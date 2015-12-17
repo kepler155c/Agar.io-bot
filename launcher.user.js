@@ -570,7 +570,7 @@ console.log("Running Bot Launcher!");
                 try {
                 q = a.getUint16(b, !0);
                 } catch(c) {
-                    console.log('caught4 ' + q);
+                    console.log('caught4 ' + b);
                     hasError = true;
                     return;
                 }
