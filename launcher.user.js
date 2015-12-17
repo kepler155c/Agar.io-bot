@@ -532,7 +532,12 @@ console.log("Running Bot Launcher!");
                 C)
         }
         for (u = 0;;) {
-            d = a.getUint32(b, !0);
+            try {
+                d = a.getUint32(b, !0);
+            } catch (c) {
+                console.log('caught3 ' + d);
+                break;
+            }
             b += 4;
             if (0 == d) break;
             ++u;
