@@ -573,14 +573,13 @@ console.log("Running Bot Launcher!");
             w & 8 && (b += 16);
             for (var q, n = "";;) {
                 try {
-                q = a.getUint16(b, !0);
+                    q = a.getUint16(b, !0);
+                    b += 2;
+                    if (0 == q) break;
+                    n += String.fromCharCode(q)
                 } catch(c) {
                     console.log('caught4 ' + b);
-                    return;
                 }
-                b += 2;
-                if (0 == q) break;
-                n += String.fromCharCode(q)
             }
             q = n;
             n = null;
