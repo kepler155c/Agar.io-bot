@@ -544,7 +544,12 @@ console.log("Running Bot Launcher!");
                 break;
             }
             b += 4;
-            g = a.getInt16(b, !0);
+            try {
+                g = a.getInt16(b, !0);
+            } catch(c) {
+                console.log('caught2 ' + g);
+                break;
+            }
             b += 4;
             f = a.getInt16(b, !0);
             b += 2;
