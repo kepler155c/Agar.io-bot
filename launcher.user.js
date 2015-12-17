@@ -556,7 +556,12 @@ console.log("Running Bot Launcher!");
                 break;
             }
             b += 4;
+            try {
             f = a.getInt16(b, !0);
+            } catch(c) {
+                console.log('caught7 ' + b);
+                return;
+            }
             b += 2;
             for (var h = a.getUint8(b++), w = a.getUint8(b++), m = a.getUint8(b++), h = (h << 16 | w << 8 | m).toString(16); 6 > h.length;) h = "0" + h;
             var h = "#" + h,
