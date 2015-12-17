@@ -563,7 +563,11 @@ console.log("Running Bot Launcher!");
                 return;
             }
             b += 2;
-            for (var h = a.getUint8(b++), w = a.getUint8(b++), m = a.getUint8(b++), h = (h << 16 | w << 8 | m).toString(16); 6 > h.length;) h = "0" + h;
+            for (var h = a.getUint8(b++) {
+                w = a.getUint8(b++);
+                m = a.getUint8(b++);
+                h = (h << 16 | w << 8 | m).toString(16); 6 > h.length;) h = "0" + h;
+            }
             var h = "#" + h,
                 w = a.getUint8(b++),
                 m = !!(w & 1),
