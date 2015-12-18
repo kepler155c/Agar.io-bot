@@ -26,6 +26,7 @@ SOFTWARE.*/
 var aposLauncherVersion = 4.149;
 
 var showAd = true;
+var xxx = 0;
 
 Number.prototype.mod = function(n) {
     return ((this % n) + n) % n;
@@ -436,6 +437,8 @@ console.log("Running Bot Launcher!");
             return b
         }
         var c = 0;
+        
+        xxx = a.getUint8(c);
         240 == a.getUint8(c) && (c += 5);
         switch (a.getUint8(c++)) {
             case 16:
@@ -603,9 +606,10 @@ console.log("Running Bot Launcher!");
             
             // console.log('replacing with clone ' + clone.length + ' ' + interNodes.length);
             interNodes = clone;
-            
+         console.log('xxx ' + xxx);   
         } catch (ex) {
             console.log('caught11 ' + b);
+            console.log('xxx ' + xxx);
         }
         //UPDATE
         //Ha && 0 == k.length && Sa(!1)
@@ -2607,4 +2611,4 @@ window.refreshTwitch = function() {
 }
 setInterval(window.refreshTwitch, 60000);
 window.refreshTwitch();
-console.log('version 102');
+console.log('version 103');
