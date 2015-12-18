@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.645
+// @version     3.646
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.645;
+var aposBotVersion = 3.646;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -51,7 +51,7 @@ Array.prototype.peek = function() {
 var sha = "efde0488cc2cc176db48dd23b28a20b90314352b";
 function getLatestCommit() {
     window.jQuery.ajax({
-            url: "https://api.github.com/repos/apostolique/Agar.io-bot/git/refs/heads/master",
+            url: "https://api.github.com/repos/kepler155c/Agar.io-bot/git/refs/heads/master",
             cache: false,
             dataType: "jsonp"
         }).done(function(data) {
@@ -71,7 +71,7 @@ function getLatestCommit() {
                 window.jQuery("#" + prefix + "Dialog").show();
             }
 
-            $.get('https://raw.githubusercontent.com/Apostolique/Agar.io-bot/master/bot.user.js?' + Math.floor((Math.random() * 1000000) + 1), function(data) {
+            $.get('https://raw.githubusercontent.com/kepler155c/Agar.io-bot/master/bot.user.js?' + Math.floor((Math.random() * 1000000) + 1), function(data) {
                 var latestVersion = data.replace(/(\r\n|\n|\r)/gm,"");
                 latestVersion = latestVersion.substring(latestVersion.indexOf("// @version")+11,latestVersion.indexOf("// @grant"));
 
@@ -80,7 +80,7 @@ function getLatestCommit() {
                 
                 if(latestVersion > myVersion)
                 {
-                    update("aposBot", "bot.user.js", "https://github.com/Apostolique/Agar.io-bot/blob/" + sha + "/bot.user.js/");
+                    update("aposBot", "bot.user.js", "https://github.com/kepler155c/Agar.io-bot/blob/" + sha + "/bot.user.js/");
                 }
                 console.log('Current bot.user.js Version: ' + myVersion + " on Github: " + latestVersion);
             });
@@ -1069,6 +1069,15 @@ function AposBot() {
 
                         if (tempList.length === 0) {
                             console.log("MAYDAY IT'S HAPPENING!");
+
+                            for (var i = 0; i < allPossibleThreats.length; i++) {
+
+                                var enemyDistance = this.computeDistance(allPossibleThreats[i].x, allPossibleThreats[i].y, player[k].x, player[k].y, allPossibleThreats[i].size);
+
+                                console.log('enemy: ' + player.size + ' ' + enemyDistance);
+                                
+                            }
+
                             break;
                         } else {
                             sortedInterList = tempList;
