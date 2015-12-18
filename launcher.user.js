@@ -572,7 +572,7 @@ console.log("Running Bot Launcher!");
             w & 4 && (b += 8);
             w & 8 && (b += 16);
             try {
-                for (var q, n = "";;) 
+                for (var q, n = "";;) {
                     q = a.getUint16(b, !0);
                     b += 2;
                     if (0 == q) break;
