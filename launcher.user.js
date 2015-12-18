@@ -113,6 +113,7 @@ console.log("Running Bot Launcher!");
         if (82 == e.keyCode) {
             console.log("ToggleDraw");
             toggleDraw = !toggleDraw;
+            interNodes = [];
         }
         if (68 == e.keyCode) {
             window.setDarkTheme(!getDarkBool());
@@ -2611,4 +2612,4 @@ window.refreshTwitch = function() {
 }
 setInterval(window.refreshTwitch, 60000);
 window.refreshTwitch();
-console.log('version 103');
+console.log('version 104');
