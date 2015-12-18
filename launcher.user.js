@@ -19,11 +19,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.159
+// @version     4.160
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.159;
+var aposLauncherVersion = 4.160;
 
 var showAd = true;
 
@@ -2220,6 +2220,9 @@ console.log("Running Bot Launcher!");
                     },
                     w: function(a) {
                         if (this.N()) {
+if (this.size > 500) {
+    console.log('skipping - size is ' + this.size)
+} else {
                             ++this.Y;
                             var b = 0 < this.id && !this.h && !this.n && .4 > h;
                             5 > this.I() && (b = !0);
@@ -2248,9 +2251,7 @@ console.log("Running Bot Launcher!");
                             }
                             a.closePath();
                             d = this.name.toLowerCase();
-if (this.size > 500) {
-    console.log('skipping - size is ' + this.size)
-} else {
+
                             !this.n && kb && ":teams" != P ? -1 != ob.indexOf(d) ? (U.hasOwnProperty(d) || (U[d] = new Image, (d == "notreallyabot" ? U[d].src = "http://i.imgur.com/q5FdCkx.png" : U[d].src = "skins/" +
                                 d + ".png")), c = 0 != U[d].width && U[d].complete ? U[d] : null) : c = null : c = null;
                             c = (e = c) ? -1 != Hb.indexOf(d) : !1;
