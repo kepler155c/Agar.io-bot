@@ -2612,4 +2612,4 @@ window.refreshTwitch = function() {
 }
 setInterval(window.refreshTwitch, 60000);
 window.refreshTwitch();
-console.log('version 105');
+console.log('version 106');
