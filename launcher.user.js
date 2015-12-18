@@ -954,7 +954,7 @@ console.log("Running Bot Launcher!");
             //d.setLineDash([5]);
             d.globalAlpha = 0.3;
 
-            d.arc(circles[i][0], circles[i][1], circles[i][2], 0, 2 * Math.PI, false);
+            // d.arc(circles[i][0], circles[i][1], circles[i][2], 0, 2 * Math.PI, false);
 
             d.stroke();
         }
@@ -2612,4 +2612,4 @@ window.refreshTwitch = function() {
 }
 setInterval(window.refreshTwitch, 60000);
 window.refreshTwitch();
-console.log('version 104');
+console.log('version 105');
