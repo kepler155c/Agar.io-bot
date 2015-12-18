@@ -533,71 +533,77 @@ console.log("Running Bot Launcher!");
         }
         for (u = 0;;) {
             try {
-                d = a.getUint32(b, !0);
-            } catch (c) {
-                console.log('caught3 ' + d);
-                break;
-            }
-            b += 4;
-            if (0 == d) break;
-            ++u;
-            var f, p;
-            try {
-                p = a.getInt16(b, !0);
-            } catch(c) {
-                console.log('caught ' + b);
-                break;
-            }
-            b += 4;
-            try {
-                g = a.getInt16(b, !0);
-            } catch(c) {
-                console.log('caught2 ' + g);
-                break;
-            }
-            b += 4;
-            try {
-            f = a.getInt16(b, !0);
-            } catch(c) {
-                console.log('caught7 ' + b);
-                return;
-            }
-            b += 2;
-            for (var h = a.getUint8(b++), w = a.getUint8(b++), m = a.getUint8(b++), h = (h << 16 | w << 8 | m).toString(16); 6 > h.length;) h = "0" + h;
-            var h = "#" + h,
-                w = a.getUint8(b++),
-                m = !!(w & 1),
-                r = !!(w & 16);
-            w & 2 && (b += 4);
-            w & 4 && (b += 8);
-            w & 8 && (b += 16);
-            for (var q, n = "";;) {
+
                 try {
-                q = a.getUint16(b, !0);
+                    d = a.getUint32(b, !0);
+                } catch (c) {
+                    console.log('caught3 ' + d);
+                    break;
+                }
+                b += 4;
+                if (0 == d) break;
+                ++u;
+                var f, p;
+                try {
+                    p = a.getInt16(b, !0);
                 } catch(c) {
-                    console.log('caught4 ' + b);
+                    console.log('caught ' + b);
+                    break;
+                }
+                b += 4;
+                try {
+                    g = a.getInt16(b, !0);
+                } catch(c) {
+                    console.log('caught2 ' + g);
+                    break;
+                }
+                b += 4;
+                try {
+                f = a.getInt16(b, !0);
+                } catch(c) {
+                    console.log('caught7 ' + b);
                     return;
                 }
                 b += 2;
-                if (0 == q) break;
-                n += String.fromCharCode(q)
-            }
-            q = n;
-            n = null;
-            E.hasOwnProperty(d) ? (n = E[d], n.P(), n.s = n.x, n.t = n.y, n.r = n.size, n.color = h) :
-                (n = new da(d, p, g, f, h, q), v.push(n), E[d] = n, n.ua = p, n.va = g);
-            n.h = m;
-            n.n = r;
-            n.J = p;
-            n.K = g;
-            n.q = f;
-            n.sa = c;
-            n.Q = C;
-            n.ba = w;
-            q && n.B(q); - 1 != M.indexOf(d) && -1 == k.indexOf(n) && (document.getElementById("overlays").style.display = "none", k.push(n), n.birth = getLastUpdate(), n.birthMass = (n.size * n.size / 100), 1 == k.length && (s = n.x, t = n.y, db()))
-
-            //UPDATE
+                for (var h = a.getUint8(b++), w = a.getUint8(b++), m = a.getUint8(b++), h = (h << 16 | w << 8 | m).toString(16); 6 > h.length;) h = "0" + h;
+                var h = "#" + h,
+                    w = a.getUint8(b++),
+                    m = !!(w & 1),
+                    r = !!(w & 16);
+                w & 2 && (b += 4);
+                w & 4 && (b += 8);
+                w & 8 && (b += 16);
+                for (var q, n = "";;) {
+                    try {
+                    q = a.getUint16(b, !0);
+                    } catch(c) {
+                        console.log('caught4 ' + b);
+                        return;
+                    }
+                    b += 2;
+                    if (0 == q) break;
+                    n += String.fromCharCode(q)
+                }
+                q = n;
+                n = null;
+                E.hasOwnProperty(d) ? (n = E[d], n.P(), n.s = n.x, n.t = n.y, n.r = n.size, n.color = h) :
+                    (n = new da(d, p, g, f, h, q), v.push(n), E[d] = n, n.ua = p, n.va = g);
+                n.h = m;
+                n.n = r;
+                n.J = p;
+                n.K = g;
+                n.q = f;
+                n.sa = c;
+                n.Q = C;
+                n.ba = w;
+                q && n.B(q); - 1 != M.indexOf(d) && -1 == k.indexOf(n) && (document.getElementById("overlays").style.display = "none", k.push(n), n.birth = getLastUpdate(), n.birthMass = (n.size * n.size / 100), 1 == k.length && (s = n.x, t = n.y, db()))
             interNodes[d] = window.getCells()[d];
+
+            } catch(ex) {
+                console.log('...');
+                internNodes[d] = null;
+            }
+            //UPDATE
         }
 
         //UPDATE
