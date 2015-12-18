@@ -518,111 +518,93 @@ console.log("Running Bot Launcher!");
     }
 
     function xb(a, b) {
-        bb = C = Date.now();
-        bo || (bo = !0, e("#connecting").hide(), cb(), L && (L(), L = null));
-        var c = Math.random();
-        Ha = !1;
-        var d = a.getUint16(b, !0);
-        b += 2;
-        for (var u = 0; u < d; ++u) {
-            var p = E[a.getUint32(b, !0)],
-                g = E[a.getUint32(b + 4, !0)];
-            b += 8;
-            p && g && (g.X(), g.s = g.x, g.t = g.y, g.r = g.size, g.J = p.x, g.K = p.y, g.q = g.size, g.Q =
-                C)
-        }
-        for (u = 0;;) {
-            var badB = false;
-            try {
+        
+        try {
+            var clone = interNodes.slice(0);
+            
+            bb = C = Date.now();
+            bo || (bo = !0, e("#connecting").hide(), cb(), L && (L(), L = null));
+            var c = Math.random();
+            Ha = !1;
+            var d = a.getUint16(b, !0);
+            b += 2;
+            for (var u = 0; u < d; ++u) {
+                var p = E[a.getUint32(b, !0)],
+                    g = E[a.getUint32(b + 4, !0)];
+                b += 8;
+                p && g && (g.X(), g.s = g.x, g.t = g.y, g.r = g.size, g.J = p.x, g.K = p.y, g.q = g.size, g.Q =
+                    C)
+            }
+            for (u = 0;;) {
                 d = a.getUint32(b, !0);
-            } catch (c) {
-                console.log('caught3 ' + b);
-                badB = true;
-                return;
-            }
-            b += 4;
-            ++u;
-            if (!badB) {
-                try {
-                    if (0 == d) break;
-                    var f, p;
-                    p = a.getInt16(b, !0);
-                    b += 4;
-                    g = a.getInt16(b, !0);
-                    b += 4;
-                    f = a.getInt16(b, !0);
+                b += 4;
+                ++u;
+                if (0 == d) break;
+                var f, p;
+                p = a.getInt16(b, !0);
+                b += 4;
+                g = a.getInt16(b, !0);
+                b += 4;
+                f = a.getInt16(b, !0);
+                b += 2;
+                for (var h = a.getUint8(b++), w = a.getUint8(b++), m = a.getUint8(b++), h = (h << 16 | w << 8 | m).toString(16); 6 > h.length;) h = "0" + h;
+                var h = "#" + h,
+                    w = a.getUint8(b++),
+                    m = !!(w & 1),
+                    r = !!(w & 16);
+                w & 2 && (b += 4);
+                w & 4 && (b += 8);
+                w & 8 && (b += 16);
+                for (var q, n = "";;) {
+                    q = a.getUint16(b, !0);
                     b += 2;
-                    for (var h = a.getUint8(b++), w = a.getUint8(b++), m = a.getUint8(b++), h = (h << 16 | w << 8 | m).toString(16); 6 > h.length;) h = "0" + h;
-                    var h = "#" + h,
-                        w = a.getUint8(b++),
-                        m = !!(w & 1),
-                        r = !!(w & 16);
-                    w & 2 && (b += 4);
-                    w & 4 && (b += 8);
-                    w & 8 && (b += 16);
-                    for (var q, n = "";;) {
-                        q = a.getUint16(b, !0);
-                        b += 2;
-                        if (0 == q) break;
-                        n += String.fromCharCode(q)
-                    }
-                    q = n;
-                    n = null;
-                    E.hasOwnProperty(d) ? (n = E[d], n.P(), n.s = n.x, n.t = n.y, n.r = n.size, n.color = h) :
-                        (n = new da(d, p, g, f, h, q), v.push(n), E[d] = n, n.ua = p, n.va = g);
-                    n.h = m;
-                    n.n = r;
-                    n.J = p;
-                    n.K = g;
-                    n.q = f;
-                    n.sa = c;
-                    n.Q = C;
-                    n.ba = w;
-                    q && n.B(q); - 1 != M.indexOf(d) && -1 == k.indexOf(n) && (document.getElementById("overlays").style.display = "none", k.push(n), n.birth = getLastUpdate(), n.birthMass = (n.size * n.size / 100), 1 == k.length && (s = n.x, t = n.y, db()))
-                    interNodes[d] = window.getCells()[d];
-                } catch(ex) {
-                    console.log('caught10 ' + b);
-                    console.log(interNodes[d]);
-                    interNodes[d].id = -1;
+                    if (0 == q) break;
+                    n += String.fromCharCode(q)
                 }
+                q = n;
+                n = null;
+                E.hasOwnProperty(d) ? (n = E[d], n.P(), n.s = n.x, n.t = n.y, n.r = n.size, n.color = h) :
+                    (n = new da(d, p, g, f, h, q), v.push(n), E[d] = n, n.ua = p, n.va = g);
+                n.h = m;
+                n.n = r;
+                n.J = p;
+                n.K = g;
+                n.q = f;
+                n.sa = c;
+                n.Q = C;
+                n.ba = w;
+                q && n.B(q); - 1 != M.indexOf(d) && -1 == k.indexOf(n) && (document.getElementById("overlays").style.display = "none", k.push(n), n.birth = getLastUpdate(), n.birthMass = (n.size * n.size / 100), 1 == k.length && (s = n.x, t = n.y, db()))
+                interNodes[d] = window.getCells()[d];
             }
+    
             //UPDATE
-        }
-
-        //UPDATE
-        Object.keys(interNodes).forEach(function(element, index) {
-            //console.log("start: " + interNodes[element].updateTime + " current: " + D + " life: " + (D - interNodes[element].updateTime));
-            var isRemoved = !window.getCells().hasOwnProperty(element);
-
-            //console.log("Time not updated: " + (window.getLastUpdate() - interNodes[element].getUptimeTime()));
-            if (interNodes[element].id == -1) {
-                delete interNodes[element];
-            } else if (isRemoved && (window.getLastUpdate() - interNodes[element].getUptimeTime()) > 3000) {
-                delete interNodes[element];
-            } else {
-                if (isRemoved &&
-                    interNodes[element].x > (getX() - (1920 / 2) / getZoomlessRatio()) &&
-                    interNodes[element].x < (getX() + (1920 / 2) / getZoomlessRatio()) &&
-                    interNodes[element].y > getY() - (1080 / 2) / getZoomlessRatio() &&
-                    interNodes[element].y < getY() + (1080 / 2) / getZoomlessRatio()) {
-
+            Object.keys(clone).forEach(function(element, index) {
+                //console.log("start: " + interNodes[element].updateTime + " current: " + D + " life: " + (D - interNodes[element].updateTime));
+                var isRemoved = !window.getCells().hasOwnProperty(element);
+    
+                //console.log("Time not updated: " + (window.getLastUpdate() - interNodes[element].getUptimeTime()));
+                if (isRemoved && (window.getLastUpdate() - clone[element].getUptimeTime()) > 3000) {
                     delete interNodes[element];
+                } else {
+                    if (isRemoved &&
+                        clone[element].x > (getX() - (1920 / 2) / getZoomlessRatio()) &&
+                        clone[element].x < (getX() + (1920 / 2) / getZoomlessRatio()) &&
+                        clone[element].y > getY() - (1080 / 2) / getZoomlessRatio() &&
+                        clone[element].y < getY() + (1080 / 2) / getZoomlessRatio()) {
+    
+                        delete clone[element];
+                    }
                 }
-            }
-        });
-
-        try {
+            });
+    
             c = a.getUint32(b, !0);
-        } catch(x) {
-            console.log('caught5 ' + b);
-            return;
-        }
-        b += 4;
-        try {
+            b += 4;
             for (u = 0; u < c; u++) d = a.getUint32(b, !0), b += 4, n = E[d], null != n && n.X();
-        } catch(ex) {
-            console.log('caught9 ' + b);
-            return;
+            
+            interNodes = clone;
+            
+        } catch (ex) {
+            console.log('caught11 ' + b);
         }
         //UPDATE
         //Ha && 0 == k.length && Sa(!1)
