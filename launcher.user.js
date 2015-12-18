@@ -23,7 +23,7 @@ SOFTWARE.*/
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.149;
+var aposLauncherVersion = 4.150;
 
 var showAd = true;
 var xxx = 0;
@@ -2612,4 +2612,4 @@ window.refreshTwitch = function() {
 }
 setInterval(window.refreshTwitch, 60000);
 window.refreshTwitch();
-console.log('version 107');
+console.log('version ' + aposLauncherVersion);
