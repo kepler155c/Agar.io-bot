@@ -633,7 +633,11 @@ console.log("Running Bot Launcher!");
             return;
         }
         b += 4;
-        for (u = 0; u < c; u++) d = a.getUint32(b, !0), b += 4, n = E[d], null != n && n.X();
+        try {
+            for (u = 0; u < c; u++) d = a.getUint32(b, !0), b += 4, n = E[d], null != n && n.X();
+        } catch(ex) {
+            console.log('caught9 ' + b);
+        }
         //UPDATE
         //Ha && 0 == k.length && Sa(!1)
     }
