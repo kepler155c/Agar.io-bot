@@ -954,7 +954,7 @@ console.log("Running Bot Launcher!");
             //d.setLineDash([5]);
             d.globalAlpha = 0.3;
 
-            // d.arc(circles[i][0], circles[i][1], circles[i][2], 0, 2 * Math.PI, false);
+            d.arc(circles[i][0], circles[i][1], circles[i][2], 0, 2 * Math.PI, false);
 
             d.stroke();
         }
@@ -2260,7 +2260,7 @@ console.log("Running Bot Launcher!");
                             null == e || c || (a.save(), a.clip(), a.drawImage(e, this.x - this.size, this.y - this.size, 2 * this.size, 2 * this.size), a.restore());
                             (Oa || 15 < this.size) && !b && (a.strokeStyle = "#000000", a.globalAlpha *= .1, a.stroke());
                             a.globalAlpha = 1;
-                            null != e && c && a.drawImage(e, this.x - 2 * this.size, this.y - 2 * this.size, 4 * this.size, 4 * this.size);
+                            // null != e && c && a.drawImage(e, this.x - 2 * this.size, this.y - 2 * this.size, 4 * this.size, 4 * this.size);
                             c = -1 != k.indexOf(this);
                             b = ~~this.y;
                             if (0 != this.id && (wa || c) && this.name && this.o && (null ==
