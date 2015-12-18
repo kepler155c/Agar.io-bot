@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.654
+// @version     3.655
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.654;
+var aposBotVersion = 3.655;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -283,6 +283,18 @@ function AposBot() {
         return false;
     };
 
+    this.safeToSplit = function() {
+    	
+    }
+    
+    this.isThreatIfSplit = function(blob, cell) {
+
+        if (!cell.isVirus() && this.compareSize(blob, cell, 1.30)) {
+            return true;
+        }
+        return false;
+    };
+
     this.isVirus = function(blob, cell) {
         if (blob == null) {
             if (cell.isVirus()){return true;} 
@@ -313,6 +325,7 @@ function AposBot() {
         var threatList = [];
         var virusList = [];
         var splitTargetList = [];
+        var enemyList = [];
 
         var player = getPlayer();
         
@@ -320,20 +333,23 @@ function AposBot() {
 
         Object.keys(listToUse).forEach(function(element, index) {
             var isMe = that.isItMe(player, listToUse[element]);
+            var isEnemy = true;
 
             if (!isMe) {
                 if (that.isFood(blob, listToUse[element]) && listToUse[element].isNotMoving()) {
                     //IT'S FOOD!
                     foodElementList.push(listToUse[element]);
-
-                    
+                    isEnemy = false;
                 } else if (that.isThreat(blob, listToUse[element])) {
                     //IT'S DANGER!
                     threatList.push(listToUse[element]);
                     mergeList.push(listToUse[element]);
+                } else if (that.isThreatIfSplit(blob, listToUse[element])) {
+                	threatIfSplitList.push()
                 } else if (that.isVirus(blob, listToUse[element])) {
                     //IT'S VIRUS!
                     virusList.push(listToUse[element]);
+                    isEnemy = false;
                 }
                 else if (that.isSplitTarget(that, blob, listToUse[element])) {
                         drawCircle(listToUse[element].x, listToUse[element].y, listToUse[element].size + 50, 7);
@@ -341,8 +357,15 @@ function AposBot() {
                         //foodElementList.push(listToUse[element]);
                         mergeList.push(listToUse[element]);
                 }
-                else {if (that.isVirus(null, listToUse[element])==false) {mergeList.push(listToUse[element]);}
-                    }
+                else {
+                	if (that.isVirus(null, listToUse[element])==false) {
+                		mergeList.push(listToUse[element]);
+                	}
+                }
+                
+                if (isEnemy) {
+                	enemyList.push(listToUse[element]);
+                }
             }/*else if(isMe && (getBlobCount(getPlayer()) > 0)){
                 //Attempt to make the other cell follow the mother one
                 foodElementList.push(listToUse[element]);
@@ -384,7 +407,7 @@ function AposBot() {
             }
         }
         
-        return [foodList, threatList, virusList, splitTargetList];
+        return [foodList, threatList, virusList, splitTargetList, enemyList];
     };
 
     this.getAll = function(blob) {
@@ -912,8 +935,6 @@ function AposBot() {
                     //The viruses are stored in element 2 of allIsAll
                     var allPossibleViruses = allIsAll[2];
                     
-                    var allPossibleTargets = allIsAll[3];
-
                     //The bot works by removing angles in which it is too
                     //dangerous to travel towards to.
                     var badAngles = [];
@@ -936,15 +957,30 @@ function AposBot() {
                     }
 
                     if (allPossibleThreats.length == 0) {
+
+                    	var allPossibleTargets = allIsAll[3];
+                        var allPossibleEnemies = allIsAll[4];
+
                         var safeToSplit = false;
-                        for (var i = 0; i < allPossibleTargets.length; i++) {
+                        
+                        for (var i = 0; i < allPossibleEnemies.length; i++) {
+                        	var enemy = allPossibleEnemies[i];
+                        	if (enemy.size > player[k].size *.85) {
+                        		safeToSplit = false;
+                        	}
+                        }
 
-                            var enemyDistance = this.computeDistance(allPossibleTargets[i].x, allPossibleTargets[i].y, player[k].x, player[k].y, allPossibleTargets[i].size);
-
-                            if (player.length == 1 && enemyDistance < this.splitDistance) {
-                            	drawCircle(allPossibleTargets[i].x, allPossibleTargets[i].y, allPossibleTargets[i].size + 30, 5);
-                            	return [ allPossibleTargets[i].x, allPossibleTargets[i].y ];
-                            }
+                        if (safeToSplit) {
+                        	
+	                        for (var i = 0; i < allPossibleTargets.length; i++) {
+	
+	                            var enemyDistance = this.computeDistance(allPossibleTargets[i].x, allPossibleTargets[i].y, player[k].x, player[k].y, allPossibleTargets[i].size);
+	
+	                            if (player.length == 1 && enemyDistance < this.splitDistance) {
+	                            	drawCircle(allPossibleTargets[i].x, allPossibleTargets[i].y, allPossibleTargets[i].size + 30, 5);
+	                            	return [ allPossibleTargets[i].x, allPossibleTargets[i].y ];
+	                            }
+	                        }
                         }
                     }
                     
