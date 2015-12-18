@@ -571,32 +571,32 @@ console.log("Running Bot Launcher!");
             w & 2 && (b += 4);
             w & 4 && (b += 8);
             w & 8 && (b += 16);
-            for (var q, n = "";;) {
-                try {
+            try {
+                for (var q, n = "";;) 
                     q = a.getUint16(b, !0);
                     b += 2;
                     if (0 == q) break;
                     n += String.fromCharCode(q)
-                } catch(c) {
-                    console.log('caught4 ' + b);
                 }
+                q = n;
+                n = null;
+                E.hasOwnProperty(d) ? (n = E[d], n.P(), n.s = n.x, n.t = n.y, n.r = n.size, n.color = h) :
+                    (n = new da(d, p, g, f, h, q), v.push(n), E[d] = n, n.ua = p, n.va = g);
+                n.h = m;
+                n.n = r;
+                n.J = p;
+                n.K = g;
+                n.q = f;
+                n.sa = c;
+                n.Q = C;
+                n.ba = w;
+                q && n.B(q); - 1 != M.indexOf(d) && -1 == k.indexOf(n) && (document.getElementById("overlays").style.display = "none", k.push(n), n.birth = getLastUpdate(), n.birthMass = (n.size * n.size / 100), 1 == k.length && (s = n.x, t = n.y, db()))
+    
+                //UPDATE
+                interNodes[d] = window.getCells()[d];
+            } catch(c) {
+                console.log('caught4 ' + b);
             }
-            q = n;
-            n = null;
-            E.hasOwnProperty(d) ? (n = E[d], n.P(), n.s = n.x, n.t = n.y, n.r = n.size, n.color = h) :
-                (n = new da(d, p, g, f, h, q), v.push(n), E[d] = n, n.ua = p, n.va = g);
-            n.h = m;
-            n.n = r;
-            n.J = p;
-            n.K = g;
-            n.q = f;
-            n.sa = c;
-            n.Q = C;
-            n.ba = w;
-            q && n.B(q); - 1 != M.indexOf(d) && -1 == k.indexOf(n) && (document.getElementById("overlays").style.display = "none", k.push(n), n.birth = getLastUpdate(), n.birthMass = (n.size * n.size / 100), 1 == k.length && (s = n.x, t = n.y, db()))
-
-            //UPDATE
-            interNodes[d] = window.getCells()[d];
         }
 
         //UPDATE
