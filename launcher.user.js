@@ -597,7 +597,7 @@ console.log("Running Bot Launcher!");
                     interNodes[d] = window.getCells()[d];
                 } catch(ex) {
                     console.log('...');
-                    internNodes[d] = null;
+                    interNodes[d] = null;
                 }
             }
             //UPDATE
