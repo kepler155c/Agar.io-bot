@@ -19,11 +19,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.163
+// @version     4.164
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.163;
+var aposLauncherVersion = 4.164;
 
 var showAd = true;
 var badSize = 1500;
@@ -2226,7 +2226,7 @@ console.log("Running Bot Launcher!");
                     w: function(a) {
                         if (this.N()) {
 if (this.size > badSize) {
-    console.log('skipping - size is ' + this.size)
+    //console.log('skipping - size is ' + this.size)
 } else {
                             ++this.Y;
                             var b = 0 < this.id && !this.h && !this.n && .4 > h;
