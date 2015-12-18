@@ -581,7 +581,7 @@ console.log("Running Bot Launcher!");
                     q && n.B(q); - 1 != M.indexOf(d) && -1 == k.indexOf(n) && (document.getElementById("overlays").style.display = "none", k.push(n), n.birth = getLastUpdate(), n.birthMass = (n.size * n.size / 100), 1 == k.length && (s = n.x, t = n.y, db()))
                     interNodes[d] = window.getCells()[d];
                 } catch(ex) {
-                    console.log('caught 10' + b);
+                    console.log('caught10' + b);
                     // interNodes[d] = null;
                 }
             }
