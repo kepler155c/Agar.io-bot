@@ -596,6 +596,7 @@ console.log("Running Bot Launcher!");
                 interNodes[d] = window.getCells()[d];
             } catch(c) {
                 console.log('caught4 ' + b);
+                break;
             }
         }
 
