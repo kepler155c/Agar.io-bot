@@ -19,11 +19,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.151
+// @version     4.152
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.151;
+var aposLauncherVersion = 4.152;
 
 var showAd = true;
 var xxx = 0;
@@ -1026,7 +1026,7 @@ console.log("Running Bot Launcher!");
 
                 text.C(dText[i]);
                 var textRender = text.L();
-                d.drawImage(textRender, dPoints[i][0] - (textRender.width / 2), dPoints[i][1] - (textRender.height / 2));
+                // d.drawImage(textRender, dPoints[i][0] - (textRender.width / 2), dPoints[i][1] - (textRender.height / 2));
             }
 
         }
@@ -2257,10 +2257,10 @@ console.log("Running Bot Launcher!");
                             c = (e = c) ? -1 != Hb.indexOf(d) : !1;
                             b || a.stroke();
                             a.fill();
-                            //null == e || c || (a.save(), a.clip(), a.drawImage(e, this.x - this.size, this.y - this.size, 2 * this.size, 2 * this.size), a.restore());
+                            null == e || c || (a.save(), a.clip(), a.drawImage(e, this.x - this.size, this.y - this.size, 2 * this.size, 2 * this.size), a.restore());
                             (Oa || 15 < this.size) && !b && (a.strokeStyle = "#000000", a.globalAlpha *= .1, a.stroke());
                             a.globalAlpha = 1;
-                            //null != e && c && a.drawImage(e, this.x - 2 * this.size, this.y - 2 * this.size, 4 * this.size, 4 * this.size);
+                            null != e && c && a.drawImage(e, this.x - 2 * this.size, this.y - 2 * this.size, 4 * this.size, 4 * this.size);
                             c = -1 != k.indexOf(this);
                             b = ~~this.y;
                             if (0 != this.id && (wa || c) && this.name && this.o && (null ==
@@ -2273,11 +2273,11 @@ console.log("Running Bot Launcher!");
                                 var e = e.L(),
                                     p = ~~(e.width / d),
                                     g = ~~(e.height / d);
-                                a.drawImage(e, ~~this.x - ~~(p / 2), b - ~~(g / 2), p, g);
+                                // a.drawImage(e, ~~this.x - ~~(p / 2), b - ~~(g / 2), p, g);
                                 b += e.height / 2 / d + 4
                             }
-                            //0 < this.id && lb && (c || 0 == k.length && (!this.h || this.n) && 20 < this.size) && (null == this.O && (this.O = new va(this.l() / 2, "#FFFFFF", !0, "#000000")), c = this.O, c.M(this.l() / 2), c.C(~~(this.size * this.size / 100)), d = Math.ceil(10 * h) / 10, c.ea(d), e = c.L(), p = ~~(e.width / d), g = ~~(e.height / d), a.drawImage(e, ~~this.x - ~~(p / 2),
-                            //    b - ~~(g / 2), p, g));
+                            0 < this.id && lb && (c || 0 == k.length && (!this.h || this.n) && 20 < this.size) && (null == this.O && (this.O = new va(this.l() / 2, "#FFFFFF", !0, "#000000")), c = this.O, c.M(this.l() / 2), c.C(~~(this.size * this.size / 100)), d = Math.ceil(10 * h) / 10, c.ea(d), e = c.L(), p = ~~(e.width / d), g = ~~(e.height / d), a.drawImage(e, ~~this.x - ~~(p / 2),
+                                b - ~~(g / 2), p, g));
                             a.restore()
                         }
                     }
@@ -2541,7 +2541,7 @@ console.log("Running Bot Launcher!");
                             k.clearRect(0, 0, g, h);
                             k.save();
                             k.translate(g / 2, h / 2);
-                            for (var m = 0; 10 > m; ++m) k.drawImage(d, (.1 * f + 80 * m) % (g + 140) - g / 2 - 70 - 35, h / 2 * Math.sin((.001 * f + m) % Math.PI * 2) - 35, 70, 70);
+                            // for (var m = 0; 10 > m; ++m) k.drawImage(d, (.1 * f + 80 * m) % (g + 140) - g / 2 - 70 - 35, h / 2 * Math.sin((.001 * f + m) % Math.PI * 2) - 35, 70, 70);
                             k.restore();
                             (c = c.attr("data-itr")) && (c = Z(c));
                             a(b, this, c || "", +e(this).attr("data-size"), "#5bc0de")
