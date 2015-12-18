@@ -19,11 +19,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.155
+// @version     4.156
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.155;
+var aposLauncherVersion = 4.156;
 
 var showAd = true;
 
@@ -2253,10 +2253,10 @@ console.log("Running Bot Launcher!");
                             c = (e = c) ? -1 != Hb.indexOf(d) : !1;
                             b || a.stroke();
                             //a.fill();
-                            //null == e || c || (a.save(), a.clip(), a.drawImage(e, this.x - this.size, this.y - this.size, 2 * this.size, 2 * this.size), a.restore());
+                            null == e || c || (a.save(), a.clip(), a.drawImage(e, this.x - this.size, this.y - this.size, 2 * this.size, 2 * this.size), a.restore());
                             (Oa || 15 < this.size) && !b && (a.strokeStyle = "#000000", a.globalAlpha *= .1, a.stroke());
                             a.globalAlpha = 1;
-                            //null != e && c && a.drawImage(e, this.x - 2 * this.size, this.y - 2 * this.size, 4 * this.size, 4 * this.size);
+                            null != e && c && a.drawImage(e, this.x - 2 * this.size, this.y - 2 * this.size, 4 * this.size, 4 * this.size);
                             c = -1 != k.indexOf(this);
                             b = ~~this.y;
                             if (0 != this.id && (wa || c) && this.name && this.o && (null ==
@@ -2272,8 +2272,8 @@ console.log("Running Bot Launcher!");
                                 //a.drawImage(e, ~~this.x - ~~(p / 2), b - ~~(g / 2), p, g);
                                 b += e.height / 2 / d + 4
                             }
-                            //0 < this.id && lb && (c || 0 == k.length && (!this.h || this.n) && 20 < this.size) && (null == this.O && (this.O = new va(this.l() / 2, "#FFFFFF", !0, "#000000")), c = this.O, c.M(this.l() / 2), c.C(~~(this.size * this.size / 100)), d = Math.ceil(10 * h) / 10, c.ea(d), e = c.L(), p = ~~(e.width / d), g = ~~(e.height / d), a.drawImage(e, ~~this.x - ~~(p / 2),
-                            //    b - ~~(g / 2), p, g));
+                            0 < this.id && lb && (c || 0 == k.length && (!this.h || this.n) && 20 < this.size) && (null == this.O && (this.O = new va(this.l() / 2, "#FFFFFF", !0, "#000000")), c = this.O, c.M(this.l() / 2), c.C(~~(this.size * this.size / 100)), d = Math.ceil(10 * h) / 10, c.ea(d), e = c.L(), p = ~~(e.width / d), g = ~~(e.height / d), a.drawImage(e, ~~this.x - ~~(p / 2),
+                                b - ~~(g / 2), p, g));
                             a.restore()
                         }
                     }
