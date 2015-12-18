@@ -582,7 +582,8 @@ console.log("Running Bot Launcher!");
                     interNodes[d] = window.getCells()[d];
                 } catch(ex) {
                     console.log('caught10 ' + b);
-                    interNodes[d].remove = true;
+                    console.log(interNodes[d]);
+                    interNodes[d].id = -1;
                 }
             }
             //UPDATE
@@ -594,7 +595,7 @@ console.log("Running Bot Launcher!");
             var isRemoved = !window.getCells().hasOwnProperty(element);
 
             //console.log("Time not updated: " + (window.getLastUpdate() - interNodes[element].getUptimeTime()));
-            if (interNodes[element].remove) {
+            if (interNodes[element].id == -1) {
                 delete interNodes[element];
             } else if (isRemoved && (window.getLastUpdate() - interNodes[element].getUptimeTime()) > 3000) {
                 delete interNodes[element];
@@ -2131,7 +2132,6 @@ console.log("Running Bot Launcher!");
                     updateCode: 0,
                     danger: false,
                     dangerTimeOut: 0,
-                    remove: false,
                     isNotMoving: function() {
                         return (this.x == this.s && this.y == this.t);
                     },
