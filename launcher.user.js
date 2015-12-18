@@ -19,14 +19,13 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.154
+// @version     4.155
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.154;
+var aposLauncherVersion = 4.155;
 
 var showAd = true;
-var xxx = 0;
 
 Number.prototype.mod = function(n) {
     return ((this % n) + n) % n;
@@ -439,7 +438,6 @@ console.log("Running Bot Launcher!");
         }
         var c = 0;
         
-        xxx = a.getUint8(c);
         240 == a.getUint8(c) && (c += 5);
         switch (a.getUint8(c++)) {
             case 16:
@@ -2254,7 +2252,7 @@ console.log("Running Bot Launcher!");
                                 d + ".png")), c = 0 != U[d].width && U[d].complete ? U[d] : null) : c = null : c = null;
                             c = (e = c) ? -1 != Hb.indexOf(d) : !1;
                             b || a.stroke();
-                            a.fill();
+                            //a.fill();
                             //null == e || c || (a.save(), a.clip(), a.drawImage(e, this.x - this.size, this.y - this.size, 2 * this.size, 2 * this.size), a.restore());
                             (Oa || 15 < this.size) && !b && (a.strokeStyle = "#000000", a.globalAlpha *= .1, a.stroke());
                             a.globalAlpha = 1;
