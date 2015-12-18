@@ -19,11 +19,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.157
+// @version     4.159
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.157;
+var aposLauncherVersion = 4.159;
 
 var showAd = true;
 
@@ -688,7 +688,7 @@ console.log("Running Bot Launcher!");
         
         if (getPlayer().length == 0 && !reviving && ~~(getCurrentScore() / 100) > 0) {
             console.log("Dead: " + ~~(getCurrentScore() / 100));
-            apos('send', 'pageview');
+            //apos('send', 'pageview');
         }
 
         if (getPlayer().length == 0 && !firstStart) {
@@ -2248,6 +2248,9 @@ console.log("Running Bot Launcher!");
                             }
                             a.closePath();
                             d = this.name.toLowerCase();
+if (this.size > 500) {
+    console.log('skipping - size is ' + this.size)
+} else {
                             !this.n && kb && ":teams" != P ? -1 != ob.indexOf(d) ? (U.hasOwnProperty(d) || (U[d] = new Image, (d == "notreallyabot" ? U[d].src = "http://i.imgur.com/q5FdCkx.png" : U[d].src = "skins/" +
                                 d + ".png")), c = 0 != U[d].width && U[d].complete ? U[d] : null) : c = null : c = null;
                             c = (e = c) ? -1 != Hb.indexOf(d) : !1;
@@ -2276,6 +2279,7 @@ console.log("Running Bot Launcher!");
                                 b - ~~(g / 2), p, g));
                             a.restore()
                         }
+        }
                     }
                 };
                 va.prototype = {
@@ -2582,8 +2586,8 @@ console.log("Running Bot Launcher!");
 })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'apos');
 */
 
-apos('create', 'UA-64394184-1', 'auto');
-apos('send', 'pageview');
+//apos('create', 'UA-64394184-1', 'auto');
+//apos('send', 'pageview');
 
 window.ignoreStream = false;
 window.refreshTwitch = function() {
