@@ -538,7 +538,7 @@ console.log("Running Bot Launcher!");
             } catch (c) {
                 console.log('caught3 ' + b);
                 badB = true;
-                break;
+                return;
             }
             b += 4;
             ++u;
