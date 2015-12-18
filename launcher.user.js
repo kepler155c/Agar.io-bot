@@ -609,7 +609,9 @@ console.log("Running Bot Launcher!");
             var isRemoved = !window.getCells().hasOwnProperty(element);
 
             //console.log("Time not updated: " + (window.getLastUpdate() - interNodes[element].getUptimeTime()));
-            if (isRemoved && (window.getLastUpdate() - interNodes[element].getUptimeTime()) > 3000) {
+            if (interNodes[element] == null) {
+                delete interNodes[element];
+            } else if (isRemoved && (window.getLastUpdate() - interNodes[element].getUptimeTime()) > 3000) {
                 delete interNodes[element];
             } else {
                 if (isRemoved &&
