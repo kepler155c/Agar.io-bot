@@ -601,7 +601,7 @@ console.log("Running Bot Launcher!");
             b += 4;
             for (u = 0; u < c; u++) d = a.getUint32(b, !0), b += 4, n = E[d], null != n && n.X();
             
-            console.log('replacing with clone ' + clone.length + ' ' + interNodes.length);
+            // console.log('replacing with clone ' + clone.length + ' ' + interNodes.length);
             interNodes = clone;
             
         } catch (ex) {
@@ -2607,4 +2607,4 @@ window.refreshTwitch = function() {
 }
 setInterval(window.refreshTwitch, 60000);
 window.refreshTwitch();
-console.log('version 101');
+console.log('version 102');
