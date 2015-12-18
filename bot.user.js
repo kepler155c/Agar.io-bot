@@ -935,7 +935,7 @@ function AposBot() {
 
                     }
 
-                    if (allPossibleThreats.length == 0)
+                    if (allPossibleThreats.length == 0) {
                         var safeToSplit = false;
                         for (var i = 0; i < allPossibleTargets.length; i++) {
 
