@@ -574,7 +574,7 @@ console.log("Running Bot Launcher!");
                 n.Q = C;
                 n.ba = w;
                 q && n.B(q); - 1 != M.indexOf(d) && -1 == k.indexOf(n) && (document.getElementById("overlays").style.display = "none", k.push(n), n.birth = getLastUpdate(), n.birthMass = (n.size * n.size / 100), 1 == k.length && (s = n.x, t = n.y, db()))
-                interNodes[d] = window.getCells()[d];
+                clone[d] = window.getCells()[d];
             }
     
             //UPDATE
@@ -584,7 +584,7 @@ console.log("Running Bot Launcher!");
     
                 //console.log("Time not updated: " + (window.getLastUpdate() - interNodes[element].getUptimeTime()));
                 if (isRemoved && (window.getLastUpdate() - clone[element].getUptimeTime()) > 3000) {
-                    delete interNodes[element];
+                    delete clone[element];
                 } else {
                     if (isRemoved &&
                         clone[element].x > (getX() - (1920 / 2) / getZoomlessRatio()) &&
