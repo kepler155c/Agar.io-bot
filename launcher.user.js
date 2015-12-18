@@ -121,16 +121,6 @@ console.log("Running Bot Launcher!");
         if (70 == e.keyCode) {
             window.setShowMass(!getMassBool());
         }
-        if (69 == e.keyCode) {
-            if (message.length > 0) {
-                window.setMessage([]);
-                window.onmouseup = function() {};
-                window.ignoreStream = true;
-            } else {
-                window.ignoreStream = false;
-                window.refreshTwitch();
-            }
-        }
         window.botList[botIndex].keyAction(e);
     }
 
@@ -2595,29 +2585,5 @@ if (this.size > badSize) {
 //apos('create', 'UA-64394184-1', 'auto');
 //apos('send', 'pageview');
 
-window.ignoreStream = false;
-window.refreshTwitch = function() {
-    window.jQuery.ajax({
-        url: "https://api.twitch.tv/kraken/streams/apostolique",
-        cache: false,
-        dataType: "jsonp"
-    }).done(function(data) {
-        if (data["stream"] == null) {
-            //console.log("Apostolique is not online!");
-            window.setMessage([]);
-            window.onmouseup = function() {};
-            window.ignoreStream = false;
-        } else {
-            //console.log("Apostolique is online!");
-            if (!window.ignoreStream) {
-                window.setMessage(["twitch.tv/apostolique is online right now!", "Click the screen to open the stream!", "Press E to ignore."]);
-                window.onmouseup = function() {
-                    window.open("http://www.twitch.tv/apostolique");
-                };
-            }
-        }
-    }).fail(function() {});
-}
-setInterval(window.refreshTwitch, 60000);
-window.refreshTwitch();
+
 console.log('version ' + aposLauncherVersion);

@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.646
+// @version     3.647
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.646;
+var aposBotVersion = 3.647;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -911,6 +911,8 @@ function AposBot() {
                     var allPossibleThreats = allIsAll[1];
                     //The viruses are stored in element 2 of allIsAll
                     var allPossibleViruses = allIsAll[2];
+                    
+                    var allPossibleTargets = allIsAll[3];
 
                     //The bot works by removing angles in which it is too
                     //dangerous to travel towards to.
@@ -929,9 +931,20 @@ function AposBot() {
 
                         var enemyDistance = this.computeDistance(allPossibleThreats[i].x, allPossibleThreats[i].y, player[k].x, player[k].y, allPossibleThreats[i].size);
 
-                        allPossibleThreats[i].enemyDist = enemyDistance;
                     }
 
+                    if (allPossibleTargets.length == 0) {
+                        for (var i = 0; i < allPossibleTargets.length; i++) {
+
+                            var enemyDistance = this.computeDistance(allPossibleTargets[i].x, allPossibleTargets[i].y, player[k].x, player[k].y, allPossibleTargets[i].size);
+
+                            if (enemyDistance < this.splitDistance) {
+                            	drawCircle(allPossibleTargets[i].x, allPossibleTargets[i].y, allPossibleTargets[i].size + 30, 5);
+                            }
+                        }
+                    	
+                    }
+                    
                     /*allPossibleThreats.sort(function(a, b){
                         return a.enemyDist-b.enemyDist;
                     })*/
