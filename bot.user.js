@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.680
+// @version     3.681
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.680;
+var aposBotVersion = 3.681;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -890,6 +890,8 @@ function AposBot() {
         //dangerous to travel towards to.
         var badAngles = [];
         var obstacleList = [];
+        var tempMoveX = getPointX();
+        var tempMoveY = getPointY();
 
         for (var i = 0; i < allPossibleThreats.length; i++) {
 
@@ -1198,8 +1200,6 @@ function AposBot() {
             tempPoint = [useMouseX, useMouseY, 1];
 
             //The current destination that the cells were going towards.
-            var tempMoveX = getPointX();
-            var tempMoveY = getPointY();
 
             drawLine(getX() - (1920 / 2) / getZoomlessRatio(), getY() - (1080 / 2) / getZoomlessRatio(), getX() + (1920 / 2) / getZoomlessRatio(), getY() - (1080 / 2) / getZoomlessRatio(), 7);
             drawLine(getX() - (1920 / 2) / getZoomlessRatio(), getY() + (1080 / 2) / getZoomlessRatio(), getX() + (1920 / 2) / getZoomlessRatio(), getY() + (1080 / 2) / getZoomlessRatio(), 7);
