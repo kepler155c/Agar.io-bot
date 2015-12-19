@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.677
+// @version     3.678
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.677;
+var aposBotVersion = 3.678;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -1316,9 +1316,10 @@ console.log('splitting');
                     
                     for (var i = 0; i < allPossibleThreats.length; i++) {
 
-    	                var enemyCanSplit = this.canSplit(cell, allPossibleThreats[i]);
-    	                var secureDistance = (enemyCanSplit ? splitDangerDistance : normalDangerDistance);
     	                var normalDangerDistance = allPossibleThreats[i].size + 150;
+    	                var enemyCanSplit = this.canSplit(cell, allPossibleThreats[i]);
+    	                var splitDangerDistance = allPossibleThreats[i].size + this.splitDistance + 150;
+    	                var secureDistance = (enemyCanSplit ? splitDangerDistance : normalDangerDistance);
 
     	                for (var j = clusterAllFood.length - 1; j >= 0 ; j--) {
     	                    if (this.computeDistance(allPossibleThreats[i].x, allPossibleThreats[i].y, clusterAllFood[j][0], clusterAllFood[j][1]) < secureDistance + shiftDistance)
