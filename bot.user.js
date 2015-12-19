@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.657
+// @version     3.658
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.657;
+var aposBotVersion = 3.658;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -93,7 +93,7 @@ console.log("Running Apos Bot!");
 
 var f = window;
 var g = window.jQuery;
-
+var isSplitting = false;
 
 console.log("Apos Bot!");
 
@@ -956,21 +956,21 @@ function AposBot() {
 
                     }
 
-                    if (allPossibleThreats.length == 0) {
+                    if (allPossibleThreats.length == 0 && !isSplitting) {
 
                     	var allPossibleTargets = allIsAll[3];
                         var allPossibleEnemies = allIsAll[4];
 
                         var safeToSplit = true;
-                        
+
                         for (var i = 0; i < allPossibleEnemies.length; i++) {
                         	var enemy = allPossibleEnemies[i];
                         	if (enemy.size > player[k].size *.85) {
-//                        		safeToSplit = false;
+                        		safeToSplit = false;
                         	}
                         }
 
-//                        if (safeToSplit) {
+                        if (safeToSplit) {
                         	
 	                        for (var i = 0; i < allPossibleTargets.length; i++) {
 	
@@ -979,10 +979,15 @@ function AposBot() {
 	                            if (player.length == 1 && enemyDistance < this.splitDistance) {
 	                            	drawCircle(allPossibleTargets[i].x, allPossibleTargets[i].y, allPossibleTargets[i].size + 30, 5);
 console.log('splitting');
+									isSplitting = true;
+				                    setTimeout(function() {
+				                    	isSplitting = false;
+				                    }, 1000)
+
 	                            	return [ allPossibleTargets[i].x, allPossibleTargets[i].y, true ];
 	                            }
 	                        }
- //                       }
+                        }
                     }
                     
                     /*allPossibleThreats.sort(function(a, b){
