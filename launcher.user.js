@@ -19,11 +19,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.168
+// @version     4.169
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.168;
+var aposLauncherVersion = 4.169;
 
 var showAd = true;
 var badSize = 1500;
@@ -37,6 +37,20 @@ Array.prototype.peek = function() {
 };
 
 var sha = "efde0488cc2cc176db48dd23b28a20b90314352b";
+
+var Player = function() {
+	this.cells = [];
+	this.isAlive = true;
+	this.isReviving = false;
+	this.isSplitting = false;
+}
+
+Player.prototype.setCells(cells) {
+	this.cells = cells;
+	this.isAlive = this.cells.length > 0;
+}
+
+var playerInstance = new Player();
 
 function getLatestCommit() {
     window.jQuery.ajax({
@@ -681,17 +695,17 @@ console.log("Running Bot Launcher!");
             Sa(false);
         }
         
-        if (getPlayer().length == 0 && !reviving && ~~(getCurrentScore() / 100) > 0) {
-            console.log("Dead: " + ~~(getCurrentScore() / 100));
-            //apos('send', 'pageview');
-        }
+        var player = getPlayer();
+        
+        if (!player.isAlive && !player.isReviving && ~~(getCurrentScore() / 100) > 0) {
+            console.log("Dead: " + ~~(getCurrentScore() / 100));        }
 
-        if (getPlayer().length == 0 && !firstStart) {
+        if (!player.isAlive == 0 && !firstStart) {
             console.log("Revive");
             setNick(originalName);
-            reviving = true;
-        } else if (getPlayer().length > 0 && reviving) {
-            reviving = false;
+            player.isReviving = true;
+        } else if (player.isAlive && player.isReviving) {
+            player.isReviving = false;
             console.log("Done Reviving!");
         }
 
@@ -832,7 +846,7 @@ console.log("Running Bot Launcher!");
         for (d = 0; d < v.length; d++) v[d].w(f);
         for (d = 0; d < Q.length; d++) Q[d].w(f);
         //UPDATE
-        if (getPlayer().length > 0) {
+        if (getPlayer().isAlive) {
             var moveLoc = window.botList[botIndex].mainLoop();
             if (!toggle) {
                 setPoint(moveLoc[0], moveLoc[1]);
@@ -867,7 +881,7 @@ console.log("Running Bot Launcher!");
         var currentDate = new Date();
 
         var nbSeconds = 0;
-        if (getPlayer().length > 0) {
+        if (getPlayer().isAlive) {
             //nbSeconds = currentDate.getSeconds() + currentDate.getMinutes() * 60 + currentDate.getHours() * 3600 - lifeTimer.getSeconds() - lifeTimer.getMinutes() * 60 - lifeTimer.getHours() * 3600;
             nbSeconds = (currentDate.getTime() - lifeTimer.getTime()) / 1000;
         }
@@ -1053,7 +1067,7 @@ console.log("Running Bot Launcher!");
         debugStrings.push("");
         debugStrings.push(serverIP);
 
-        if (getPlayer().length > 0) {
+        if (getPlayer().isAlive) {
             var offsetX = -getMapStartX();
             var offsetY = -getMapStartY();
             debugStrings.push("Location: " + Math.floor(getPlayer()[0].x + offsetX) + ", " + Math.floor(getPlayer()[0].y + offsetY));
@@ -1378,7 +1392,6 @@ console.log("Running Bot Launcher!");
                 lifeTimer = new Date(),
                 bestTime = 0,
                 botIndex = 0,
-                reviving = false,
                 message = [],
 
                 q = null,
@@ -1458,7 +1471,7 @@ console.log("Running Bot Launcher!");
                     //UPDATE
                     firstStart = false;
                     originalName = a;
-                    if (getPlayer().length == 0) {
+                    if (!getPlayer().isAlive) {
                         lifeTimer = new Date();
                     }
 
@@ -1808,7 +1821,10 @@ console.log("Running Bot Launcher!");
                  * @return Player's cells
                  */
                 window.getPlayer = function() {
-                    return k;
+                	
+                	playerInstance.setCells(k);
+                	
+                    return playerInstance;
                 }
 
                 /**
@@ -2573,23 +2589,5 @@ if (this.size > badSize) {
         }
     }
 })(window, window.jQuery);
-
-/*
-(function(i, s, o, g, r, a, m) {
-    i['GoogleAnalyticsObject'] = r;
-    i[r] = i[r] || function() {
-        (i[r].q = i[r].q || []).push(arguments)
-    }, i[r].l = 1 * new Date();
-    a = s.createElement(o),
-        m = s.getElementsByTagName(o)[0];
-    a.async = 1;
-    a.src = g;
-    m.parentNode.insertBefore(a, m)
-})(window, document, 'script', '//www.google-analytics.com/analytics.js', 'apos');
-*/
-
-//apos('create', 'UA-64394184-1', 'auto');
-//apos('send', 'pageview');
-
 
 console.log('version ' + aposLauncherVersion);

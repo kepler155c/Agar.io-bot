@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.670
+// @version     3.671
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.670;
+var aposBotVersion = 3.671;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -93,7 +93,6 @@ console.log("Running Apos Bot!");
 
 var f = window;
 var g = window.jQuery;
-var isSplitting = false;
 
 console.log("Apos Bot!");
 
@@ -228,7 +227,7 @@ function AposBot() {
 
     this.isItMe = function(player, cell) {
         if (getMode() == ":teams") {
-            var currentColor = player[0].color;
+            var currentColor = player.cells[0].color;
             var currentRed = currentColor.substring(1,3);
             var currentGreen = currentColor.substring(3,5);
             var currentBlue = currentColor.substring(5,7);
@@ -250,8 +249,8 @@ function AposBot() {
             //console.log("COLOR: " + color);
 
         } else {
-            for (var i = 0; i < player.length; i++) {
-                if (cell.id == player[i].id) {
+            for (var i = 0; i < player.cells.length; i++) {
+                if (cell.id == player.cells[i].id) {
                     return true;
                 }
             }
@@ -407,13 +406,9 @@ function AposBot() {
     };
 
     this.getAll = function(blob) {
-        var dotList = [];
-        var player = getPlayer();
         var interNodes = getMemoryCells();
 
-        dotList = this.separateListBasedOnFunction(this, interNodes, blob);
-
-        return dotList;
+        return this.separateListBasedOnFunction(this, interNodes, blob);
     };
 
     this.clusterFood = function(foodList, blobSize) {
@@ -592,8 +587,9 @@ function AposBot() {
 
     this.debugAngle = function(angle, text) {
         var player = getPlayer();
-        var line1 = this.followAngle(angle, player[0].x, player[0].y, 300);
-        drawLine(player[0].x, player[0].y, line1[0], line1[1], 5);
+        var cell = player.cells[0];
+        var line1 = this.followAngle(angle, cell.x, cell.y, 300);
+        drawLine(cell.x, cell.y, line1[0], line1[1], 5);
         drawPoint(line1[0], line1[1], 5, "" + text);
     };
 
@@ -900,29 +896,31 @@ function AposBot() {
             var destinationChoices = []; //destination, size, danger
 
             //Just to make sure the player is alive.
-            if (player.length > 0) {
+            if (player.isAlive) {
+            	
+            	var cells = player.cells;
 
                 //Loop through all the player's cells.
-                for (var k = 0; k < player.length; k++) {
-                    if (true) {
-                        drawPoint(player[k].x, player[k].y + player[k].size, 0, "" + (getLastUpdate() - player[k].birth) + " / " + (30000 + (player[k].birthMass * 57) - (getLastUpdate() - player[k].birth)) + " / " + player[k].birthMass);
-                    }
+                for (var k = 0; k < cells.length; k++) {
+                	var cell = cells[k];
+                    drawPoint(cell.x, cell.y + cell.size, 0, "" + (getLastUpdate() - cell.birth) + " / " + 
+                    		(30000 + (cell.birthMass * 57) - (getLastUpdate() - cell.birth)) + " / " + cell.birthMass);
                 }
-
 
                 //Loops only for one cell for now.
                 for (var k = 0; /*k < player.length*/ k < 1; k++) {
 
                     //console.log("Working on blob: " + k);
+                	var cell = player.cells[k];
 
-                    drawCircle(player[k].x, player[k].y, player[k].size + this.splitDistance, 5);
+                    drawCircle(cell.x, cell.y, cell.size + this.splitDistance, 5);
                     //drawPoint(player[0].x, player[0].y - player[0].size, 3, "" + Math.floor(player[0].x) + ", " + Math.floor(player[0].y));
 
                     //var allDots = processEverything(interNodes);
 
                     //loop through everything that is on the screen and
                     //separate everything in it's own category.
-                    var allIsAll = this.getAll(player[k]);
+                    var allIsAll = this.getAll(cell);
 
                     //The food stored in element 0 of allIsAll
                     var allPossibleFood = allIsAll[0];
@@ -939,31 +937,32 @@ function AposBot() {
                     var isSafeSpot = true;
                     var isMouseSafe = true;
 
-                    var clusterAllFood = this.clusterFood(allPossibleFood, player[k].size);
+                    var clusterAllFood = this.clusterFood(allPossibleFood, cell.size);
 
                     //console.log("Looking for enemies!");
 
                     //Loop through all the cells that were identified as threats.
                     for (var i = 0; i < allPossibleThreats.length; i++) {
 
-                        var enemyDistance = this.computeDistance(allPossibleThreats[i].x, allPossibleThreats[i].y, player[k].x, player[k].y, allPossibleThreats[i].size);
+                        var enemyDistance = this.computeDistance(allPossibleThreats[i].x, allPossibleThreats[i].y, cell.x, cell.y, allPossibleThreats[i].size);
                         allPossibleThreats[i].enemyDist = enemyDistance;
                     	drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, allPossibleThreats[i].size + 30, 5);
 
                     }
 //console.log(player.length + ' ' + allPossibleThreats.length + ' ' + isSplitting);
                 	var allPossibleTargets = allIsAll[3];
-                    if (allPossibleThreats.length == 0 && !isSplitting && player.length == 1 && allPossibleTargets.length > 0) {
+                    if (allPossibleThreats.length == 0 && !player.isSplitting && player.cells.length == 1 && allPossibleTargets.length > 0) {
 
                         var allPossibleEnemies = allIsAll[4];
 
                         var safeToSplit = true;
-console.log('my size ' + player[k].size);
+console.log('my size ' + cell.size);
                         for (var i = 0; i < allPossibleEnemies.length; i++) {
                         	var enemy = allPossibleEnemies[i];
 console.log('enemy size ' + enemy.size);
-                        	if (player[k].size * player[k].size / 2 < enemy.size *enemy.size *.85) {
+                        	if (cell.size * cell.size / 2 < enemy.size *enemy.size *.85) {
                         		safeToSplit = false;
+                        		break;
                         	}
                         }
 
@@ -971,14 +970,14 @@ console.log('enemy size ' + enemy.size);
                         	
 	                        for (var i = 0; i < allPossibleTargets.length; i++) {
 	
-	                            var enemyDistance = this.computeDistance(allPossibleTargets[i].x, allPossibleTargets[i].y, player[k].x, player[k].y, allPossibleTargets[i].size);
+	                            var enemyDistance = this.computeDistance(allPossibleTargets[i].x, allPossibleTargets[i].y, cell.x, cell.y, allPossibleTargets[i].size);
 	
 	                            if (enemyDistance < this.splitDistance * .9) {
 	                            	drawCircle(allPossibleTargets[i].x, allPossibleTargets[i].y, allPossibleTargets[i].size + 30, 5);
 console.log('splitting');
-									isSplitting = true;
+									player.isSplitting = true;
 				                    setTimeout(function() {
-				                    	isSplitting = false;
+				                    	player.isSplitting = false;
 				                    	console.log('resetting split timer');
 				                    }, 1000)
 
@@ -994,17 +993,17 @@ console.log('splitting');
 
                     for (var i = 0; i < allPossibleThreats.length; i++) {
 
-                        var enemyDistance = this.computeDistance(allPossibleThreats[i].x, allPossibleThreats[i].y, player[k].x, player[k].y);
+                        var enemyDistance = this.computeDistance(allPossibleThreats[i].x, allPossibleThreats[i].y, cell.x, cell.y);
 
                         var splitDangerDistance = allPossibleThreats[i].size + this.splitDistance + 150;
 
                         var normalDangerDistance = allPossibleThreats[i].size + 150;
 
-                        var shiftDistance = player[k].size;
+                        var shiftDistance = cell.size;
 
                         //console.log("Found distance.");
 
-                        var enemyCanSplit = this.canSplit(player[k], allPossibleThreats[i]);
+                        var enemyCanSplit = this.canSplit(cell, allPossibleThreats[i]);
                         var secureDistance = (enemyCanSplit ? splitDangerDistance : normalDangerDistance);
                         
                         for (var j = clusterAllFood.length - 1; j >= 0 ; j--) {
@@ -1038,20 +1037,20 @@ console.log('splitting');
 
                         if ((enemyCanSplit && enemyDistance < splitDangerDistance) || (enemyCanSplit && allPossibleThreats[i].danger)) {
 
-                            badAngles.push(this.getAngleRange(player[k], allPossibleThreats[i], i, splitDangerDistance).concat(allPossibleThreats[i].enemyDist));
+                            badAngles.push(this.getAngleRange(cell, allPossibleThreats[i], i, splitDangerDistance).concat(allPossibleThreats[i].enemyDist));
 
                         } else if ((!enemyCanSplit && enemyDistance < normalDangerDistance) || (!enemyCanSplit && allPossibleThreats[i].danger)) {
 
-                            badAngles.push(this.getAngleRange(player[k], allPossibleThreats[i], i, normalDangerDistance).concat(allPossibleThreats[i].enemyDist));
+                            badAngles.push(this.getAngleRange(cell, allPossibleThreats[i], i, normalDangerDistance).concat(allPossibleThreats[i].enemyDist));
 
                         } else if (enemyCanSplit && enemyDistance < splitDangerDistance + shiftDistance) {
-                            var tempOb = this.getAngleRange(player[k], allPossibleThreats[i], i, splitDangerDistance + shiftDistance);
+                            var tempOb = this.getAngleRange(cell, allPossibleThreats[i], i, splitDangerDistance + shiftDistance);
                             var angle1 = tempOb[0];
                             var angle2 = this.rangeToAngle(tempOb);
 
                             obstacleList.push([[angle1, true], [angle2, false]]);
                         } else if (!enemyCanSplit && enemyDistance < normalDangerDistance + shiftDistance) {
-                            var tempOb = this.getAngleRange(player[k], allPossibleThreats[i], i, normalDangerDistance + shiftDistance);
+                            var tempOb = this.getAngleRange(cell, allPossibleThreats[i], i, normalDangerDistance + shiftDistance);
                             var angle1 = tempOb[0];
                             var angle2 = this.rangeToAngle(tempOb);
 
@@ -1066,28 +1065,28 @@ console.log('splitting');
                     var stupidList = [];
 
                     for (var i = 0; i < allPossibleViruses.length; i++) {
-                        if (player[k].size < allPossibleViruses[i].size) {
+                        if (cell.size < allPossibleViruses[i].size) {
                             drawCircle(allPossibleViruses[i].x, allPossibleViruses[i].y, allPossibleViruses[i].size + 10, 3);
                             drawCircle(allPossibleViruses[i].x, allPossibleViruses[i].y, allPossibleViruses[i].size * 2, 6);
 
                         } else {
-                            drawCircle(allPossibleViruses[i].x, allPossibleViruses[i].y, player[k].size + 50, 3);
-                            drawCircle(allPossibleViruses[i].x, allPossibleViruses[i].y, player[k].size * 2, 6);
+                            drawCircle(allPossibleViruses[i].x, allPossibleViruses[i].y, cell.size + 50, 3);
+                            drawCircle(allPossibleViruses[i].x, allPossibleViruses[i].y, cell.size * 2, 6);
                         }
                     }
 
                     for (var i = 0; i < allPossibleViruses.length; i++) {
-                        var virusDistance = this.computeDistance(allPossibleViruses[i].x, allPossibleViruses[i].y, player[k].x, player[k].y);
-                        if (player[k].size < allPossibleViruses[i].size) {
+                        var virusDistance = this.computeDistance(allPossibleViruses[i].x, allPossibleViruses[i].y, cell.x, cell.y);
+                        if (cell.size < allPossibleViruses[i].size) {
                             if (virusDistance < (allPossibleViruses[i].size * 2)) {
-                                var tempOb = this.getAngleRange(player[k], allPossibleViruses[i], i, allPossibleViruses[i].size + 10);
+                                var tempOb = this.getAngleRange(cell, allPossibleViruses[i], i, allPossibleViruses[i].size + 10);
                                 var angle1 = tempOb[0];
                                 var angle2 = this.rangeToAngle(tempOb);
                                 obstacleList.push([[angle1, true], [angle2, false]]);
                             }
                         } else {
-                            if (virusDistance < (player[k].size * 2)) {
-                                var tempOb = this.getAngleRange(player[k], allPossibleViruses[i], i, player[k].size + 50);
+                            if (virusDistance < (cell.size * 2)) {
+                                var tempOb = this.getAngleRange(cell, allPossibleViruses[i], i, cell.size + 50);
                                 var angle1 = tempOb[0];
                                 var angle2 = this.rangeToAngle(tempOb);
                                 obstacleList.push([[angle1, true], [angle2, false]]);
@@ -1097,7 +1096,7 @@ console.log('splitting');
 
                     if (badAngles.length > 0) {
                         //NOTE: This is only bandaid wall code. It's not the best way to do it.
-                        stupidList = this.addWall(stupidList, player[k]);
+                        stupidList = this.addWall(stupidList, cell);
                     }
 
                     for (var i = 0; i < badAngles.length; i++) {
@@ -1128,9 +1127,9 @@ console.log('splitting');
 
                             for (var i = 0; i < allPossibleThreats.length; i++) {
 
-                                var enemyDistance = this.computeDistance(allPossibleThreats[i].x, allPossibleThreats[i].y, player[k].x, player[k].y, allPossibleThreats[i].size);
+                                var enemyDistance = this.computeDistance(allPossibleThreats[i].x, allPossibleThreats[i].y, cell.x, cell.y, allPossibleThreats[i].size);
 
-                                console.log('enemy: ' + player.size + ' ' + enemyDistance);
+                                console.log('enemy: ' + player.cells.size + ' ' + enemyDistance);
                                 
                             }
 
@@ -1176,12 +1175,12 @@ console.log('splitting');
                     }
 
                     for (var i = 0; i < goodAngles.length; i++) {
-                        var line1 = this.followAngle(goodAngles[i][0], player[k].x, player[k].y, 100 + player[k].size);
-                        var line2 = this.followAngle(this.mod(goodAngles[i][0] + goodAngles[i][1], 360), player[k].x, player[k].y, 100 + player[k].size);
-                        drawLine(player[k].x, player[k].y, line1[0], line1[1], 1);
-                        drawLine(player[k].x, player[k].y, line2[0], line2[1], 1);
+                        var line1 = this.followAngle(goodAngles[i][0], cell.x, cell.y, 100 + cell.size);
+                        var line2 = this.followAngle(this.mod(goodAngles[i][0] + goodAngles[i][1], 360), cell.x, cell.y, 100 + cell.size);
+                        drawLine(cell.x, cell.y, line1[0], line1[1], 1);
+                        drawLine(cell.x, cell.y, line2[0], line2[1], 1);
 
-                        drawArc(line1[0], line1[1], line2[0], line2[1], player[k].x, player[k].y, 1);
+                        drawArc(line1[0], line1[1], line2[0], line2[1], cell.x, cell.y, 1);
 
                         //drawPoint(player[0].x, player[0].y, 2, "");
 
@@ -1190,12 +1189,12 @@ console.log('splitting');
                     }
 
                     for (var i = 0; i < obstacleAngles.length; i++) {
-                        var line1 = this.followAngle(obstacleAngles[i][0], player[k].x, player[k].y, 50 + player[k].size);
-                        var line2 = this.followAngle(this.mod(obstacleAngles[i][0] + obstacleAngles[i][1], 360), player[k].x, player[k].y, 50 + player[k].size);
-                        drawLine(player[k].x, player[k].y, line1[0], line1[1], 6);
-                        drawLine(player[k].x, player[k].y, line2[0], line2[1], 6);
+                        var line1 = this.followAngle(obstacleAngles[i][0], cell.x, cell.y, 50 + cell.size);
+                        var line2 = this.followAngle(this.mod(obstacleAngles[i][0] + obstacleAngles[i][1], 360), cell.x, cell.y, 50 + cell.size);
+                        drawLine(cell.x, cell.y, line1[0], line1[1], 6);
+                        drawLine(cell.x, cell.y, line2[0], line2[1], 6);
 
-                        drawArc(line1[0], line1[1], line2[0], line2[1], player[k].x, player[k].y, 6);
+                        drawArc(line1[0], line1[1], line2[0], line2[1], cell.x, cell.y, 6);
 
                         //drawPoint(player[0].x, player[0].y, 2, "");
 
@@ -1205,14 +1204,14 @@ console.log('splitting');
 
                     if (this.toggleFollow && goodAngles.length === 0) {
                         //This is the follow the mouse mode
-                        var distance = this.computeDistance(player[k].x, player[k].y, tempPoint[0], tempPoint[1]);
+                        var distance = this.computeDistance(cell.x, cell.y, tempPoint[0], tempPoint[1]);
 
-                        var shiftedAngle = this.shiftAngle(obstacleAngles, this.getAngle(tempPoint[0], tempPoint[1], player[k].x, player[k].y), [0, 360]);
+                        var shiftedAngle = this.shiftAngle(obstacleAngles, this.getAngle(tempPoint[0], tempPoint[1], cell.x, cell.y), [0, 360]);
 
-                        var destination = this.followAngle(shiftedAngle, player[k].x, player[k].y, distance);
+                        var destination = this.followAngle(shiftedAngle, cell.x, cell.y, distance);
 
                         destinationChoices = destination;
-                        drawLine(player[k].x, player[k].y, destination[0], destination[1], 1);
+                        drawLine(cell.x, cell.y, destination[0], destination[1], 1);
                         //tempMoveX = destination[0];
                         //tempMoveY = destination[1];
 
@@ -1230,10 +1229,10 @@ console.log('splitting');
 
                         perfectAngle = this.shiftAngle(obstacleAngles, perfectAngle, bIndex);
 
-                        var line1 = this.followAngle(perfectAngle, player[k].x, player[k].y, verticalDistance());
+                        var line1 = this.followAngle(perfectAngle, cell.x, cell.y, verticalDistance());
 
                         destinationChoices = line1;
-                        drawLine(player[k].x, player[k].y, line1[0], line1[1], 7);
+                        drawLine(cell.x, cell.y, line1[0], line1[1], 7);
                         //tempMoveX = line1[0];
                         //tempMoveY = line1[1];
                     } else if (badAngles.length > 0 && goodAngles.length === 0) {
@@ -1244,8 +1243,8 @@ console.log('splitting');
                         destinationChoices = [tempMoveX, tempMoveY];
                         /*var angleWeights = [] //Put weights on the angles according to enemy distance
                         for (var i = 0; i < allPossibleThreats.length; i++){
-                            var dist = this.computeDistance(player[k].x, player[k].y, allPossibleThreats[i].x, allPossibleThreats[i].y);
-                            var angle = this.getAngle(allPossibleThreats[i].x, allPossibleThreats[i].y, player[k].x, player[k].y);
+                            var dist = this.computeDistance(cell.x, cell.y, allPossibleThreats[i].x, allPossibleThreats[i].y);
+                            var angle = this.getAngle(allPossibleThreats[i].x, allPossibleThreats[i].y, cell.x, cell.y);
                             angleWeights.push([angle,dist]);
                         }
                         var maxDist = 0;
@@ -1256,17 +1255,17 @@ console.log('splitting');
                                 finalAngle = this.mod(angleWeights[i][0] + 180, 360);
                             }
                         }
-                        var line1 = this.followAngle(finalAngle,player[k].x,player[k].y,f.verticalDistance());
-                        drawLine(player[k].x, player[k].y, line1[0], line1[1], 2);
+                        var line1 = this.followAngle(finalAngle,cell.x,cell.y,f.verticalDistance());
+                        drawLine(cell.x, cell.y, line1[0], line1[1], 2);
                         destinationChoices.push(line1);*/
                     } else if (clusterAllFood.length > 0) {
                         for (var i = 0; i < clusterAllFood.length; i++) {
                             //console.log("mefore: " + clusterAllFood[i][2]);
                             //This is the cost function. Higher is better.
 
-                                var clusterAngle = this.getAngle(clusterAllFood[i][0], clusterAllFood[i][1], player[k].x, player[k].y);
+                                var clusterAngle = this.getAngle(clusterAllFood[i][0], clusterAllFood[i][1], cell.x, cell.y);
 
-                                clusterAllFood[i][2] = clusterAllFood[i][2] * 6 - this.computeDistance(clusterAllFood[i][0], clusterAllFood[i][1], player[k].x, player[k].y);
+                                clusterAllFood[i][2] = clusterAllFood[i][2] * 6 - this.computeDistance(clusterAllFood[i][0], clusterAllFood[i][1], cell.x, cell.y);
                                 //console.log("Current Value: " + clusterAllFood[i][2]);
 
                                 //(goodAngles[bIndex][1] / 2 - (Math.abs(perfectAngle - clusterAngle)));
@@ -1288,16 +1287,16 @@ console.log('splitting');
 
                         //console.log("Best Value: " + clusterAllFood[bestFoodI][2]);
 
-                        var distance = this.computeDistance(player[k].x, player[k].y, clusterAllFood[bestFoodI][0], clusterAllFood[bestFoodI][1]);
+                        var distance = this.computeDistance(cell.x, cell.y, clusterAllFood[bestFoodI][0], clusterAllFood[bestFoodI][1]);
 
-                        var shiftedAngle = this.shiftAngle(obstacleAngles, this.getAngle(clusterAllFood[bestFoodI][0], clusterAllFood[bestFoodI][1], player[k].x, player[k].y), [0, 360]);
+                        var shiftedAngle = this.shiftAngle(obstacleAngles, this.getAngle(clusterAllFood[bestFoodI][0], clusterAllFood[bestFoodI][1], cell.x, cell.y), [0, 360]);
 
-                        var destination = this.followAngle(shiftedAngle, player[k].x, player[k].y, distance);
+                        var destination = this.followAngle(shiftedAngle, cell.x, cell.y, distance);
 
                         destinationChoices = destination;
                         //tempMoveX = destination[0];
                         //tempMoveY = destination[1];
-                        drawLine(player[k].x, player[k].y, destination[0], destination[1], 1);
+                        drawLine(cell.x, cell.y, destination[0], destination[1], 1);
                     } else {
                         //If there are no enemies around and no food to eat.
                         destinationChoices = [tempMoveX, tempMoveY];
