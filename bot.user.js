@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.671
+// @version     3.672
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.671;
+var aposBotVersion = 3.672;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -291,7 +291,7 @@ function AposBot() {
     };
 
     this.isVirus = function(blob, cell) {
-        if (blob == null) {
+        if (blob === null) {
             if (cell.isVirus()){return true;} 
             else {return false;}
         }
@@ -353,7 +353,7 @@ function AposBot() {
                         mergeList.push(listToUse[element]);
                 }
                 else {
-                	if (that.isVirus(null, listToUse[element])==false) {
+                	if (!that.isVirus(null, listToUse[element])) {
                 		mergeList.push(listToUse[element]);
                 	}
                 }
@@ -951,7 +951,7 @@ function AposBot() {
                     }
 //console.log(player.length + ' ' + allPossibleThreats.length + ' ' + isSplitting);
                 	var allPossibleTargets = allIsAll[3];
-                    if (allPossibleThreats.length == 0 && !player.isSplitting && player.cells.length == 1 && allPossibleTargets.length > 0) {
+                    if (allPossibleThreats.length === 0 && !player.isSplitting && player.cells.length == 1 && allPossibleTargets.length > 0) {
 
                         var allPossibleEnemies = allIsAll[4];
 
@@ -960,7 +960,7 @@ console.log('my size ' + cell.size);
                         for (var i = 0; i < allPossibleEnemies.length; i++) {
                         	var enemy = allPossibleEnemies[i];
 console.log('enemy size ' + enemy.size);
-                        	if (cell.size * cell.size / 2 < enemy.size *enemy.size *.85) {
+                        	if (cell.size * cell.size / 2 < enemy.size * enemy.size * 0.85) {
                         		safeToSplit = false;
                         		break;
                         	}
@@ -972,7 +972,7 @@ console.log('enemy size ' + enemy.size);
 	
 	                            var enemyDistance = this.computeDistance(allPossibleTargets[i].x, allPossibleTargets[i].y, cell.x, cell.y, allPossibleTargets[i].size);
 	
-	                            if (enemyDistance < this.splitDistance * .9) {
+	                            if (enemyDistance < this.splitDistance * 0.9) {
 	                            	drawCircle(allPossibleTargets[i].x, allPossibleTargets[i].y, allPossibleTargets[i].size + 30, 5);
 console.log('splitting');
 									player.isSplitting = true;
@@ -1343,7 +1343,8 @@ console.log('splitting');
             return destinationChoices;
         }
     };
-};
+}
+
 window.botList.push(new AposBot());
 
 window.updateBotList(); //This function might not exist yet.

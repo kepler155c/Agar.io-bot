@@ -19,11 +19,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.169
+// @version     4.170
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.169;
+var aposLauncherVersion = 4.170;
 
 var showAd = true;
 var badSize = 1500;
@@ -45,7 +45,7 @@ var Player = function() {
 	this.isSplitting = false;
 }
 
-Player.prototype.setCells(cells) {
+Player.prototype.setCells = function(cells) {
 	this.cells = cells;
 	this.isAlive = this.cells.length > 0;
 }
@@ -230,7 +230,7 @@ console.log("Running Bot Launcher!");
         y && e("#region").val(y);
         Va();
         ha(e("#region").val());
-        0 == Ba && y && I();
+        0 === Ba && y && I();
         W = !0;
         e("#overlays").show();
         Ta();
@@ -238,7 +238,7 @@ console.log("Running Bot Launcher!");
     }
 
     function Ra(a) {
-        J *= Math.pow(.9, a.wheelDelta / -120 || a.detail || 0);
+        J *= Math.pow(0.9, a.wheelDelta / -120 || a.detail || 0);
         console.log("J: " + J);
         //UPDATE
         0.07 > J && (J = 0.07);
@@ -246,7 +246,7 @@ console.log("Running Bot Launcher!");
     }
 
     function qb() {
-        if (.4 > h) X = null;
+        if (0.4 > h) X = null;
         else {
             for (var a = Number.POSITIVE_INFINITY, b = Number.POSITIVE_INFINITY, c = Number.NEGATIVE_INFINITY, l = Number.NEGATIVE_INFINITY, d = 0, p = 0; p < v.length; p++) {
                 var g = v[p];
