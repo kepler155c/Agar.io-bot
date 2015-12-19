@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.691
+// @version     3.692
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.691;
+var aposBotVersion = 3.692;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -351,7 +351,7 @@ function AposBot() {
             var xxx = listToUse[element];
 
             if (!isMe) {
-                if (that.isFood(blob, listToUse[element], canvasWidth, canvasHeight) && listToUse[element].isNotMoving()) {
+                if (that.isFood(blob, listToUse[element]) && listToUse[element].isNotMoving()) {
                     //IT'S FOOD!
                 	// avoid edges
                 	if (xxx.x > getMapStartX() && xxx.x < getMapEndX()-1000 && 
