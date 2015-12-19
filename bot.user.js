@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.686
+// @version     3.687
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.686;
+var aposBotVersion = 3.687;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -267,7 +267,12 @@ function AposBot() {
         return 2;
     };
 
-    this.isFood = function(blob, cell) {
+    this.isFood = function(blob, cell, canvasWidth, canvasHeight) {
+    	
+    	if (cell.x < 1000 || cell.x > canvasWidth-1000 || cell.y < 1000 || cell.y > canvasHeight-1000) {
+    		return false;
+    	}
+    	
         if (!cell.isVirus() && this.compareSize(cell, blob, 1.33) || (cell.size <= 13)) {
             return true;
         }
@@ -340,6 +345,10 @@ function AposBot() {
         var virusList = [];
         var splitTargetList = [];
         var enemyList = [];
+        
+        var canvas = document.getElementById("canvas");
+        var canvasWidth = canvas.width * 2;
+        var canvasHeight = canvas.height * 2;
 
         var player = getPlayer();
         
@@ -351,7 +360,7 @@ function AposBot() {
             var xxx = listToUse[element];
 
             if (!isMe) {
-                if (that.isFood(blob, listToUse[element]) && listToUse[element].isNotMoving()) {
+                if (that.isFood(blob, listToUse[element], canvasWidth, canvasHeight) && listToUse[element].isNotMoving()) {
                     //IT'S FOOD!
                     foodElementList.push(listToUse[element]);
                     isEnemy = false;
