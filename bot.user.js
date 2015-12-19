@@ -976,7 +976,7 @@ function AposBot() {
 	
 	                            var enemyDistance = this.computeDistance(allPossibleTargets[i].x, allPossibleTargets[i].y, player[k].x, player[k].y, allPossibleTargets[i].size);
 	
-	                            if (player.length == 1 && enemyDistance < this.splitDistance) {
+	                            if (player.length == 1 && enemyDistance < this.splitDistance * .9) {
 	                            	drawCircle(allPossibleTargets[i].x, allPossibleTargets[i].y, allPossibleTargets[i].size + 30, 5);
 console.log('splitting');
 									isSplitting = true;
