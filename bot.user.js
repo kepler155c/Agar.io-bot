@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.659
+// @version     3.660
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.659;
+var aposBotVersion = 3.660;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -282,10 +282,6 @@ function AposBot() {
         }
         return false;
     };
-
-    this.safeToSplit = function() {
-    	
-    }
     
     this.isThreatIfSplit = function(blob, cell) {
 
@@ -956,7 +952,7 @@ function AposBot() {
 
                     }
 
-                    if (allPossibleThreats.length == 0 && !isSplitting) {
+                    if (allPossibleThreats.length == 0 && !isSplitting && player[k].length == 1) {
 
                     	var allPossibleTargets = allIsAll[3];
                         var allPossibleEnemies = allIsAll[4];
@@ -965,7 +961,7 @@ function AposBot() {
 
                         for (var i = 0; i < allPossibleEnemies.length; i++) {
                         	var enemy = allPossibleEnemies[i];
-                        	if (enemy.size > player[k].size / 2 *.85) {
+                        	if (player[k].size / 2 *.85 < enemy.size) {
                         		safeToSplit = false;
                         	}
                         }
@@ -976,7 +972,7 @@ function AposBot() {
 	
 	                            var enemyDistance = this.computeDistance(allPossibleTargets[i].x, allPossibleTargets[i].y, player[k].x, player[k].y, allPossibleTargets[i].size);
 	
-	                            if (player.length == 1 && enemyDistance < this.splitDistance * .9) {
+	                            if (enemyDistance < this.splitDistance * .9) {
 	                            	drawCircle(allPossibleTargets[i].x, allPossibleTargets[i].y, allPossibleTargets[i].size + 30, 5);
 console.log('splitting');
 									isSplitting = true;
