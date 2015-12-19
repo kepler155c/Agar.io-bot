@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.679
+// @version     3.680
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.679;
+var aposBotVersion = 3.680;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -904,6 +904,12 @@ function AposBot() {
             //console.log("Found distance.");
 
             var enemyCanSplit = this.canSplit(cell, allPossibleThreats[i]);
+            var secureDistance = (enemyCanSplit ? splitDangerDistance : normalDangerDistance);
+
+            for (var j = clusterAllFood.length - 1; j >= 0 ; j--) {
+                if (this.computeDistance(allPossibleThreats[i].x, allPossibleThreats[i].y, clusterAllFood[j][0], clusterAllFood[j][1]) < secureDistance + shiftDistance)
+                    clusterAllFood.splice(j, 1);
+            }
 
             if (allPossibleThreats[i].danger && getLastUpdate() - allPossibleThreats[i].dangerTimeOut > 1000) {
 
@@ -1001,9 +1007,6 @@ function AposBot() {
                 for (var i = 0; i < allPossibleThreats.length; i++) {
 
                     var enemyDistance = this.computeDistance(allPossibleThreats[i].x, allPossibleThreats[i].y, cell.x, cell.y, allPossibleThreats[i].size);
-
-                    console.log('enemy: ' + player.cells.size + ' ' + enemyDistance);
-                    
                 }
 
                 break;
@@ -1322,11 +1325,6 @@ console.log('splitting');
     	                var secureDistance = (enemyCanSplit ? splitDangerDistance : normalDangerDistance);
     	                var shiftDistance = cell.size;
 
-    	                for (var j = clusterAllFood.length - 1; j >= 0 ; j--) {
-    	                    if (this.computeDistance(allPossibleThreats[i].x, allPossibleThreats[i].y, clusterAllFood[j][0], clusterAllFood[j][1]) < secureDistance + shiftDistance)
-    	                        clusterAllFood.splice(j, 1);
-    	                }
-    	
     	                //console.log("Removed some food.");
     	
     	                if (enemyCanSplit) {
