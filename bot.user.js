@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.682
+// @version     3.683
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.682;
+var aposBotVersion = 3.683;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -318,7 +318,7 @@ function AposBot() {
     this.circlesIntersect = function(circle1, circle2) {
         var distanceX = circle1.x - circle2.x;
         var distanceY = circle1.y - circle2.y;
-        var radiusSum = circle.size + circle2.size;
+        var radiusSum = circle1.size + circle2.size;
         return distanceX * distanceX + distanceY * distanceY <= radiusSum * radiusSum;
     }
     
