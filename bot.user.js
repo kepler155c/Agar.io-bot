@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.675
+// @version     3.676
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.675;
+var aposBotVersion = 3.676;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -886,9 +886,14 @@ function AposBot() {
     
     this.determineDestination = function(cell, allPossibleThreats, allPossibleViruses, clusterAllFood) {
     	
+        //The bot works by removing angles in which it is too
+        //dangerous to travel towards to.
+        var badAngles = [];
+        var obstacleList = [];
+
         for (var i = 0; i < allPossibleThreats.length; i++) {
 
-            var enemyDistance = this.computeDistance(allPossibleThreats[i].x, allPossibleThreats[i].y, cell.x, cell.y);
+        	var enemyDistance = this.computeDistance(allPossibleThreats[i].x, allPossibleThreats[i].y, cell.x, cell.y);
 
             var splitDangerDistance = allPossibleThreats[i].size + this.splitDistance + 150;
 
@@ -1241,14 +1246,6 @@ function AposBot() {
                     var allPossibleThreats = allIsAll[1];
                     //The viruses are stored in element 2 of allIsAll
                     var allPossibleViruses = allIsAll[2];
-                    
-                    //The bot works by removing angles in which it is too
-                    //dangerous to travel towards to.
-                    var badAngles = [];
-                    var obstacleList = [];
-
-                    var isSafeSpot = true;
-                    var isMouseSafe = true;
 
                     var clusterAllFood = this.clusterFood(allPossibleFood, cell.size);
 
