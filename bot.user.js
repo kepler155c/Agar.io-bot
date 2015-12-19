@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.660
+// @version     3.661
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.660;
+var aposBotVersion = 3.661;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -958,9 +958,10 @@ function AposBot() {
                         var allPossibleEnemies = allIsAll[4];
 
                         var safeToSplit = true;
-
+console.log('my size ' + player[k].size);
                         for (var i = 0; i < allPossibleEnemies.length; i++) {
                         	var enemy = allPossibleEnemies[i];
+console.log('enemy size ' + enemy.size);
                         	if (player[k].size / 2 *.85 < enemy.size) {
                         		safeToSplit = false;
                         	}
