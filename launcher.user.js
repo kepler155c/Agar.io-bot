@@ -19,11 +19,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.173
+// @version     4.174
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.173;
+var aposLauncherVersion = 4.174;
 
 var showAd = true;
 var badSize = 1500;
@@ -1061,13 +1061,15 @@ console.log("Running Bot Launcher!");
         debugStrings.push("T - Bot: " + (!toggle ? "On" : "Off"));
         debugStrings.push("R - Lines: " + (!toggleDraw ? "On" : "Off"));
 
+        debugStrings.push("Split: " + (playerInstance.isSplitting ? "True" : "False"));
+
         for (var i = 0; i < botString.length; i++) {
             debugStrings.push(botString[i]);
         }
 
         debugStrings.push("");
         debugStrings.push("Best Score: " + ~~(sessionScore / 100));
-        debugStrings.push("Best Time: " + bestTime + " seconds");
+//        debugStrings.push("Best Time: " + bestTime + " seconds");
         debugStrings.push("");
         debugStrings.push(serverIP);
 
