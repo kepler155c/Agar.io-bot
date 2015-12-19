@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.681
+// @version     3.682
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.681;
+var aposBotVersion = 3.682;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -314,6 +314,25 @@ function AposBot() {
     this.getTimeToRemerge = function(mass){
         return ((mass*0.02) + 30);
     };
+    
+    this.circlesIntersect = function(circle1, circle2) {
+        var distanceX = circle1.x - circle2.x;
+        var distanceY = circle1.y - circle2.y;
+        var radiusSum = circle.size + circle2.size;
+        return distanceX * distanceX + distanceY * distanceY <= radiusSum * radiusSum;
+    }
+    
+    this.foodInVirus = function(food, viruses) {
+        for (var i = 0; i < viruses.length; i++) {
+        	var virus = viruses[i];
+        	if (this.circlesIntersect(food, virus)) {
+        		
+                drawCircle(food.x, food.y, food.size + 10, 7);
+        		return true;
+        	}
+        }
+        return false;
+    }
 
     this.separateListBasedOnFunction = function(that, listToUse, blob) {
         var foodElementList = [];
@@ -370,7 +389,9 @@ function AposBot() {
 
         foodList = [];
         for (var i = 0; i < foodElementList.length; i++) {
-            foodList.push([foodElementList[i].x, foodElementList[i].y, foodElementList[i].size]);
+        	if (!this.foodInVirus(foodElementList[i], virusList)) {
+        		foodList.push([foodElementList[i].x, foodElementList[i].y, foodElementList[i].size]);
+        	}
         }
         
         //console.log("Merglist length: " +  mergeList.length)
