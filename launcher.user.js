@@ -19,11 +19,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.167
+// @version     4.168
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.167;
+var aposLauncherVersion = 4.168;
 
 var showAd = true;
 var badSize = 1500;
@@ -783,7 +783,8 @@ console.log("Running Bot Launcher!");
         dArc = [];
         dText = [];
         lines = [];
-
+    	var splitdown = $.Event("keydown", { keyCode: 32}); //space button
+        var splitup = $.Event("keyup", { keyCode: 32}); //space button
 
         var a, b = Date.now();
         ++zb;
@@ -836,7 +837,8 @@ console.log("Running Bot Launcher!");
             if (!toggle) {
                 setPoint(moveLoc[0], moveLoc[1]);
                 if (moveLoc[2]) {
-                	jQuery.event.trigger({ type : 'keypress', which : " " });
+                    $("body").trigger(splitdown);
+                    $("body").trigger(splitup);
                 	console.log('split attempt');
                 }
             }
