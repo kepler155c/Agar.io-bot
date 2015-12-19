@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.673
+// @version     3.674
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.673;
+var aposBotVersion = 3.674;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -330,7 +330,7 @@ function AposBot() {
             var isMe = that.isItMe(player, listToUse[element]);
             var isEnemy = true;
             var xxx = listToUse[element];
-console.log(xxx);
+
             if (!isMe) {
                 if (that.isFood(blob, listToUse[element]) && listToUse[element].isNotMoving()) {
                     //IT'S FOOD!
@@ -421,21 +421,39 @@ console.log(xxx);
         //3: size or value
         //4: Angle, not set here.
 
+        var maxSizedFood;
+
         for (var i = 0; i < foodList.length; i++) {
+        	
+        	var food = foodList[i];
+
+        	if (food[2].size > 13) {
+        		if (!maxSizedFood || food[2] > maxFoodSize[2]) {
+        			maxSizedFood = food;
+        		}
+        	}
+
             for (var j = 0; j < clusters.length; j++) {
-                if (this.computeInexpensiveDistance(foodList[i][0], foodList[i][1], clusters[j][0], clusters[j][1]) < blobSize * 2) {
-                    clusters[j][0] = (foodList[i][0] + clusters[j][0]) / 2;
-                    clusters[j][1] = (foodList[i][1] + clusters[j][1]) / 2;
-                    clusters[j][2] += foodList[i][2];
+                if (this.computeInexpensiveDistance(food[0], food[1], clusters[j][0], clusters[j][1]) < blobSize * 2) {
+                    clusters[j][0] = (food[0] + clusters[j][0]) / 2;
+                    clusters[j][1] = (food[1] + clusters[j][1]) / 2;
+                    clusters[j][2] += food[2];
                     addedCluster = true;
                     break;
                 }
             }
             if (!addedCluster) {
-                clusters.push([foodList[i][0], foodList[i][1], foodList[i][2], 0]);
+                clusters.push([food[0], food[1], food[2], 0]);
             }
             addedCluster = false;
         }
+        
+        if (maxSizedFood) {
+        	clusters = [];
+        	console.log('tracking: ' + maxSizedFood[2]);
+        	clusters.push([maxSizedFood[0], maxSizedFood[1], maxSizedFood[2], 0]);
+        }
+
         return clusters;
     };
 
