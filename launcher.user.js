@@ -19,11 +19,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.171
+// @version     4.172
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.171;
+var aposLauncherVersion = 4.172;
 
 var showAd = true;
 var badSize = 1500;
@@ -700,7 +700,7 @@ console.log("Running Bot Launcher!");
         if (!player.isAlive && !player.isReviving && ~~(getCurrentScore() / 100) > 0) {
             console.log("Dead: " + ~~(getCurrentScore() / 100));        }
 
-        if (!player.isAlive == 0 && !firstStart) {
+        if (!player.isAlive && !firstStart) {
             console.log("Revive");
             setNick(originalName);
             player.isReviving = true;
