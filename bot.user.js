@@ -978,7 +978,7 @@ function AposBot() {
 	
 	                            if (player.length == 1 && enemyDistance < this.splitDistance) {
 	                            	drawCircle(allPossibleTargets[i].x, allPossibleTargets[i].y, allPossibleTargets[i].size + 30, 5);
-	                            	return [ allPossibleTargets[i].x, allPossibleTargets[i].y ];
+	                            	return [ allPossibleTargets[i].x, allPossibleTargets[i].y, true ];
 	                            }
 	                        }
                         }
