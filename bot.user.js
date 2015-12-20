@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.722
+// @version     3.723
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.722;
+var aposBotVersion = 3.723;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -344,9 +344,7 @@ function AposBot() {
     	var oldx = b.getLastPos().x;
     	var oldy = b.getLastPos().y;
 
-    	console.log(a.x + ' ' + a.y + ' ' + b.x + ' ' + b.y + ' ' + oldx + ' ' + oldy);
-    	
-    	return b.x - a.x <= oldx - a.x && b.y - a.y <= oldy - a.y;
+    	return computeInexpensiveDistance(b.x, b.y, a.x, a.y) < computeInexpensiveDistance(oldx, oldy, a.x, a.y);
     }
 
     this.separateListBasedOnFunction = function(player, that, listToUse, blob) {
