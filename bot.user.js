@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.717
+// @version     3.718
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.717;
+var aposBotVersion = 3.718;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -1297,13 +1297,14 @@ function AposBot() {
                     //console.log("Looking for enemies!");
 
                     //Loop through all the cells that were identified as threats.
+                    /*
                     for (var i = 0; i < allPossibleThreats.length; i++) {
 
                         var enemyDistance = this.computeDistance(allPossibleThreats[i].x, allPossibleThreats[i].y, cell.x, cell.y, allPossibleThreats[i].size);
                         allPossibleThreats[i].enemyDist = enemyDistance;
                     	drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, allPossibleThreats[i].size + 30, 5);
 
-                    }
+                    }*/
 //console.log(player.length + ' ' + allPossibleThreats.length + ' ' + isSplitting);
                 	var allPossibleTargets = allIsAll[3];
                     if (allPossibleThreats.length === 0 && !player.isSplitting && player.cells.length == 1 && allPossibleTargets.length > 0) {
