@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.701
+// @version     3.702
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.701;
+var aposBotVersion = 3.702;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -430,8 +430,8 @@ function AposBot() {
         
         player.food = foodList;
         player.threats = threatList;
-        player.viruses = viruses;
-        player.splitTargets = splitTargets;
+        player.viruses = virusList;
+        player.splitTargets = splitTargetList;
         player.enemies = enemyList;
         
         return [foodList, threatList, virusList, splitTargetList, enemyList];
