@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.714
+// @version     3.715
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.714;
+var aposBotVersion = 3.715;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -337,6 +337,13 @@ function AposBot() {
         	}
         }
         return false;
+    }
+    
+    this.isMovingTowards = function(a, b) {
+    	var oldx = b.getLastPos().x;
+    	var oldy = b.getLastPos().y;
+    	
+    	return b.x - a.x < oldx - a.x && b.y - a.y < oldy - a.y;
     }
 
     this.separateListBasedOnFunction = function(player, that, listToUse, blob) {
@@ -1361,7 +1368,7 @@ console.log('splitting');
 
     	                //console.log("Removed some food.");
     	
-    	                if (enemyCanSplit) {
+    	                if (enemyCanSplit && this.isMovingTowards(player, allPossibleThreats[i])) {
     	                    drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, splitDangerDistance, 0);
     	                    drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, splitDangerDistance + shiftDistance, 6);
     	                } else {
