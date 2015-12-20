@@ -19,11 +19,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.182
+// @version     4.183
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.182;
+var aposLauncherVersion = 4.183;
 
 var showAd = true;
 var badSize = 1500;
@@ -49,6 +49,8 @@ var Player = function() {
     this.viruses = [];
     this.splitTargets = [];
     this.enemies = [];
+    
+    this.chasing = 0;
 }
 
 Player.prototype.setCells = function(cells) {
@@ -1081,16 +1083,21 @@ console.log("Running Bot Launcher!");
         var debugStrings = [];
         debugStrings.push("Bot:         " + window.botList[botIndex].name);
         debugStrings.push("Launcher: AposLauncher " + aposLauncherVersion);
-        debugStrings.push("T - Bot:     " + (!toggle ? "On" : "Off"));
-        debugStrings.push("R - Lines:   " + (!toggleDraw ? "On" : "Off"));
-        debugStrings.push("Player Mass: " + player.totalSize);
-        debugStrings.push("Player Min:  " + player.minSize);
-        debugStrings.push("Player Max:  " + player.maxSize);
+        debugStrings.push("");
+
+        debugStrings.push("Player Mass: " + parseInt(player.totalSize, 10));
+        if (player.cells.length > 1) {
+	        debugStrings.push("Player Min:  " + parseInt(player.minSize));
+	        debugStrings.push("Player Max:  " + parseInt(player.maxSize));
+        }
         debugStrings.push("Food:        " + player.food.length);
         debugStrings.push("Threats:     " + player.threats.length);
         debugStrings.push("Viruses:     " + player.viruses.length);
         debugStrings.push("Split Tgts:  " + player.splitTargets.length);
         debugStrings.push("Enemies:     " + player.enemies.length);
+        if (player.chasing > 0) {
+            debugStrings.push("Chasing:     " + player.chasing);
+        }
 
         for (var i = 0; i < player.cells.length; i++) {
 
@@ -1099,16 +1106,19 @@ console.log("Running Bot Launcher!");
         }
 
         debugStrings.push("Split: " + (playerInstance.isSplitting ? "True" : "False"));
+        debugStrings.push("");
 
         for (var i = 0; i < botString.length; i++) {
             debugStrings.push(botString[i]);
         }
 
-        debugStrings.push("");
-        debugStrings.push("Best Score: " + ~~(sessionScore / 100));
+        debugStrings.push("T - Bot:     " + (!toggle ? "On" : "Off"));
+        debugStrings.push("R - Lines:   " + (!toggleDraw ? "On" : "Off"));
+
+//        debugStrings.push("Best Score: " + ~~(sessionScore / 100));
 //        debugStrings.push("Best Time: " + bestTime + " seconds");
         debugStrings.push("");
-        debugStrings.push(serverIP);
+//        debugStrings.push(serverIP);
 
         if (getPlayer().isAlive) {
             var offsetX = -getMapStartX();
