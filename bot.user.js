@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.733
+// @version     3.734
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.733;
+var aposBotVersion = 3.734;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -1270,6 +1270,10 @@ function AposBot() {
                     		(30000 + (cell.birthMass * 57) - (getLastUpdate() - cell.birth)) + " / " + cell.birthMass);
                 }
                 */
+            	
+            	if (player.isSplitting) {
+            		return [ getPointX(), getPointY() ];
+            	}
 
                 //Loops only for one cell for now.
                 for (var k = 0; /*k < player.length*/ k < 1; k++) {
@@ -1322,13 +1326,12 @@ function AposBot() {
                         	}
                         }
 
-                        //if (safeToSplit) {
+                        if (safeToSplit) {
 	                        for (var i = 0; i < allPossibleTargets.length; i++) {
 	                        	
 	                        	var target = allPossibleTargets[i];
 	
-
-                            	var lastPos = target.getLastPos();
+]                            	var lastPos = target.getLastPos();
                             	var predictedX = target.x - (lastPos.x - target.x) * 10;
                             	var predictedY = target.y - (lastPos.y - target.y) * 10;
                             	
@@ -1336,16 +1339,17 @@ function AposBot() {
 //                            	console.log(predictedY + ' ' + target.y + ' ' + lastPos.y);
                             	
                             	drawLine(cell.x, cell.y, predictedX, predictedY, 6);
-if (safeToSplit) {
-    var enemyDistance = this.computeDistance(predictedX, predictedY, cell.x, cell.y, target.size);
-	                            if (enemyDistance < this.splitDistance * 0.9) {
+
+                            	var enemyDistance = this.computeDistance(predictedX, predictedY, cell.x, cell.y, target.size);
+	                            
+                            	if (enemyDistance < this.splitDistance * 0.8) {
 	                            	
 	                            	drawCircle(target.x, target.y, target.size + 30, 5);
 									player.isSplitting = true;
 				                    setTimeout(function() {
 				                    	player.isSplitting = false;
 				                    	console.log('resetting split timer');
-				                    }, 1000)
+				                    }, 400)
 
 	                            	return [ predictedX, predictedY, true ];
 	                            }
@@ -1387,8 +1391,8 @@ if (safeToSplit) {
 	                	}
 
     	                if (enemyCanSplit) {
-//    	                    drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, splitDangerDistance, 0);
-    	                    drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, splitDangerDistance + shiftDistance, 6);
+    	                    drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, splitDangerDistance, 0);
+//    	                    drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, splitDangerDistance + shiftDistance, 6);
     	                } else {
     	                    //drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, normalDangerDistance, 3);
     	                    //drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, normalDangerDistance + shiftDistance, 6);
