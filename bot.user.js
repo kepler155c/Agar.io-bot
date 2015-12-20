@@ -219,7 +219,7 @@ function AposBot() {
             return true;
         }
         return false;
-    },
+    };
 
     this.canSplit = function(player1, player2) {
         return this.compareSize(player1, player2, 2.8) && !this.compareSize(player1, player2, 20);
