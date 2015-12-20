@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.705
+// @version     3.706
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.705;
+var aposBotVersion = 3.706;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -443,7 +443,7 @@ function AposBot() {
         return this.separateListBasedOnFunction(player, this, interNodes, blob);
     };
 
-    this.clusterFood = function(foodList, blobSize) {
+    this.clusterFood = function(player, foodList, blobSize) {
         var clusters = [];
         var addedCluster = false;
 
@@ -1281,7 +1281,7 @@ function AposBot() {
                     //The viruses are stored in element 2 of allIsAll
                     var allPossibleViruses = allIsAll[2];
 
-                    var clusterAllFood = this.clusterFood(allPossibleFood, cell.size);
+                    var clusterAllFood = this.clusterFood(player, allPossibleFood, cell.size);
 
                     //console.log("Looking for enemies!");
 
