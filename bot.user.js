@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.700
+// @version     3.701
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.700;
+var aposBotVersion = 3.701;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -335,7 +335,7 @@ function AposBot() {
         return false;
     }
 
-    this.separateListBasedOnFunction = function(that, listToUse, blob) {
+    this.separateListBasedOnFunction = function(player, that, listToUse, blob) {
         var foodElementList = [];
         var threatList = [];
         var virusList = [];
@@ -428,13 +428,19 @@ function AposBot() {
             }
         }
         
+        player.food = foodList;
+        player.threats = threatList;
+        player.viruses = viruses;
+        player.splitTargets = splitTargets;
+        player.enemies = enemyList;
+        
         return [foodList, threatList, virusList, splitTargetList, enemyList];
     };
 
-    this.getAll = function(blob) {
+    this.getAll = function(player, blob) {
         var interNodes = getMemoryCells();
 
-        return this.separateListBasedOnFunction(this, interNodes, blob);
+        return this.separateListBasedOnFunction(player, this, interNodes, blob);
     };
 
     this.clusterFood = function(foodList, blobSize) {
@@ -1263,7 +1269,7 @@ function AposBot() {
 
                     //loop through everything that is on the screen and
                     //separate everything in it's own category.
-                    var allIsAll = this.getAll(cell);
+                    var allIsAll = this.getAll(player, cell);
 
                     //The food stored in element 0 of allIsAll
                     var allPossibleFood = allIsAll[0];
