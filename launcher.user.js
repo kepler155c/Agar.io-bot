@@ -19,11 +19,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.179
+// @version     4.180
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.179;
+var aposLauncherVersion = 4.180;
 
 var showAd = true;
 var badSize = 1500;
@@ -2635,9 +2635,11 @@ if (this.size > badSize) {
 
 console.log('version ' + aposLauncherVersion);
 
-setTimeout(function() {
-	while (true) {
-		sleep(1000);
+function updateStats() {
+	
+	setTimeout(function() {
 		drawStats(f);
-	}
-}, 1000)
+	}, 1000)
+}
+
+updateStats();
