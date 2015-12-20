@@ -451,8 +451,8 @@ function AposBot() {
         for (var i = 0; i < foodList.length; i++) {
         	
         	var food = foodList[i];
-console.log('food.size: ' + food.size);
-        	if (food[2].size > 13) {
+
+        	if (food[2] > 13) {
         		console.log('greater ' + food[2].size);
         		if (maxSizedFood === null || food[2] > maxFoodSize[2]) {
         			console.log('found');
