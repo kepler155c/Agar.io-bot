@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.725
+// @version     3.726
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.725;
+var aposBotVersion = 3.726;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -1329,14 +1329,15 @@ console.log('safe to split');
 	                        	var target = allPossibleTargets[i];
 	
 	                            var enemyDistance = this.computeDistance(target.x, target.y, cell.x, cell.y, target.size);
-	
+
+                            	var lastPos = target.getLastPos();
+                            	var predictedX = lastPos.x - target.x * 2;
+                            	var predictedY = lastPos.y - target.y * 2;
+                            	
+                            	drawLine(cell.x, cell.y, predictedX, predictedY, 6);
+
 	                            if (enemyDistance < this.splitDistance * 0.9) {
 	                            	
-	                            	var lastPos = target.getLastPos();
-	                            	var predictedX = lastPos.x - target.x * 2;
-	                            	var predictedY = lastPos.y - target.y * 2;
-	                            	
-	                            	drawLine(cell.x, cell.y, predictedX, predictedY, 6);
 	                            	drawCircle(target.x, target.y, target.size + 30, 5);
 console.log('splitting');
 									player.isSplitting = true;
