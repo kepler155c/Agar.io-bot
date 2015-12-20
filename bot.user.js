@@ -269,7 +269,11 @@ function AposBot() {
 
     this.isFood = function(blob, cell) {
     	
-        if (!cell.isVirus() && this.canEat(cell, blob) || (cell.size <= 13)) {
+    	if (cell.size <= 13) {
+    		return true;
+    	}
+
+    	if (!cell.isVirus() && this.canEat(cell, blob)) {
             return true;
         }
         return false;
@@ -284,7 +288,7 @@ function AposBot() {
     
     this.isThreat = function(blob, cell) {
     	
-        if (!cell.isVirus() && this.canEat(blob, cell, 1.30)) {
+        if (!cell.isVirus() && this.canEat(blob, cell)) {
             return true;
         }
         return false;
