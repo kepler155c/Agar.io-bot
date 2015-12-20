@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.727
+// @version     3.728
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.727;
+var aposBotVersion = 3.728;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -1333,6 +1333,8 @@ console.log('safe to split');
                             	var lastPos = target.getLastPos();
                             	var predictedX = target.x + (lastPos.x - target.x * 2);
                             	var predictedY = target.y + (lastPos.y - target.y * 2);
+                            	
+                            	console.log(predictedX + ' ' + target.x + ' ' + lastPos.x);
                             	
                             	drawLine(cell.x, cell.y, predictedX, predictedY, 6);
 if (safeToSplit) {
