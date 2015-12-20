@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.720
+// @version     3.721
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.720;
+var aposBotVersion = 3.721;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -1372,17 +1372,16 @@ console.log('splitting');
 
     	                //console.log("Removed some food.");
     	
+                    	drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, allPossibleThreats[i].size + 10, 0);
+                    	
+	                	if (this.isMovingTowards(cell, allPossibleThreats[i])) {
+	                    	drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, allPossibleThreats[i].size + 30, 3);
+	                	}
+
     	                if (enemyCanSplit) {
-    	                	if (this.isMovingTowards(cell, allPossibleThreats[i])) {
-//        	                    drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, splitDangerDistance, 0);
-        	                    drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, splitDangerDistance + shiftDistance, 3);
-    	                	} else {
-    	                		
 //    	                    drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, splitDangerDistance, 0);
     	                    drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, splitDangerDistance + shiftDistance, 6);
-    	                	}
     	                } else {
-                        	drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, allPossibleThreats[i].size + 30, 5);
     	                    //drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, normalDangerDistance, 3);
     	                    //drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, normalDangerDistance + shiftDistance, 6);
     	                }
