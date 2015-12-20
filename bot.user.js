@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.735
+// @version     3.736
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.735;
+var aposBotVersion = 3.736;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -1224,7 +1224,7 @@ function AposBot() {
         }
         
         return destinationChoices;
-    }
+    };
 
     /**
      * This is the main bot logic. This is called quite often.
@@ -1330,7 +1330,7 @@ function AposBot() {
 	                        	
 	                        	var target = allPossibleTargets[i];
 	
-]                            	var lastPos = target.getLastPos();
+                            	var lastPos = target.getLastPos();
                             	var predictedX = target.x - (lastPos.x - target.x) * 10;
                             	var predictedY = target.y - (lastPos.y - target.y) * 10;
                             	
