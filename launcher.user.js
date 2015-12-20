@@ -19,11 +19,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.178
+// @version     4.179
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.178;
+var aposLauncherVersion = 4.179;
 
 var showAd = true;
 var badSize = 1500;
@@ -43,6 +43,12 @@ var Player = function() {
 	this.isAlive = true;
 	this.isReviving = false;
 	this.isSplitting = false;
+
+    this.food = [];
+    this.threats = [];
+    this.viruses = [];
+    this.splitTargets = [];
+    this.enemies = [];
 }
 
 Player.prototype.setCells = function(cells) {
@@ -915,7 +921,7 @@ console.log("Running Bot Launcher!");
         0 < x && (f.fillStyle = "#000000", f.globalAlpha = .5 * x, f.fillRect(0, 0, m, r), f.globalAlpha = 1);
         ib = C
 
-        drawStats(f);
+        // drawStats(f);
     }
 
     //UPDATE
@@ -1063,17 +1069,34 @@ console.log("Running Bot Launcher!");
     }
 
     function drawStats(d) {
-        d.save()
+    	
+    	var player = getPlayer();
+    	
+        d.save();
 
         sessionScore = Math.max(getCurrentScore(), sessionScore);
 
         var botString = window.botList[botIndex].displayText();
 
         var debugStrings = [];
-        debugStrings.push("Bot: " + window.botList[botIndex].name);
+        debugStrings.push("Bot:         " + window.botList[botIndex].name);
         debugStrings.push("Launcher: AposLauncher " + aposLauncherVersion);
-        debugStrings.push("T - Bot: " + (!toggle ? "On" : "Off"));
-        debugStrings.push("R - Lines: " + (!toggleDraw ? "On" : "Off"));
+        debugStrings.push("T - Bot:     " + (!toggle ? "On" : "Off"));
+        debugStrings.push("R - Lines:   " + (!toggleDraw ? "On" : "Off"));
+        debugStrings.push("Player Mass: " + player.totalSize);
+        debugStrings.push("Player Min:  " + player.minSize);
+        debugStrings.push("Player Max:  " + player.maxSize);
+        debugStrings.push("Food:        " + player.food.length);
+        debugStrings.push("Threats:     " + player.threats.length);
+        debugStrings.push("Viruses:     " + player.viruses.length);
+        debugStrings.push("Split Tgts:  " + player.splitTargets.length);
+        debugStrings.push("Enemies:     " + player.enemies.length);
+
+        for (var i = 0; i < player.cells.length; i++) {
+
+        	var cell = player.cells[i];
+            debugStrings.push("Cell " + i + " Size: " + cell.size);
+        }
 
         debugStrings.push("Split: " + (playerInstance.isSplitting ? "True" : "False"));
 
@@ -2611,3 +2634,10 @@ if (this.size > badSize) {
 })(window, window.jQuery);
 
 console.log('version ' + aposLauncherVersion);
+
+setTimeout(function() {
+	while (true) {
+		sleep(1000);
+		drawStats(f);
+	}
+}, 1000)
