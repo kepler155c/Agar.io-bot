@@ -269,18 +269,18 @@ function AposBot() {
 
     this.isFood = function(blob, cell) {
     	
-        if (!cell.isVirus() && this.compareSize(cell, blob, 1.33) || (cell.size <= 13)) {
+        if (!cell.isVirus() && this.canEat(cell, blob) || (cell.size <= 13)) {
             return true;
         }
         return false;
     };
 
-    this.canEat(eater, eatee) {
+    this.canEat = function(eater, eatee) {
     	if (eater.size > eatee.size) {
         	return eater.size / 2 / eatee.size > 1.25;
     	}
     	return false;
-    }
+    };
     
     this.isThreat = function(blob, cell) {
     	
