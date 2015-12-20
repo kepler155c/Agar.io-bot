@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.721
+// @version     3.722
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.721;
+var aposBotVersion = 3.722;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -344,9 +344,9 @@ function AposBot() {
     	var oldx = b.getLastPos().x;
     	var oldy = b.getLastPos().y;
 
-    	// console.log(a.x + ' ' + a.y + ' ' + b.x + ' ' + b.y + ' ' + oldx + ' ' + oldy);
+    	console.log(a.x + ' ' + a.y + ' ' + b.x + ' ' + b.y + ' ' + oldx + ' ' + oldy);
     	
-    	return b.x - a.x < oldx - a.x && b.y - a.y < oldy - a.y;
+    	return b.x - a.x <= oldx - a.x && b.y - a.y <= oldy - a.y;
     }
 
     this.separateListBasedOnFunction = function(player, that, listToUse, blob) {
@@ -1372,10 +1372,10 @@ console.log('splitting');
 
     	                //console.log("Removed some food.");
     	
-                    	drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, allPossibleThreats[i].size + 10, 0);
+                    	drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, allPossibleThreats[i].size + 30, 0);
                     	
 	                	if (this.isMovingTowards(cell, allPossibleThreats[i])) {
-	                    	drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, allPossibleThreats[i].size + 30, 3);
+	                    	drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, allPossibleThreats[i].size + 10, 3);
 	                	}
 
     	                if (enemyCanSplit) {
