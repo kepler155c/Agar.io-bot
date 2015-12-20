@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.696
+// @version     3.697
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.696;
+var aposBotVersion = 3.697;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -277,7 +277,7 @@ function AposBot() {
 
     this.isThreat = function(blob, cell) {
         
-        if (!cell.isVirus() && this.compareSize(blob, cell, 1.40)) {
+        if (!cell.isVirus() && this.compareSize(blob, cell, 1.30)) {
             return true;
         }
         return false;
@@ -285,7 +285,7 @@ function AposBot() {
     
     this.isThreatIfSplit = function(blob, cell) {
 
-        if (!cell.isVirus() && this.compareSize(blob, cell, 1.40)) {
+        if (!cell.isVirus() && this.compareSize(blob, cell, 1.30)) {
             return true;
         }
         return false;
@@ -451,7 +451,7 @@ function AposBot() {
         for (var i = 0; i < foodList.length; i++) {
         	
         	var food = foodList[i];
-
+console.log('food.size: ' + food.size);
         	if (food[2].size > 13) {
         		console.log('greater ' + food[2].size);
         		if (maxSizedFood === null || food[2] > maxFoodSize[2]) {
