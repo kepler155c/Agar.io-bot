@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.715
+// @version     3.716
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.715;
+var aposBotVersion = 3.716;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -1368,9 +1368,15 @@ console.log('splitting');
 
     	                //console.log("Removed some food.");
     	
-    	                if (enemyCanSplit && this.isMovingTowards(player, allPossibleThreats[i])) {
-    	                    drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, splitDangerDistance, 0);
+    	                if (enemyCanSplit) {
+    	                	if (this.isMovingTowards(player, allPossibleThreats[i]) {
+//        	                    drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, splitDangerDistance, 0);
+        	                    drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, splitDangerDistance + shiftDistance, 3);
+    	                	} else {
+    	                		
+//    	                    drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, splitDangerDistance, 0);
     	                    drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, splitDangerDistance + shiftDistance, 6);
+    	                	}
     	                } else {
     	                    drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, normalDangerDistance, 3);
     	                    drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, normalDangerDistance + shiftDistance, 6);
