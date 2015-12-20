@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.734
+// @version     3.735
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.734;
+var aposBotVersion = 3.735;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -325,7 +325,7 @@ function AposBot() {
         var distanceY = circle1.y - circle2.y;
         var radiusSum = circle1.size + circle2.size;
         return distanceX * distanceX + distanceY * distanceY <= radiusSum * radiusSum;
-    }
+    };
     
     this.foodInVirus = function(food, viruses) {
         for (var i = 0; i < viruses.length; i++) {
@@ -337,7 +337,7 @@ function AposBot() {
         	}
         }
         return false;
-    }
+    };
     
     this.isMovingTowards = function(a, b) {
 
@@ -354,8 +354,7 @@ function AposBot() {
         var splitTargetList = [];
         var enemyList = [];
         var mergeList = [];
-
-        var player = getPlayer();
+        var i;
 
         Object.keys(listToUse).forEach(function(element, index) {
             var isMe = that.isItMe(player, listToUse[element]);
@@ -404,7 +403,7 @@ function AposBot() {
         });
 
         foodList = [];
-        for (var i = 0; i < foodElementList.length; i++) {
+        for (i = 0; i < foodElementList.length; i++) {
         	if (!this.foodInVirus(foodElementList[i], virusList)) {
         		foodList.push([foodElementList[i].x, foodElementList[i].y, foodElementList[i].size]);
         	}
@@ -412,7 +411,7 @@ function AposBot() {
         
         //console.log("Merglist length: " +  mergeList.length)
         //cell merging
-        for (var i = 0; i < mergeList.length; i++) {
+        for (i = 0; i < mergeList.length; i++) {
             for (var z = 0; z < mergeList.length; z++) {
                 if (z != i && that.isMerging(mergeList[i], mergeList[z])) { //z != i && 
                         //found cells that appear to be merging - if they constitute a threat add them to the theatlist
