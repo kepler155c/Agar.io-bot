@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.749
+// @version     3.750
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.749;
+var aposBotVersion = 3.750;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -939,7 +939,7 @@ function AposBot() {
             var secureDistance = (enemyCanSplit ? splitDangerDistance : normalDangerDistance);
 
             for (var j = clusterAllFood.length - 1; j >= 0 ; j--) {
-                if (this.computeDistance(allPossibleThreats[i].x, allPossibleThreats[i].y, clusterAllFood[j][0], clusterAllFood[j][1]) < secureDistance + shiftDistance)
+                if (this.computeDistance(allPossibleThreats[i].x, allPossibleThreats[i].y, clusterAllFood[j].x, clusterAllFood[j].y) < secureDistance + shiftDistance)
                     clusterAllFood.splice(j, 1);
             }
 
@@ -1189,7 +1189,7 @@ function AposBot() {
 
                 //var clusterAngle = this.getAngle(clusterAllFood[i].x, clusterAllFood[i].y, player.enclosingCell.x, player.enclosingCell.y);
 
-                clusterAllFood[i].xsize = clusterAllFood[i].size * 6 - this.computeDistance(clusterAllFood[i].x, clusterAllFood[i].y, player.enclosingCell.x, player.enclosingCell.y);
+                clusterAllFood[i].clusterSize = clusterAllFood[i].size * 6 - this.computeDistance(clusterAllFood[i].x, clusterAllFood[i].y, player.enclosingCell.x, player.enclosingCell.y);
                 //console.log("Current Value: " + clusterAllFood[i][2]);
 
                 //(goodAngles[bIndex][1] / 2 - (Math.abs(perfectAngle - clusterAngle)));
@@ -1201,10 +1201,10 @@ function AposBot() {
             }
             
             var bestFoodI = 0;
-            var bestFood = clusterAllFood[0].xsize;
+            var bestFood = clusterAllFood[0].clusterSize;
             for (var i = 1; i < clusterAllFood.length; i++) {
-                if (bestFood < clusterAllFood[i].xsize) {
-                    bestFood = clusterAllFood[i].xsize;
+                if (bestFood < clusterAllFood[i].clusterSize) {
+                    bestFood = clusterAllFood[i].clusterSize;
                     bestFoodI = i;
                 }
             }
