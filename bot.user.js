@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.745
+// @version     3.746
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.745;
+var aposBotVersion = 3.746;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -1221,8 +1221,8 @@ console.log('clustering from ' + foodList.length);
             if (clusterAllFood[bestFoodI].cell && !clusterAllFood[bestFoodI].cell.isNotMoving()) {
             	
 	        	var lastPos = clusterAllFood[bestFoodI].cell.getLastPos();
-	        	var predictedX = target.x - (lastPos.x - target.x) * 10;
-	        	var predictedY = target.y - (lastPos.y - target.y) * 10;
+	        	var predictedX = clusterAllFood[bestFoodI].cell.x - (lastPos.x - clusterAllFood[bestFoodI].cell.x) * 10;
+	        	var predictedY = clusterAllFood[bestFoodI].cell.y - (lastPos.y - clusterAllFood[bestFoodI].cell.y) * 10;
 	        	
 	        	drawLine(player.enclosingCell.x, player.enclosingCell.y, predictedX, predictedY, 6);
             }
