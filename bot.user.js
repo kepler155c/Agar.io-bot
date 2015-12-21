@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.773
+// @version     3.774
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.773;
+var aposBotVersion = 3.774;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -1253,8 +1253,8 @@ function AposBot() {
             if (bestFood.cell && !bestFood.cell.isNotMoving()) {
             	
 	        	var lastPos = bestFood.cell.getLastPos();
-	        	var predictedX = bestFood.cell.x - (lastPos.x - bestFood.cell.x) * 10;
-	        	var predictedY = bestFood.cell.y - (lastPos.y - bestFood.cell.y) * 10;
+	        	var predictedX = bestFood.cell.x - (lastPos.x - bestFood.cell.x) * 20;
+	        	var predictedY = bestFood.cell.y - (lastPos.y - bestFood.cell.y) * 20;
 	        	
 	        	drawLine(player.enclosingCell.x, player.enclosingCell.y, predictedX, predictedY, 6);
             }
@@ -1389,11 +1389,9 @@ function AposBot() {
 	                        	var target = allPossibleTargets[i];
 	
                             	var lastPos = target.getLastPos();
-                            	var predictedX = target.x - (lastPos.x - target.x) * 10;
-                            	var predictedY = target.y - (lastPos.y - target.y) * 10;
+                            	var predictedX = target.x - (lastPos.x - target.x) * 20;
+                            	var predictedY = target.y - (lastPos.y - target.y) * 20;
                             	
-                            	drawLine(cell.x, cell.y, predictedX, predictedY, 6);
-
                             	var enemyDistance = this.computeDistance(predictedX, predictedY, cell.x, cell.y, target.size);
 	                            
                             	if (enemyDistance < this.splitDistance * 0.8) {
