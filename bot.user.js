@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.759
+// @version     3.760
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.759;
+var aposBotVersion = 3.760;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -364,11 +364,7 @@ function AposBot() {
             if (!isMe) {
                 if (that.isFood(player.smallestCell, listToUse[element]) && listToUse[element].isNotMoving()) {
                     //IT'S FOOD!
-                	// avoid edges
-                	if (xxx.x > getMapStartX()+2000 && xxx.x < getMapEndX()-2000 && 
-                			xxx.y > getMapStartY()+2000 && xxx.y < getMapEndY()-2000) {
-                		foodElementList.push(listToUse[element]);
-                	}
+               		foodElementList.push(listToUse[element]);
                     isEnemy = false;
                 } else if (that.isThreat(player.smallestCell, listToUse[element])) {
                     //IT'S DANGER!
@@ -1206,26 +1202,25 @@ function AposBot() {
         } else if (clusterAllFood.length > 0) {
         	
             for (i = 0; i < clusterAllFood.length; i++) {
-                //console.log("mefore: " + clusterAllFood[i][2]);
+            	
                 //This is the cost function. Higher is better.
 
-                //var clusterAngle = this.getAngle(clusterAllFood[i].x, clusterAllFood[i].y, player.enclosingCell.x, player.enclosingCell.y);
+            	var cluster = clusterAllFood[i];
 
             	var multiplier = 6;
-            	if (clusterAllFood[i].size > 14) {
+            	if (cluster.size > 14) {
             		multiplier = 16;
             	}
-            	var closestInfo = this.closestCell(player, clusterAllFood[i].x, clusterAllFood[i].y);
-                clusterAllFood[i].clusterSize = clusterAllFood[i].size * multiplier - closestInfo.distance;
-                clusterAllFood[i].closestCell = closestInfo.cell;
-                //console.log("Current Value: " + clusterAllFood[i][2]);
-
-                //(goodAngles[bIndex][1] / 2 - (Math.abs(perfectAngle - clusterAngle)));
-
-                // clusterAllFood[i][3] = clusterAngle;
-
-                //console.log("After: " + clusterAllFood[i][2]);
- //               drawPoint(clusterAllFood[i].x, clusterAllFood[i].y, 1, "");
+            	if (cluster.x < getMapStartX()+2000 || 
+            			cluster.x > getMapEndX()-2000 || 
+            			cluster.y < getMapStartY()+2000 || 
+            			cluster.y > getMapEndY()-2000) {
+            		multiplier = 1;
+            	}
+            	
+            	var closestInfo = this.closestCell(player, cluster.x, cluster.y);
+                cluster.clusterSize = cluster.size * multiplier - closestInfo.distance;
+                cluster.closestCell = closestInfo.cell;
             }
             
             var bestFoodI = 0;
