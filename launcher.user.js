@@ -646,7 +646,7 @@ console.log("Running Bot Launcher!");
                 var n = a.getUint8(b++),
                 h = a.getUint8(b++),
                 w = a.getUint8(b++),
-                h = nccc(m << 16 | g << 8 | h),
+                h = nccc(n << 16 | h << 8 | w),
                 w = a.getUint8(b++),
                 m = !!(w & 1),
                 r = !!(w & 16),
