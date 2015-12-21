@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.736
+// @version     3.737
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.736;
+var aposBotVersion = 3.737;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -355,14 +355,14 @@ function AposBot() {
         var enemyList = [];
         var mergeList = [];
         var i;
-
+        
         Object.keys(listToUse).forEach(function(element, index) {
             var isMe = that.isItMe(player, listToUse[element]);
             var isEnemy = true;
             var xxx = listToUse[element];
 
             if (!isMe) {
-                if (that.isFood(blob, listToUse[element]) && listToUse[element].isNotMoving()) {
+                if (that.isFood(player.smallestCell, listToUse[element]) && listToUse[element].isNotMoving()) {
                     //IT'S FOOD!
                 	// avoid edges
                 	if (xxx.x > getMapStartX()+2000 && xxx.x < getMapEndX()-2000 && 
@@ -370,18 +370,18 @@ function AposBot() {
                 		foodElementList.push(listToUse[element]);
                 	}
                     isEnemy = false;
-                } else if (that.isThreat(blob, listToUse[element])) {
+                } else if (that.isThreat(player.smallestCell, listToUse[element])) {
                     //IT'S DANGER!
                     threatList.push(listToUse[element]);
                     mergeList.push(listToUse[element]);
                 //} else if (that.isThreatIfSplit(blob, listToUse[element])) {
                 //	threatIfSplitList.push()
-                } else if (that.isVirus(blob, listToUse[element])) {
+                } else if (that.isVirus(player.largestCell, listToUse[element])) {
                     //IT'S VIRUS!
                     virusList.push(listToUse[element]);
                     isEnemy = false;
                 }
-                else if (that.isSplitTarget(that, blob, listToUse[element])) {
+                else if (that.isSplitTarget(that, player.largestCell, listToUse[element])) {
                         drawCircle(listToUse[element].x, listToUse[element].y, listToUse[element].size + 50, 7);
                         splitTargetList.push(listToUse[element]);
                         foodElementList.push(listToUse[element]);

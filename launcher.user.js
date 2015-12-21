@@ -19,11 +19,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.196
+// @version     4.197
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.196;
+var aposLauncherVersion = 4.197;
 
 var showAd = true;
 var badSize = 1500;
@@ -56,21 +56,123 @@ var Player = function() {
 Player.prototype.setCells = function(cells) {
 	this.cells = cells;
 	this.isAlive = this.cells.length > 0;
-	this.minSize = 99999999;
-	this.maxSize = 0;
 	this.totalSize = 0;
+    this.smallestCell = cells[0];
+    this.largestCell = cells[0];
+
 	for (var i = 0; i < cells.length; i++) {
 		var cell = cells[i];
-		if (cell.size < this.minSize) {
-			this.minSize = cell.size;
-		}
-		if (cell.size > this.maxSize) {
-			this.maxSize = cell.size;
-		}
-		this.totalSize = this.totalSize + cell.size;
 		
+		this.totalSize = this.totalSize + cell.size;
+
+    	if (cell.size < this.smallestCell.size) {
+    		this.smallestCell = cell;
+    	}
+    	if (cell.size > this.largestCell.size) {
+    		this.largestCell = cell;
+    	}
 	}
+	var c = enclosingCircle(circles);
+	console.log(c);
 }
+
+	function randomizedList(array) {
+	  var i,
+	      n = (array = array.slice()).length,
+	      head = null,
+	      node = head;
+	  while (n) {
+	    var next = {id: array.length - n, value: array[n - 1], next: null};
+	    if (node) node = node.next = next;
+	    else node = head = next;
+	    array[i] = array[--n];
+	  }
+	  return {head: head, tail: node};
+	}
+	// Returns the smallest circle that contains the specified circles.
+	function enclosingCircle(circles) {
+	  return enclosingCircleIntersectingCircles(randomizedList(circles), []);
+	}
+	// Returns the smallest circle that contains the circles L
+	// and intersects the circles B.
+	function enclosingCircleIntersectingCircles(L, B) {
+	  var circle,
+	      l0 = null,
+	      l1 = L.head,
+	      l2,
+	      p1;
+	  switch (B.length) {
+	    case 1: circle = B[0]; break;
+	    case 2: circle = circleIntersectingTwoCircles(B[0], B[1]); break;
+	    case 3: circle = circleIntersectingThreeCircles(B[0], B[1], B[2]); break;
+	  }
+	  while (l1) {
+	    p1 = l1.value, l2 = l1.next;
+	    if (!circle || !circleContainsCircle(circle, p1)) {
+	      // Temporarily truncate L before l1.
+	      if (l0) L.tail = l0, l0.next = null;
+	      else L.head = L.tail = null;
+	      B.push(p1);
+	      circle = enclosingCircleIntersectingCircles(L, B); // Note: reorders L!
+	      B.pop();
+	      // Move l1 to the front of L and reconnect the truncated list L.
+	      if (L.head) l1.next = L.head, L.head = l1;
+	      else l1.next = null, L.head = L.tail = l1;
+	      l0 = L.tail, l0.next = l2;
+	    } else {
+	      l0 = l1;
+	    }
+	    l1 = l2;
+	  }
+	  L.tail = l0;
+	  return circle;
+	}
+	// Returns true if the specified circle1 contains the specified circle2.
+	function circleContainsCircle(circle1, circle2) {
+	  var xc0 = circle1.x - circle2.x,
+	      yc0 = circle1.y - circle2.y;
+	  return Math.sqrt(xc0 * xc0 + yc0 * yc0) < circle1.size - circle2.size + 1e-6;
+	}
+	// Returns the smallest circle that intersects the two specified circles.
+	function circleIntersectingTwoCircles(circle1, circle2) {
+	  var x1 = circle1.x, y1 = circle1.y, r1 = circle1.size,
+	      x2 = circle2.x, y2 = circle2.y, r2 = circle2.size,
+	      x12 = x2 - x1, y12 = y2 - y1, r12 = r2 - r1,
+	      l = Math.sqrt(x12 * x12 + y12 * y12);
+	  return {
+	    x: (x1 + x2 + x12 / l * r12) / 2,
+	    y: (y1 + y2 + y12 / l * r12) / 2,
+	    size: (l + r1 + r2) / 2
+	  };
+	}
+	// Returns the smallest circle that intersects the three specified circles.
+	function circleIntersectingThreeCircles(circle1, circle2, circle3) {
+	  var x1 = circle1.x, y1 = circle1.y, r1 = circle1.size,
+	      x2 = circle2.x, y2 = circle2.y, r2 = circle2.size,
+	      x3 = circle3.x, y3 = circle3.y, r3 = circle3.size,
+	      a2 = 2 * (x1 - x2),
+	      b2 = 2 * (y1 - y2),
+	      c2 = 2 * (r2 - r1),
+	      d2 = x1 * x1 + y1 * y1 - r1 * r1 - x2 * x2 - y2 * y2 + r2 * r2,
+	      a3 = 2 * (x1 - x3),
+	      b3 = 2 * (y1 - y3),
+	      c3 = 2 * (r3 - r1),
+	      d3 = x1 * x1 + y1 * y1 - r1 * r1 - x3 * x3 - y3 * y3 + r3 * r3,
+	      ab = a3 * b2 - a2 * b3,
+	      xa = (b2 * d3 - b3 * d2) / ab - x1,
+	      xb = (b3 * c2 - b2 * c3) / ab,
+	      ya = (a3 * d2 - a2 * d3) / ab - y1,
+	      yb = (a2 * c3 - a3 * c2) / ab,
+	      A = xb * xb + yb * yb - 1,
+	      B = 2 * (xa * xb + ya * yb + r1),
+	      C = xa * xa + ya * ya - r1 * r1,
+	      r = (-B - Math.sqrt(B * B - 4 * A * C)) / (2 * A);
+	  return {
+	    x: xa + xb * r + x1,
+	    y: ya + yb * r + y1,
+	    size: r
+	  };
+	}
 
 var playerInstance = new Player();
 
@@ -1155,8 +1257,8 @@ console.log("Running Bot Launcher!");
 
         debugStrings.push("Player Mass: " + parseInt(player.totalSize, 10));
         if (player.cells.length > 1) {
-	        debugStrings.push("Player Min:  " + parseInt(player.minSize));
-	        debugStrings.push("Player Max:  " + parseInt(player.maxSize));
+	        debugStrings.push("Player Min:  " + parseInt(player.smallestCell.size));
+	        debugStrings.push("Player Max:  " + parseInt(player.largestCell.size));
         }
         debugStrings.push("Food:        " + player.food.length);
         debugStrings.push("Threats:     " + player.threats.length);
@@ -2404,7 +2506,7 @@ if (this.size > badSize) {
                             b || a.stroke();
                             a.fill();
                             null == e || c || (a.save(), a.clip(), a.drawImage(e, this.x - this.size, this.y - this.size, 2 * this.size, 2 * this.size), a.restore());
-                            (Oa || 15 < this.size) && !b && (a.strokeStyle = "#000000", 1, a.stroke());
+                            (Oa || 15 < this.size) && !b && (a.strokeStyle = "#000000", a.globalAlpha *= .1, a.stroke());
                             a.globalAlpha = 1;
                             null != e && c && a.drawImage(e, this.x - 2 * this.size, this.y - 2 * this.size, 4 * this.size, 4 * this.size);
                             c = -1 != k.indexOf(this);
