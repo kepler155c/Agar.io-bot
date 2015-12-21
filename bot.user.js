@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.744
+// @version     3.745
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.744;
+var aposBotVersion = 3.745;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -462,7 +462,7 @@ function AposBot() {
         //2: y
         //3: size or value
         //4: Angle, not set here.
-
+console.log('clustering from ' + foodList.length);
         var maxSizedFood = null;
 
         for (var i = 0; i < foodList.length; i++) {
@@ -1189,6 +1189,9 @@ function AposBot() {
             drawLine(player.enclosingCell.x, player.enclosingCell.y, line1[0], line1[1], 2);
             destinationChoices.push(line1);*/
         } else if (clusterAllFood.length > 0) {
+        	
+        	console.log("cluster size " + clusterAllFood.length);
+        	
             for (var i = 0; i < clusterAllFood.length; i++) {
                 //console.log("mefore: " + clusterAllFood[i][2]);
                 //This is the cost function. Higher is better.
@@ -1204,7 +1207,6 @@ function AposBot() {
 
                     //console.log("After: " + clusterAllFood[i][2]);
             }
-
             
             var bestFoodI = 0;
             var bestFood = clusterAllFood[0].size;
@@ -1320,7 +1322,7 @@ function AposBot() {
                     //The viruses are stored in element 2 of allIsAll
                     var allPossibleViruses = allIsAll[2];
 
-                    var clusterAllFood = this.clusterFood(player, allPossibleFood, cell.size);
+                    var clusterAllFood = this.clusterFood(player, allPossibleFood, player.enclosingCell.size);
 
                     //console.log("Looking for enemies!");
 
