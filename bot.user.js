@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.798
+// @version     3.799
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.798;
+var aposBotVersion = 3.799;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -387,8 +387,6 @@ function AposBot() {
                     threatList.push(listToUse[element]);
                     mergeList.push(listToUse[element]);
                     
-                    drawPoint(xxx.x, xxx.y+20, 1, that.getRatio(listToUse[element], player.smallestCell));
-
                 //} else if (that.isThreatIfSplit(blob, listToUse[element])) {
                 //	threatIfSplitList.push()
                 } else if (that.isVirus(player.largestCell, listToUse[element])) {
@@ -991,9 +989,8 @@ function AposBot() {
 
             var closestCell = closestInfo.cell;
             var enemyDistance = closestInfo.distance;
-            var isMovingTowards = this.isMovingTowards(closestCell, threat);
 
-            var enemyCanSplit = isMovingTowards && this.canSplit(threat, player.smallestCell);
+            var enemyCanSplit = this.canSplit(threat, player.smallestCell);
             
             if (panicMode) {
             	console.log('panic mode');
@@ -1006,6 +1003,8 @@ function AposBot() {
             var secureDistance = (enemyCanSplit ? splitDangerDistance : normalDangerDistance);
             
             threat.dangerZone = secureDistance;
+            
+            drawPoint(threat.x, threat.y+20, 1, that.getRatio(threat, player.smallestCell) + " " + enemyCanSplit ? "true" : "false");
 
             for (j = clusterAllFood.length - 1; j >= 0 ; j--) {
                 if (this.computeDistance(allPossibleThreats[i].x, allPossibleThreats[i].y, clusterAllFood[j].x, clusterAllFood[j].y) < secureDistance + shiftDistance)
