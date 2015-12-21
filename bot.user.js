@@ -1247,12 +1247,12 @@ function AposBot() {
             			cluster.x > getMapEndX()-1000 || 
             			cluster.y < getMapStartY()+1000 || 
             			cluster.y > getMapEndY()-1000) {
-            		multiplier = 2;
+            		multiplier = 6;
             	} else if (cluster.x < getMapStartX()+2000 || 
             			cluster.x > getMapEndX()-2000 || 
             			cluster.y < getMapStartY()+2000 ||
             			cluster.y > getMapEndY()-2000) {
-            		multiplier = 1;
+            		multiplier = 9;
             	}
             	
                 var size = cluster.clusterSize;
@@ -1268,7 +1268,7 @@ function AposBot() {
                 }
                 
             	var closestInfo = this.closestCell(player, cluster.x, cluster.y);
-                cluster.clusterSize = closestInfo.distance / size * 3 * multiplier ;
+                cluster.clusterSize = closestInfo.distance / size * multiplier ;
                 cluster.closestCell = closestInfo.cell;
                 
                 drawPoint(cluster.x, cluster.y+20, 1, "" + parseInt(cluster.clusterSize, 10) + " " + cluster.size);
