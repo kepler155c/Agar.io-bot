@@ -1230,7 +1230,7 @@ function AposBot() {
                 cluster.clusterSize = closestInfo.distance / cluster.size * 16 * multiplier ;
                 cluster.closestCell = closestInfo.cell;
 
-                drawPoint(cluster.x, cluster.y+20, 1, "" + parseInt(cluster.clusterSize, 10));
+                drawPoint(cluster.x, cluster.y+20, 1, "" + parseInt(cluster.clusterSize, 10) + " " + cluster.size);
             }
             
             var bestFoodI = 0;
