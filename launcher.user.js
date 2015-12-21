@@ -19,11 +19,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.201
+// @version     4.202
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.201;
+var aposLauncherVersion = 4.202;
 
 var showAd = true;
 var badSize = 1500;
@@ -1259,7 +1259,7 @@ console.log("Running Bot Launcher!");
         debugStrings.push("Launcher: AposLauncher " + aposLauncherVersion);
         debugStrings.push("");
 
-        debugStrings.push("Player Mass: " + parseInt(player.totalSize, 10));
+        debugStrings.push("Player Mass: " + parseInt(player.totalSize * player.totalSize / 100, 10));
         if (player.cells.length > 1) {
 	        debugStrings.push("Player Min:  " + parseInt(player.smallestCell.size, 10));
 	        debugStrings.push("Player Max:  " + parseInt(player.largestCell.size, 10));
@@ -1660,7 +1660,7 @@ console.log("Running Bot Launcher!");
                 Ha = !1,
                 R = 0,
                 ta = !0,
-                lb = !1,
+                lb = true,
                 aa = s = ~~((pa + ra) / 2),
                 ba = t = ~~((qa + sa) / 2),
                 ca = 1,
