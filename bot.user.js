@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.780
+// @version     3.781
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.780;
+var aposBotVersion = 3.781;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -955,16 +955,20 @@ function AposBot() {
         var i, j, angle1, angle2, tempOb, line1, line2, diff;
         
         for (i = 0; i < allPossibleThreats.length; i++) {
+        	
+        	var threat = allPossibleThreats[i];
 
-            var splitDangerDistance = allPossibleThreats[i].size + this.splitDistance + 150;
+        	var closestInfo = this.closestCell(player, threat.x, threat.y);
 
-            var normalDangerDistance = allPossibleThreats[i].size + 150;
+            var closestCell = closestInfo.cell;
+            var enemyDistance = closestInfo.distance;
+            var isMovingTowards = this.isMovingTowards(closestCell, threat);
 
+            var splitDangerDistance = threat.size + this.splitDistance + 150;
+            var normalDangerDistance = threat.size + 150;
             var shiftDistance = player.enclosingCell.size;
 
-            //console.log("Found distance.");
-
-            var enemyCanSplit = this.canSplit(player.smallestCell, allPossibleThreats[i]);
+            var enemyCanSplit = isMovingTowards && this.canSplit(player.smallestCell, threat);
             var secureDistance = (enemyCanSplit ? splitDangerDistance : normalDangerDistance);
 
             for (j = clusterAllFood.length - 1; j >= 0 ; j--) {
@@ -985,20 +989,7 @@ function AposBot() {
             }*/
 
             //console.log("Figured out who was important.");
-
-            var closestCell = player.cells[0];
-            var enemyDistance = null;
-            for (j = 0; j < player.cells.length; j++) {
-
-            	var cell = player.cells[j];
-            	var distance = this.computeDistance(allPossibleThreats[i].x, allPossibleThreats[i].y, cell.x, cell.y);
-
-            	if (enemyDistance === null || distance < enemyDistance) {
-            		enemyDistance = distance;
-            		closestCell = cell;
-            	}
-            }
-
+            
             if ((enemyCanSplit && enemyDistance < splitDangerDistance) || (enemyCanSplit && allPossibleThreats[i].danger)) {
 
                 badAngles.push(this.getAngleRange(closestCell, allPossibleThreats[i], i, splitDangerDistance).concat(allPossibleThreats[i].enemyDist));
