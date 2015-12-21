@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.754
+// @version     3.756
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.754;
+var aposBotVersion = 3.756;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -916,6 +916,25 @@ function AposBot() {
         return angle;
     };
     
+    this.closestCell = function (player, x, y) {
+
+    	var i;
+    	var info = { cell: null, distance: null };
+    	
+    	for (i = 0; i < player.cells.length; i++) {
+
+    		var cell = player.cells[i];
+    		var distance = this.computeDistance(cell.x, cell.y, x, y);
+    		
+    		if (!info.distance || distance < info.istance) {
+    			info.distance = distance;
+    			info.cell = cell;
+    		}
+    	}
+
+        return info;
+    };
+    
     this.determineDestination = function(player, allPossibleThreats, allPossibleViruses, clusterAllFood) {
     	
         //The bot works by removing angles in which it is too
@@ -1189,11 +1208,13 @@ function AposBot() {
 
                 //var clusterAngle = this.getAngle(clusterAllFood[i].x, clusterAllFood[i].y, player.enclosingCell.x, player.enclosingCell.y);
 
-            	var multiplier = 6;
+            	var multiplier = 25;
             	if (clusterAllFood[i].size > 14) {
-            		multiplier = 16;
+            		multiplier = 250;
             	}
-                clusterAllFood[i].clusterSize = clusterAllFood[i].size * 6 - this.computeDistance(clusterAllFood[i].x, clusterAllFood[i].y, player.largestCell.x, player.largestCell.y);
+            	var closestInfo = this.closestCell(player, clusterAllFood[i].x, clusterAllFood[i].y);
+                clusterAllFood[i].clusterSize = clusterAllFood[i].size * 6 - closestInfo.distance);
+                clusterAllFood[i].closestCell = closestInfo.cell;
                 //console.log("Current Value: " + clusterAllFood[i][2]);
 
                 //(goodAngles[bIndex][1] / 2 - (Math.abs(perfectAngle - clusterAngle)));
@@ -1201,39 +1222,41 @@ function AposBot() {
                 // clusterAllFood[i][3] = clusterAngle;
 
                 //console.log("After: " + clusterAllFood[i][2]);
-                drawPoint(clusterAllFood[i].x, clusterAllFood[i],y, 1, "");
+ //               drawPoint(clusterAllFood[i].x, clusterAllFood[i].y, 1, "");
             }
             
             var bestFoodI = 0;
-            var bestFood = clusterAllFood[0].clusterSize;
+            var bestFoodSize = clusterAllFood[0].clusterSize;
             for (var i = 1; i < clusterAllFood.length; i++) {
-                if (bestFood < clusterAllFood[i].clusterSize) {
-                    bestFood = clusterAllFood[i].clusterSize;
+                if (bestFoodSize < clusterAllFood[i].clusterSize) {
+                    bestFoodSize = clusterAllFood[i].clusterSize;
                     bestFoodI = i;
                 }
             }
-//            drawPoint(clusterAllFood[bestFoodI].x, clusterAllFood[bestFoodI],y, 1, "");
+            var bestFood = clusterAllFood[bestFoodI];
+            
+            drawPoint(bestFood.x, bestFood.y, 1, "");
 
-            if (clusterAllFood[bestFoodI].cell && !clusterAllFood[bestFoodI].cell.isNotMoving()) {
+            if (bestFood.cell && !bestFood.cell.isNotMoving()) {
             	
-	        	var lastPos = clusterAllFood[bestFoodI].cell.getLastPos();
-	        	var predictedX = clusterAllFood[bestFoodI].cell.x - (lastPos.x - clusterAllFood[bestFoodI].cell.x) * 10;
-	        	var predictedY = clusterAllFood[bestFoodI].cell.y - (lastPos.y - clusterAllFood[bestFoodI].cell.y) * 10;
+	        	var lastPos = bestFood.cell.getLastPos();
+	        	var predictedX = bestFood.cell.x - (lastPos.x - bestFood.cell.x) * 10;
+	        	var predictedY = bestFood.cell.y - (lastPos.y - bestFood.cell.y) * 10;
 	        	
 	        	drawLine(player.enclosingCell.x, player.enclosingCell.y, predictedX, predictedY, 6);
             }
 
-            var distance = this.computeDistance(player.largestCell.x, player.largestCell.y, clusterAllFood[bestFoodI].x, clusterAllFood[bestFoodI].y);
+            var distance = this.computeDistance(bestFood.cell.x, bestFood.cell.y, bestFood.x, bestFood.y);
 
-            var angle = this.getAngle(clusterAllFood[bestFoodI].x, clusterAllFood[bestFoodI].y, player.largestCell.x, player.largestCell.y);
+            var angle = this.getAngle(bestFood.x, bestFood.y, bestFood.cell.x, bestFood.cell.y);
             var shiftedAngle = this.shiftAngle(obstacleAngles, angle, [0, 360]);
 
-            var destination = this.followAngle(shiftedAngle, player.largestCell.x, player.largestCell.y, distance);
+            var destination = this.followAngle(shiftedAngle, bestFood.cell.x, bestFood.cell.y, distance);
 
             destinationChoices = destination;
             //tempMoveX = destination[0];
             //tempMoveY = destination[1];
-            drawLine(player.largestCell.x, player.largestCell.y, destination[0], destination[1], 1);
+            drawLine(bestFood.cell.x, bestFood.cell.y, destination[0], destination[1], 1);
                         
         } else {
             //If there are no enemies around and no food to eat.
