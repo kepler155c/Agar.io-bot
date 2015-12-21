@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.810
+// @version     3.811
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.810;
+var aposBotVersion = 3.811;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -271,9 +271,13 @@ function AposBot() {
         return false;
     };
 
-    this.getMass = function(cell) {
+    this.calculateMass = function(cell) {
     	return cell.size * cell.size / 100;
-    }
+    };
+
+    this.getMass = function(cell) {
+    	return cell.mass;
+    };
 
     this.getSplitMass = function(cell) {
     	var halfSize = cell.size / 2;
@@ -374,6 +378,7 @@ function AposBot() {
             if (!isMe) {
             	
             	xxx.isMovingTowards = that.isMovingTowards(player.enclosingCell, xxx);
+            	xxx.mass = that.calculateMass(xxx);
             	
                 if (that.isFood(player.smallestCell, listToUse[element]) && listToUse[element].isNotMoving()) {
                     //IT'S FOOD!
@@ -988,6 +993,10 @@ function AposBot() {
             var enemyDistance = closestInfo.distance;
 
             var enemyCanSplit = this.isSplitTarget(threat, player.smallestCell);
+
+            if (enemyCanSplit) {	
+                drawPoint(threat.x, threat.y+40, 1, "c:" + (this.getSplitMass(threat) / this.getMass(threat)).toFixed(2));
+            }
             
             if (panicMode) {
             	console.log('panic mode');
