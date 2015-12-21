@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.775
+// @version     3.776
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.775;
+var aposBotVersion = 3.776;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -1250,18 +1250,21 @@ function AposBot() {
 
             // drawPoint(bestFood.x, bestFood.y, 1, "");
 
+        	predictedX = bestFood.closestCell.x;
+        	predictedY = bestFood.closestCell.y;
+
             if (bestFood.cell && !bestFood.cell.isNotMoving()) {
             	
 	        	var lastPos = bestFood.cell.getLastPos();
-	        	var predictedX = bestFood.cell.x - (lastPos.x - bestFood.cell.x) * 20;
-	        	var predictedY = bestFood.cell.y - (lastPos.y - bestFood.cell.y) * 20;
+	        	predictedX = bestFood.cell.x - (lastPos.x - bestFood.cell.x) * 20;
+	        	predictedY = bestFood.cell.y - (lastPos.y - bestFood.cell.y) * 20;
 	        	
-	        	drawLine(player.enclosingCell.x, player.enclosingCell.y, predictedX, predictedY, 6);
+//	        	drawLine(player.enclosingCell.x, player.enclosingCell.y, predictedX, predictedY, 6);
             }
 
-            var distance = this.computeDistance(bestFood.closestCell.x, bestFood.closestCell.y, bestFood.x, bestFood.y);
+            var distance = this.computeDistance(predictedX, predictedY, bestFood.x, bestFood.y);
 
-            angle = this.getAngle(bestFood.x, bestFood.y, bestFood.closestCell.x, bestFood.closestCell.y);
+            angle = this.getAngle(bestFood.x, bestFood.y, predictedX, predictedY);
             var shiftedAngle = this.shiftAngle(obstacleAngles, angle, [0, 360]);
 
             var destination = this.followAngle(shiftedAngle, bestFood.closestCell.x, bestFood.closestCell.y, distance);
