@@ -279,6 +279,10 @@ function AposBot() {
         return false;
     };
 
+    this.getRatio = function(eater, eatee) {
+    	return eater.size / eatee.size;
+    }
+    
     this.canEat = function(eater, eatee) {
     	if (eater.size > eatee.size) {
         	return eater.size / eatee.size > 1.12;
@@ -383,7 +387,7 @@ function AposBot() {
                     foodElementList.push(listToUse[element]);
                     mergeList.push(listToUse[element]);
                 }
-                else if (player.cells.length == 1 && that.canEat(player.largestCell, listToUse[element])) {
+                else if (player.cells.length == 1 && that.getRatio(player.largestCell, listToUse[element]) > 1.13) {
 
                 	foodElementList.push(listToUse[element]);
                     mergeList.push(listToUse[element]);
