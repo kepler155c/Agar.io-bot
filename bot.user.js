@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.812
+// @version     3.813
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.812;
+var aposBotVersion = 3.813;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -396,7 +396,7 @@ function AposBot() {
                     virusList.push(listToUse[element]);
                     isEnemy = false;
                 }
-                else if (that.isSplitTarget(player.largestCell, listToUse[element])) {
+                else if (that.isSplitTarget(player.smallestCell, listToUse[element])) {
                     drawCircle(listToUse[element].x, listToUse[element].y, listToUse[element].size + 50, 7);
                     splitTargetList.push(listToUse[element]);
                     foodElementList.push(listToUse[element]);
