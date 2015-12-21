@@ -154,15 +154,6 @@ function AposBot() {
         return (15 / (range[1])) * (angleValue * angleValue) - (range[1] / 6);
     };
 
-    this.getMass = function(size) {
-        return Math.pow(size * size / 100, 2);
-    };
-
-    this.getSplitMass = function(size) {
-    	var halfSize = size / 2;
-        return Math.pow(halfSize * halfSize / 100, 2);
-    };
-
     this.valueAngleBased = function(angle, range) {
         var leftValue = this.mod(angle - range[0], 360);
         var rightValue = this.mod(this.rangeToAngle(range) - angle, 360);
@@ -281,9 +272,14 @@ function AposBot() {
     };
 
     this.getMass = function(cell) {
-    	return (cell.size * cell.size / 100).toFixed(2);;
+    	return (cell.size * cell.size / 100).toFixed(2);
     }
-    
+
+    this.getSplitMass = function(cell) {
+    	var halfSize = cell.size / 2;
+        return (halfSize * halfSize / 100).toFixed(2);
+    };
+
     this.getRatio = function(eater, eatee) {
     	return (eater.size * 2) / (eatee.size * 2);
     }
