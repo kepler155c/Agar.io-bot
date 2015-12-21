@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.737
+// @version     3.738
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.737;
+var aposBotVersion = 3.738;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -1272,6 +1272,10 @@ function AposBot() {
             	
             	if (player.isSplitting) {
             		return [ getPointX(), getPointY() ];
+            	}
+
+            	if (player.cells.length > 1) {
+                    drawCircle(player.enclosingCell.x, player.enclosingCell.y, player.enclosingCell.size, 6);
             	}
 
                 //Loops only for one cell for now.
