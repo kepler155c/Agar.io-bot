@@ -19,11 +19,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.194
+// @version     4.195
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.194;
+var aposLauncherVersion = 4.195;
 
 var showAd = true;
 var badSize = 1500;
@@ -2379,10 +2379,6 @@ if (this.size > badSize) {
                             this.ia = C;
                             c = this.P();
                             this.G && (a.globalAlpha *= 1 - c);
-                            
-                            a.globalAlpha = 1;
-                            
-                            
                             a.lineWidth =
                                 10;
                             a.lineCap = "round";
@@ -2408,7 +2404,7 @@ if (this.size > badSize) {
                             b || a.stroke();
                             a.fill();
                             null == e || c || (a.save(), a.clip(), a.drawImage(e, this.x - this.size, this.y - this.size, 2 * this.size, 2 * this.size), a.restore());
-                            (Oa || 15 < this.size) && !b && (a.strokeStyle = "#000000", a.globalAlpha *= .1, a.stroke());
+                            (Oa || 15 < this.size) && !b && (a.strokeStyle = "#000000", 1, a.stroke());
                             a.globalAlpha = 1;
                             null != e && c && a.drawImage(e, this.x - 2 * this.size, this.y - 2 * this.size, 4 * this.size, 4 * this.size);
                             c = -1 != k.indexOf(this);
