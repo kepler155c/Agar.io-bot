@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.739
+// @version     3.740
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.739;
+var aposBotVersion = 3.740;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -1017,7 +1017,7 @@ function AposBot() {
                 }
             } else {
                 if (virusDistance < (player.enclosingCell.size * 2)) {
-                    var tempOb = this.getAngleRange(player.enclosingCell, allPossibleViruses[i], i, player.enlosingCell.size + 50);
+                    var tempOb = this.getAngleRange(player.enclosingCell, allPossibleViruses[i], i, player.enclosingCell.size + 50);
                     var angle1 = tempOb[0];
                     var angle2 = this.rangeToAngle(tempOb);
                     obstacleList.push([[angle1, true], [angle2, false]]);
