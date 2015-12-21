@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.794
+// @version     3.795
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.794;
+var aposBotVersion = 3.795;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -1255,7 +1255,7 @@ function AposBot() {
             		multiplier = 9;
             	}
             	
-                var size = cluster.clusterSize;
+                var size = cluster.size;
                 if (cluster.cell) {
                 	// prioritize enemies moving towards us
                 	if (cluster.cell.isMovingTowards) {
