@@ -19,11 +19,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.193
+// @version     4.194
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.193;
+var aposLauncherVersion = 4.194;
 
 var showAd = true;
 var badSize = 1500;
@@ -988,7 +988,7 @@ console.log("Running Bot Launcher!");
         1 < D && (D = 1);
         b = C - ib;
         !T() || W ? (x += b / 2E3, 1 < x && (x = 1)) : (x -= b / 300, 0 > x && (x = 0));
-        // 0 < x && (f.fillStyle = "#000000", f.globalAlpha = .5 * x, f.fillRect(0, 0, m, r), f.globalAlpha = 1);
+        0 < x && (f.fillStyle = "#000000", f.globalAlpha = .5 * x, f.fillRect(0, 0, m, r), f.globalAlpha = 1);
         ib = C
 
         drawStats(f);
@@ -2379,6 +2379,10 @@ if (this.size > badSize) {
                             this.ia = C;
                             c = this.P();
                             this.G && (a.globalAlpha *= 1 - c);
+                            
+                            a.globalAlpha = 1;
+                            
+                            
                             a.lineWidth =
                                 10;
                             a.lineCap = "round";
