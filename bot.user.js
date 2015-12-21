@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.747
+// @version     3.748
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.747;
+var aposBotVersion = 3.748;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -1187,16 +1187,17 @@ function AposBot() {
                 //console.log("mefore: " + clusterAllFood[i][2]);
                 //This is the cost function. Higher is better.
 
-                    //var clusterAngle = this.getAngle(clusterAllFood[i].x, clusterAllFood[i].y, player.enclosingCell.x, player.enclosingCell.y);
+                //var clusterAngle = this.getAngle(clusterAllFood[i].x, clusterAllFood[i].y, player.enclosingCell.x, player.enclosingCell.y);
 
-                    clusterAllFood[i].xsize = clusterAllFood[i].size * 6 - this.computeDistance(clusterAllFood[i].x, clusterAllFood[i].y, player.enclosingCell.x, player.enclosingCell.y);
-                    //console.log("Current Value: " + clusterAllFood[i][2]);
+                clusterAllFood[i].xsize = clusterAllFood[i].size * 6 - this.computeDistance(clusterAllFood[i].x, clusterAllFood[i].y, player.enclosingCell.x, player.enclosingCell.y);
+                //console.log("Current Value: " + clusterAllFood[i][2]);
 
-                    //(goodAngles[bIndex][1] / 2 - (Math.abs(perfectAngle - clusterAngle)));
+                //(goodAngles[bIndex][1] / 2 - (Math.abs(perfectAngle - clusterAngle)));
 
-                    // clusterAllFood[i][3] = clusterAngle;
+                // clusterAllFood[i][3] = clusterAngle;
 
-                    //console.log("After: " + clusterAllFood[i][2]);
+                //console.log("After: " + clusterAllFood[i][2]);
+                drawPoint(clusterAllFood[bestFoodI].x, clusterAllFood[bestFoodI],y, 1, "");
             }
             
             var bestFoodI = 0;
@@ -1218,7 +1219,8 @@ function AposBot() {
 	        	drawLine(player.enclosingCell.x, player.enclosingCell.y, predictedX, predictedY, 6);
             }
 
-            console.log("Best Value: " + clusterAllFood[bestFoodI]);
+            console.log("Best Value: ");
+            console.log(clusterAllFood[bestFoodI]);
 
             var distance = this.computeDistance(player.enclosingCell.x, player.enclosingCell.y, clusterAllFood[bestFoodI].x, clusterAllFood[bestFoodI].y);
 
