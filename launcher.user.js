@@ -19,11 +19,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.186
+// @version     4.187
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.186;
+var aposLauncherVersion = 4.187;
 
 var showAd = true;
 var badSize = 1500;
@@ -548,6 +548,25 @@ console.log("Running Bot Launcher!");
 
     function xb(a, b) {
         
+        function ddd() {
+            for (var d = "";;) {
+                var c = a.getUint16(b, !0);
+                b += 2;
+                if (0 == c) break;
+                d += String.fromCharCode(c)
+            }
+            return d
+        }
+
+        function uuu() {
+            for (var d = "";;) {
+                var c = a.getUint8(b++);
+                if (0 == c) break;
+                d += String.fromCharCode(c)
+            }
+            return d
+        }
+
         try {
             var clone = interNodes.slice(0);
             
@@ -564,6 +583,7 @@ console.log("Running Bot Launcher!");
                 p && g && (g.X(), g.s = g.x, g.t = g.y, g.r = g.size, g.J = p.x, g.K = p.y, g.q = g.size, g.Q =
                     C)
             }
+            /*
             for (u = 0;;) {
                 d = a.getUint32(b, !0);
                 b += 4;
@@ -609,7 +629,54 @@ console.log("Running Bot Launcher!");
                     console.log('rejecting + ' + window.getCells()[d].size);
                 }
             }
-    
+            */
+            for (u = 0;;) {
+                d = a.getUint32(b, !0);
+                b += 4;
+                ++u;
+                if (0 == d) break;
+                var f, p;
+                p = a.getInt16(b, !0);
+                b += 4;
+                g = a.getInt16(b, !0);
+                b += 4;
+                f = a.getInt16(b, !0);
+                b += 2;
+                
+                var n = a.getUint8(b++),
+                h = a.getUint8(b++),
+                w = a.getUint8(b++),
+                h = nc(m << 16 | g << 8 | h),
+                w = a.getUint8(b++),
+                m = !!(h & 1),
+                r = !!(h & 16),
+                rrr = null;
+
+                w & 2 && (b += 4 + a.getUint32(b, !0));
+                w & 4 && (rrr = uuu());    // what is u()
+                
+                var q = ddd(),  // what is d()
+                n = null;
+
+                E.hasOwnProperty(d) ? (n = E[d], n.P(), n.s = n.x, n.t = n.y, n.r = n.size, n.color = h) :
+                    (n = new da(d, p, g, f, h, q), v.push(n), E[d] = n, n.ua = p, n.va = g);
+                n.h = m;
+                n.n = r;
+                n.J = p;
+                n.K = g;
+                n.q = f;
+                n.sa = c;
+                n.Q = C;
+                n.ba = w;
+                // rrr && (n.C = rrr);    // what is m.C
+                q && n.B(q); - 1 != M.indexOf(d) && -1 == k.indexOf(n) && (document.getElementById("overlays").style.display = "none", k.push(n), n.birth = getLastUpdate(), n.birthMass = (n.size * n.size / 100), 1 == k.length && (s = n.x, t = n.y, db()))
+                if (window.getCells()[d].size < badSize) {
+                    clone[d] = window.getCells()[d];
+                } else {
+                    console.log('rejecting + ' + window.getCells()[d].size);
+                }
+            }
+
             //UPDATE
             Object.keys(clone).forEach(function(element, index) {
                 //console.log("start: " + interNodes[element].updateTime + " current: " + D + " life: " + (D - interNodes[element].updateTime));
@@ -619,7 +686,7 @@ console.log("Running Bot Launcher!");
                 if (isRemoved && (window.getLastUpdate() - clone[element].getUptimeTime()) > 3000) {
                     delete clone[element];
                 } else {
-                    if (// isRemoved &&
+                    if (isRemoved &&
                         clone[element].x > (getX() - (1920 / 2) / getZoomlessRatio()) &&
                         clone[element].x < (getX() + (1920 / 2) / getZoomlessRatio()) &&
                         clone[element].y > getY() - (1080 / 2) / getZoomlessRatio() &&
