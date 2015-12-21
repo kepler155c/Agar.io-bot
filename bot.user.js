@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.753
+// @version     3.754
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.753;
+var aposBotVersion = 3.754;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -1189,7 +1189,11 @@ function AposBot() {
 
                 //var clusterAngle = this.getAngle(clusterAllFood[i].x, clusterAllFood[i].y, player.enclosingCell.x, player.enclosingCell.y);
 
-                clusterAllFood[i].clusterSize = clusterAllFood[i].size * 6 - this.computeDistance(clusterAllFood[i].x, clusterAllFood[i].y, player.enclosingCell.x, player.enclosingCell.y);
+            	var multiplier = 6;
+            	if (clusterAllFood[i].size > 14) {
+            		multiplier = 16;
+            	}
+                clusterAllFood[i].clusterSize = clusterAllFood[i].size * 6 - this.computeDistance(clusterAllFood[i].x, clusterAllFood[i].y, player.largestCell.x, player.largestCell.y);
                 //console.log("Current Value: " + clusterAllFood[i][2]);
 
                 //(goodAngles[bIndex][1] / 2 - (Math.abs(perfectAngle - clusterAngle)));
@@ -1208,7 +1212,7 @@ function AposBot() {
                     bestFoodI = i;
                 }
             }
-            drawPoint(clusterAllFood[bestFoodI].x, clusterAllFood[bestFoodI],y, 1, "");
+//            drawPoint(clusterAllFood[bestFoodI].x, clusterAllFood[bestFoodI],y, 1, "");
 
             if (clusterAllFood[bestFoodI].cell && !clusterAllFood[bestFoodI].cell.isNotMoving()) {
             	
@@ -1219,17 +1223,17 @@ function AposBot() {
 	        	drawLine(player.enclosingCell.x, player.enclosingCell.y, predictedX, predictedY, 6);
             }
 
-            var distance = this.computeDistance(player.enclosingCell.x, player.enclosingCell.y, clusterAllFood[bestFoodI].x, clusterAllFood[bestFoodI].y);
+            var distance = this.computeDistance(player.largestCell.x, player.largestCell.y, clusterAllFood[bestFoodI].x, clusterAllFood[bestFoodI].y);
 
-            var angle = this.getAngle(clusterAllFood[bestFoodI].x, clusterAllFood[bestFoodI].y, player.enclosingCell.x, player.enclosingCell.y);
+            var angle = this.getAngle(clusterAllFood[bestFoodI].x, clusterAllFood[bestFoodI].y, player.largestCell.x, player.largestCell.y);
             var shiftedAngle = this.shiftAngle(obstacleAngles, angle, [0, 360]);
 
-            var destination = this.followAngle(shiftedAngle, player.enclosingCell.x, player.enclosingCell.y, distance);
+            var destination = this.followAngle(shiftedAngle, player.largestCell.x, player.largestCell.y, distance);
 
             destinationChoices = destination;
             //tempMoveX = destination[0];
             //tempMoveY = destination[1];
-            drawLine(player.enclosingCell.x, player.enclosingCell.y, destination[0], destination[1], 1);
+            drawLine(player.largestCell.x, player.largestCell.y, destination[0], destination[1], 1);
                         
         } else {
             //If there are no enemies around and no food to eat.
@@ -1313,7 +1317,7 @@ function AposBot() {
                     //The viruses are stored in element 2 of allIsAll
                     var allPossibleViruses = allIsAll[2];
 
-                    var clusterAllFood = this.clusterFood(player, allPossibleFood, player.enclosingCell.size);
+                    var clusterAllFood = this.clusterFood(player, allPossibleFood, player.largestCell.size);
 
                     //console.log("Looking for enemies!");
 
