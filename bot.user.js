@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.740
+// @version     3.741
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.740;
+var aposBotVersion = 3.741;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -405,7 +405,7 @@ function AposBot() {
         foodList = [];
         for (i = 0; i < foodElementList.length; i++) {
         	if (!this.foodInVirus(foodElementList[i], virusList)) {
-        		foodList.push([foodElementList[i].x, foodElementList[i].y, foodElementList[i].size]);
+        		foodList.push(foodElementList);
         	}
         }
         
@@ -469,35 +469,32 @@ function AposBot() {
         	
         	var food = foodList[i];
 
-        	if (food[2] > 13) {
-        		if (maxSizedFood === null || food[2] > maxSizedFood[2]) {
-        			maxSizedFood = food;
-        		}
+        	if (!food.isNotMoving()) {
+                clusters.push({
+                	x: food.x, y: food.y, size: food.size, cell: food
+                });
+        	} else {
+	            for (var j = 0; j < clusters.length; j++) {
+	            	if (!clusters[j].cell) {
+		                if (this.computeInexpensiveDistance(food.x, food.y, clusters[j].x, clusters[j].y) < blobSize * 2) {
+		                	
+		                    clusters[j].x = (food.x + clusters[j].x) / 2;
+		                    clusters[j].y = (food.y + clusters[j].y) / 2;
+		                    clusters[j].size += food.size;
+		                    addedCluster = true;
+		                    break;
+		                }
+	            	}
+	            }
+	            if (!addedCluster) {
+	                clusters.push({
+	                	x: food.x, y: food.y, size: food.size, cell: null
+	                });
+	            }
         	}
-
-            for (var j = 0; j < clusters.length; j++) {
-                if (this.computeInexpensiveDistance(food[0], food[1], clusters[j][0], clusters[j][1]) < blobSize * 2) {
-                    clusters[j][0] = (food[0] + clusters[j][0]) / 2;
-                    clusters[j][1] = (food[1] + clusters[j][1]) / 2;
-                    clusters[j][2] += food[2];
-                    addedCluster = true;
-                    break;
-                }
-            }
-            if (!addedCluster) {
-                clusters.push([food[0], food[1], food[2], 0]);
-            }
             addedCluster = false;
         }
         
-        player.chasing = 0;
-        
-        if (maxSizedFood) {
-        	clusters = [];
-        	clusters.push([maxSizedFood[0], maxSizedFood[1], maxSizedFood[2], 0]);
-        	player.chasing = maxSizedFood[2];
-        }
-
         return clusters;
     };
 
@@ -1196,34 +1193,44 @@ function AposBot() {
                 //console.log("mefore: " + clusterAllFood[i][2]);
                 //This is the cost function. Higher is better.
 
-                    var clusterAngle = this.getAngle(clusterAllFood[i][0], clusterAllFood[i][1], player.enclosingCell.x, player.enclosingCell.y);
+                    var clusterAngle = this.getAngle(clusterAllFood[i].x, clusterAllFood[i].y, player.enclosingCell.x, player.enclosingCell.y);
 
-                    clusterAllFood[i][2] = clusterAllFood[i][2] * 6 - this.computeDistance(clusterAllFood[i][0], clusterAllFood[i][1], player.enclosingCell.x, player.enclosingCell.y);
+                    clusterAllFood[i].size = clusterAllFood[i].size * 6 - this.computeDistance(clusterAllFood[i].x, clusterAllFood[i].y, player.enclosingCell.x, player.enclosingCell.y);
                     //console.log("Current Value: " + clusterAllFood[i][2]);
 
                     //(goodAngles[bIndex][1] / 2 - (Math.abs(perfectAngle - clusterAngle)));
 
-                    clusterAllFood[i][3] = clusterAngle;
+                    // clusterAllFood[i][3] = clusterAngle;
 
-                    drawPoint(clusterAllFood[i][0], clusterAllFood[i][1], 1, "");
                     //console.log("After: " + clusterAllFood[i][2]);
             }
 
             
             var bestFoodI = 0;
-            var bestFood = clusterAllFood[0][2];
+            var bestFood = clusterAllFood[0].size;
             for (var i = 1; i < clusterAllFood.length; i++) {
-                if (bestFood < clusterAllFood[i][2]) {
-                    bestFood = clusterAllFood[i][2];
+                if (bestFood < clusterAllFood[i].size) {
+                    bestFood = clusterAllFood[i].size;
                     bestFoodI = i;
                 }
             }
+            drawPoint(clusterAllFood[bestFoodI].x, clusterAllFood[bestFoodI],y, 1, "");
+
+            if (clusterAllFood[bestFoodI].cell && !clusterAllFood[bestFoodI].cell.isNotMoving()) {
+            	
+	        	var lastPos = clusterAllFood[bestFoodI].cell.getLastPos();
+	        	var predictedX = target.x - (lastPos.x - target.x) * 10;
+	        	var predictedY = target.y - (lastPos.y - target.y) * 10;
+	        	
+	        	drawLine(player.enclosingCell.x, player.enclosingCell.y, predictedX, predictedY, 6);
+            }
+
 
             //console.log("Best Value: " + clusterAllFood[bestFoodI][2]);
 
-            var distance = this.computeDistance(player.enclosingCell.x, player.enclosingCell.y, clusterAllFood[bestFoodI][0], clusterAllFood[bestFoodI][1]);
+            var distance = this.computeDistance(player.enclosingCell.x, player.enclosingCell.y, clusterAllFood[bestFoodI].x, clusterAllFood[bestFoodI].y);
 
-            var shiftedAngle = this.shiftAngle(obstacleAngles, this.getAngle(clusterAllFood[bestFoodI][0], clusterAllFood[bestFoodI][1], player.enclosingCell.x, player.enclosingCell.y), [0, 360]);
+            var shiftedAngle = this.shiftAngle(obstacleAngles, this.getAngle(clusterAllFood[bestFoodI].x, clusterAllFood[bestFoodI],y, player.enclosingCell.x, player.enclosingCell.y), [0, 360]);
 
             var destination = this.followAngle(shiftedAngle, player.enclosingCell.x, player.enclosingCell.y, distance);
 
@@ -1350,9 +1357,6 @@ function AposBot() {
                             	var lastPos = target.getLastPos();
                             	var predictedX = target.x - (lastPos.x - target.x) * 10;
                             	var predictedY = target.y - (lastPos.y - target.y) * 10;
-                            	
-//                            	console.log(predictedX + ' ' + target.x + ' ' + lastPos.x);
-//                            	console.log(predictedY + ' ' + target.y + ' ' + lastPos.y);
                             	
                             	drawLine(cell.x, cell.y, predictedX, predictedY, 6);
 
