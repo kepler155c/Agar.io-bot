@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.757
+// @version     3.758
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.757;
+var aposBotVersion = 3.758;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -1249,17 +1249,17 @@ function AposBot() {
 	        	drawLine(player.enclosingCell.x, player.enclosingCell.y, predictedX, predictedY, 6);
             }
 
-            var distance = this.computeDistance(bestFood.cell.x, bestFood.cell.y, bestFood.x, bestFood.y);
+            var distance = this.computeDistance(bestFood.closestCell.x, bestFood.closestCell.y, bestFood.x, bestFood.y);
 
-            angle = this.getAngle(bestFood.x, bestFood.y, bestFood.cell.x, bestFood.cell.y);
+            angle = this.getAngle(bestFood.x, bestFood.y, bestFood.closestCell.x, bestFood.closestCell.y);
             var shiftedAngle = this.shiftAngle(obstacleAngles, angle, [0, 360]);
 
-            var destination = this.followAngle(shiftedAngle, bestFood.cell.x, bestFood.cell.y, distance);
+            var destination = this.followAngle(shiftedAngle, bestFood.closestCell.x, bestFood.closestCell.y, distance);
 
             destinationChoices = destination;
             //tempMoveX = destination[0];
             //tempMoveY = destination[1];
-            drawLine(bestFood.cell.x, bestFood.cell.y, destination[0], destination[1], 1);
+            drawLine(bestFood.closestCell.x, bestFood.closestCell.y, destination[0], destination[1], 1);
                         
         } else {
             //If there are no enemies around and no food to eat.
