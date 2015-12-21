@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.799
+// @version     3.800
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.799;
+var aposBotVersion = 3.800;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -1004,7 +1004,7 @@ function AposBot() {
             
             threat.dangerZone = secureDistance;
             
-            drawPoint(threat.x, threat.y+20, 1, that.getRatio(threat, player.smallestCell) + " " + enemyCanSplit ? "true" : "false");
+            drawPoint(threat.x, threat.y+20, 1, this.getRatio(threat, player.smallestCell) + " " + enemyCanSplit ? "true" : "false");
 
             for (j = clusterAllFood.length - 1; j >= 0 ; j--) {
                 if (this.computeDistance(allPossibleThreats[i].x, allPossibleThreats[i].y, clusterAllFood[j].x, clusterAllFood[j].y) < secureDistance + shiftDistance)
