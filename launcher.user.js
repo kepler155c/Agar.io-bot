@@ -1261,8 +1261,8 @@ console.log("Running Bot Launcher!");
 
         debugStrings.push("Player Mass: " + parseInt(player.totalSize, 10));
         if (player.cells.length > 1) {
-	        debugStrings.push("Player Min:  " + parseInt(player.smallestCell.size));
-	        debugStrings.push("Player Max:  " + parseInt(player.largestCell.size));
+	        debugStrings.push("Player Min:  " + parseInt(player.smallestCell.size, 10));
+	        debugStrings.push("Player Max:  " + parseInt(player.largestCell.size, 10));
         }
         debugStrings.push("Food:        " + player.food.length);
         debugStrings.push("Threats:     " + player.threats.length);
