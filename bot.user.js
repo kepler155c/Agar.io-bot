@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.783
+// @version     3.784
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.783;
+var aposBotVersion = 3.784;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -952,11 +952,22 @@ function AposBot() {
         var obstacleList = [];
         var tempMoveX = getPointX();
         var tempMoveY = getPointY();
-        var i, j, angle1, angle2, tempOb, line1, line2, diff;
-        
+        var i, j, angle1, angle2, tempOb, line1, line2, diff, threat;
+        var panicMode = false;
+
+        for (j = 0; j < player.cells.length; j++) {
+        	var cell = player.cells[j];
+            for (i = 0; i < allPossibleThreats.length; i++) {
+            	if (this.circlesIntersect(cell, threat)) {
+            		panicMode = true;
+            		break;
+            	}
+            }
+        }
+
         for (i = 0; i < allPossibleThreats.length; i++) {
         	
-        	var threat = allPossibleThreats[i];
+        	threat = allPossibleThreats[i];
 
         	var closestInfo = this.closestCell(player, threat.x, threat.y);
 
@@ -964,12 +975,19 @@ function AposBot() {
             var enemyDistance = closestInfo.distance;
             var isMovingTowards = this.isMovingTowards(closestCell, threat);
 
-            var splitDangerDistance = threat.size + this.splitDistance + 150;
+            var enemyCanSplit = isMovingTowards && this.canSplit(player.smallestCell, threat);
+            
+            if (panicMode) {
+            	console.log('panic mode');
+            	enemyCanSplit = false;
+            }
+
             var normalDangerDistance = threat.size + 150;
             var shiftDistance = player.enclosingCell.size;
-
-            var enemyCanSplit = isMovingTowards && this.canSplit(player.smallestCell, threat);
+            var splitDangerDistance = threat.size + this.splitDistance + 150;
             var secureDistance = (enemyCanSplit ? splitDangerDistance : normalDangerDistance);
+            
+            threat.dangerZone = secureDistance;
 
             for (j = clusterAllFood.length - 1; j >= 0 ; j--) {
                 if (this.computeDistance(allPossibleThreats[i].x, allPossibleThreats[i].y, clusterAllFood[j].x, clusterAllFood[j].y) < secureDistance + shiftDistance)
@@ -1419,27 +1437,13 @@ function AposBot() {
                     
                     for (i = 0; i < allPossibleThreats.length; i++) {
 
-    	                var normalDangerDistance = allPossibleThreats[i].size + 150;
-    	                var enemyCanSplit = this.canSplit(cell, allPossibleThreats[i]);
-    	                var splitDangerDistance = allPossibleThreats[i].size + this.splitDistance + 150;
-    	                var secureDistance = (enemyCanSplit ? splitDangerDistance : normalDangerDistance);
-    	                var shiftDistance = cell.size;
-
-    	                //console.log("Removed some food.");
-    	
                     	drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, allPossibleThreats[i].size + 30, 0);
                     	
 	                	if (this.isMovingTowards(cell, allPossibleThreats[i])) {
 	                    	drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, allPossibleThreats[i].size + 10, 3);
 	                	}
 
-    	                if (enemyCanSplit) {
-    	                    drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, splitDangerDistance, 0);
-//    	                    drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, splitDangerDistance + shiftDistance, 6);
-    	                } else {
-    	                    //drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, normalDangerDistance, 3);
-    	                    //drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, normalDangerDistance + shiftDistance, 6);
-    	                }
+   	                    drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, allPossibleThreats[i].dangerZone, 0);
                     }
                     
                     drawPoint(tempPoint[0], tempPoint[1], tempPoint[2], "");
