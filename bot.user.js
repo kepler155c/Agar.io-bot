@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.791
+// @version     3.792
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.791;
+var aposBotVersion = 3.792;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -350,6 +350,10 @@ function AposBot() {
     
     this.isMovingTowards = function(a, b) {
 
+    	if (b.isNotMoving()) {
+    		return false;
+    	}
+
     	var oldx = b.getLastPos().x;
     	var oldy = b.getLastPos().y;
 
@@ -371,6 +375,9 @@ function AposBot() {
             var xxx = listToUse[element];
 
             if (!isMe) {
+            	
+            	xxx.isMovingTowards = this.isMovingTowards(player.enclosingCell, xxx);
+            	
                 if (that.isFood(player.smallestCell, listToUse[element]) && listToUse[element].isNotMoving()) {
                     //IT'S FOOD!
                		foodElementList.push(listToUse[element]);
@@ -1234,7 +1241,7 @@ function AposBot() {
 
             	var cluster = clusterAllFood[i];
 
-            	var multiplier = 1;
+            	var multiplier = 3;
 
             	if (cluster.x < getMapStartX()+1000 || 
             			cluster.x > getMapEndX()-1000 || 
@@ -1245,13 +1252,25 @@ function AposBot() {
             			cluster.x > getMapEndX()-2000 || 
             			cluster.y < getMapStartY()+2000 ||
             			cluster.y > getMapEndY()-2000) {
-            		multiplier = 3;
+            		multiplier = 1;
             	}
             	
+                var size = cluster.clusterSize;
+                if (cluster.cell) {
+                	// prioritize enemies moving towards us
+                	if (cluster.cell.isMovingTowards) {
+                		size = size * 2;
+                	}
+                	// easy food
+                	if (cluster.cell.isNotMoving()) {
+                		size = size * 5;
+                	}
+                }
+                
             	var closestInfo = this.closestCell(player, cluster.x, cluster.y);
-                cluster.clusterSize = closestInfo.distance / cluster.size * 3 * multiplier ;
+                cluster.clusterSize = closestInfo.distance / size * 3 * multiplier ;
                 cluster.closestCell = closestInfo.cell;
-
+                
                 drawPoint(cluster.x, cluster.y+20, 1, "" + parseInt(cluster.clusterSize, 10) + " " + cluster.size);
             }
             
