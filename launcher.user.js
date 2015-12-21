@@ -19,11 +19,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.187
+// @version     4.188
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.187;
+var aposLauncherVersion = 4.188;
 
 var showAd = true;
 var badSize = 1500;
@@ -549,22 +549,22 @@ console.log("Running Bot Launcher!");
     function xb(a, b) {
         
         function ddd() {
-            for (var d = "";;) {
-                var c = a.getUint16(b, !0);
+            for (var dzz = "";;) {
+                var czz = a.getUint16(b, !0);
                 b += 2;
-                if (0 == c) break;
-                d += String.fromCharCode(c)
+                if (0 == czz) break;
+                dzz += String.fromCharCode(czz)
             }
-            return d
+            return dzz
         }
 
         function uuu() {
-            for (var d = "";;) {
-                var c = a.getUint8(b++);
-                if (0 == c) break;
-                d += String.fromCharCode(c)
+            for (var dzz = "";;) {
+                var czz = a.getUint8(b++);
+                if (0 == czz) break;
+                dzz += String.fromCharCode(czz)
             }
-            return d
+            return dzz
         }
 
         try {
@@ -633,8 +633,8 @@ console.log("Running Bot Launcher!");
             for (u = 0;;) {
                 d = a.getUint32(b, !0);
                 b += 4;
-                ++u;
                 if (0 == d) break;
+                ++u;
                 var f, p;
                 p = a.getInt16(b, !0);
                 b += 4;
