@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.752
+// @version     3.753
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.752;
+var aposBotVersion = 3.753;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -1198,8 +1198,6 @@ function AposBot() {
 
                 //console.log("After: " + clusterAllFood[i][2]);
                 drawPoint(clusterAllFood[i].x, clusterAllFood[i],y, 1, "");
-                console.log('drawing point');
-                console.log(clusterAllFood[i]);
             }
             
             var bestFoodI = 0;
@@ -1221,12 +1219,10 @@ function AposBot() {
 	        	drawLine(player.enclosingCell.x, player.enclosingCell.y, predictedX, predictedY, 6);
             }
 
-            console.log("Best Value: ");
-            console.log(clusterAllFood[bestFoodI]);
-
             var distance = this.computeDistance(player.enclosingCell.x, player.enclosingCell.y, clusterAllFood[bestFoodI].x, clusterAllFood[bestFoodI].y);
 
-            var shiftedAngle = this.shiftAngle(obstacleAngles, this.getAngle(clusterAllFood[bestFoodI].x, clusterAllFood[bestFoodI],y, player.enclosingCell.x, player.enclosingCell.y), [0, 360]);
+            var angle = this.getAngle(clusterAllFood[bestFoodI].x, clusterAllFood[bestFoodI].y, player.enclosingCell.x, player.enclosingCell.y);
+            var shiftedAngle = this.shiftAngle(obstacleAngles, angle, [0, 360]);
 
             var destination = this.followAngle(shiftedAngle, player.enclosingCell.x, player.enclosingCell.y, distance);
 
@@ -1234,9 +1230,7 @@ function AposBot() {
             //tempMoveX = destination[0];
             //tempMoveY = destination[1];
             drawLine(player.enclosingCell.x, player.enclosingCell.y, destination[0], destination[1], 1);
-            
-            console.log('drawing ' + [player.enclosingCell.x, player.enclosingCell.y, destination[0], destination[1]]);
-            
+                        
         } else {
             //If there are no enemies around and no food to eat.
             destinationChoices = [tempMoveX, tempMoveY];
