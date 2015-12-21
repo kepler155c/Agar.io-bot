@@ -19,11 +19,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.202
+// @version     4.203
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.202;
+var aposLauncherVersion = 4.203;
 
 var showAd = true;
 var badSize = 1500;
@@ -59,11 +59,12 @@ Player.prototype.setCells = function(cells) {
 	this.totalSize = 0;
     this.smallestCell = cells[0];
     this.largestCell = cells[0];
-
+    
 	for (var i = 0; i < cells.length; i++) {
 		var cell = cells[i];
 		
 		this.totalSize = this.totalSize + cell.size;
+	    this.mass = cell.size * cell.size / 100;
 
     	if (cell.size < this.smallestCell.size) {
     		this.smallestCell = cell;
