@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.789
+// @version     3.790
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.789;
+var aposBotVersion = 3.790;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -221,10 +221,6 @@ function AposBot() {
         return false;
     };
 
-    this.canSplit = function(player1, player2) {
-        return this.compareSize(player1, player2, 2.8) && !this.compareSize(player1, player2, 20);
-    };
-
     this.isItMe = function(player, cell) {
         if (getMode() == ":teams") {
             var currentColor = player.cells[0].color;
@@ -289,7 +285,24 @@ function AposBot() {
     	}
     	return false;
     };
-    
+
+    // can someone else split and eat me
+    this.canSplit = function(eater, eatee) {
+    	if (eater.size > eatee.size) {
+    		return eater.size / 2 / eatee.size > 1.11;
+    	}
+    	return false;
+    };
+
+    // can i split and eat someone
+    this.isSplitTarget = function(that, eater, eatee) {
+
+    	if (eater.size > eatee.size) {
+    		return eater.size / 2 / eatee.size > 1.10;
+    	}
+    	return false;
+    };
+
     this.isThreat = function(blob, cell) {
     	
         if (!cell.isVirus() && this.canEat(cell, blob)) {
@@ -310,14 +323,6 @@ function AposBot() {
             return true;
         }
         return false;
-    };
-
-    this.isSplitTarget = function(that, eater, eatee) {
-
-    	if (eater.size > eatee.size) {
-    		return eater.size / 2 / eatee.size > 1.10;
-    	}
-    	return false;
     };
 
     this.getTimeToRemerge = function(mass){
