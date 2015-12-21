@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.802
+// @version     3.803
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.802;
+var aposBotVersion = 3.803;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -286,16 +286,8 @@ function AposBot() {
     	return false;
     };
 
-    // can someone else split and eat me
-    this.canSplit = function(eater, eatee) {
-    	if (eater.size > eatee.size) {
-    		return eater.size / 2 / eatee.size < 1.11;
-    	}
-    	return false;
-    };
-
     // can i split and eat someone
-    this.isSplitTarget = function(that, eater, eatee) {
+    this.isSplitTarget = function(eater, eatee) {
 
     	if (eater.size > eatee.size) {
     		return eater.size / 2 / eatee.size > 1.10;
@@ -394,7 +386,7 @@ function AposBot() {
                     virusList.push(listToUse[element]);
                     isEnemy = false;
                 }
-                else if (that.isSplitTarget(that, player.largestCell, listToUse[element])) {
+                else if (that.isSplitTarget(player.largestCell, listToUse[element])) {
                     drawCircle(listToUse[element].x, listToUse[element].y, listToUse[element].size + 50, 7);
                     splitTargetList.push(listToUse[element]);
                     foodElementList.push(listToUse[element]);
@@ -990,7 +982,7 @@ function AposBot() {
             var closestCell = closestInfo.cell;
             var enemyDistance = closestInfo.distance;
 
-            var enemyCanSplit = this.canSplit(threat, player.smallestCell);
+            var enemyCanSplit = this.isSplitTarget(threat, player.smallestCell);
             
             if (panicMode) {
             	console.log('panic mode');
