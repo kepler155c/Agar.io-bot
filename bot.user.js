@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.772
+// @version     3.773
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.772;
+var aposBotVersion = 3.773;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -462,6 +462,11 @@ function AposBot() {
         for (var i = 0; i < foodList.length; i++) {
         	
         	var food = foodList[i];
+        	var foodSize = food.size;
+        	
+        	if (food.size <= 14) {
+        		foodSize = food.size-9;
+        	}
 
         	if (!food.isNotMoving()) {
                 clusters.push({
@@ -474,7 +479,7 @@ function AposBot() {
 		                	
 		                    clusters[j].x = (food.x + clusters[j].x) / 2;
 		                    clusters[j].y = (food.y + clusters[j].y) / 2;
-		                    clusters[j].size += food.size;
+		                    clusters[j].size += foodSize;
 		                    addedCluster = true;
 		                    break;
 		                }
@@ -482,7 +487,7 @@ function AposBot() {
 	            }
 	            if (!addedCluster) {
 	                clusters.push({
-	                	x: food.x, y: food.y, size: food.size, cell: null
+	                	x: food.x, y: food.y, size: foodSize, cell: null
 	                });
 	            }
         	}
@@ -1227,7 +1232,7 @@ function AposBot() {
             	}
             	
             	var closestInfo = this.closestCell(player, cluster.x, cluster.y);
-                cluster.clusterSize = closestInfo.distance / cluster.size * 16 * multiplier ;
+                cluster.clusterSize = closestInfo.distance / cluster.size * 6 * multiplier ;
                 cluster.closestCell = closestInfo.cell;
 
                 drawPoint(cluster.x, cluster.y+20, 1, "" + parseInt(cluster.clusterSize, 10) + " " + cluster.size);
