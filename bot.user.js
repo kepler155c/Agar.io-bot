@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.746
+// @version     3.747
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.746;
+var aposBotVersion = 3.747;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -457,13 +457,6 @@ function AposBot() {
     this.clusterFood = function(player, foodList, blobSize) {
         var clusters = [];
         var addedCluster = false;
-
-        //1: x
-        //2: y
-        //3: size or value
-        //4: Angle, not set here.
-console.log('clustering from ' + foodList.length);
-        var maxSizedFood = null;
 
         for (var i = 0; i < foodList.length; i++) {
         	
@@ -1190,15 +1183,13 @@ console.log('clustering from ' + foodList.length);
             destinationChoices.push(line1);*/
         } else if (clusterAllFood.length > 0) {
         	
-        	console.log("cluster size " + clusterAllFood.length);
-        	
             for (var i = 0; i < clusterAllFood.length; i++) {
                 //console.log("mefore: " + clusterAllFood[i][2]);
                 //This is the cost function. Higher is better.
 
-                    var clusterAngle = this.getAngle(clusterAllFood[i].x, clusterAllFood[i].y, player.enclosingCell.x, player.enclosingCell.y);
+                    //var clusterAngle = this.getAngle(clusterAllFood[i].x, clusterAllFood[i].y, player.enclosingCell.x, player.enclosingCell.y);
 
-                    clusterAllFood[i].size = clusterAllFood[i].size * 6 - this.computeDistance(clusterAllFood[i].x, clusterAllFood[i].y, player.enclosingCell.x, player.enclosingCell.y);
+                    clusterAllFood[i].xsize = clusterAllFood[i].size * 6 - this.computeDistance(clusterAllFood[i].x, clusterAllFood[i].y, player.enclosingCell.x, player.enclosingCell.y);
                     //console.log("Current Value: " + clusterAllFood[i][2]);
 
                     //(goodAngles[bIndex][1] / 2 - (Math.abs(perfectAngle - clusterAngle)));
@@ -1209,10 +1200,10 @@ console.log('clustering from ' + foodList.length);
             }
             
             var bestFoodI = 0;
-            var bestFood = clusterAllFood[0].size;
+            var bestFood = clusterAllFood[0].xsize;
             for (var i = 1; i < clusterAllFood.length; i++) {
-                if (bestFood < clusterAllFood[i].size) {
-                    bestFood = clusterAllFood[i].size;
+                if (bestFood < clusterAllFood[i].xsize) {
+                    bestFood = clusterAllFood[i].xsize;
                     bestFoodI = i;
                 }
             }
@@ -1227,8 +1218,7 @@ console.log('clustering from ' + foodList.length);
 	        	drawLine(player.enclosingCell.x, player.enclosingCell.y, predictedX, predictedY, 6);
             }
 
-
-            //console.log("Best Value: " + clusterAllFood[bestFoodI][2]);
+            console.log("Best Value: " + clusterAllFood[bestFoodI]);
 
             var distance = this.computeDistance(player.enclosingCell.x, player.enclosingCell.y, clusterAllFood[bestFoodI].x, clusterAllFood[bestFoodI].y);
 
