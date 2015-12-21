@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.805
+// @version     3.806
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.805;
+var aposBotVersion = 3.806;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -155,7 +155,12 @@ function AposBot() {
     };
 
     this.getMass = function(size) {
-        return Math.pow(size / 10, 2);
+        return Math.pow(size * size / 100, 2);
+    };
+
+    this.getSplitMass = function(size) {
+    	var halfSize = size / 2;
+        return Math.pow(halfSize * halfSize / 100, 2);
     };
 
     this.valueAngleBased = function(angle, range) {
@@ -1000,9 +1005,7 @@ function AposBot() {
             
             threat.dangerZone = secureDistance;
             
-            drawPoint(threat.x, threat.y+20, 1, "" + 
-            		this.getMass(threat) + " " +
-            		(threat.size / 2 / player.smallestCell.size));
+            drawPoint(threat.x, threat.y+20, 1, "m:" + this.getMass(threat) + " s:" + this.getSplitMass(threat));
 
             for (j = clusterAllFood.length - 1; j >= 0 ; j--) {
                 if (this.computeDistance(allPossibleThreats[i].x, allPossibleThreats[i].y, clusterAllFood[j].x, clusterAllFood[j].y) < secureDistance + shiftDistance)
