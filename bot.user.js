@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.808
+// @version     3.809
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.808;
+var aposBotVersion = 3.809;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -272,21 +272,21 @@ function AposBot() {
     };
 
     this.getMass = function(cell) {
-    	return (cell.size * cell.size / 100).toFixed(2);
+    	return cell.size * cell.size / 100;
     }
 
     this.getSplitMass = function(cell) {
     	var halfSize = cell.size / 2;
-        return (halfSize * halfSize / 100).toFixed(2);
+        return halfSize * halfSize / 100;
     };
 
     this.getRatio = function(eater, eatee) {
-    	return (eater.size * 2) / (eatee.size * 2);
+    	return this.getMass(eater) / this.getMass(eatee);
     }
     
     this.canEat = function(eater, eatee) {
     	if (eater.size > eatee.size) {
-        	return eater.size / eatee.size > 1.12;
+        	return this.getMass(eater) / this.getMass(eatee) >= 1.25;
     	}
     	return false;
     };
@@ -295,7 +295,7 @@ function AposBot() {
     this.isSplitTarget = function(eater, eatee) {
 
     	if (eater.size > eatee.size) {
-    		return eater.size / 2 / eatee.size > 1.10;
+    		return this.getSplitMass(eater) / this.getSplitMass(eatee) >= 1.25;
     	}
     	return false;
     };
@@ -397,7 +397,7 @@ function AposBot() {
                     foodElementList.push(listToUse[element]);
                     mergeList.push(listToUse[element]);
                 }
-                else if (player.cells.length == 1 && that.getRatio(player.largestCell, listToUse[element]) > 1.13) {
+                else if (player.cells.length == 1 && that.canEat(player.smallestCell, listToUse[element])) {
 
                 	foodElementList.push(listToUse[element]);
                     mergeList.push(listToUse[element]);
@@ -1001,7 +1001,7 @@ function AposBot() {
             
             threat.dangerZone = secureDistance;
             
-            drawPoint(threat.x, threat.y+20, 1, "m:" + this.getMass(threat) + " s:" + this.getSplitMass(threat));
+            drawPoint(threat.x, threat.y+20, 1, "m:" + this.getMass(threat)).toFixed(2) + " s:" + this.getSplitMass(threat)).toFixed(2));
 
             for (j = clusterAllFood.length - 1; j >= 0 ; j--) {
                 if (this.computeDistance(allPossibleThreats[i].x, allPossibleThreats[i].y, clusterAllFood[j].x, clusterAllFood[j].y) < secureDistance + shiftDistance)
