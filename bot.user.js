@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.751
+// @version     3.752
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.751;
+var aposBotVersion = 3.752;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -1234,6 +1234,9 @@ function AposBot() {
             //tempMoveX = destination[0];
             //tempMoveY = destination[1];
             drawLine(player.enclosingCell.x, player.enclosingCell.y, destination[0], destination[1], 1);
+            
+            console.log('drawing ' + [player.enclosingCell.x, player.enclosingCell.y, destination[0], destination[1]]);
+            
         } else {
             //If there are no enemies around and no food to eat.
             destinationChoices = [tempMoveX, tempMoveY];
