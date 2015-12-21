@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.767
+// @version     3.768
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.767;
+var aposBotVersion = 3.768;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -1207,15 +1207,13 @@ function AposBot() {
 
             	var cluster = clusterAllFood[i];
 
-            	var multiplier = 6;
-            	if (cluster.size > 14) {
-            		multiplier = 32;
-            	}
+            	var multiplier = 1;
+
             	if (cluster.x < getMapStartX()+1000 || 
             			cluster.x > getMapEndX()-1000 || 
             			cluster.y < getMapStartY()+1000 || 
             			cluster.y > getMapEndY()-1000) {
-            		multiplier = 1;
+            		multiplier = 2;
             	} else if (cluster.x < getMapStartX()+2000 || 
             			cluster.x > getMapEndX()-2000 || 
             			cluster.y < getMapStartY()+2000 ||
@@ -1224,7 +1222,7 @@ function AposBot() {
             	}
             	
             	var closestInfo = this.closestCell(player, cluster.x, cluster.y);
-                cluster.clusterSize = closestInfo.distance * Math.log(cluster.size);
+                cluster.clusterSize = closestInfo.distance * Math.log(cluster.size) * multiplier;
                 cluster.closestCell = closestInfo.cell;
 
                 drawPoint(cluster.x, cluster.y, 1, "" + parseInt(cluster.clusterSize, 10));
@@ -1233,13 +1231,13 @@ function AposBot() {
             var bestFoodI = 0;
             var bestFoodSize = clusterAllFood[0].clusterSize;
             for (i = 1; i < clusterAllFood.length; i++) {
-                if (bestFoodSize < clusterAllFood[i].clusterSize) {
+                if (clusterAllFood[i].clusterSize < bestFoodSize) {
                     bestFoodSize = clusterAllFood[i].clusterSize;
                     bestFoodI = i;
                 }
             }
             var bestFood = clusterAllFood[bestFoodI];
-            console.log(bestFood);
+
             // drawPoint(bestFood.x, bestFood.y, 1, "");
 
             if (bestFood.cell && !bestFood.cell.isNotMoving()) {
