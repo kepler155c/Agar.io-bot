@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.770
+// @version     3.771
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.770;
+var aposBotVersion = 3.771;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -1227,7 +1227,7 @@ function AposBot() {
             	}
             	
             	var closestInfo = this.closestCell(player, cluster.x, cluster.y);
-                cluster.clusterSize = closestInfo.distance / cluster.size * multiplier;
+                cluster.clusterSize = closestInfo.distance / cluster.size * 6 * multiplier ;
                 cluster.closestCell = closestInfo.cell;
 
                 drawPoint(cluster.x, cluster.y+20, 1, "" + parseInt(cluster.clusterSize, 10));
