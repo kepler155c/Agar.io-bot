@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.769
+// @version     3.770
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.769;
+var aposBotVersion = 3.770;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -378,12 +378,17 @@ function AposBot() {
                     isEnemy = false;
                 }
                 else if (that.isSplitTarget(that, player.largestCell, listToUse[element])) {
-                        drawCircle(listToUse[element].x, listToUse[element].y, listToUse[element].size + 50, 7);
-                        splitTargetList.push(listToUse[element]);
-                        foodElementList.push(listToUse[element]);
-                        mergeList.push(listToUse[element]);
+                    drawCircle(listToUse[element].x, listToUse[element].y, listToUse[element].size + 50, 7);
+                    splitTargetList.push(listToUse[element]);
+                    foodElementList.push(listToUse[element]);
+                    mergeList.push(listToUse[element]);
                 }
-                else {
+                else if (player.cells.length == 1 && that.canEat(player.largestCell, listToUse[element])) {
+
+                	foodElementList.push(listToUse[element]);
+                    mergeList.push(listToUse[element]);
+                	
+                } else {
                 	if (!that.isVirus(null, listToUse[element])) {
                 		mergeList.push(listToUse[element]);
                 	}
@@ -1225,7 +1230,7 @@ function AposBot() {
                 cluster.clusterSize = closestInfo.distance / cluster.size * multiplier;
                 cluster.closestCell = closestInfo.cell;
 
-                drawPoint(cluster.x, cluster.y+100, 1, "" + parseInt(cluster.clusterSize, 10));
+                drawPoint(cluster.x, cluster.y+20, 1, "" + parseInt(cluster.clusterSize, 10));
             }
             
             var bestFoodI = 0;
