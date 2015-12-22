@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.853
+// @version     3.854
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.853;
+var aposBotVersion = 3.854;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -1368,6 +1368,7 @@ function AposBot() {
             	
 				console.log("dist: " + cluster.enemyDist);
 				console.log(cluster.cell && cluster.cell.isSplitTarget);
+				console.log(cluster.cell.isSplitTarget);
 				console.log(cluster);
                 	//drawCircle(target.x, target.y, target.size + 30, 5);
 				player.isSplitting = true;
