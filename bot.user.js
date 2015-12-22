@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.830
+// @version     3.831
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.830;
+var aposBotVersion = 3.831;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -1001,7 +1001,7 @@ function AposBot() {
         	
         	var threat = allPossibleThreats[i];
 
-            var closestCell = threat.closetCell;
+            var closestCell = threat.closestCell;
             var enemyDistance = threat.enemyDist;
 
             if (enemyCanSplit) {	
@@ -1027,40 +1027,40 @@ function AposBot() {
             threat.dangerZone = secureDistance;
 
             for (j = clusterAllFood.length - 1; j >= 0 ; j--) {
-                if (this.computeDistance(allPossibleThreats[i].x, allPossibleThreats[i].y, clusterAllFood[j].x, clusterAllFood[j].y) < secureDistance + shiftDistance)
+                if (this.computeDistance(threat.x, threat.y, clusterAllFood[j].x, clusterAllFood[j].y) < secureDistance + shiftDistance)
                     clusterAllFood.splice(j, 1);
             }
 
-            if (panicMode || allPossibleThreats[i].danger && getLastUpdate() - allPossibleThreats[i].dangerTimeOut > 400) {
+            if (panicMode || threat.danger && getLastUpdate() - threat.dangerTimeOut > 400) {
 
-                allPossibleThreats[i].danger = false;
+                threat.danger = false;
             }
 
             /*if ((enemyCanSplit && enemyDistance < splitDangerDistance) ||
                 (!enemyCanSplit && enemyDistance < normalDangerDistance)) {
 
-                allPossibleThreats[i].danger = true;
-                allPossibleThreats[i].dangerTimeOut = f.getLastUpdate();
+                threat.danger = true;
+                threat.dangerTimeOut = f.getLastUpdate();
             }*/
 
             //console.log("Figured out who was important.");
             
-            if ((enemyCanSplit && enemyDistance < splitDangerDistance) || (enemyCanSplit && allPossibleThreats[i].danger)) {
+            if ((enemyCanSplit && enemyDistance < splitDangerDistance) || (enemyCanSplit && threat.danger)) {
 
-                badAngles.push(this.getAngleRange(closestCell, allPossibleThreats[i], i, splitDangerDistance).concat(allPossibleThreats[i].enemyDist));
+                badAngles.push(this.getAngleRange(closestCell, threat, i, splitDangerDistance).concat(threat.enemyDist));
 
-            } else if ((!enemyCanSplit && enemyDistance < normalDangerDistance) || (!enemyCanSplit && allPossibleThreats[i].danger)) {
+            } else if ((!enemyCanSplit && enemyDistance < normalDangerDistance) || (!enemyCanSplit && threat.danger)) {
 
-                badAngles.push(this.getAngleRange(closestCell, allPossibleThreats[i], i, normalDangerDistance).concat(allPossibleThreats[i].enemyDist));
+                badAngles.push(this.getAngleRange(closestCell, threat, i, normalDangerDistance).concat(threat.enemyDist));
 
             } else if (enemyCanSplit && enemyDistance < splitDangerDistance + shiftDistance) {
-                tempOb = this.getAngleRange(closestCell, allPossibleThreats[i], i, splitDangerDistance + shiftDistance);
+                tempOb = this.getAngleRange(closestCell, threat, i, splitDangerDistance + shiftDistance);
                 angle1 = tempOb[0];
                 angle2 = this.rangeToAngle(tempOb);
 
                 obstacleList.push([[angle1, true], [angle2, false]]);
             } else if (!enemyCanSplit && enemyDistance < normalDangerDistance + shiftDistance) {
-                tempOb = this.getAngleRange(closestCell, allPossibleThreats[i], i, normalDangerDistance + shiftDistance);
+                tempOb = this.getAngleRange(closestCell, threat, i, normalDangerDistance + shiftDistance);
                 angle1 = tempOb[0];
                 angle2 = this.rangeToAngle(tempOb);
 
