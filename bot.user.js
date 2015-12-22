@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.836
+// @version     3.837
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.836;
+var aposBotVersion = 3.837;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -403,8 +403,11 @@ function AposBot() {
                     isEnemy = false;
                 }
                 else if (that.isSplitTarget(player.smallestCell, listToUse[element])) {
-                    drawCircle(listToUse[element].x, listToUse[element].y, listToUse[element].size + 50, 7);
-                    splitTargetList.push(listToUse[element]);
+                	if (player.largestCell.mass / xxx.mass > 10) {
+                        drawCircle(listToUse[element].x, listToUse[element].y, listToUse[element].size + 50, 7);
+                        splitTargetList.push(listToUse[element]);
+                	}
+
                     foodElementList.push(listToUse[element]);
                     mergeList.push(listToUse[element]);
                 }
@@ -1443,7 +1446,6 @@ function AposBot() {
                         }
 
                         if (safeToSplit) {
-//drawCircle(player.largestCell.x, player.largestCell.y, player.largestCell.size + 850, 2);
                         	drawCircle(player.largestCell.x, player.largestCell.y, player.largestCell.size + 30, 2);
 	                        for (i = 0; i < allPossibleTargets.length; i++) {
 	                        	
