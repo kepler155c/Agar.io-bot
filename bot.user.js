@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.817
+// @version     3.818
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.817;
+var aposBotVersion = 3.818;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -376,7 +376,7 @@ function AposBot() {
             var xxx = listToUse[element];
 
             if (isMe) {
-                drawPoint(xxx.x, xxx.y+20, 1, " s:" + this.getSplitMass(xxx).toFixed(2));
+                drawPoint(xxx.x, xxx.y+20, 1, " s:" + that.getSplitMass(xxx).toFixed(2));
             } else {
             	
             	xxx.isMovingTowards = that.isMovingTowards(player.enclosingCell, xxx);
@@ -417,7 +417,7 @@ function AposBot() {
                 
                 if (isEnemy) {
                 	enemyList.push(listToUse[element]);
-                    drawPoint(xxx.x, xxx.y+20, 1, "m:" + this.getMass(xxx).toFixed(2) + " s:" + this.getSplitMass(xxx).toFixed(2));
+                    drawPoint(xxx.x, xxx.y+20, 1, "m:" + that.getMass(xxx).toFixed(2) + " s:" + that.getSplitMass(xxx).toFixed(2));
                 }
             }/*else if(isMe && (getBlobCount(getPlayer()) > 0)){
                 //Attempt to make the other cell follow the mother one
