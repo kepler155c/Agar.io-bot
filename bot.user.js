@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.852
+// @version     3.853
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.852;
+var aposBotVersion = 3.853;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -295,7 +295,7 @@ function AposBot() {
     };
 
     // can i split and eat someone
-    this.isSplitTarget = function(eater, eatee) {
+    this.canSplitKill = function(eater, eatee) {
 
     	if (eater.size > eatee.size) {
     		return this.getSplitMass(eater) / this.getMass(eatee) > 1.265;
@@ -378,12 +378,11 @@ function AposBot() {
             var isMe = that.isItMe(player, entity);
             var isEnemy = true;
             
-        	entity.isSplitTarget = false;
-
             if (isMe) {
                 drawPoint(entity.x, entity.y+20, 1, "m:" + that.getMass(entity).toFixed(2) + " s:" + that.getSplitMass(entity).toFixed(2));
             } else {
             	
+            	entity.isSplitTarget = false;
             	entity.isMovingTowards = that.isMovingTowards(player.enclosingCell, entity);
             	entity.mass = that.calculateMass(entity);
             	closestInfo = that.closestCell(player, entity.x, entity.y);
@@ -407,7 +406,7 @@ function AposBot() {
                     virusList.push(entity);
                     isEnemy = false;
                 }
-                else if (entity.closestCell.mass > 36 && that.isSplitTarget(player.smallestCell, entity)) {
+                else if (entity.closestCell.mass > 36 && that.canSplitKill(entity.closestCell, entity)) {
 
                 	// only split kill if it's moving
                 	entity.isSplitTarget = !entity.isNotMoving();
@@ -1092,7 +1091,7 @@ function AposBot() {
                 drawPoint(threat.x, threat.y+40, 1, "c:" + (this.getSplitMass(threat) / this.getMass(threat)).toFixed(2));
             }
             
-            var enemyCanSplit = this.isSplitTarget(threat, player.smallestCell);
+            var enemyCanSplit = this.canSplitKill(threat, player.smallestCell);
             
             if (enemyCanSplit && this.getRatio(threat, player.smallestCell) > 20) {
             	enemyCanSplit = false;
@@ -1365,9 +1364,10 @@ function AposBot() {
         	drawCircle(cluster.x, cluster.y, cluster.size + 30, 2);
 
             // drawPoint(bestFood.x, bestFood.y, 1, "");
-            if (cluster.cell && cluster.cell.isSplitTarget) {
+            if (cluster.cell != null && cluster.cell.isSplitTarget) {
             	
 				console.log("dist: " + cluster.enemyDist);
+				console.log(cluster.cell && cluster.cell.isSplitTarget);
 				console.log(cluster);
                 	//drawCircle(target.x, target.y, target.size + 30, 5);
 				player.isSplitting = true;
