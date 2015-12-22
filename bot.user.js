@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.827
+// @version     3.829
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.827;
+var aposBotVersion = 3.829;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -380,6 +380,10 @@ function AposBot() {
             	
             	xxx.isMovingTowards = that.isMovingTowards(player.enclosingCell, xxx);
             	xxx.mass = that.calculateMass(xxx);
+            	var distanceInfo = that.closestCell(player, xxx.x, xxx.y);
+
+            	xxx.closestCell = closestInfo.cell;
+                xxx.enemyDist = closestInfo.distance;
 
                 if (that.isFood(player.smallestCell, listToUse[element]) && listToUse[element].isNotMoving()) {
                     //IT'S FOOD!
@@ -436,28 +440,34 @@ function AposBot() {
         for (i = 0; i < mergeList.length; i++) {
             for (var z = 0; z < mergeList.length; z++) {
                 if (z != i && that.isMerging(mergeList[i], mergeList[z])) { //z != i && 
-                        //found cells that appear to be merging - if they constitute a threat add them to the theatlist
-                        
-                        //clone us a new cell
-                        var newThreat = {};
-                        var prop;
-                        
-                        for (prop in mergeList[i]) {
-                            newThreat[prop] = mergeList[i][prop];
-                        }
-                        
-                        //average distance and sum the size
-                        newThreat.x = (mergeList[i].x + mergeList[z].x)/2;
-                        newThreat.y = (mergeList[i].y + mergeList[z].y)/2;
-                        newThreat.size = (mergeList[i].size + mergeList[z].size);
-                        newThreat.mass = that.calculateMass(newThreat);
-                        newThreat.nopredict = true;
-                        //check its a threat
-                        if (that.isThreat(blob, newThreat)) {
-                             //IT'S DANGER!
-                            threatList.push(newThreat);
-                        }   
-                                          
+                    //found cells that appear to be merging - if they constitute a threat add them to the theatlist
+                    
+                    //clone us a new cell
+                    var newThreat = {};
+                    var prop;
+                    
+                    for (prop in mergeList[i]) {
+                        newThreat[prop] = mergeList[i][prop];
+                    }
+                    
+                    //average distance and sum the size
+                    newThreat.x = (mergeList[i].x + mergeList[z].x)/2;
+                    newThreat.y = (mergeList[i].y + mergeList[z].y)/2;
+                    newThreat.size = (mergeList[i].size + mergeList[z].size);
+                    newThreat.mass = that.calculateMass(newThreat);
+                    newThreat.isMovingTowards = true;
+
+                	var distanceInfo = that.closestCell(player, newThreat.x, newThreat.y);
+
+                	newThreat.closestCell = closestInfo.cell;
+                	newThreat.enemyDist = closestInfo.distance;
+                    
+                    newThreat.nopredict = true;
+                    //check its a threat
+                    if (that.isThreat(blob, newThreat)) {
+                         //IT'S DANGER!
+                        threatList.push(newThreat);
+                    }   
                 }
             }
         }
@@ -990,10 +1000,8 @@ function AposBot() {
         	
         	var threat = allPossibleThreats[i];
 
-        	var closestInfo = this.closestCell(player, threat.x, threat.y);
-
-            var closestCell = closestInfo.cell;
-            var enemyDistance = closestInfo.distance;
+            var closestCell = threat.closetCell;
+            var enemyDistance = threat.enemyDist;
 
             if (enemyCanSplit) {	
                 drawPoint(threat.x, threat.y+40, 1, "c:" + (this.getSplitMass(threat) / this.getMass(threat)).toFixed(2));
