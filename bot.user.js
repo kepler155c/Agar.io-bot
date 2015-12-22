@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.849
+// @version     3.850
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.849;
+var aposBotVersion = 3.850;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -380,7 +380,6 @@ function AposBot() {
             
         	entity.isSplitTarget = false;
 
-
             if (isMe) {
                 drawPoint(entity.x, entity.y+20, 1, "m:" + that.getMass(entity).toFixed(2) + " s:" + that.getSplitMass(entity).toFixed(2));
             } else {
@@ -409,8 +408,10 @@ function AposBot() {
                     isEnemy = false;
                 }
                 else if (that.isSplitTarget(player.smallestCell, entity)) {
-                	
-                	entity.isSplitTarget = true;
+
+                	// only split kill if it's moving
+                	entity.isSplitTarget = !entity.isNotMoving();
+
                 	//if (player.largestCell.mass / entity.mass > 10) {
                         drawCircle(entity.x, entity.y, entity.size + 50, 7);
                         splitTargetList.push(entity);
@@ -1033,14 +1034,15 @@ function AposBot() {
             
             var size = cluster.size;
             if (cluster.cell) {
-            	// prioritize enemies moving towards us
             	if (cluster.cell.isNotMoving()) {
                 	// easy food
             		size = size * 5;
             	} else if (player.safeToSplit && cluster.cell.isSplitTarget && cluster.enemyDist < this.splitDistance * 0.75 && target.mass > 10) {
             		size = size * 3;
-                } else if (cluster.cell.isMovingTowards) {
-            		size = size * 2;
+                }
+            	if (cluster.cell.isMovingTowards) {
+                	// prioritize enemies moving towards us
+            		size = size * 1.2;
                 }
             }
             cluster.clusterSize = closestInfo.distance / size * multiplier ;
@@ -1363,7 +1365,7 @@ function AposBot() {
         	drawCircle(cluster.x, cluster.y, cluster.size + 30, 2);
 
             // drawPoint(bestFood.x, bestFood.y, 1, "");
-            if (cluster.cell && !cluster.cell.isNotMoving()) {
+            if (cluster.cell && cluster.cell.isSplitTarget) {
             	
 				console.log("dist: " + cluster.enemyDist);
 				console.log(cluster);
