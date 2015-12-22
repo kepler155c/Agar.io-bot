@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.834
+// @version     3.835
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.834;
+var aposBotVersion = 3.835;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -1439,7 +1439,7 @@ console.log(newThreat);
                         	var enemy = allPossibleEnemies[i];
 //console.log('enemy size ' + enemy.size);
                         	if (cell.size * cell.size / 2 < enemy.size * enemy.size * 1.25) {
-                        		if (enemy.distance < 1350 + cell.size) {
+                        		if (enemy.distance < 750 + cell.size) {
                             		safeToSplit = false;
                             		break;
                         		}
@@ -1447,7 +1447,7 @@ console.log(newThreat);
                         }
 
                         if (safeToSplit) {
-drawCircle(player.largestCell.x, player.largestCell.y, player.largestCell.size + 1350, 2);
+//drawCircle(player.largestCell.x, player.largestCell.y, player.largestCell.size + 850, 2);
                         	drawCircle(player.largestCell.x, player.largestCell.y, player.largestCell.size + 30, 2);
 	                        for (i = 0; i < allPossibleTargets.length; i++) {
 	                        	
@@ -1456,13 +1456,14 @@ drawCircle(player.largestCell.x, player.largestCell.y, player.largestCell.size +
                             	var lastPos = target.getLastPos();
                             	var predictedX = target.x - (lastPos.x - target.x) * 20;
                             	var predictedY = target.y - (lastPos.y - target.y) * 20;
-                            	
+
                             	var enemyDistance = this.computeDistance(predictedX, predictedY, cell.x, cell.y, target.size);
 
                             	drawCircle(target.x, target.y, target.size + 30, 2);
 
                             	if (enemyDistance < this.splitDistance * 0.8) {
-	                            	
+console.log("dist: " + enemyDistance);
+console.log(target);
 	                            	drawCircle(target.x, target.y, target.size + 30, 5);
 									player.isSplitting = true;
 				                    setTimeout(function() {
