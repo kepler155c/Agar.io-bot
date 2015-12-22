@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.851
+// @version     3.852
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.851;
+var aposBotVersion = 3.852;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -407,7 +407,7 @@ function AposBot() {
                     virusList.push(entity);
                     isEnemy = false;
                 }
-                else if (player.closestCell.mass > 36 && that.isSplitTarget(player.smallestCell, entity)) {
+                else if (entity.closestCell.mass > 36 && that.isSplitTarget(player.smallestCell, entity)) {
 
                 	// only split kill if it's moving
                 	entity.isSplitTarget = !entity.isNotMoving();
