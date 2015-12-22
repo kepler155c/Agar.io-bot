@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.839
+// @version     3.840
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.839;
+var aposBotVersion = 3.840;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -1019,6 +1019,9 @@ function AposBot() {
             if (panicMode) {
             	console.log('panic mode');
             	enemyCanSplit = false;
+            	
+            	// save the biggest cell
+            	closestCell = player.largestCell;
             }
 
             var normalDangerDistance = threat.size + 150;
@@ -1074,22 +1077,36 @@ function AposBot() {
         //console.log("Done looking for enemies!");
 
         for (i = 0; i < allPossibleViruses.length; i++) {
-            var virusDistance = this.computeDistance(allPossibleViruses[i].x, allPossibleViruses[i].y, player.enclosingCell.x, player.enclosingCell.y);
-            if (player.largestCell.size < allPossibleViruses[i].size) {
-                if (virusDistance < (allPossibleViruses[i].size * 2)) {
-                    tempOb = this.getAngleRange(player.enclosingCell, allPossibleViruses[i], i, allPossibleViruses[i].size + 10);
-                    angle1 = tempOb[0];
-                    angle2 = this.rangeToAngle(tempOb);
-                    obstacleList.push([[angle1, true], [angle2, false]]);
-                }
-            } else {
-                if (virusDistance < (player.enclosingCell.size * 2)) {
-                    tempOb = this.getAngleRange(player.enclosingCell, allPossibleViruses[i], i, player.enclosingCell.size + 50);
-                    angle1 = tempOb[0];
-                    angle2 = this.rangeToAngle(tempOb);
-                    obstacleList.push([[angle1, true], [angle2, false]]);
-                }
-            }
+        	
+        	var virus = allPossibleViruses[i];
+
+        	for (j = 0; j < player.cells.length; j++) {
+
+        		var cell = player.cells[j];
+        		if (panicMode) {
+        			cell = player.largestCell;
+        		}
+        			
+        		var virusDistance = this.computeDistance(virus.x, virus.y, cell.x, cell.y);
+	            if (cell.size < virus.size) {
+	                if (virusDistance < (virus.size * 2)) {
+	                    tempOb = this.getAngleRange(cell, virus, i, virus.size + 10);
+	                    angle1 = tempOb[0];
+	                    angle2 = this.rangeToAngle(tempOb);
+	                    obstacleList.push([[angle1, true], [angle2, false]]);
+	                }
+	            } else {
+	                if (virusDistance < (cell.size * 2)) {
+	                    tempOb = this.getAngleRange(cell, virus, i, cell.size + 50);
+	                    angle1 = tempOb[0];
+	                    angle2 = this.rangeToAngle(tempOb);
+	                    obstacleList.push([[angle1, true], [angle2, false]]);
+	                }
+	            }
+	            if (panicMode) {
+	            	break;
+        		}
+        	}
         }
 
         var stupidList = [];
