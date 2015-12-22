@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.854
+// @version     3.855
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.854;
+var aposBotVersion = 3.855;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -1038,6 +1038,7 @@ function AposBot() {
             		size = size * 5;
             	} else if (player.safeToSplit && cluster.cell.isSplitTarget && cluster.enemyDist < this.splitDistance * 0.75 && cluster.cell.mass > 10) {
             		size = size * 3;
+            		cluster.canSplitKill = true;
                 }
             	if (cluster.cell.isMovingTowards) {
                 	// prioritize enemies moving towards us
@@ -1364,11 +1365,11 @@ function AposBot() {
         	drawCircle(cluster.x, cluster.y, cluster.size + 30, 2);
 
             // drawPoint(bestFood.x, bestFood.y, 1, "");
-            if (cluster.cell != null && cluster.cell.isSplitTarget) {
-            	
+            if (cluster.canSplitKill && player.safeToSplit) {
+
 				console.log("dist: " + cluster.enemyDist);
-				console.log(cluster.cell && cluster.cell.isSplitTarget);
-				console.log(cluster.cell.isSplitTarget);
+				console.log(cluster.canSplitKill);
+				console.log(player.safeToSplit);
 				console.log(cluster);
                 	//drawCircle(target.x, target.y, target.size + 30, 5);
 				player.isSplitting = true;
