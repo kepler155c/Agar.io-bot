@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.831
+// @version     3.832
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.831;
+var aposBotVersion = 3.832;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -454,10 +454,13 @@ function AposBot() {
                     //average distance and sum the size
                     newThreat.x = (mergeList[i].x + mergeList[z].x)/2;
                     newThreat.y = (mergeList[i].y + mergeList[z].y)/2;
-                    newThreat.size = (mergeList[i].size + mergeList[z].size);
-                    newThreat.mass = that.calculateMass(newThreat);
+                    newThreat.mass = mergeList[i].mass + mergeList[z].mass;
+                    newThreat.size = Math.sqrt(newThreat.mass * 100);
                     newThreat.isMovingTowards = true;
-
+console.log('======');
+console.log(mergeList[i]);
+console.log(mergeList[z]);
+console.log(newThreat);
                 	closestInfo = that.closestCell(player, newThreat.x, newThreat.y);
 
                 	newThreat.closestCell = closestInfo.cell;
