@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.835
+// @version     3.836
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.835;
+var aposBotVersion = 3.836;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -457,10 +457,6 @@ function AposBot() {
                     newThreat.mass = mergeList[i].mass + mergeList[z].mass;
                     newThreat.size = Math.sqrt(newThreat.mass * 100);
                     newThreat.isMovingTowards = true;
-console.log('======');
-console.log(mergeList[i]);
-console.log(mergeList[z]);
-console.log(newThreat);
                 	closestInfo = that.closestCell(player, newThreat.x, newThreat.y);
 
                 	newThreat.closestCell = closestInfo.cell;
@@ -1439,7 +1435,7 @@ console.log(newThreat);
                         	var enemy = allPossibleEnemies[i];
 //console.log('enemy size ' + enemy.size);
                         	if (cell.size * cell.size / 2 < enemy.size * enemy.size * 1.25) {
-                        		if (enemy.distance < 750 + cell.size) {
+                        		if (enemy.enemyDist < 750 + cell.size) {
                             		safeToSplit = false;
                             		break;
                         		}
