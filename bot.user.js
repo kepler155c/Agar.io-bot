@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.820
+// @version     3.821
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.820;
+var aposBotVersion = 3.821;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -376,12 +376,12 @@ function AposBot() {
             var xxx = listToUse[element];
 
             if (isMe) {
-                drawPoint(xxx.x, xxx.y+20, 1, " s:" + that.getSplitMass(xxx).toFixed(2));
+                drawPoint(xxx.x, xxx.y+40, 1, " s:" + that.getSplitMass(xxx).toFixed(2));
             } else {
             	
             	xxx.isMovingTowards = that.isMovingTowards(player.enclosingCell, xxx);
             	xxx.mass = that.calculateMass(xxx);
-            	
+
                 if (that.isFood(player.smallestCell, listToUse[element]) && listToUse[element].isNotMoving()) {
                     //IT'S FOOD!
                		foodElementList.push(listToUse[element]);
@@ -1284,7 +1284,7 @@ function AposBot() {
                 cluster.clusterSize = closestInfo.distance / size * multiplier ;
                 cluster.closestCell = closestInfo.cell;
                 
-                drawPoint(cluster.x, cluster.y+20, 1, "" + parseInt(cluster.clusterSize, 10) + " " + cluster.size);
+                drawPoint(cluster.x, cluster.y+60, 1, "" + parseInt(cluster.clusterSize, 10) + " " + cluster.size);
             }
             
             var bestFoodI = 0;
