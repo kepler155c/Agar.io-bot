@@ -1439,7 +1439,7 @@ console.log(newThreat);
                         	var enemy = allPossibleEnemies[i];
 //console.log('enemy size ' + enemy.size);
                         	if (cell.size * cell.size / 2 < enemy.size * enemy.size * 1.25) {
-                        		if (enemy.distance < 750 + cell.size) {
+                        		if (enemy.distance < 1350 + cell.size) {
                             		safeToSplit = false;
                             		break;
                         		}
@@ -1447,6 +1447,7 @@ console.log(newThreat);
                         }
 
                         if (safeToSplit) {
+drawCircle(player.largestCell.x, player.largestCell.y, player.largestCell.size + 1350, 2);
                         	drawCircle(player.largestCell.x, player.largestCell.y, player.largestCell.size + 30, 2);
 	                        for (i = 0; i < allPossibleTargets.length; i++) {
 	                        	
