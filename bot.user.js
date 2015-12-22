@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.826
+// @version     3.827
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.826;
+var aposBotVersion = 3.827;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -289,7 +289,7 @@ function AposBot() {
     
     this.canEat = function(eater, eatee) {
     	if (eater.size > eatee.size) {
-        	return this.getMass(eater) / this.getMass(eatee) > 1.25;
+        	return this.getMass(eater) / this.getMass(eatee) > 1.255;
     	}
     	return false;
     };
@@ -298,7 +298,7 @@ function AposBot() {
     this.isSplitTarget = function(eater, eatee) {
 
     	if (eater.size > eatee.size) {
-    		return this.getSplitMass(eater) / this.getMass(eatee) > 1.25;
+    		return this.getSplitMass(eater) / this.getMass(eatee) > 1.255;
     	}
     	return false;
     };
@@ -450,6 +450,7 @@ function AposBot() {
                         newThreat.x = (mergeList[i].x + mergeList[z].x)/2;
                         newThreat.y = (mergeList[i].y + mergeList[z].y)/2;
                         newThreat.size = (mergeList[i].size + mergeList[z].size);
+                        newThreat.mass = that.calculateMass(newThreat);
                         newThreat.nopredict = true;
                         //check its a threat
                         if (that.isThreat(blob, newThreat)) {
@@ -1021,7 +1022,7 @@ function AposBot() {
                     clusterAllFood.splice(j, 1);
             }
 
-            if (allPossibleThreats[i].danger && getLastUpdate() - allPossibleThreats[i].dangerTimeOut > 400) {
+            if (panicMode || allPossibleThreats[i].danger && getLastUpdate() - allPossibleThreats[i].dangerTimeOut > 400) {
 
                 allPossibleThreats[i].danger = false;
             }
