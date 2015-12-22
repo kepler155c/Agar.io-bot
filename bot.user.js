@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.832
+// @version     3.833
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.832;
+var aposBotVersion = 3.833;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -360,7 +360,7 @@ function AposBot() {
     	return this.computeInexpensiveDistance(b.x, b.y, a.x, a.y) < this.computeInexpensiveDistance(oldx, oldy, a.x, a.y);
     };
 
-    this.separateListBasedOnFunction = function(player, that, listToUse, blob) {
+    this.separateListBasedOnFunction = function(player, that, listToUse) {
         var foodElementList = [];
         var threatList = [];
         var virusList = [];
@@ -468,7 +468,7 @@ console.log(newThreat);
                     
                     newThreat.nopredict = true;
                     //check its a threat
-                    if (that.isThreat(blob, newThreat)) {
+                    if (that.isThreat(player.smallestCell, newThreat)) {
                          //IT'S DANGER!
                         threatList.push(newThreat);
                     }   
@@ -485,10 +485,10 @@ console.log(newThreat);
         return [foodList, threatList, virusList, splitTargetList, enemyList];
     };
 
-    this.getAll = function(player, blob) {
+    this.getAll = function(player) {
         var interNodes = getMemoryCells();
 
-        return this.separateListBasedOnFunction(player, this, interNodes, blob);
+        return this.separateListBasedOnFunction(player, this, interNodes);
     };
 
     this.clusterFood = function(player, foodList, blobSize) {
@@ -1406,7 +1406,7 @@ console.log(newThreat);
 
                     //loop through everything that is on the screen and
                     //separate everything in it's own category.
-                    var allIsAll = this.getAll(player, cell);
+                    var allIsAll = this.getAll(player);
 
                     //The food stored in element 0 of allIsAll
                     var allPossibleFood = allIsAll[0];
