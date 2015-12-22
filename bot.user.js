@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.838
+// @version     3.839
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.838;
+var aposBotVersion = 3.839;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -1459,7 +1459,7 @@ function AposBot() {
 
                             	drawCircle(target.x, target.y, target.size + 30, 2);
 
-                            	if (enemyDistance < this.splitDistance * 0.8) {
+                            	if (enemyDistance < this.splitDistance * 0.8 && target.mass > 10) {
 console.log("dist: " + enemyDistance);
 console.log(target);
 	                            	drawCircle(target.x, target.y, target.size + 30, 5);
