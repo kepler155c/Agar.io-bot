@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.815
+// @version     3.816
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.815;
+var aposBotVersion = 3.816;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -375,7 +375,9 @@ function AposBot() {
             var isEnemy = true;
             var xxx = listToUse[element];
 
-            if (!isMe) {
+            if (isMe) {
+                drawPoint(cell.x, cell.y+20, 1, " s:" + this.getSplitMass(cell).toFixed(2));
+            } else {
             	
             	xxx.isMovingTowards = that.isMovingTowards(player.enclosingCell, xxx);
             	xxx.mass = that.calculateMass(xxx);
@@ -415,6 +417,7 @@ function AposBot() {
                 
                 if (isEnemy) {
                 	enemyList.push(listToUse[element]);
+                    drawPoint(enemy.x, enemy.y+20, 1, "m:" + this.getMass(enemy).toFixed(2) + " s:" + this.getSplitMass(enemy).toFixed(2));
                 }
             }/*else if(isMe && (getBlobCount(getPlayer()) > 0)){
                 //Attempt to make the other cell follow the mother one
@@ -992,16 +995,16 @@ function AposBot() {
             var closestCell = closestInfo.cell;
             var enemyDistance = closestInfo.distance;
 
+            if (enemyCanSplit) {	
+                drawPoint(threat.x, threat.y+40, 1, "c:" + (this.getSplitMass(threat) / this.getMass(threat)).toFixed(2));
+            }
+            
             var enemyCanSplit = this.isSplitTarget(threat, player.smallestCell);
             
             if (enemyCanSplit && this.getRatio(threat, player.smallestCell) > 5) {
             	enemyCanSplit = false;
             }
 
-            if (enemyCanSplit) {	
-                drawPoint(threat.x, threat.y+40, 1, "c:" + (this.getSplitMass(threat) / this.getMass(threat)).toFixed(2));
-            }
-            
             if (panicMode) {
             	console.log('panic mode');
             	enemyCanSplit = false;
@@ -1013,8 +1016,6 @@ function AposBot() {
             var secureDistance = (enemyCanSplit ? splitDangerDistance : normalDangerDistance);
             
             threat.dangerZone = secureDistance;
-            
-            drawPoint(threat.x, threat.y+20, 1, "m:" + this.getMass(threat).toFixed(2) + " s:" + this.getSplitMass(threat).toFixed(2));
 
             for (j = clusterAllFood.length - 1; j >= 0 ; j--) {
                 if (this.computeDistance(allPossibleThreats[i].x, allPossibleThreats[i].y, clusterAllFood[j].x, clusterAllFood[j].y) < secureDistance + shiftDistance)
