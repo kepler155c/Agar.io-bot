@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.848
+// @version     3.849
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.848;
+var aposBotVersion = 3.849;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -377,6 +377,9 @@ function AposBot() {
         	var entity = listToUse[element];
             var isMe = that.isItMe(player, entity);
             var isEnemy = true;
+            
+        	entity.isSplitTarget = false;
+
 
             if (isMe) {
                 drawPoint(entity.x, entity.y+20, 1, "m:" + that.getMass(entity).toFixed(2) + " s:" + that.getSplitMass(entity).toFixed(2));
@@ -406,6 +409,8 @@ function AposBot() {
                     isEnemy = false;
                 }
                 else if (that.isSplitTarget(player.smallestCell, entity)) {
+                	
+                	entity.isSplitTarget = true;
                 	//if (player.largestCell.mass / entity.mass > 10) {
                         drawCircle(entity.x, entity.y, entity.size + 50, 7);
                         splitTargetList.push(entity);
@@ -1032,7 +1037,7 @@ function AposBot() {
             	if (cluster.cell.isNotMoving()) {
                 	// easy food
             		size = size * 5;
-            	} else if (player.safeToSplit && cluster.enemyDist < this.splitDistance * 0.75 && target.mass > 10) {
+            	} else if (player.safeToSplit && cluster.cell.isSplitTarget && cluster.enemyDist < this.splitDistance * 0.75 && target.mass > 10) {
             		size = size * 3;
                 } else if (cluster.cell.isMovingTowards) {
             		size = size * 2;
