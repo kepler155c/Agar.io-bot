@@ -1,3 +1,12 @@
+'use strict';
+
+/* jshint browser: true */
+/* global console, $ */
+/* global drawPoint, drawLine, drawCircle, drawArc, getModek, getMapStartX, getMapStartY */
+/* global getPointX, getPointY, getMapEndX, getMapEndY, getMouseX, getMouseY */
+/* global getZoomlessRatio, verticalDistance, getPlayer, screenToGameX, screenToGameY */
+/* global getX, getY, getMemoryCells, getCells, getMode, getLastUpdate */
+
 /*The MIT License (MIT)
 
 Copyright (c) 2015 Apostolique
@@ -480,8 +489,8 @@ function AposBot() {
         if (player.isSplitting || player.cells.length > 1 || player.splitTargets.length === 0) {
         	player.safeToSplit = false;
         }
-
-        foodList = [];
+        
+        var foodList = [];
         for (i = 0; i < foodElementList.length; i++) {
         	if (!this.foodInVirus(foodElementList[i], virusList)) {
         		foodList.push(foodElementList[i]);
@@ -802,11 +811,13 @@ function AposBot() {
         ];
     };
 
+    /*
     this.invertAngle = function(range) { // Where are you getting all of these vars from? (badAngles and angle)
         var angle1 = this.rangeToAngle(badAngles[i]);
         var angle2 = this.mod(badAngles[i][0] - angle, 360);
         return [angle1, angle2];
     },
+    */
 
     this.addWall = function(listToUse, blob) {
     	
@@ -1102,7 +1113,7 @@ function AposBot() {
         return player.foodClusters[bestFoodI];
     };
     
-    this.determineDestination = function(player, allPossibleThreats, allPossibleViruses) {
+    this.determineDestination = function(player, tempPoint, allPossibleThreats, allPossibleViruses) {
     	
         //The bot works by removing angles in which it is too
         //dangerous to travel towards to.
@@ -1111,6 +1122,7 @@ function AposBot() {
         var tempMoveX = getPointX();
         var tempMoveY = getPointY();
         var i, j, angle1, angle2, tempOb, line1, line2, diff, threat, shiftedAngle, destination, closestCell;
+        var destinationChoices;
         var panicMode = false;
     	var doSplit = false;
 
@@ -1203,7 +1215,8 @@ function AposBot() {
 		for (i = 0; i < allPossibleViruses.length; i++) {
 			var virus = allPossibleViruses[i];
 			
-			for (let cell of player.cells) {
+			for (j = 0; j < player.cells.length; j++) {
+				var cell = player.cells[j];
 				
 	            if (virus.distance < (cell.size * 2)) {
 	                tempOb = this.getAngleRange(cell, virus, i, cell.size + 50);
@@ -1404,7 +1417,7 @@ function AposBot() {
                 doSplit = true;
             }
 
-            angle = this.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
+            var angle = this.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
             shiftedAngle = this.shiftAngle(obstacleAngles, angle, [0, 360]);
 
             destination = this.followAngle(shiftedAngle, cluster.closestCell.x, cluster.closestCell.y, cluster.distance);
@@ -1458,7 +1471,7 @@ function AposBot() {
             //absolute game coordinate.
             var useMouseX = screenToGameX(getMouseX());
             var useMouseY = screenToGameY(getMouseY());
-            tempPoint = [useMouseX, useMouseY, 1];
+            var tempPoint = [useMouseX, useMouseY, 1];
 
             //The current destination that the cells were going towards.
 
@@ -1576,7 +1589,7 @@ function AposBot() {
                         drawCircle(splitTarget.x, splitTarget.y, splitTarget.size + 50, splitTarget.isSplitTarget ? constants.green : constants.gray );
                     }
 
-                    destinationChoices = this.determineDestination(player, allPossibleThreats, allPossibleViruses);
+                    destinationChoices = this.determineDestination(player, tempPoint, allPossibleThreats, allPossibleViruses);
                     
                     for (i = 0; i < allPossibleThreats.length; i++) {
 
