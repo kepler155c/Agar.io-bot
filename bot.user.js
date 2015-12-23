@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.884
+// @version     3.886
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.884;
+var aposBotVersion = 3.886;
 
 var constants = {
 	safeDistance: 150,
@@ -1099,7 +1099,7 @@ function AposBot() {
         var obstacleList = [];
         var tempMoveX = getPointX();
         var tempMoveY = getPointY();
-        var i, j, angle1, angle2, tempOb, line1, line2, diff, threat;
+        var i, j, angle1, angle2, tempOb, line1, line2, diff, threat, shiftedAngle, destination;
         var panicMode = false;
 
         for (j = 0; j < player.cells.length; j++) {
@@ -1324,9 +1324,9 @@ function AposBot() {
             //This is the follow the mouse mode
             var distance = this.computeDistance(player.enclosingCell.x, player.enclosingCell.y, tempPoint[0], tempPoint[1]);
 
-            var shiftedAngle = this.shiftAngle(obstacleAngles, this.getAngle(tempPoint[0], tempPoint[1], player.enclosingCell.x, player.enclosingCell.y), [0, 360]);
+            shiftedAngle = this.shiftAngle(obstacleAngles, this.getAngle(tempPoint[0], tempPoint[1], player.enclosingCell.x, player.enclosingCell.y), [0, 360]);
 
-            var destination = this.followAngle(shiftedAngle, player.enclosingCell.x, player.enclosingCell.y, distance);
+            destination = this.followAngle(shiftedAngle, player.enclosingCell.x, player.enclosingCell.y, distance);
 
             destinationChoices = destination;
             drawLine(player.enclosingCell.x, player.enclosingCell.y, destination[0], destination[1], 1);
@@ -1392,8 +1392,16 @@ function AposBot() {
             	player.splitTarget = cluster.cell;
             	
         		player.splitTimer = Date.now();
-        		player.splitLocation = { x: player.enclosingCell.x, y: player.enclosingCell.y };
+        		player.splitLocation = { 
+        				x: (player.largestCell.x - cluster.x) * 2, 
+        				y: (player.largestCell.y - cluster.y) * 2
+        		};
+        		
+        		cluster.x = player.splitLocation.x;
+        		cluster.y = player.splitLocation.y;        		
+        		
         		player.splitDistance = 0;
+        		player.splitMass = player.mass;
 
                 setTimeout(function() {
                 	player.isSplitting = false;
@@ -1406,9 +1414,9 @@ function AposBot() {
             }
 
             angle = this.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
-            var shiftedAngle = this.shiftAngle(obstacleAngles, angle, [0, 360]);
+            shiftedAngle = this.shiftAngle(obstacleAngles, angle, [0, 360]);
 
-            var destination = this.followAngle(shiftedAngle, cluster.closestCell.x, cluster.closestCell.y, cluster.enemyDist);
+            destination = this.followAngle(shiftedAngle, cluster.closestCell.x, cluster.closestCell.y, cluster.enemyDist);
 
             destinationChoices = [ destination[0], destination[1], doSplit ];
 
@@ -1476,10 +1484,12 @@ function AposBot() {
             			console.log(Date.now() - player.splitTimer);
             			console.log('max distance = ' + player.splitDistance);
             			console.log('velocity = ' + player.splitVelocity);
+            			console.log('mass = ' + player.splitMass);
             		}
             	}
             	
             	if (player.isSplitting) {
+                    drawCircle(player.splitLocation.x, player.splitLocation.y, 50, constants.green);
             		if (player.splitTarget) {
                 		return [ player.splitTarget.x, player.splitTarget.y ];
             		}
