@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.908
+// @version     3.909
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.908;
+var aposBotVersion = 3.909;
 
 var constants = {
 	safeDistance: 150,
@@ -283,7 +283,7 @@ function AposBot() {
     		return true;
     	}
 
-    	if (!cell.isVirus() && this.canEat(blob, cell, playerRatio)) {
+    	if (!cell.isVirus() && this.canEat(blob, cell, constants.playerRatio)) {
             return true;
         }
         return false;
@@ -435,7 +435,7 @@ function AposBot() {
                     foodElementList.push(entity);
                     mergeList.push(entity);
                 }
-                else if (player.cells.length == 1 && that.canEat(player.smallestCell, entity, playerRatio)) {
+                else if (player.cells.length == 1 && that.canEat(player.smallestCell, entity, constants.playerRatio)) {
 
                 	foodElementList.push(entity);
                     mergeList.push(entity);
