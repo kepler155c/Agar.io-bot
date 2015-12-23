@@ -56,7 +56,7 @@ var Player = function() {
 Player.prototype.setCells = function(cells) {
 	this.cells = cells;
 	this.isAlive = this.cells.length > 0;
-	this.totalSize = 0;
+	this.mass = 0;
     this.smallestCell = cells[0];
     this.largestCell = cells[0];
     
@@ -65,7 +65,7 @@ Player.prototype.setCells = function(cells) {
 		
 	    cell.mass = cell.size * cell.size / 100;
 
-	    this.totalSize = this.totalSize + cell.size;
+	    this.mass = this.mass + cell.mass;
 
     	if (cell.size < this.smallestCell.size) {
     		this.smallestCell = cell;

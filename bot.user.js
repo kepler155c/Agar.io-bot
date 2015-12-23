@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.862
+// @version     3.863
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.862;
+var aposBotVersion = 3.863;
 
 var constants = {
 	safeDistance: 150,
@@ -1017,25 +1017,26 @@ function AposBot() {
             //This is the cost function. Higher is better.
 
         	var cluster = player.foodClusters[i];
-
         	var multiplier = 3;
 
-        	if (cluster.x < getMapStartX()+1000 || 
-        			cluster.x > getMapEndX()-1000 || 
-        			cluster.y < getMapStartY()+1000 || 
-        			cluster.y > getMapEndY()-1000) {
-        		multiplier = 6;
-        	} else if (cluster.x < getMapStartX()+2000 || 
-        			cluster.x > getMapEndX()-2000 || 
-        			cluster.y < getMapStartY()+2000 ||
-        			cluster.y > getMapEndY()-2000) {
-        		multiplier = 9;
-        	}
-        	
         	var closestInfo = this.closestCell(player, cluster.x, cluster.y);
             cluster.closestCell = closestInfo.cell;
             cluster.enemyDist = closestInfo.distance;
-            
+
+        	if (cluster.x < getMapStartX()+2000) {
+        		multipler += (2000 - (custer.x - getMapStartX())) / 100;
+        	}
+        	if (cluster.y < getMapStartY()+2000) {
+        		multipler += (2000 - (custer.y - getMapStartY())) / 100;
+        	}
+
+        	if (cluster.x > getMapEndX()-2000) {
+        		multiplier += (cluster.x - getMapEndX() + getMapEndX() / 100);
+        	}
+        	if (cluster.y > getMapEndY()-2000) {
+        		multiplier += (cluster.y - getMapEndY() + getMapEndY() / 100);
+        	}
+console.log(multiplier);
             var weight = cluster.size;
             if (cluster.cell) {
             	
@@ -1219,28 +1220,18 @@ function AposBot() {
         //stupidList.push([[10, true], [200, false]]);
 
         stupidList.sort(function(a, b){
-            //console.log("Distance: " + a[2] + ", " + b[2]);
             return a[2]-b[2];
         });
-
-        //console.log("Added random noob stuff.");
 
         var sortedInterList = [];
         var sortedObList = [];
 
         for (i = 0; i < stupidList.length; i++) {
-            //console.log("Adding to sorted: " + stupidList[i][0][0] + ", " + stupidList[i][1][0]);
+
             var tempList = this.addAngle(sortedInterList, stupidList[i]);
 
             if (tempList.length === 0) {
                 console.log("MAYDAY IT'S HAPPENING!");
-
-                /*
-                for (var i = 0; i < allPossibleThreats.length; i++) {
-
-                    var enemyDistance = this.computeDistance(allPossibleThreats[i].x, allPossibleThreats[i].y, cell.x, cell.y, allPossibleThreats[i].size);
-                }
-                */
 
                 break;
             } else {
@@ -1378,24 +1369,10 @@ function AposBot() {
             // drawPoint(bestFood.x, bestFood.y, 1, "");
             if (cluster.canSplitKill && player.safeToSplit) {
 
-				console.log("dist: " + cluster.enemyDist);
-				console.log(cluster.canSplitKill);
-				console.log(player.safeToSplit);
-				console.log(cluster);
-
 				var food = cluster.cell;
 
 				var angle = this.getAngle(food.getLastPos().x, food.getLastPos().y, food.x, food.y);
         		
-            	console.log(food);
-            	console.log("angle: " + angle);
-            	console.log("sin: " + Math.sin(angle));
-            	console.log("cos: " + Math.cos(angle));
-            	console.log('dist: ' + food.enemyDist);
-            	// console.log("velocity: " + Math.sqrt(lastPos.x*))
-            	console.log(food.x + 'x' + food.y + '   ' + cluster.x + 'x' + cluster.y)
-
-				//drawCircle(target.x, target.y, target.size + 30, 5);
 				player.isSplitting = true;
             	player.splitTarget = cluster.cell;
 
@@ -1484,7 +1461,7 @@ function AposBot() {
 
             	drawCircle(player.enclosingCell.x, player.enclosingCell.y, player.enclosingCell.size + this.splitDistance, 5);
             	
-                drawLine(player.enclosingCell.x, player.enclosingCell.y, player.enclosingCell.x, player.enclosingCell.y + player.totalSize, 7);
+                drawLine(player.enclosingCell.x, player.enclosingCell.y, player.enclosingCell.x, player.enclosingCell.y + player.size, 7);
 
             	//Loops only for one cell for now.
                 for (var k = 0; /*k < player.length*/ k < 1; k++) {
