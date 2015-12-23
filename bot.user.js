@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.921
+// @version     3.922
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.921;
+var aposBotVersion = 3.922;
 
 var constants = {
 	safeDistance: 150,
@@ -46,7 +46,7 @@ var constants = {
     splitRangeMin: 650,
     splitRangeMax: 674.5,
     enemySplitDistance: 710,
-    lureDistance: 900,
+    lureDistance: 1000,
 
 	red: 0,
     green: 1,
@@ -1097,7 +1097,7 @@ function AposBot() {
 
             	if (cluster.cell.isNotMoving()) {
                 	// easy food
-            		weight = weight * 50;
+            		weight = weight * 25;
             	} else if (player.safeToSplit && cluster.cell.isSplitTarget && 
             			this.inSplitRange(cluster.cell)) {
             		weight = weight * 3;
