@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.878
+// @version     3.879
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.878;
+var aposBotVersion = 3.879;
 
 var constants = {
 	safeDistance: 150,
@@ -1379,7 +1379,7 @@ function AposBot() {
         } else if (player.foodClusters.length > 0) {
         	
         	var doSplit = false;
-        	var needVelocity = player.splitVelocity == 0 && player.cells.length == 1 && player.mass >= 36;
+        	var needVelocity = player.splitVelocity == 0 && player.largestCell.mass >= 36;
 
         	var cluster = this.getBestFood(player);
 
@@ -1388,10 +1388,6 @@ function AposBot() {
             // drawPoint(bestFood.x, bestFood.y, 1, "");
             if ((cluster.canSplitKill && player.safeToSplit) || needVelocity) {
 
-				var food = cluster.cell;
-
-				var angle = this.getAngle(food.getLastPos().x, food.getLastPos().y, food.x, food.y);
-        		
 				player.isSplitting = true;
             	player.splitTarget = cluster.cell;
             	
@@ -1403,8 +1399,9 @@ function AposBot() {
                 setTimeout(function() {
                 	player.isSplitting = false;
                 	player.splitTarget = null;
+                	player.
                 	console.log('resetting split timer');
-                }, 1000);
+                }, 2000);
                 
                 doSplit = true;
             }
@@ -1471,7 +1468,7 @@ function AposBot() {
                 }
                 */
 
-            	if (player.splitVelocity == 0 && player.splitLocation) {
+            	if (player.isSplitting) {
             		var distance = this.computeDistance(player.cells[0].x, player.cells[0].y, 
             				player.cells[1].x, player.cells[1].y);
             		if (distance > player.splitDistance) {
@@ -1479,11 +1476,14 @@ function AposBot() {
             			console.log(Date.now() - player.splitTimer);
             			console.log('max distance = ' + player.splitDistance);
             		}
-
+            	}
+            	
+            	if (player.cells.length == 1) {
+            		player.splitVelocity = 0;
             	}
             	
             	if (player.isSplitting) {
-            		return [ getPointX(), getPointY() ];
+            		return [ player.splitTarget.x, player.splitTarget.y ];
             	}
 
             	if (player.cells.length > 1) {
