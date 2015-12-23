@@ -24,15 +24,15 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.856
+// @version     3.857
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.856;
+var aposBotVersion = 3.857;
 
 var constants = {
-	safeDistance: 0, // 150,
+	safeDistance: 150,
 }
 
 //TODO: Team mode
