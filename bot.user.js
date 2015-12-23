@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.894
+// @version     3.895
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.894;
+var aposBotVersion = 3.895;
 
 var constants = {
 	safeDistance: 150,
@@ -1397,7 +1397,7 @@ function AposBot() {
             destination = this.followAngle(shiftedAngle, cluster.closestCell.x, cluster.closestCell.y, cluster.enemyDist);
 
             // are we avoiding obstacles ??
-            if (doSplit && destination[0] == cluster.x && destination[1] == cluster.y) {
+            if (obstacleAngles.length == 0) {
 				player.isSplitting = true;
             	player.splitTarget = cluster.cell;
             	
