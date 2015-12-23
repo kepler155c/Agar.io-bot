@@ -451,7 +451,7 @@ function AposBot() {
                 		if (player.cells.length > 1 && player.mass / entity.mass < 10 && !entity.isNotMoving()) {
                             foodElementList.push(entity);
                 			entity.isSplitTarget = true;
-                			console.log("adding to food list: " + entity.name)
+                			console.log("adding to food list: " + entity.name);
                 		}
                 	}
                 	
