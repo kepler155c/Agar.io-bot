@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.861
+// @version     3.862
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.861;
+var aposBotVersion = 3.862;
 
 var constants = {
 	safeDistance: 150,
@@ -1173,9 +1173,9 @@ function AposBot() {
         	
         	var virus = allPossibleViruses[i];
 
-        	for (j = 0; j < player.cells.length; j++) {
+        	//for (j = 0; j < player.cells.length; j++) {
 
-        		var cell = player.cells[j];
+        		var cell = player.enclosingCell; // player.cells[j];
         		if (panicMode) {
 //        			cell = player.largestCell;
         		}
@@ -1199,7 +1199,7 @@ function AposBot() {
 	            if (panicMode) {
 //	            	break;
         		}
-        	}
+//        	}
         }
 
         var stupidList = [];
@@ -1484,7 +1484,7 @@ function AposBot() {
 
             	drawCircle(player.enclosingCell.x, player.enclosingCell.y, player.enclosingCell.size + this.splitDistance, 5);
             	
-                drawLine(player.enclosingCell.x, player.enclosingCell.y, player.enclosingCell.x, player.enclosingCell.y + player.totalSize / 2, 7);
+                drawLine(player.enclosingCell.x, player.enclosingCell.y, player.enclosingCell.x, player.enclosingCell.y + player.totalSize, 7);
 
             	//Loops only for one cell for now.
                 for (var k = 0; /*k < player.length*/ k < 1; k++) {
