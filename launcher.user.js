@@ -20,11 +20,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.211
+// @version     4.212
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.211;
+var aposLauncherVersion = 4.212;
 
 var showAd = true;
 var badSize = 1500;
@@ -468,13 +468,13 @@ console.log("Running Bot Launcher!");
 
     function sb() {
         la && (la = !1, setTimeout(function() {
-            la = !0;
+            la = !0
                 //UPDATE
-        }, 6E4 * Ya));
+        }, 6E4 * Ya))
     }
 
     function Z(a) {
-        return d.i18n[a] || d.i18n_dict.en[a] || a;
+        return d.i18n[a] || d.i18n_dict.en[a] || a
     }
 
     function Za() {
@@ -492,11 +492,11 @@ console.log("Running Bot Launcher!");
             cache: !1,
             crossDomain: !0,
             data: (y + P || "?") + "\n2200049715"
-        });
+        })
     }
 
     function I() {
-        ya && y && (e("#connecting").show(), Za());
+        ya && y && (e("#connecting").show(), Za())
     }
 
     function Ca(a, b) {
@@ -505,20 +505,20 @@ console.log("Running Bot Launcher!");
             q.onmessage = null;
             q.onclose = null;
             try {
-                q.close();
+                q.close()
             } catch (c) {}
-            q = null;
+            q = null
         }
         Da.ip && (a = "ws://" + Da.ip);
-        if (null !== L) {
+        if (null != L) {
             var l = L;
             L = function() {
-                l(b);
-            };
+                l(b)
+            }
         }
         if (tb) {
             var d = a.split(":");
-            a = d[0] + "s://ip-" + d[1].replace(/\./g, "-").replace(/\//g, "") + ".tech.agar.io:" + +d[2];
+            a = d[0] + "s://ip-" + d[1].replace(/\./g, "-").replace(/\//g, "") + ".tech.agar.io:" + +d[2]
         }
         M = [];
         k = [];
@@ -1294,9 +1294,9 @@ console.log("Running Bot Launcher!");
         for (var i = 0; i < player.cells.length; i++) {
 
         	var cell = player.cells[i];
-        	var cellInfo = "Cell " + i + " Size: " + parseInt(cell.size, 10);
+        	var cellInfo = "Cell " + i + " Mass: " + parseInt(cell.size, 10);
         	if (cell.fuseTime) {
-        		cellInfo += "Fuse: " + parseInt((cell.fuseTime - Date.now()) / 1000, 10);
+        		cellInfo += "Fuse: " + parseInt(cell.fuseTime - Date.now()) / 1000, 10);
         	}
             debugStrings.push(cellInfo);
         }
