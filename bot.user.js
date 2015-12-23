@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.895
+// @version     3.896
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.895;
+var aposBotVersion = 3.896;
 
 var constants = {
 	safeDistance: 150,
@@ -1397,7 +1397,7 @@ function AposBot() {
             destination = this.followAngle(shiftedAngle, cluster.closestCell.x, cluster.closestCell.y, cluster.enemyDist);
 
             // are we avoiding obstacles ??
-            if (obstacleAngles.length == 0) {
+            if (doSplit && obstacleAngles.length == 0) {
 				player.isSplitting = true;
             	player.splitTarget = cluster.cell;
             	
@@ -1409,8 +1409,8 @@ function AposBot() {
         				starty: player.largestCell.y
         		};
         		
-        		cluster.x = player.splitLocation.x;
-        		cluster.y = player.splitLocation.y;        		
+        		destination[0] = player.splitLocation.x;
+        		destination[1] = player.splitLocation.y;        		
         		
         		player.splitDistance = 0;
         		player.splitMass = player.mass;
@@ -1422,9 +1422,6 @@ function AposBot() {
                 	console.log('resetting split timer');
                 }, 1000);
             } else {
-            	console.log('not equal');
-            	console.log(destination[0] == cluster.x && destination[1] == cluster.y);
-            	console.log(destination[0] + ' ' + cluster.x + ' ' + destination[1] + ' ' + cluster.y);
             	doSplit = false;
             }
             
