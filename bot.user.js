@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.860
+// @version     3.861
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.860;
+var aposBotVersion = 3.861;
 
 var constants = {
 	safeDistance: 150,
@@ -1036,30 +1036,36 @@ function AposBot() {
             cluster.closestCell = closestInfo.cell;
             cluster.enemyDist = closestInfo.distance;
             
-            var size = cluster.size;
+            var weight = cluster.size;
             if (cluster.cell) {
+            	
+            	if (player.isSplitting && player.splitTarget == cluster.cell) {
+            		weight = weight * 5;
+           			console.log("increasing weight");
+            	}
+            	
             	if (cluster.cell.isNotMoving()) {
                 	// easy food
-            		size = size * 5;
+            		weight = weight * 5;
             	} else if (player.safeToSplit && cluster.cell.isSplitTarget && cluster.enemyDist < this.splitDistance * 0.75 && cluster.cell.mass > 10) {
-            		size = size * 3;
+            		weight = weight * 3;
             		cluster.canSplitKill = true;
                 }
             	if (cluster.cell.isMovingTowards) {
                 	// prioritize enemies moving towards us
-            		size = size * 1.2;
+            		weight = weight * 1.2;
                 }
             }
-            cluster.clusterSize = closestInfo.distance / size * multiplier ;
+            cluster.clusterWeight = closestInfo.distance / weight * multiplier ;
             
-            drawPoint(cluster.x, cluster.y+60, 1, "" + parseInt(cluster.clusterSize, 10) + " " + parseInt(cluster.size, 10));
+            drawPoint(cluster.x, cluster.y+60, 1, "" + parseInt(cluster.clusterWeight, 10) + " " + parseInt(cluster.size, 10));
         }
         
         var bestFoodI = 0;
-        var bestFoodSize = player.foodClusters[0].clusterSize;
+        var bestClusterWeight = player.foodClusters[0].clusterWeight;
         for (i = 1; i < player.foodClusters.length; i++) {
-            if (player.foodClusters[i].clusterSize < bestFoodSize) {
-                bestFoodSize = player.foodClusters[i].clusterSize;
+            if (player.foodClusters[i].clusterWeight < bestClusterWeight) {
+                bestClusterWeight = player.foodClusters[i].clusterWeight;
                 bestFoodI = i;
             }
         }
@@ -1108,7 +1114,7 @@ function AposBot() {
             	enemyCanSplit = false;
             	
             	// save the biggest cell
-            	closestCell = player.largestCell;
+//            	closestCell = player.largestCell;
             }
 
             var normalDangerDistance = threat.size + constants.safeDistance;
@@ -1171,7 +1177,7 @@ function AposBot() {
 
         		var cell = player.cells[j];
         		if (panicMode) {
-        			cell = player.largestCell;
+//        			cell = player.largestCell;
         		}
         			
         		var virusDistance = this.computeDistance(virus.x, virus.y, cell.x, cell.y);
@@ -1191,7 +1197,7 @@ function AposBot() {
 	                }
 	            }
 	            if (panicMode) {
-	            	break;
+//	            	break;
         		}
         	}
         }
@@ -1391,9 +1397,11 @@ function AposBot() {
 
 				//drawCircle(target.x, target.y, target.size + 30, 5);
 				player.isSplitting = true;
+            	player.splitTarget = cluster.cell;
 
                 setTimeout(function() {
                 	player.isSplitting = false;
+                	player.splitTarget = null;
                 	console.log('resetting split timer');
                 }, 500);
                 
@@ -1474,13 +1482,16 @@ function AposBot() {
                 	drawCircle(player.enclosingCell.x, player.enclosingCell.y, player.enclosingCell.size + 30, 2);
             	}
 
-                //Loops only for one cell for now.
+            	drawCircle(player.enclosingCell.x, player.enclosingCell.y, player.enclosingCell.size + this.splitDistance, 5);
+            	
+                drawLine(player.enclosingCell.x, player.enclosingCell.y, player.enclosingCell.x, player.enclosingCell.y + player.totalSize / 2, 7);
+
+            	//Loops only for one cell for now.
                 for (var k = 0; /*k < player.length*/ k < 1; k++) {
 
                     //console.log("Working on blob: " + k);
                 	var cell = player.cells[k];
 
-                    drawCircle(player.enclosingCell.x, player.enclosingCell.y, player.enclosingCell.size + this.splitDistance, 5);
                     //drawPoint(player[0].x, player[0].y - player[0].size, 3, "" + Math.floor(player[0].x) + ", " + Math.floor(player[0].y));
 
                     //var allDots = processEverything(interNodes);
