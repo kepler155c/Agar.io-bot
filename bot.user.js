@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.866
+// @version     3.867
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.866;
+var aposBotVersion = 3.867;
 
 var constants = {
 	safeDistance: 150,
@@ -1034,7 +1034,7 @@ function AposBot() {
         		multiplier += (2000 - (getMapEndX() - cluster.x)) / 100;
         	}
         	if (cluster.y > getMapEndY()-2000) {
-        		multiplier += (2000 - (getMapEndY() + cluster.y)) / 100;
+        		multiplier += (2000 - (getMapEndY() - cluster.y)) / 100;
         	}
 console.log('multiplier: ' + multiplier);
             var weight = cluster.size;
@@ -1044,7 +1044,10 @@ console.log('multiplier: ' + multiplier);
             		weight = weight * 5;
            			console.log("increasing weight");
             	}
-            	
+            	if (cluster.cell.isSplitTarget) {
+            		weight = weight * 2;
+            	}
+
             	if (cluster.cell.isNotMoving()) {
                 	// easy food
             		weight = weight * 5;
