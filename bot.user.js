@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.907
+// @version     3.908
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.907;
+var aposBotVersion = 3.908;
 
 var constants = {
 	safeDistance: 150,
@@ -44,6 +44,9 @@ var constants = {
     cyan: 6,
     gray: 7,
     black: 8,
+    
+    playerRatio: 1.27,
+    enemyRatio: 1.26,
 };
 
 //TODO: Team mode
@@ -280,7 +283,7 @@ function AposBot() {
     		return true;
     	}
 
-    	if (!cell.isVirus() && this.canEat(blob, cell)) {
+    	if (!cell.isVirus() && this.canEat(blob, cell, playerRatio)) {
             return true;
         }
         return false;
@@ -302,25 +305,25 @@ function AposBot() {
     	return this.getMass(eater) / this.getMass(eatee);
     };
     
-    this.canEat = function(eater, eatee) {
+    this.canEat = function(eater, eatee, ratio) {
     	if (eater.size > eatee.size) {
-        	return this.getMass(eater) / this.getMass(eatee) > 1.265;
+        	return this.getMass(eater) / this.getMass(eatee) > ratio;
     	}
     	return false;
     };
 
     // can i split and eat someone
-    this.canSplitKill = function(eater, eatee) {
+    this.canSplitKill = function(eater, eatee, ratio) {
 
     	if (eater.size > eatee.size) {
-    		return this.getSplitMass(eater) / this.getMass(eatee) > 1.265;
+    		return this.getSplitMass(eater) / this.getMass(eatee) > ratio;
     	}
     	return false;
     };
 
     this.isThreat = function(blob, cell) {
     	
-        if (!cell.isVirus() && this.canEat(cell, blob)) {
+        if (!cell.isVirus() && this.canEat(cell, blob, constants.playerRatio)) {
             return true;
         }
         return false;
@@ -421,7 +424,7 @@ function AposBot() {
                     virusList.push(entity);
                     isEnemy = false;
                 }
-                else if (entity.closestCell.mass > 36 && that.canSplitKill(entity.closestCell, entity)) {
+                else if (entity.closestCell.mass > 36 && that.canSplitKill(entity.closestCell, entity, constants.playerRatio)) {
 
                 	if (player.largestCell.mass / entity.mass < 10) {
                     	// only split kill if it's moving
@@ -432,7 +435,7 @@ function AposBot() {
                     foodElementList.push(entity);
                     mergeList.push(entity);
                 }
-                else if (player.cells.length == 1 && that.canEat(player.smallestCell, entity)) {
+                else if (player.cells.length == 1 && that.canEat(player.smallestCell, entity, playerRatio)) {
 
                 	foodElementList.push(entity);
                     mergeList.push(entity);
@@ -1117,7 +1120,7 @@ function AposBot() {
                 drawPoint(threat.x, threat.y+40, 1, "c:" + (this.getSplitMass(threat) / this.getMass(threat)).toFixed(2));
             }
             
-            var enemyCanSplit = this.canSplitKill(threat, player.smallestCell);
+            var enemyCanSplit = this.canSplitKill(threat, player.smallestCell, constants.enemyRatio);
             
             if (enemyCanSplit && this.getRatio(threat, player.smallestCell) > 20) {
             	enemyCanSplit = false;
