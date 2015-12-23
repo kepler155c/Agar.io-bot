@@ -24,15 +24,24 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.868
+// @version     3.870
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.868;
+var aposBotVersion = 3.870;
 
 var constants = {
 	safeDistance: 150,
+    red: 0,
+    green: 1,
+    blue: 2,
+    orange: 3,
+    purple: 4,
+    pink: 5,
+    cyan: 6,
+    gray: 7,
+    black: 8,
 }
 
 //TODO: Team mode
@@ -412,7 +421,7 @@ function AposBot() {
                 }
                 else if (entity.closestCell.mass > 36 && that.canSplitKill(entity.closestCell, entity)) {
 
-                	if (player.largestCell.mass / entity.mass > 10) {
+                	if (player.largestCell.mass / entity.mass < 10) {
                     	// only split kill if it's moving
                     	entity.isSplitTarget = !entity.isNotMoving();
                 	}
@@ -1034,7 +1043,7 @@ function AposBot() {
         	if (cluster.y > getMapEndY()-2000) {
         		multiplier += (2000 - (getMapEndY() - cluster.y)) / 100;
         	}
-console.log('multiplier: ' + multiplier);
+
             var weight = cluster.size;
             if (cluster.cell) {
             	
@@ -1504,7 +1513,7 @@ console.log('multiplier: ' + multiplier);
                     
                     for (i = 0; i < player.splitTargets.length; i++) {
                     	var splitTarget = player.splitTargets[i];
-                        drawCircle(splitTarget.x, splitTarget.y, splitTarget.size + 50, splitTarget.isSplitTarget ? 7 : 5);
+                        drawCircle(splitTarget.x, splitTarget.y, splitTarget.size + 50, splitTarget.isSplitTarget ? constants.green : constants.gray );
                     }
 
                     destinationChoices = this.determineDestination(player, allPossibleThreats, allPossibleViruses);
