@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.910
+// @version     3.911
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.910;
+var aposBotVersion = 3.911;
 
 var constants = {
 	safeDistance: 150,
@@ -365,10 +365,6 @@ function AposBot() {
         }
         return false;
     };
-    
-    this.entityInsideEntities() {
-    	
-    }
     
     this.isMovingTowards = function(a, b) {
 
