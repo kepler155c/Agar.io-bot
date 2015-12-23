@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.858
+// @version     3.859
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.858;
+var aposBotVersion = 3.859;
 
 var constants = {
 	safeDistance: 150,
@@ -530,20 +530,9 @@ function AposBot() {
         		
             	var lastPos = food.getLastPos();
 
-            	var angle = this.getAngle(lastPos.x, lastPos.y, food.x, food.y);
-            	
-            	console.log(food);
-            	console.log("angle: " + angle);
-            	console.log("sin: " + Math.sin(angle));
-            	console.log("cos: " + Math.cos(angle));
-            	console.log('dist: ' + food.enemyDist);
-            	// console.log("velocity: " + Math.sqrt(lastPos.x*))
-        		
             	var predictedX = food.x - (lastPos.x - food.x) * (food.enemyDist/750) * 30;
             	var predictedY = food.y - (lastPos.y - food.y) * (food.enemyDist/750) * 30;
 
-            	console.log(food.x + 'x' + food.y + '   ' + predictedX + 'x' + predictedY)
-            	
                 clusters.push({
                 	x: predictedX, y: predictedY, size: food.size, cell: food
                 });
@@ -1387,7 +1376,20 @@ function AposBot() {
 				console.log(cluster.canSplitKill);
 				console.log(player.safeToSplit);
 				console.log(cluster);
-                	//drawCircle(target.x, target.y, target.size + 30, 5);
+
+				var food = cluster.cell;
+
+				var angle = this.getAngle(food.getLastPos().x, food.getLastPos().y, food.x, food.y);
+        		
+            	console.log(food);
+            	console.log("angle: " + angle);
+            	console.log("sin: " + Math.sin(angle));
+            	console.log("cos: " + Math.cos(angle));
+            	console.log('dist: ' + food.enemyDist);
+            	// console.log("velocity: " + Math.sqrt(lastPos.x*))
+            	console.log(food.x + 'x' + food.y + '   ' + cluster.x + 'x' + cluster.y)
+
+				//drawCircle(target.x, target.y, target.size + 30, 5);
 				player.isSplitting = true;
 
                 setTimeout(function() {
