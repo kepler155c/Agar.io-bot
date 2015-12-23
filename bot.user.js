@@ -24,12 +24,16 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.855
+// @version     3.856
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.855;
+var aposBotVersion = 3.856;
+
+var constants = {
+	safeDistance: 0, // 150,
+}
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -525,9 +529,21 @@ function AposBot() {
         	if (!food.isNotMoving()) {
         		
             	var lastPos = food.getLastPos();
-            	var predictedX = food.x - (lastPos.x - food.x) * 30;
-            	var predictedY = food.y - (lastPos.y - food.y) * 30;
 
+            	var angle = this.getAngle(lastPos.x, lastPos.y, food.x, food.y);
+            	
+            	console.log(food);
+            	console.log("angle: " + angle);
+            	console.log("sin: " + Math.sin(angle));
+            	console.log("cos: " + Math.cos(angle));
+            	console.log('dist: ' + food.enemyDist);
+            	// console.log("velocity: " + Math.sqrt(lastPos.x*))
+        		
+            	var predictedX = food.x - (lastPos.x - food.x) * (750/food.enemyDist) * 30;
+            	var predictedY = food.y - (lastPos.y - food.y) * (750/food.enemyDist) * 30;
+
+            	console.log(food.x + 'x' + food.y + '   ' + predictedX + 'x' + predictedY)
+            	
                 clusters.push({
                 	x: predictedX, y: predictedY, size: food.size, cell: food
                 });
@@ -932,8 +948,8 @@ function AposBot() {
 
         //console.log("Adding badAngles: " + leftAngle + ", " + rightAngle + " diff: " + difference);
 
-        var lineLeft = this.followAngle(leftAngle, blob1.x, blob1.y, 150 + blob1.size - index * 10);
-        var lineRight = this.followAngle(rightAngle, blob1.x, blob1.y, 150 + blob1.size - index * 10);
+        var lineLeft = this.followAngle(leftAngle, blob1.x, blob1.y, constants.safeDistance + blob1.size - index * 10);
+        var lineRight = this.followAngle(rightAngle, blob1.x, blob1.y, constants.safeDistance + blob1.size - index * 10);
 
         if (blob2.isVirus()) {
             drawLine(blob1.x, blob1.y, lineLeft[0], lineLeft[1], 6);
@@ -1106,9 +1122,9 @@ function AposBot() {
             	closestCell = player.largestCell;
             }
 
-            var normalDangerDistance = threat.size + 150;
+            var normalDangerDistance = threat.size + constants.safeDistance;
             var shiftDistance = player.enclosingCell.size;
-            var splitDangerDistance = threat.size + this.splitDistance + 150;
+            var splitDangerDistance = threat.size + this.splitDistance + constants.safeDistance;
             var secureDistance = (enemyCanSplit ? splitDangerDistance : normalDangerDistance);
             
             threat.dangerZone = secureDistance;
