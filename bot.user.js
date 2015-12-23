@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.896
+// @version     3.897
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.896;
+var aposBotVersion = 3.897;
 
 var constants = {
 	safeDistance: 150,
@@ -1400,6 +1400,7 @@ function AposBot() {
             if (doSplit && obstacleAngles.length == 0) {
 				player.isSplitting = true;
             	player.splitTarget = cluster.cell;
+            	player.splitSize = player.size;
             	
         		player.splitTimer = Date.now();
         		player.splitLocation = { 
@@ -1418,9 +1419,9 @@ function AposBot() {
                 setTimeout(function() {
                 	player.isSplitting = false;
                 	player.splitTarget = null;
-                	
+
                 	console.log('resetting split timer');
-                }, 1000);
+                }, 2000);
             } else {
             	doSplit = false;
             }
@@ -1498,11 +1499,21 @@ function AposBot() {
             	}
             	
             	if (player.isSplitting) {
-                    drawCircle(player.splitLocation.x, player.splitLocation.y, 50, constants.green);
-            		if (player.splitTarget) {
-                		return [ player.splitTarget.x, player.splitTarget.y ];
+            		
+            		if (player.size <= player.splitSize) {
+            			// player size grows as long as we are splitting
+                    	player.isSplitting = false;
+                    	player.splitTarget = null;
+                    	console.log('i think we are done splitting');
+            		} else {
+	                	player.splitSize = playser.size;
+	            		
+	                    drawCircle(player.splitLocation.x, player.splitLocation.y, 50, constants.green);
+	            		if (player.splitTarget) {
+	                		return [ player.splitTarget.x, player.splitTarget.y ];
+	            		}
+	            		return [ getPointX(), getPointY() ];
             		}
-            		return [ getPointX(), getPointY() ];
             	}
 
             	if (player.cells.length > 1) {
