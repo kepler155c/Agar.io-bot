@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.875
+// @version     3.876
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.875;
+var aposBotVersion = 3.876;
 
 var constants = {
 	safeDistance: 150,
@@ -1229,7 +1229,7 @@ function AposBot() {
 
         if (badAngles.length > 0) {
             //NOTE: This is only bandaid wall code. It's not the best way to do it.
-            // stupidList = this.addWall(stupidList, player.enclosingCell);
+            stupidList = this.addWall(stupidList, player.enclosingCell);
         }
 
         for (i = 0; i < badAngles.length; i++) {
@@ -1383,13 +1383,14 @@ function AposBot() {
         } else if (player.foodClusters.length > 0) {
         	
         	var doSplit = false;
+        	var needVelocity = player.splitVelocity == 0 && player.cells.length == 1 && planer.mass > 36;
 
         	var cluster = this.getBestFood(player);
 
         	drawCircle(cluster.x, cluster.y, cluster.size + 30, 2);
 
             // drawPoint(bestFood.x, bestFood.y, 1, "");
-            if (cluster.canSplitKill && player.safeToSplit) {
+            if ((cluster.canSplitKill && player.safeToSplit) || needVelocity) {
 
 				var food = cluster.cell;
 
@@ -1397,6 +1398,11 @@ function AposBot() {
         		
 				player.isSplitting = true;
             	player.splitTarget = cluster.cell;
+            	
+            	player.splitVelocity = 0;
+        		player.splitTimer = Date.now();
+        		player.splitLocation = [ player.enclosingCell.x, player.enclosingCell.y ];
+        		player.splitDistance = 0;
 
                 setTimeout(function() {
                 	player.isSplitting = false;
@@ -1468,6 +1474,17 @@ function AposBot() {
                     		(30000 + (cell.birthMass * 57) - (getLastUpdate() - cell.birth)) + " / " + cell.birthMass);
                 }
                 */
+
+            	if (player.splitVelocity == 0 && player.splitLocation) {
+            		var distance = this.computeDistance(player.cells[0].x, player.cells[0].y, 
+            				player.cells[1].x, player.cells[1].y);
+            		if (distance > player.splitDistance) {
+            			player.splitDistance = distance;
+            			console.log(Date.now() - player.splitTimer);
+            			console.log('max distance = ' + player.splitDistance);
+            		}
+
+            	}
             	
             	if (player.isSplitting) {
             		return [ getPointX(), getPointY() ];
