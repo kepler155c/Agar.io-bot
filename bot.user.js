@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.891
+// @version     3.892
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.891;
+var aposBotVersion = 3.892;
 
 var constants = {
 	safeDistance: 150,
@@ -44,7 +44,7 @@ var constants = {
     cyan: 6,
     gray: 7,
     black: 8,
-}
+};
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -1114,7 +1114,7 @@ function AposBot() {
 
         for (i = 0; i < allPossibleThreats.length; i++) {
         	
-        	var threat = allPossibleThreats[i];
+        	threat = allPossibleThreats[i];
 
             var closestCell = threat.closestCell;
             var enemyDistance = threat.enemyDist;
@@ -1379,7 +1379,7 @@ function AposBot() {
             destinationChoices.push(line1);*/
         } else if (player.foodClusters.length > 0) {
         	
-        	var needVelocity = player.splitVelocity == 0 && player.largestCell.mass >= 36;
+        	var needVelocity = player.splitVelocity === 0 && player.largestCell.mass >= 36;
 
         	var cluster = this.getBestFood(player);
 
@@ -1397,7 +1397,7 @@ function AposBot() {
             destination = this.followAngle(shiftedAngle, cluster.closestCell.x, cluster.closestCell.y, cluster.enemyDist);
 
             // are we avoiding obstacles ??
-            if (doSplit && destination.x = cluster.x && destination.y = cluster.y) {
+            if (doSplit && destination.x == cluster.x && destination.y == cluster.y) {
 				player.isSplitting = true;
             	player.splitTarget = cluster.cell;
             	
@@ -1493,7 +1493,7 @@ function AposBot() {
             			console.log('velocity = ' + player.splitVelocity);
             			console.log('mass = ' + player.splitMass);
             			console.log('end ' + this.computeDistance(player.splitLocation.startx, player.splitLocation.starty,
-                				player.cells[1].x, player.cells[1].y))
+                				player.cells[1].x, player.cells[1].y));
             		}
             	}
             	
