@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.902
+// @version     3.903
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.902;
+var aposBotVersion = 3.903;
 
 var constants = {
 	safeDistance: 150,
@@ -1033,18 +1033,11 @@ function AposBot() {
             cluster.enemyDist = closestInfo.distance;
 
             if (!cluster.cell) {
-            	if (cluster.x < getMapStartX()+2000) {
-            		multiplier += (2000 - Math.abs(getMapStartX() - cluster.x)) / 100;
-            	}
-            	if (cluster.y < getMapStartY()+2000) {
-            		multiplier += (2000 - Math.abs(getMapStartY() - cluster.y)) / 100;
-            	}
-
-            	if (cluster.x > getMapEndX()-2000) {
-            		multiplier += (2000 - (getMapEndX() - cluster.x)) / 100;
-            	}
-            	if (cluster.y > getMapEndY()-2000) {
-            		multiplier += (2000 - (getMapEndY() - cluster.y)) / 100;
+            	if ((cluster.x < getMapStartX()+2000 && cluster.x < player.x) ||
+            		(cluster.y < getMapStartY()+2000 && cluster.y < player.y) ||
+            		(cluster.x > getMapEndX()-2000 && cluster.x > player.x) ||
+            		(cluster.y > getMapEndY()-2000 && cluster.y > player.y)) {
+            		multiplier = 6;
             	}
             }
 
