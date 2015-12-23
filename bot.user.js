@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.873
+// @version     3.874
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.873;
+var aposBotVersion = 3.874;
 
 var constants = {
 	safeDistance: 150,
@@ -1074,7 +1074,9 @@ function AposBot() {
             	if (!cluster.cell.isNotMoving()) {
             		console.log('original weight: ' + weight);
                 	weight *= Math.log(closestInfo.distance / 1000 * 20);
-                	console.log("new weight: " + weight + ' ' + closestInfo.distance);
+                	console.log("new weight: " + weight + ' ' + closestInfo.distance + ' ' + 
+                			Math.log(closestInfo.distance / 1000 * 20) +
+                			closestInfo.distance / 1000 * 20);
             	}
             }
             cluster.clusterWeight = closestInfo.distance / weight * multiplier ;
