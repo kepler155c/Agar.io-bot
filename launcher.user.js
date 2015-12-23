@@ -20,11 +20,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.213
+// @version     4.214
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.213;
+var aposLauncherVersion = 4.214;
 
 var showAd = true;
 var badSize = 1500;
@@ -1296,7 +1296,7 @@ console.log("Running Bot Launcher!");
         	var cell = player.cells[i];
         	var cellInfo = "Cell " + i + " Mass: " + parseInt(cell.size, 10);
         	if (cell.fuseTime) {
-        		cellInfo += "Fuse: " + parseInt(cell.fuseTime - Date.now()) / 1000, 10);
+        		cellInfo += "Fuse: " + parseInt((cell.fuseTime - Date.now()) / 1000, 10);
         	}
             debugStrings.push(cellInfo);
         }
