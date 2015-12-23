@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.893
+// @version     3.894
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.893;
+var aposBotVersion = 3.894;
 
 var constants = {
 	safeDistance: 150,
@@ -1422,6 +1422,9 @@ function AposBot() {
                 	console.log('resetting split timer');
                 }, 1000);
             } else {
+            	console.log('not equal');
+            	console.log(destination[0] == cluster.x && destination[1] == cluster.y);
+            	console.log(destination[0] + ' ' + cluster.x + ' ' + destination[1] + ' ' + cluster.y);
             	doSplit = false;
             }
             
