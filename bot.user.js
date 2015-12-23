@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.870
+// @version     3.872
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.870;
+var aposBotVersion = 3.872;
 
 var constants = {
 	safeDistance: 150,
@@ -1030,29 +1030,31 @@ function AposBot() {
             cluster.closestCell = closestInfo.cell;
             cluster.enemyDist = closestInfo.distance;
 
-        	if (cluster.x < getMapStartX()+2000) {
-        		multiplier += (2000 - Math.abs(getMapStartX() - cluster.x)) / 100;
-        	}
-        	if (cluster.y < getMapStartY()+2000) {
-        		multiplier += (2000 - Math.abs(getMapStartY() - cluster.y)) / 100;
-        	}
+            if (!cluster.cell) {
+            	if (cluster.x < getMapStartX()+2000) {
+            		multiplier += (2000 - Math.abs(getMapStartX() - cluster.x)) / 100;
+            	}
+            	if (cluster.y < getMapStartY()+2000) {
+            		multiplier += (2000 - Math.abs(getMapStartY() - cluster.y)) / 100;
+            	}
 
-        	if (cluster.x > getMapEndX()-2000) {
-        		multiplier += (2000 - (getMapEndX() - cluster.x)) / 100;
-        	}
-        	if (cluster.y > getMapEndY()-2000) {
-        		multiplier += (2000 - (getMapEndY() - cluster.y)) / 100;
-        	}
+            	if (cluster.x > getMapEndX()-2000) {
+            		multiplier += (2000 - (getMapEndX() - cluster.x)) / 100;
+            	}
+            	if (cluster.y > getMapEndY()-2000) {
+            		multiplier += (2000 - (getMapEndY() - cluster.y)) / 100;
+            	}
+            }
 
             var weight = cluster.size;
             if (cluster.cell) {
             	
             	if (player.isSplitting && player.splitTarget == cluster.cell) {
-            		weight = weight * 5;
+            		weight = weight * 10;
            			console.log("increasing weight");
             	}
             	if (cluster.cell.isSplitTarget) {
-            		weight = weight * 2;
+            		weight = weight * 1.5;
             	}
 
             	if (cluster.cell.isNotMoving()) {
@@ -1066,6 +1068,12 @@ function AposBot() {
                 	// prioritize enemies moving towards us
             		weight = weight * 1.2;
                 }
+            	
+            	if (!cluster.cell.isNotMoving()) {
+            		console.log('original weight: ' + weight);
+                	weight *= Math.log(closestInfo.distance / 1000 * 20);
+                	console.log("new weight: " + weight + ' ' + closestInfo.distance);
+            	}
             }
             cluster.clusterWeight = closestInfo.distance / weight * multiplier ;
             
@@ -1390,7 +1398,7 @@ function AposBot() {
                 	player.isSplitting = false;
                 	player.splitTarget = null;
                 	console.log('resetting split timer');
-                }, 500);
+                }, 1000);
                 
                 doSplit = true;
             }
@@ -1469,7 +1477,7 @@ function AposBot() {
                 	drawCircle(player.enclosingCell.x, player.enclosingCell.y, player.enclosingCell.size + 30, 2);
             	}
 
-            	drawCircle(player.enclosingCell.x, player.enclosingCell.y, player.enclosingCell.size + this.splitDistance, 5);
+            	drawCircle(player.enclosingCell.x, player.enclosingCell.y, player.enclosingCell.size + this.splitDistance, player.isSplitting ? constants.red : 5);
             	
                 drawLine(player.enclosingCell.x, player.enclosingCell.y, player.enclosingCell.x, player.enclosingCell.y + player.size, 7);
 
