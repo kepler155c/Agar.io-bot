@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.911
+// @version     3.912
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.911;
+var aposBotVersion = 3.912;
 
 var constants = {
 	safeDistance: 150,
@@ -435,12 +435,26 @@ function AposBot() {
                     foodElementList.push(entity);
                     mergeList.push(entity);
                 }
-                else if (player.cells.length == 1 && that.canEat(player.smallestCell, entity, constants.playerRatio)) {
+                else if (that.canEat(player.smallestCell, entity, constants.playerRatio)) {
 
+                	if (player.cells.length > 1 && player.mass / entity.mass < 10) {
+                    	// only split kill if it's moving
+                    	entity.isSplitTarget = !entity.isNotMoving();
+                	}
+                	
                 	foodElementList.push(entity);
                     mergeList.push(entity);
                 	
                 } else {
+                	
+                	if (!that.canEat(entity, player.smallestCell, constants.enemeyRatio)) {
+                		if (player.cells.length > 1 && player.mass / entity.mass < 10 && !entity.isNotMoving()) {
+                            foodElementList.push(entity);
+                			entity.isSplitTarget = true;
+                			console.log("adding to food list: " + entity.name)
+                		}
+                	}
+                	
                 	if (!that.isVirus(null, entity)) {
                 		mergeList.push(entity);
                 	}
