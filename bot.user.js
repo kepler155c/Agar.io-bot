@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.904
+// @version     3.905
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.904;
+var aposBotVersion = 3.905;
 
 var constants = {
 	safeDistance: 150,
@@ -1380,7 +1380,7 @@ function AposBot() {
         	drawCircle(cluster.x, cluster.y, cluster.size + 30, 2);
 
             // drawPoint(bestFood.x, bestFood.y, 1, "");
-            if ((cluster.canSplitKill && player.safeToSplit) || needVelocity) {
+            if (cluster.canSplitKill && player.safeToSplit) {
                 
                 doSplit = true;
             }
