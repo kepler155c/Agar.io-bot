@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.879
+// @version     3.880
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.879;
+var aposBotVersion = 3.880;
 
 var constants = {
 	safeDistance: 150,
@@ -1399,7 +1399,6 @@ function AposBot() {
                 setTimeout(function() {
                 	player.isSplitting = false;
                 	player.splitTarget = null;
-                	player.
                 	console.log('resetting split timer');
                 }, 2000);
                 
