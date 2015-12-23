@@ -15,15 +15,16 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.*/
+
 // ==UserScript==
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.205
+// @version     4.206
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.205;
+var aposLauncherVersion = 4.206;
 
 var showAd = true;
 var badSize = 1500;
@@ -1261,7 +1262,7 @@ console.log("Running Bot Launcher!");
         debugStrings.push("Launcher: AposLauncher " + aposLauncherVersion);
         debugStrings.push("");
 
-        debugStrings.push("Player Mass: " + parseInt(player.totalSize * player.totalSize / 100, 10));
+        debugStrings.push("Player Mass: " + parseInt(player.mass, 10));
         if (player.cells.length > 1) {
 	        debugStrings.push("Player Min:  " + parseInt(player.smallestCell.size, 10));
 	        debugStrings.push("Player Max:  " + parseInt(player.largestCell.size, 10));
