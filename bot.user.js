@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.918
+// @version     3.919
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.918;
+var aposBotVersion = 3.919;
 
 var constants = {
 	safeDistance: 150,
@@ -46,6 +46,7 @@ var constants = {
     splitRangeMin: 650,
     splitRangeMax: 674.5,
     enemySplitDistance: 710,
+    lureDistance: 800,
 
 	red: 0,
     green: 1,
@@ -1439,7 +1440,7 @@ function AposBot() {
             // really bad condition logic - but check if it's a split target just outside of range
             if (!doSplit && !player.isLuring && obstacleAngles.length === 0 && 
             		player.safeToSplit && cluster.cell && cluster.cell.isSplitTarget &&
-        			cluster.distance < 750 && player.mass > 250 && (player.mass - cluster.cell.mass > 25)) {
+        			cluster.distance < constants.lureDistance && player.mass > 250 && (player.mass - cluster.cell.mass > 25)) {
 
             	// TODO: figure out lure amount
             	player.isLuring = true;
