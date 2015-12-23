@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.903
+// @version     3.904
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.903;
+var aposBotVersion = 3.904;
 
 var constants = {
 	safeDistance: 150,
@@ -1037,7 +1037,7 @@ function AposBot() {
             		(cluster.y < getMapStartY()+2000 && cluster.y < player.y) ||
             		(cluster.x > getMapEndX()-2000 && cluster.x > player.x) ||
             		(cluster.y > getMapEndY()-2000 && cluster.y > player.y)) {
-            		multiplier = 6;
+            		multiplier = 10;
             	}
             }
 
@@ -1373,7 +1373,7 @@ function AposBot() {
             destinationChoices.push(line1);*/
         } else if (player.foodClusters.length > 0) {
         	
-        	var needVelocity = player.splitVelocity === 0 && player.largestCell.mass >= 36;
+        	doSplit = player.largestCell.mass >= 36 && player.mass <= 50 && player.cells.length == 1;
 
         	var cluster = this.getBestFood(player);
 
@@ -1512,7 +1512,7 @@ function AposBot() {
 
             	drawCircle(player.x, player.y, player.size + this.splitDistance, player.isSplitting ? constants.red : 5);
             	
-                drawLine(player.x, player.y, player.x, player.size + this.splitDistance, 7);
+                drawLine(player.x, player.y, player.x, player.y + player.size + this.splitDistance, 7);
 
             	//Loops only for one cell for now.
                 for (var k = 0; /*k < player.length*/ k < 1; k++) {
