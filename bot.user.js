@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.874
+// @version     3.875
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.874;
+var aposBotVersion = 3.875;
 
 var constants = {
 	safeDistance: 150,
@@ -1229,7 +1229,7 @@ function AposBot() {
 
         if (badAngles.length > 0) {
             //NOTE: This is only bandaid wall code. It's not the best way to do it.
-            stupidList = this.addWall(stupidList, player.enclosingCell);
+            // stupidList = this.addWall(stupidList, player.enclosingCell);
         }
 
         for (i = 0; i < badAngles.length; i++) {
@@ -1483,7 +1483,7 @@ function AposBot() {
 
             	drawCircle(player.enclosingCell.x, player.enclosingCell.y, player.enclosingCell.size + this.splitDistance, player.isSplitting ? constants.red : 5);
             	
-                drawLine(player.enclosingCell.x, player.enclosingCell.y, player.enclosingCell.x, player.enclosingCell.y + player.size, 7);
+                drawLine(player.enclosingCell.x, player.enclosingCell.y, player.enclosingCell.x, player.enclosingCell.size + this.splitDistance, 7);
 
             	//Loops only for one cell for now.
                 for (var k = 0; /*k < player.length*/ k < 1; k++) {
