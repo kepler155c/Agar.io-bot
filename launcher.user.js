@@ -20,11 +20,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.216
+// @version     4.217
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.216;
+var aposLauncherVersion = 4.217;
 
 var showAd = true;
 var badSize = 1500;
@@ -44,6 +44,7 @@ var Player = function() {
 	this.isAlive = true;
 	this.isReviving = false;
 	this.isSplitting = false;
+	this.isLuring = false;
 
     this.food = [];
     this.threats = [];

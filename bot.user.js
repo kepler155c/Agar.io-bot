@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.916
+// @version     3.917
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.916;
+var aposBotVersion = 3.917;
 
 var constants = {
 	safeDistance: 150,
@@ -57,8 +57,8 @@ var constants = {
     gray: 7,
     black: 8,
     
-    playerRatio: 1.28,
-    enemyRatio: 1.26,
+    playerRatio: 1.285,
+    enemyRatio: 1.27,
 };
 
 //TODO: Team mode
@@ -1436,6 +1436,18 @@ function AposBot() {
 
             destination = this.followAngle(shiftedAngle, cluster.closestCell.x, cluster.closestCell.y, cluster.distance);
 
+            // really bad condition logic - but check if it's a split target just outside of range
+            if (!doSplit && !player.isLuring && obstacleAngles.length === 0 && 
+            		player.safeToSplit && cluster.cell && cluster.cell.isSplitTarget &&
+        			cluster.distance < 750) {
+            	player.isLuring = true;
+                window.opCode(21);
+                setTimeout(function() {
+                	player.isLuring = false;
+                	console.log('luring');
+                }, 5000);
+            }
+        			
             // are we avoiding obstacles ??
             if (doSplit && obstacleAngles.length === 0) {
 				player.isSplitting = true;
@@ -1530,7 +1542,7 @@ function AposBot() {
             	
             	if (player.isSplitting) {
             		
-            		if (player.size <= player.splitSize && (Date.now() - player.splitTimer > 100)) {
+            		if (player.size <= player.splitSize && (Date.now() - player.splitTimer > 200)) {
             			// player size grows as long as we are splitting
                     	player.isSplitting = false;
                     	player.splitTarget = null;
