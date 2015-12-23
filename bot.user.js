@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.919
+// @version     3.920
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.919;
+var aposBotVersion = 3.920;
 
 var constants = {
 	safeDistance: 150,
@@ -1139,7 +1139,6 @@ function AposBot() {
         var i, j, angle1, angle2, tempOb, line1, line2, diff, threat, shiftedAngle, destination, closestCell;
         var destinationChoices;
         var panicMode = false;
-    	var doSplit = false;
 
         for (j = 0; j < player.cells.length; j++) {
             for (i = 0; i < allPossibleThreats.length; i++) {
@@ -1420,7 +1419,8 @@ function AposBot() {
             destinationChoices.push(line1);*/
         } else if (player.foodClusters.length > 0) {
         	
-        	doSplit = player.largestCell.mass >= 36 && player.mass <= 50 && player.cells.length == 1;
+        	var doSplit = player.largestCell.mass >= 36 && player.mass <= 50 && player.cells.length == 1;
+        	var doLure = false;
 
         	var cluster = this.getBestFood(player);
 
@@ -1444,7 +1444,7 @@ function AposBot() {
 
             	// TODO: figure out lure amount
             	player.isLuring = true;
-                window.opCode(21);
+            	doLure = true;
                 setTimeout(function() {
                 	player.isLuring = false;
                 	console.log('luring');
@@ -1474,7 +1474,7 @@ function AposBot() {
             	doSplit = false;
             }
             
-            destinationChoices = [ destination[0], destination[1], doSplit ];
+            destinationChoices = [ destination[0], destination[1], doSplit, doLure ];
 
             drawLine(cluster.closestCell.x, cluster.closestCell.y, destination[0], destination[1], 1);
                         
