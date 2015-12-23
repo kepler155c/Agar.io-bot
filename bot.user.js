@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.880
+// @version     3.881
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.880;
+var aposBotVersion = 3.881;
 
 var constants = {
 	safeDistance: 150,
@@ -1467,7 +1467,7 @@ function AposBot() {
                 }
                 */
 
-            	if (player.isSplitting) {
+            	if (player.isSplitting && player.cells.length > 1) {
             		var distance = this.computeDistance(player.cells[0].x, player.cells[0].y, 
             				player.cells[1].x, player.cells[1].y);
             		if (distance > player.splitDistance) {
@@ -1482,6 +1482,9 @@ function AposBot() {
             	}
             	
             	if (player.isSplitting) {
+            		if (player.cells.length == 1) {
+                		return [ getPointX(), getPointY() ];
+            		}
             		return [ player.splitTarget.x, player.splitTarget.y ];
             	}
 
