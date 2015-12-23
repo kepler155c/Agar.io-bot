@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.890
+// @version     3.891
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.890;
+var aposBotVersion = 3.891;
 
 var constants = {
 	safeDistance: 150,
@@ -1056,7 +1056,7 @@ function AposBot() {
            			console.log("increasing weight");
             	}
             	if (cluster.cell.isSplitTarget) {
-            		weight = weight * 1.5;
+            		weight = weight * 2.5;
             	}
 
             	if (cluster.cell.isNotMoving()) {
@@ -1101,6 +1101,7 @@ function AposBot() {
         var tempMoveY = getPointY();
         var i, j, angle1, angle2, tempOb, line1, line2, diff, threat, shiftedAngle, destination;
         var panicMode = false;
+    	var doSplit = false;
 
         for (j = 0; j < player.cells.length; j++) {
             for (i = 0; i < allPossibleThreats.length; i++) {
@@ -1378,7 +1379,6 @@ function AposBot() {
             destinationChoices.push(line1);*/
         } else if (player.foodClusters.length > 0) {
         	
-        	var doSplit = false;
         	var needVelocity = player.splitVelocity == 0 && player.largestCell.mass >= 36;
 
         	var cluster = this.getBestFood(player);
@@ -1387,7 +1387,17 @@ function AposBot() {
 
             // drawPoint(bestFood.x, bestFood.y, 1, "");
             if ((cluster.canSplitKill && player.safeToSplit) || needVelocity) {
+                
+                doSplit = true;
+            }
 
+            angle = this.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
+            shiftedAngle = this.shiftAngle(obstacleAngles, angle, [0, 360]);
+
+            destination = this.followAngle(shiftedAngle, cluster.closestCell.x, cluster.closestCell.y, cluster.enemyDist);
+
+            // are we avoiding obstacles ??
+            if (doSplit && destination.x = cluster.x && destination.y = cluster.y) {
 				player.isSplitting = true;
             	player.splitTarget = cluster.cell;
             	
@@ -1411,15 +1421,10 @@ function AposBot() {
                 	
                 	console.log('resetting split timer');
                 }, 1000);
-                
-                doSplit = true;
+            } else {
+            	doSplit = false;
             }
-
-            angle = this.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
-            shiftedAngle = this.shiftAngle(obstacleAngles, angle, [0, 360]);
-
-            destination = this.followAngle(shiftedAngle, cluster.closestCell.x, cluster.closestCell.y, cluster.enemyDist);
-
+            
             destinationChoices = [ destination[0], destination[1], doSplit ];
 
             drawLine(cluster.closestCell.x, cluster.closestCell.y, destination[0], destination[1], 1);
