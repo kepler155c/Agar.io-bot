@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.913
+// @version     3.914
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.913;
+var aposBotVersion = 3.914;
 
 var constants = {
 	safeDistance: 150,
@@ -1203,13 +1203,15 @@ function AposBot() {
 		for (i = 0; i < allPossibleViruses.length; i++) {
 			var virus = allPossibleViruses[i];
 			
-			for 
-            if (virus.distance < (virus.closestCell.size * 2)) {
-                tempOb = this.getAngleRange(virus.closestCell, virus, i, virus.closestCell.size + 50);
-                angle1 = tempOb[0];
-                angle2 = this.rangeToAngle(tempOb);
-                obstacleList.push([[angle1, true], [angle2, false]]);
-            }
+			for (let cell of player.cells) {
+				
+	            if (virus.distance < (cell.size * 2)) {
+	                tempOb = this.getAngleRange(cell, virus, i, cell.size + 50);
+	                angle1 = tempOb[0];
+	                angle2 = this.rangeToAngle(tempOb);
+	                obstacleList.push([[angle1, true], [angle2, false]]);
+	            }
+			}
         }
 		/*
 		 * original - if after splitting, a virus is inside the enclosing player, the player can hit the virus
