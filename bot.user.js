@@ -24,16 +24,18 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.872
+// @version     3.873
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.872;
+var aposBotVersion = 3.873;
 
 var constants = {
 	safeDistance: 150,
-    red: 0,
+	velocity: 18,
+
+	red: 0,
     green: 1,
     blue: 2,
     orange: 3,
@@ -537,8 +539,8 @@ function AposBot() {
         		
             	var lastPos = food.getLastPos();
 
-            	var predictedX = food.x - (lastPos.x - food.x) * (food.enemyDist/750) * 15;
-            	var predictedY = food.y - (lastPos.y - food.y) * (food.enemyDist/750) * 15;
+            	var predictedX = food.x - (lastPos.x - food.x) * (food.enemyDist/750) * constants.velocity;
+            	var predictedY = food.y - (lastPos.y - food.y) * (food.enemyDist/750) * constants.velocity;
 
                 clusters.push({
                 	x: predictedX, y: predictedY, size: food.size, cell: food
