@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.887
+// @version     3.888
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.887;
+var aposBotVersion = 3.888;
 
 var constants = {
 	safeDistance: 150,
@@ -1394,7 +1394,9 @@ function AposBot() {
         		player.splitTimer = Date.now();
         		player.splitLocation = { 
         				x: player.largestCell.x + (cluster.x - player.largestCell.x) * 2, 
-        				y: player.largestCell.y + (cluster.y - player.largestCell.y) * 2
+        				y: player.largestCell.y + (cluster.y - player.largestCell.y) * 2,
+        				startx: player.largestCell.x,
+        				starty: player.largestCell.y
         		};
         		
         		cluster.x = player.splitLocation.x;
@@ -1485,6 +1487,8 @@ function AposBot() {
             			console.log('max distance = ' + player.splitDistance);
             			console.log('velocity = ' + player.splitVelocity);
             			console.log('mass = ' + player.splitMass);
+            			console.log('end ' + this.computeDistance(player.splitLocation.startx, player.splitLocation.starty,
+                				player.cells[1].x, player.cells[1].y))
             		}
             	}
             	
