@@ -33,16 +33,19 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.915
+// @version     3.916
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.915;
+var aposBotVersion = 3.916;
 
 var constants = {
 	safeDistance: 150,
 	velocity: 18,
+    splitRangeMin: 650,
+    splitRangeMax: 674.5,
+    enemySplitDistance: 710,
 
 	red: 0,
     green: 1,
@@ -160,7 +163,6 @@ function AposBot() {
         }
         return num < 0 ? ((num % mod) + mod) % mod : num % mod;
     };
-    this.splitDistance = 710;
 
     this.isMerging = function(cell1, cell2) {        
         var dist = this.computeDistance(cell1.x, cell1.y, cell2.x, cell2.y, cell1.size, cell2.size);
@@ -826,8 +828,8 @@ function AposBot() {
         //var mapSizeY = Math.abs(f.getMapStartY - f.getMapEndY);
         //var distanceFromWallX = mapSizeX/3;
         //var distanceFromWallY = mapSizeY/3;
-        var distanceFromWallY = 2000;
-        var distanceFromWallX = 2000;
+        var distanceFromWallY = 1000;  // originally 2000
+        var distanceFromWallX = 1000;  // originally 2000
         if (blob.x < getMapStartX() + distanceFromWallX) {
             //LEFT
             //console.log("Left");
@@ -1025,6 +1027,16 @@ function AposBot() {
         //console.log("No Shifting Was needed!");
         return angle;
     };
+    this.inSplitRange = function(target) {
+
+    	var range = constants.splitRangeMin;
+    	
+    	if (target.isMovingTowards) {
+    		range = constants.splitRangeMax;
+    	}
+
+       	return target.distance < range;
+    };
     
     this.closestCell = function (player, x, y) {
 
@@ -1060,14 +1072,16 @@ function AposBot() {
             cluster.closestCell = closestInfo.cell;
             cluster.distance = closestInfo.distance;
 
-            if (!cluster.cell) {
+            // if (!cluster.cell) {  // lets try not to follow enemies towards wall
             	if ((cluster.x < getMapStartX()+2000 && cluster.x < player.x) ||
             		(cluster.y < getMapStartY()+2000 && cluster.y < player.y) ||
             		(cluster.x > getMapEndX()-2000 && cluster.x > player.x) ||
             		(cluster.y > getMapEndY()-2000 && cluster.y > player.y)) {
-            		multiplier = 10;
+            		
+            		// everything close to the wall will seem very far away
+            		multiplier = 25;
             	}
-            }
+            // }
 
             var weight = cluster.size;
             if (cluster.cell) {
@@ -1082,9 +1096,9 @@ function AposBot() {
 
             	if (cluster.cell.isNotMoving()) {
                 	// easy food
-            		weight = weight * 10;
+            		weight = weight * 50;
             	} else if (player.safeToSplit && cluster.cell.isSplitTarget && 
-            			cluster.distance < this.splitDistance * 0.95) {
+            			this.inSplitRange(cluster.cell)) {
             		weight = weight * 3;
             		cluster.canSplitKill = true;
                 }
@@ -1162,7 +1176,7 @@ function AposBot() {
 
             var normalDangerDistance = threat.size + constants.safeDistance;
             var shiftDistance = player.size;
-            var splitDangerDistance = threat.size + this.splitDistance + constants.safeDistance;
+            var splitDangerDistance = threat.size + constants.enemySplitDistance + constants.safeDistance;
             var secureDistance = (enemyCanSplit ? splitDangerDistance : normalDangerDistance);
             
             threat.dangerZone = secureDistance;
@@ -1490,10 +1504,8 @@ function AposBot() {
 
             //Just to make sure the player is alive.
             if (player.isAlive) {
-            	
-            	var cells = player.cells;
 
-                //Loop through all the player's cells.
+            	//Loop through all the player's cells.
             	/*
                 for (var k = 0; k < cells.length; k++) {
                 	var cell = cells[k];
@@ -1542,99 +1554,63 @@ function AposBot() {
                 	drawCircle(player.x, player.y, player.size + 30, 2);
             	}
 
-            	drawCircle(player.x, player.y, player.size + this.splitDistance, player.isSplitting ? constants.red : 5);
+            	drawCircle(player.x, player.y, player.size + constants.enemySplitDistance, 5);
             	
-                drawLine(player.x, player.y, player.x, player.y + player.size + this.splitDistance, 7);
+                // drawLine(player.x, player.y, player.x, player.y + player.size + this.splitDistance, 7);
+                //drawPoint(player[0].x, player[0].y - player[0].size, 3, "" + Math.floor(player[0].x) + ", " + Math.floor(player[0].y));
 
-            	//Loops only for one cell for now.
-                for (var k = 0; /*k < player.length*/ k < 1; k++) {
+                //loop through everything that is on the screen and
+                //separate everything in it's own category.
+                var allIsAll = this.getAll(player);
 
-                    //console.log("Working on blob: " + k);
-                	var cell = player.cells[k];
+                //The food stored in element 0 of allIsAll
+                var allPossibleFood = allIsAll[0];
+                //The threats are stored in element 1 of allIsAll
+                var allPossibleThreats = allIsAll[1];
+                //The viruses are stored in element 2 of allIsAll
+                var allPossibleViruses = allIsAll[2];
 
-                    //drawPoint(player[0].x, player[0].y - player[0].size, 3, "" + Math.floor(player[0].x) + ", " + Math.floor(player[0].y));
+                player.foodClusters = this.clusterFood(player, allPossibleFood, player.largestCell.size);
+                
+                /*allPossibleThreats.sort(function(a, b){
+                    return a.distance-b.distance;
+                })*/
 
-                    //var allDots = processEverything(interNodes);
+                for (i = 0; i < allPossibleViruses.length; i++) {
+                    if (player.largestCell.size < allPossibleViruses[i].size) {
+                        drawCircle(allPossibleViruses[i].x, allPossibleViruses[i].y, allPossibleViruses[i].size + 10, 3);
+                        drawCircle(allPossibleViruses[i].x, allPossibleViruses[i].y, allPossibleViruses[i].size * 2, 6);
 
-                    //loop through everything that is on the screen and
-                    //separate everything in it's own category.
-                    var allIsAll = this.getAll(player);
-
-                    //The food stored in element 0 of allIsAll
-                    var allPossibleFood = allIsAll[0];
-                    //The threats are stored in element 1 of allIsAll
-                    var allPossibleThreats = allIsAll[1];
-                    //The viruses are stored in element 2 of allIsAll
-                    var allPossibleViruses = allIsAll[2];
-
-                    player.foodClusters = this.clusterFood(player, allPossibleFood, player.largestCell.size);
-                    
-                    /*allPossibleThreats.sort(function(a, b){
-                        return a.distance-b.distance;
-                    })*/
-
-                    for (i = 0; i < allPossibleViruses.length; i++) {
-                        if (cell.size < allPossibleViruses[i].size) {
-                            drawCircle(allPossibleViruses[i].x, allPossibleViruses[i].y, allPossibleViruses[i].size + 10, 3);
-                            drawCircle(allPossibleViruses[i].x, allPossibleViruses[i].y, allPossibleViruses[i].size * 2, 6);
-
-                        } else {
-                            drawCircle(allPossibleViruses[i].x, allPossibleViruses[i].y, cell.size + 50, 3);
-                            drawCircle(allPossibleViruses[i].x, allPossibleViruses[i].y, cell.size * 2, 6);
-                        }
-                    }
-                    
-                    for (i = 0; i < player.splitTargets.length; i++) {
-                    	var splitTarget = player.splitTargets[i];
-                        drawCircle(splitTarget.x, splitTarget.y, splitTarget.size + 50, splitTarget.isSplitTarget ? constants.green : constants.gray );
-                    }
-
-                    destinationChoices = this.determineDestination(player, tempPoint, allPossibleThreats, allPossibleViruses);
-                    
-                    for (i = 0; i < allPossibleThreats.length; i++) {
-
-                    	drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, allPossibleThreats[i].size + 30, 0);
-                    	
-	                	if (this.isMovingTowards(cell, allPossibleThreats[i])) {
-	                    	drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, allPossibleThreats[i].size + 10, 3);
-	                	}
-
-   	                    drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, allPossibleThreats[i].dangerZone, 0);
-                    }
-                    
-                    drawPoint(tempPoint[0], tempPoint[1], tempPoint[2], "");
-                    //drawPoint(tempPoint[0], tempPoint[1], tempPoint[2], "" + Math.floor(this.computeDistance(tempPoint[0], tempPoint[1], I, J)));
-                    //drawLine(tempPoint[0], tempPoint[1], player[0].x, player[0].y, 6);
-                    //console.log("Slope: " + slope(tempPoint[0], tempPoint[1], player[0].x, player[0].y) + " Angle: " + getAngle(tempPoint[0], tempPoint[1], player[0].x, player[0].y) + " Side: " + this.mod(getAngle(tempPoint[0], tempPoint[1], player[0].x, player[0].y) - 90, 360));
-                    tempPoint[2] = 1;
-
-                    //console.log("Done working on blob: " + i);
-                }
-
-                //TODO: Find where to go based on destinationChoices.
-                /*var dangerFound = false;
-                for (var i = 0; i < destinationChoices.length; i++) {
-                    if (destinationChoices[i][2]) {
-                        dangerFound = true;
-                        break;
+                    } else {
+                        drawCircle(allPossibleViruses[i].x, allPossibleViruses[i].y, player.largestCell.size + 50, 3);
+                        drawCircle(allPossibleViruses[i].x, allPossibleViruses[i].y, player.largestCell.size * 2, 6);
                     }
                 }
+                
+                for (i = 0; i < player.splitTargets.length; i++) {
+                	var splitTarget = player.splitTargets[i];
+                    drawCircle(splitTarget.x, splitTarget.y, splitTarget.size + 50, splitTarget.isSplitTarget ? constants.green : constants.gray );
+                }
 
-                destinationChoices.sort(function(a, b){return b[1] - a[1]});
+                destinationChoices = this.determineDestination(player, tempPoint, allPossibleThreats, allPossibleViruses);
+                
+                for (i = 0; i < allPossibleThreats.length; i++) {
 
-                if (dangerFound) {
-                    for (var i = 0; i < destinationChoices.length; i++) {
-                        if (destinationChoices[i][2]) {
-                            tempMoveX = destinationChoices[i][0][0];
-                            tempMoveY = destinationChoices[i][0][1];
-                            break;
-                        }
-                    }
-                } else {
-                    tempMoveX = destinationChoices.peek()[0][0];
-                    tempMoveY = destinationChoices.peek()[0][1];
-                    //console.log("Done " + tempMoveX + ", " + tempMoveY);
-                }*/
+                	drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, allPossibleThreats[i].size + 30, 0);
+                	
+                	if (allPossibleThreats[i].isMovingTowards) {
+                    	drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, allPossibleThreats[i].size + 10, 3);
+                	}
+
+                    drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, allPossibleThreats[i].dangerZone, 0);
+                }
+                
+                drawPoint(tempPoint[0], tempPoint[1], tempPoint[2], "");
+                //drawPoint(tempPoint[0], tempPoint[1], tempPoint[2], "" + Math.floor(this.computeDistance(tempPoint[0], tempPoint[1], I, J)));
+                //drawLine(tempPoint[0], tempPoint[1], player[0].x, player[0].y, 6);
+                //console.log("Slope: " + slope(tempPoint[0], tempPoint[1], player[0].x, player[0].y) + " Angle: " + getAngle(tempPoint[0], tempPoint[1], player[0].x, player[0].y) + " Side: " + this.mod(getAngle(tempPoint[0], tempPoint[1], player[0].x, player[0].y) - 90, 360));
+                tempPoint[2] = 1;
+
             }
             //console.log("MOVING RIGHT NOW!");
 
