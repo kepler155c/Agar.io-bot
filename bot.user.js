@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.939
+// @version     3.940
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.939;
+var aposBotVersion = 3.940;
 
 var constants = {
 	safeDistance: 150,
@@ -921,6 +921,7 @@ function AposBot() {
         //console.log("Slope: " + slope(tempPoint[0], tempPoint[1], player[0].x, player[0].y) + " Angle: " + getAngle(tempPoint[0], tempPoint[1], player[0].x, player[0].y) + " Side: " + this.mod(getAngle(tempPoint[0], tempPoint[1], player[0].x, player[0].y) - 90, 360));
         tempPoint[2] = 1;
 
+        this.infoStrings = [];
         this.infoStrings.push("Player Mass: " + parseInt(player.mass, 10));
         if (player.cells.length > 1) {
 	        this.infoStrings.push("Player Min:  " + parseInt(player.smallestCell.size, 10));
