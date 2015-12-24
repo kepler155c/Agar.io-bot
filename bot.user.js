@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.925
+// @version     3.926
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.925;
+var aposBotVersion = 3.926;
 
 var constants = {
 	safeDistance: 150,
@@ -315,6 +315,763 @@ function AposBot() {
     
     this.player = new Player();
 
+    this.separateListBasedOnFunction = function(player) {
+        var foodElementList = [];
+        var threatList = [];
+        var virusList = [];
+        var splitTargetList = [];
+        var enemyList = [];
+        var mergeList = [];
+        var i;
+        var closestInfo;
+        var listToUse = getMemoryCells();
+
+    	player.safeToSplit = true;
+
+    	var that = this;
+        Object.keys(listToUse).forEach(function(element, index) {
+
+        	var entity = listToUse[element];
+            var isMe = that.isItMe(player, entity);
+            var isEnemy = true;
+            
+            if (isMe) {
+                drawPoint(entity.x, entity.y+20, 1, "m:" + that.getMass(entity).toFixed(2) + " s:" + that.getSplitMass(entity).toFixed(2));
+            } else {
+            	
+            	entity.isSplitTarget = false;
+            	entity.isMovingTowards = that.isMovingTowards(player, entity);
+            	entity.mass = that.calculateMass(entity);
+            	closestInfo = that.closestCell(player, entity.x, entity.y);
+
+            	entity.closestCell = closestInfo.cell;
+                entity.distance = closestInfo.distance;
+
+                if (that.isFood(player.smallestCell, entity) && entity.isNotMoving()) {
+                    //IT'S FOOD!
+               		foodElementList.push(entity);
+                    isEnemy = false;
+                } else if (that.isThreat(player.smallestCell, entity)) {
+                    //IT'S DANGER!
+                    threatList.push(entity);
+                    mergeList.push(entity);
+                    
+                //} else if (that.isThreatIfSplit(blob, entity)) {
+                //	threatIfSplitList.push()
+                } else if (that.isVirus(player.largestCell, entity)) {
+                    //IT'S VIRUS!
+                    virusList.push(entity);
+                    isEnemy = false;
+                }
+                else if (entity.closestCell.mass > 36 && that.canSplitKill(entity.closestCell, entity, constants.playerRatio)) {
+
+                	if (player.largestCell.mass / entity.mass < 10) {
+                    	// only split kill if it's moving
+                    	entity.isSplitTarget = !entity.isNotMoving();
+                	}
+                    splitTargetList.push(entity);
+
+                    foodElementList.push(entity);
+                    mergeList.push(entity);
+                }
+                else if (that.canEat(player.smallestCell, entity, constants.playerRatio)) {
+
+                	if (player.cells.length > 1 && player.mass / entity.mass < 10) {
+                    	// only split kill if it's moving
+                    	entity.isSplitTarget = !entity.isNotMoving();
+                	}
+                	
+                	foodElementList.push(entity);
+                    mergeList.push(entity);
+                	
+                } else {
+                	
+                	if (!that.canEat(entity, player.smallestCell, constants.enemeyRatio)) {
+                		if (player.cells.length > 1 && player.mass / entity.mass < 10 && !entity.isNotMoving()) {
+                            foodElementList.push(entity);
+                			entity.isSplitTarget = true;
+                			console.log("adding to food list: " + entity.name);
+                		}
+                	}
+                	
+                	if (!that.isVirus(null, entity)) {
+                		mergeList.push(entity);
+                	}
+                }
+                
+                if (isEnemy) {
+
+                	if (entity.closestCell.size * entity.closestCell.size / 2 < entity.size * entity.size * 1.265) {
+                		if (entity.distance < 750 + entity.closestCell.size) {
+                    		player.safeToSplit = false;
+                		}
+                	}
+
+                	enemyList.push(entity);
+                    drawPoint(entity.x, entity.y+20, 1, "m:" + that.getMass(entity).toFixed(2) + " s:" + that.getSplitMass(entity).toFixed(2));
+                }
+            }/*else if(isMe && (getBlobCount(getPlayer()) > 0)){
+                //Attempt to make the other cell follow the mother one
+                foodElementList.push(entity);
+            }*/
+        });
+
+        if (player.isSplitting || player.cells.length > 1 || player.splitTargets.length === 0) {
+        	player.safeToSplit = false;
+        }
+        
+        var foodList = [];
+        for (i = 0; i < foodElementList.length; i++) {
+        	if (!this.foodInVirus(foodElementList[i], virusList)) {
+        		foodList.push(foodElementList[i]);
+        	}
+        }
+        
+        //console.log("Merglist length: " +  mergeList.length)
+        //cell merging
+        for (i = 0; i < mergeList.length; i++) {
+            for (var z = 0; z < mergeList.length; z++) {
+                if (z != i && that.isMerging(mergeList[i], mergeList[z])) { //z != i && 
+                    //found cells that appear to be merging - if they constitute a threat add them to the theatlist
+                    
+                    //clone us a new cell
+                    var newThreat = {};
+                    var prop;
+                    
+                    for (prop in mergeList[i]) {
+                        newThreat[prop] = mergeList[i][prop];
+                    }
+                    
+                    //average distance and sum the size
+                    newThreat.x = (mergeList[i].x + mergeList[z].x)/2;
+                    newThreat.y = (mergeList[i].y + mergeList[z].y)/2;
+                    newThreat.mass = mergeList[i].mass + mergeList[z].mass;
+                    newThreat.size = Math.sqrt(newThreat.mass * 100);
+                    newThreat.isMovingTowards = true;
+                	closestInfo = that.closestCell(player, newThreat.x, newThreat.y);
+
+                	newThreat.closestCell = closestInfo.cell;
+                	newThreat.distance = closestInfo.distance;
+                    
+                    newThreat.nopredict = true;
+                    //check its a threat
+                    if (that.isThreat(player.smallestCell, newThreat)) {
+                         //IT'S DANGER!
+                        threatList.push(newThreat);
+                    }   
+                }
+            }
+        }
+        
+        player.food = foodList;
+        player.threats = threatList;
+        player.viruses = virusList;
+        player.splitTargets = splitTargetList;
+        player.enemies = enemyList;
+    };
+
+    this.clusterFood = function(player, foodList, blobSize) {
+        var clusters = [];
+        var addedCluster = false;
+
+        for (var i = 0; i < foodList.length; i++) {
+        	
+        	var food = foodList[i];
+        	var foodSize = food.size;
+        	
+        	if (food.size <= 14) {
+        		foodSize = food.size-9;
+        	}
+
+        	if (!food.isNotMoving()) {
+        		
+            	var lastPos = food.getLastPos();
+
+            	var predictedX = food.x - (lastPos.x - food.x) * (food.distance/750) * constants.velocity;
+            	var predictedY = food.y - (lastPos.y - food.y) * (food.distance/750) * constants.velocity;
+
+                clusters.push({
+                	x: predictedX, y: predictedY, size: food.size, cell: food
+                });
+        	} else {
+	            for (var j = 0; j < clusters.length; j++) {
+	            	if (!clusters[j].cell) {
+		                if (this.computeInexpensiveDistance(food.x, food.y, clusters[j].x, clusters[j].y) < blobSize * 2) {
+		                	
+		                    clusters[j].x = (food.x + clusters[j].x) / 2;
+		                    clusters[j].y = (food.y + clusters[j].y) / 2;
+		                    clusters[j].size += foodSize;
+		                    addedCluster = true;
+		                    break;
+		                }
+	            	}
+	            }
+	            if (!addedCluster) {
+	                clusters.push({
+	                	x: food.x, y: food.y, size: foodSize, cell: null
+	                });
+	            }
+        	}
+            addedCluster = false;
+        }
+        
+        return clusters;
+    };
+    
+    this.getBestFood = function(player) {
+    	
+    	var i;
+    	
+        for (i = 0; i < player.foodClusters.length; i++) {
+        	
+            //This is the cost function. Higher is better.
+
+        	var cluster = player.foodClusters[i];
+        	var multiplier = 3;
+
+        	var closestInfo = this.closestCell(player, cluster.x, cluster.y);
+            cluster.closestCell = closestInfo.cell;
+            cluster.distance = closestInfo.distance;
+
+            // if (!cluster.cell) {  // lets try not to follow enemies towards wall
+            	if ((cluster.x < getMapStartX()+2000 && cluster.x < player.x) ||
+            		(cluster.y < getMapStartY()+2000 && cluster.y < player.y) ||
+            		(cluster.x > getMapEndX()-2000 && cluster.x > player.x) ||
+            		(cluster.y > getMapEndY()-2000 && cluster.y > player.y)) {
+            		
+            		// everything close to the wall will seem very far away
+            		multiplier = 25;
+            	}
+            // }
+
+            var weight = cluster.size;
+            if (cluster.cell) {
+            	
+            	if (player.isSplitting && player.splitTarget == cluster.cell) {
+            		weight = weight * 10;
+           			console.log("increasing weight");
+            	}
+            	if (cluster.cell.isSplitTarget && player.cells.length == 1) {
+            		weight = weight * 2.5;
+            	}
+
+            	if (cluster.cell.isNotMoving()) {
+                	// easy food
+            		weight = weight * 25;
+            	} else if (player.safeToSplit && cluster.cell.isSplitTarget && 
+            			this.inSplitRange(cluster.cell)) {
+            		weight = weight * 3;
+            		cluster.canSplitKill = true;
+                }
+            	if (cluster.cell.isMovingTowards) {
+                	// prioritize enemies moving towards us
+            		weight = weight * 1.2;
+                }
+            	
+            	if (!cluster.cell.isNotMoving()) {
+                	weight *= Math.log(closestInfo.distance / 1000 * 20);
+            	}
+            }
+            cluster.clusterWeight = closestInfo.distance / weight * multiplier ;
+            
+            drawPoint(cluster.x, cluster.y+60, 1, "" + parseInt(cluster.clusterWeight, 10) + " " + parseInt(cluster.size, 10));
+        }
+        
+        var bestFoodI = 0;
+        var bestClusterWeight = player.foodClusters[0].clusterWeight;
+        for (i = 1; i < player.foodClusters.length; i++) {
+            if (player.foodClusters[i].clusterWeight < bestClusterWeight) {
+                bestClusterWeight = player.foodClusters[i].clusterWeight;
+                bestFoodI = i;
+            }
+        }
+        return player.foodClusters[bestFoodI];
+    };
+    
+    this.determineDestination = function(player, tempPoint) {
+    	
+        //The bot works by removing angles in which it is too
+        //dangerous to travel towards to.
+        var badAngles = [];
+        var obstacleList = [];
+        var tempMoveX = getPointX();
+        var tempMoveY = getPointY();
+        var i, j, angle1, angle2, tempOb, line1, line2, diff, threat, shiftedAngle, destination, closestCell;
+        var destinationChoices;
+        var panicMode = false;
+
+        for (j = 0; j < player.cells.length; j++) {
+            for (i = 0; i < player.threats.length; i++) {
+            	if (this.circlesIntersect(player.cells[j], player.threats[i])) {
+            		panicMode = true;
+            		break;
+            	}
+            }
+        }
+
+        for (i = 0; i < player.threats.length; i++) {
+        	
+        	threat = player.threats[i];
+
+            closestCell = threat.closestCell;
+            var enemyDistance = threat.distance;
+
+            if (enemyCanSplit) {	
+                drawPoint(threat.x, threat.y+40, 1, "c:" + (this.getSplitMass(threat) / this.getMass(threat)).toFixed(2));
+            }
+            
+            var enemyCanSplit = this.canSplitKill(threat, player.smallestCell, constants.enemyRatio);
+            
+            if (enemyCanSplit && this.getRatio(threat, player.smallestCell) > 20) {
+            	enemyCanSplit = false;
+            }
+
+            if (panicMode) {
+            	console.log('panic mode');
+            	enemyCanSplit = false;
+            	
+            	// save the biggest cell
+//            	closestCell = player.largestCell;
+            }
+
+            var normalDangerDistance = threat.size + constants.safeDistance;
+            var shiftDistance = player.size;
+            var splitDangerDistance = threat.size + constants.enemySplitDistance + constants.safeDistance;
+            var secureDistance = (enemyCanSplit ? splitDangerDistance : normalDangerDistance);
+            
+            threat.dangerZone = secureDistance;
+
+            for (j = player.foodClusters.length - 1; j >= 0 ; j--) {
+                if (this.computeDistance(threat.x, threat.y, player.foodClusters[j].x, player.foodClusters[j].y) < secureDistance + shiftDistance)
+                    player.foodClusters.splice(j, 1);
+            }
+
+            if (panicMode || threat.danger && getLastUpdate() - threat.dangerTimeOut > 400) {
+
+                threat.danger = false;
+            }
+
+            /*if ((enemyCanSplit && enemyDistance < splitDangerDistance) ||
+                (!enemyCanSplit && enemyDistance < normalDangerDistance)) {
+
+                threat.danger = true;
+                threat.dangerTimeOut = f.getLastUpdate();
+            }*/
+
+            //console.log("Figured out who was important.");
+            
+            if ((enemyCanSplit && enemyDistance < splitDangerDistance) || (enemyCanSplit && threat.danger)) {
+
+                badAngles.push(this.getAngleRange(closestCell, threat, i, splitDangerDistance).concat(threat.distance));
+
+            } else if ((!enemyCanSplit && enemyDistance < normalDangerDistance) || (!enemyCanSplit && threat.danger)) {
+
+                badAngles.push(this.getAngleRange(closestCell, threat, i, normalDangerDistance).concat(threat.distance));
+
+            } else if (enemyCanSplit && enemyDistance < splitDangerDistance + shiftDistance) {
+                tempOb = this.getAngleRange(closestCell, threat, i, splitDangerDistance + shiftDistance);
+                angle1 = tempOb[0];
+                angle2 = this.rangeToAngle(tempOb);
+
+                obstacleList.push([[angle1, true], [angle2, false]]);
+            } else if (!enemyCanSplit && enemyDistance < normalDangerDistance + shiftDistance) {
+                tempOb = this.getAngleRange(closestCell, threat, i, normalDangerDistance + shiftDistance);
+                angle1 = tempOb[0];
+                angle2 = this.rangeToAngle(tempOb);
+
+                obstacleList.push([[angle1, true], [angle2, false]]);
+            }
+            //console.log("Done with enemy: " + i);
+        }
+
+        //console.log("Done looking for enemies!");
+
+		for (i = 0; i < player.viruses.length; i++) {
+			var virus = player.viruses[i];
+			
+			for (j = 0; j < player.cells.length; j++) {
+				var cell = player.cells[j];
+				
+	            if (virus.distance < (cell.size * 2)) {
+	                tempOb = this.getAngleRange(cell, virus, i, cell.size + 70); // was 50
+	                angle1 = tempOb[0];
+	                angle2 = this.rangeToAngle(tempOb);
+	                obstacleList.push([[angle1, true], [angle2, false]]);
+	            }
+			}
+        }
+		/*
+		 * original - if after splitting, a virus is inside the enclosing player, the player can hit the virus
+		for (i = 0; i < player.viruses.length; i++) {
+            var virusDistance = this.computeDistance(player.viruses[i].x, player.viruses[i].y, player.x, player.y);
+            if (player.largestCell.size < player.viruses[i].size) {
+                if (virusDistance < (player.viruses[i].size * 2)) {
+                    tempOb = this.getAngleRange(player, player.viruses[i], i, player.viruses[i].size + 10);
+                    angle1 = tempOb[0];
+                    angle2 = this.rangeToAngle(tempOb);
+                    obstacleList.push([[angle1, true], [angle2, false]]);
+                }
+            } else {
+                if (virusDistance < (player.size * 2)) {
+                    tempOb = this.getAngleRange(player, player.viruses[i], i, player.size + 50);
+                    angle1 = tempOb[0];
+                    angle2 = this.rangeToAngle(tempOb);
+                    obstacleList.push([[angle1, true], [angle2, false]]);
+                }
+            }
+        }
+		 */
+
+        var stupidList = [];
+
+        if (badAngles.length > 0) {
+            //NOTE: This is only bandaid wall code. It's not the best way to do it.
+            stupidList = this.addWall(stupidList, player);
+        }
+
+        for (i = 0; i < badAngles.length; i++) {
+            angle1 = badAngles[i][0];
+            angle2 = this.rangeToAngle(badAngles[i]);
+            stupidList.push([[angle1, true], [angle2, false], badAngles[i][2]]);
+        }
+
+        //stupidList.push([[45, true], [135, false]]);
+        //stupidList.push([[10, true], [200, false]]);
+
+        stupidList.sort(function(a, b){
+            return a[2]-b[2];
+        });
+
+        var sortedInterList = [];
+        var sortedObList = [];
+
+        for (i = 0; i < stupidList.length; i++) {
+
+            var tempList = this.addAngle(sortedInterList, stupidList[i]);
+
+            if (tempList.length === 0) {
+                console.log("MAYDAY IT'S HAPPENING!");
+
+                break;
+            } else {
+                sortedInterList = tempList;
+            }
+        }
+
+        for (i = 0; i < obstacleList.length; i++) {
+            sortedObList = this.addAngle(sortedObList, obstacleList[i]);
+
+            if (sortedObList.length === 0) {
+                break;
+            }
+        }
+
+        var offsetI = 0;
+        var obOffsetI = 1;
+
+        if (sortedInterList.length > 0 && sortedInterList[0][1]) {
+            offsetI = 1;
+        }
+        if (sortedObList.length > 0 && sortedObList[0][1]) {
+            obOffsetI = 0;
+        }
+
+        var goodAngles = [];
+        var obstacleAngles = [];
+
+        for (i = 0; i < sortedInterList.length; i += 2) {
+            angle1 = sortedInterList[this.mod(i + offsetI, sortedInterList.length)][0];
+            angle2 = sortedInterList[this.mod(i + 1 + offsetI, sortedInterList.length)][0];
+            diff = this.mod(angle2 - angle1, 360);
+            goodAngles.push([angle1, diff]);
+        }
+
+        for (i = 0; i < sortedObList.length; i += 2) {
+            angle1 = sortedObList[this.mod(i + obOffsetI, sortedObList.length)][0];
+            angle2 = sortedObList[this.mod(i + 1 + obOffsetI, sortedObList.length)][0];
+            diff = this.mod(angle2 - angle1, 360);
+            obstacleAngles.push([angle1, diff]);
+        }
+
+        for (i = 0; i < goodAngles.length; i++) {
+            line1 = this.followAngle(goodAngles[i][0], player.x, player.y, 100 + player.size);
+            line2 = this.followAngle(this.mod(goodAngles[i][0] + goodAngles[i][1], 360), player.x, player.y, 100 + player.size);
+            drawLine(player.x, player.y, line1[0], line1[1], 1);
+            drawLine(player.x, player.y, line2[0], line2[1], 1);
+
+            drawArc(line1[0], line1[1], line2[0], line2[1], player.x, player.y, 1);
+
+            //drawPoint(player[0].x, player[0].y, 2, "");
+
+            drawPoint(line1[0], line1[1], 0, "" + i + ": 0");
+            drawPoint(line2[0], line2[1], 0, "" + i + ": 1");
+        }
+
+        for (i = 0; i < obstacleAngles.length; i++) {
+            line1 = this.followAngle(obstacleAngles[i][0], player.x, player.y, 50 + player.size);
+            line2 = this.followAngle(this.mod(obstacleAngles[i][0] + obstacleAngles[i][1], 360), player.x, player.y, 50 + player.size);
+            drawLine(player.x, player.y, line1[0], line1[1], 6);
+            drawLine(player.x, player.y, line2[0], line2[1], 6);
+
+            drawArc(line1[0], line1[1], line2[0], line2[1], player.x, player.y, 6);
+
+            //drawPoint(player[0].x, player[0].y, 2, "");
+
+            drawPoint(line1[0], line1[1], 0, "" + i + ": 0");
+            drawPoint(line2[0], line2[1], 0, "" + i + ": 1");
+        }
+
+        if (this.toggleFollow && goodAngles.length === 0) {
+            //This is the follow the mouse mode
+            var distance = this.computeDistance(player.x, player.y, tempPoint[0], tempPoint[1]);
+
+            shiftedAngle = this.shiftAngle(obstacleAngles, this.getAngle(tempPoint[0], tempPoint[1], player.x, player.y), [0, 360]);
+
+            destination = this.followAngle(shiftedAngle, player.x, player.y, distance);
+
+            destinationChoices = destination;
+            drawLine(player.x, player.y, destination[0], destination[1], 1);
+            //tempMoveX = destination[0];
+            //tempMoveY = destination[1];
+
+        } else if (goodAngles.length > 0) {
+            var bIndex = goodAngles[0];
+            var biggest = goodAngles[0][1];
+            for (i = 1; i < goodAngles.length; i++) {
+                var size = goodAngles[i][1];
+                if (size > biggest) {
+                    biggest = size;
+                    bIndex = goodAngles[i];
+                }
+            }
+            var perfectAngle = this.mod(bIndex[0] + bIndex[1] / 2, 360);
+
+            perfectAngle = this.shiftAngle(obstacleAngles, perfectAngle, bIndex);
+
+            line1 = this.followAngle(perfectAngle, player.x, player.y, verticalDistance());
+
+            destinationChoices = line1;
+            drawLine(player.x, player.y, line1[0], line1[1], 7);
+            //tempMoveX = line1[0];
+            //tempMoveY = line1[1];
+        } else if (badAngles.length > 0 && goodAngles.length === 0) {
+            //When there are enemies around but no good angles
+            //You're likely screwed. (This should never happen.)
+
+            console.log("Failed");
+            destinationChoices = [tempMoveX, tempMoveY];
+            /*var angleWeights = [] //Put weights on the angles according to enemy distance
+            for (var i = 0; i < player.threats.length; i++){
+                var dist = this.computeDistance(player.x, player.y, player.threats[i].x, player.threats[i].y);
+                var angle = this.getAngle(player.threats[i].x, player.threats[i].y, player.x, player.y);
+                angleWeights.push([angle,dist]);
+            }
+            var maxDist = 0;
+            var finalAngle = 0;
+            for (var i = 0; i < angleWeights.length; i++){
+                if (angleWeights[i][1] > maxDist){
+                    maxDist = angleWeights[i][1];
+                    finalAngle = this.mod(angleWeights[i][0] + 180, 360);
+                }
+            }
+            line1 = this.followAngle(finalAngle,player.x,player.y,f.verticalDistance());
+            drawLine(player.x, player.y, line1[0], line1[1], 2);
+            destinationChoices.push(line1);*/
+        } else if (player.foodClusters.length > 0) {
+        	
+        	var doSplit = player.largestCell.mass >= 36 && player.mass <= 50 && player.cells.length == 1;
+        	var doLure = false;
+
+        	var cluster = this.getBestFood(player);
+
+        	drawCircle(cluster.x, cluster.y, cluster.size + 30, 2);
+
+            // drawPoint(bestFood.x, bestFood.y, 1, "");
+            if (cluster.canSplitKill && player.safeToSplit) {
+                
+                doSplit = true;
+            }
+
+            var angle = this.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
+            shiftedAngle = this.shiftAngle(obstacleAngles, angle, [0, 360]);
+
+            destination = this.followAngle(shiftedAngle, cluster.closestCell.x, cluster.closestCell.y, cluster.distance);
+
+            // really bad condition logic - but check if it's a split target just outside of range
+            if (!doSplit && 
+            		!player.isLuring && 
+            		obstacleAngles.length === 0 && 
+            		player.safeToSplit && 
+            		cluster.cell && 
+            		cluster.cell.isSplitTarget &&
+            		!cluster.cell.isMovingTowards && 
+        			cluster.distance < constants.lureDistance &&
+        			cluster.distance > constants.splitRangeMin && // not already in range (might have been an enemy close)
+        			player.mass > 250 && 
+        			(player.mass - cluster.cell.mass > 25)) {
+
+            	// TODO: figure out lure amount
+            	player.isLuring = true;
+            	doLure = true;
+                setTimeout(function() {
+                	player.isLuring = false;
+                	console.log('luring');
+                }, 5000);
+            }
+        			
+            // are we avoiding obstacles ??
+            if (doSplit && obstacleAngles.length === 0) {
+				player.isSplitting = true;
+            	player.splitTarget = cluster.cell;
+            	player.splitSize = player.size;
+            	
+        		player.splitTimer = Date.now();
+        		player.splitLocation = { 
+        				x: player.largestCell.x + (cluster.x - player.largestCell.x) * 4,
+        				y: player.largestCell.y + (cluster.y - player.largestCell.y) * 4,
+        				startx: player.largestCell.x,
+        				starty: player.largestCell.y
+        		};
+        		
+        		destination[0] = player.splitLocation.x;
+        		destination[1] = player.splitLocation.y;        		
+        		
+        		player.splitDistance = 0;
+
+            } else {
+            	doSplit = false;
+            }
+            
+            destinationChoices = [ destination[0], destination[1], doSplit, doLure ];
+
+            drawLine(cluster.closestCell.x, cluster.closestCell.y, destination[0], destination[1], 1);
+                        
+        } else {
+            //If there are no enemies around and no food to eat.
+            destinationChoices = [tempMoveX, tempMoveY];
+        }
+        
+        return destinationChoices;
+    };
+
+    /**
+     * This is the main bot logic. This is called quite often.
+     * @return A 2 dimensional array with coordinates for every cells.  [[x, y], [x, y]]
+     */
+    this.mainLoop = function(cells) {
+        var player = this.player;
+        var interNodes = getMemoryCells();
+        var i;
+        
+        player.setCells(cells);
+
+        var useMouseX = screenToGameX(getMouseX());
+        var useMouseY = screenToGameY(getMouseY());
+        var tempPoint = [useMouseX, useMouseY, 1];
+
+        //The current destination that the cells were going towards.
+
+        drawLine(getX() - (1920 / 2) / getZoomlessRatio(), getY() - (1080 / 2) / getZoomlessRatio(), getX() + (1920 / 2) / getZoomlessRatio(), getY() - (1080 / 2) / getZoomlessRatio(), 7);
+        drawLine(getX() - (1920 / 2) / getZoomlessRatio(), getY() + (1080 / 2) / getZoomlessRatio(), getX() + (1920 / 2) / getZoomlessRatio(), getY() + (1080 / 2) / getZoomlessRatio(), 7);
+        drawLine(getX() - (1920 / 2) / getZoomlessRatio(), getY() - (1080 / 2) / getZoomlessRatio(), getX() - (1920 / 2) / getZoomlessRatio(), getY() + (1080 / 2) / getZoomlessRatio(), 7);
+        drawLine(getX() + (1920 / 2) / getZoomlessRatio(), getY() - (1080 / 2) / getZoomlessRatio(), getX() + (1920 / 2) / getZoomlessRatio(), getY() + (1080 / 2) / getZoomlessRatio(), 7);
+
+    	if (player.isSplitting && player.cells.length > 1) {
+    		var distance = this.computeDistance(player.cells[0].x, player.cells[0].y, 
+    				player.cells[1].x, player.cells[1].y);
+    		if (distance > player.splitDistance) {
+    			player.splitDistance = distance;
+    			player.splitVelocity = distance / (Date.now() - player.splitTimer);
+    			console.log(Date.now() - player.splitTimer);
+    			console.log('max distance = ' + player.splitDistance);
+    			console.log('velocity = ' + player.splitVelocity);
+    			console.log('end ' + this.computeDistance(player.splitLocation.startx, player.splitLocation.starty,
+        				player.cells[1].x, player.cells[1].y));
+    		}
+    	}
+    	
+    	if (player.isSplitting) {
+    		
+    		if (player.size <= player.splitSize && (Date.now() - player.splitTimer > 200)) {
+    			// player size grows as long as we are splitting
+            	player.isSplitting = false;
+            	player.splitTarget = null;
+            	console.log('i think we are done splitting');
+    		} else {
+            	player.splitSize = player.size;
+        		
+                drawCircle(player.splitLocation.x, player.splitLocation.y, 50, constants.green);
+        		if (player.splitTarget) {
+            		return [ player.splitTarget.x, player.splitTarget.y ];
+        		}
+        		return [ getPointX(), getPointY() ];
+    		}
+    	}
+
+    	if (player.cells.length > 1) {
+            drawCircle(player.x, player.y, player.size, 6);
+    	}
+    	
+    	if (player.safeToSplit) {
+        	drawCircle(player.x, player.y, player.size + 30, 2);
+    	}
+
+    	drawCircle(player.x, player.y, player.size + constants.enemySplitDistance, 5);
+    	
+        // drawLine(player.x, player.y, player.x, player.y + player.size + this.splitDistance, 7);
+        //drawPoint(player[0].x, player[0].y - player[0].size, 3, "" + Math.floor(player[0].x) + ", " + Math.floor(player[0].y));
+
+        //loop through everything that is on the screen and
+        //separate everything in it's own category.
+        this.separateListBasedOnFunction(player);
+
+        player.foodClusters = this.clusterFood(player, player.foodList, player.largestCell.size);
+        
+        /*player.threats.sort(function(a, b){
+            return a.distance-b.distance;
+        })*/
+
+        for (i = 0; i < player.viruses.length; i++) {
+        	var virus = player.viruses[i];
+            if (player.largestCell.size < virus.size) {
+                drawCircle(virus.x, virus.y, virus.size + 10, 3);
+                drawCircle(virus.x, virus.y, virus.size * 2, 6);
+
+            } else {
+                drawCircle(virus.x, virus.y, player.largestCell.size + 50, 3);
+                drawCircle(virus.x, virus.y, player.largestCell.size * 2, 6);
+            }
+        }
+        
+        for (i = 0; i < player.splitTargets.length; i++) {
+        	var splitTarget = player.splitTargets[i];
+            drawCircle(splitTarget.x, splitTarget.y, splitTarget.size + 50, splitTarget.isSplitTarget ? constants.green : constants.gray );
+        }
+
+        var destinationChoices = this.determineDestination(player, tempPoint);
+        
+        for (i = 0; i < player.threats.length; i++) {
+        	
+        	var threat = player.threats[i];
+
+        	drawCircle(threat.x, threat.y, threat.size + 30, 0);
+        	
+        	if (threat.isMovingTowards) {
+            	drawCircle(threat.x, threat.y, threat.size + 10, 3);
+        	}
+
+            drawCircle(threat.x, threat.y, threat.dangerZone, 0);
+        }
+        
+        drawPoint(tempPoint[0], tempPoint[1], tempPoint[2], "what ?");
+        //drawPoint(tempPoint[0], tempPoint[1], tempPoint[2], "" + Math.floor(this.computeDistance(tempPoint[0], tempPoint[1], I, J)));
+        //drawLine(tempPoint[0], tempPoint[1], player[0].x, player[0].y, 6);
+        //console.log("Slope: " + slope(tempPoint[0], tempPoint[1], player[0].x, player[0].y) + " Angle: " + getAngle(tempPoint[0], tempPoint[1], player[0].x, player[0].y) + " Side: " + this.mod(getAngle(tempPoint[0], tempPoint[1], player[0].x, player[0].y) - 90, 360));
+        tempPoint[2] = 1;
+
+        return destinationChoices;
+    };
+
     this.displayText = function() {
         return ["Q - Follow Mouse: " + (this.toggleFollow ? "On" : "Off")];
     };
@@ -550,215 +1307,6 @@ function AposBot() {
     	var oldy = b.getLastPos().y;
 
     	return this.computeInexpensiveDistance(b.x, b.y, a.x, a.y) < this.computeInexpensiveDistance(oldx, oldy, a.x, a.y);
-    };
-
-    this.separateListBasedOnFunction = function(player, that, listToUse) {
-        var foodElementList = [];
-        var threatList = [];
-        var virusList = [];
-        var splitTargetList = [];
-        var enemyList = [];
-        var mergeList = [];
-        var i;
-        var closestInfo;
-        
-    	player.safeToSplit = true;
-
-        Object.keys(listToUse).forEach(function(element, index) {
-
-        	var entity = listToUse[element];
-            var isMe = that.isItMe(player, entity);
-            var isEnemy = true;
-            
-            if (isMe) {
-                drawPoint(entity.x, entity.y+20, 1, "m:" + that.getMass(entity).toFixed(2) + " s:" + that.getSplitMass(entity).toFixed(2));
-            } else {
-            	
-            	entity.isSplitTarget = false;
-            	entity.isMovingTowards = that.isMovingTowards(player, entity);
-            	entity.mass = that.calculateMass(entity);
-            	closestInfo = that.closestCell(player, entity.x, entity.y);
-
-            	entity.closestCell = closestInfo.cell;
-                entity.distance = closestInfo.distance;
-
-                if (that.isFood(player.smallestCell, entity) && entity.isNotMoving()) {
-                    //IT'S FOOD!
-               		foodElementList.push(entity);
-                    isEnemy = false;
-                } else if (that.isThreat(player.smallestCell, entity)) {
-                    //IT'S DANGER!
-                    threatList.push(entity);
-                    mergeList.push(entity);
-                    
-                //} else if (that.isThreatIfSplit(blob, entity)) {
-                //	threatIfSplitList.push()
-                } else if (that.isVirus(player.largestCell, entity)) {
-                    //IT'S VIRUS!
-                    virusList.push(entity);
-                    isEnemy = false;
-                }
-                else if (entity.closestCell.mass > 36 && that.canSplitKill(entity.closestCell, entity, constants.playerRatio)) {
-
-                	if (player.largestCell.mass / entity.mass < 10) {
-                    	// only split kill if it's moving
-                    	entity.isSplitTarget = !entity.isNotMoving();
-                	}
-                    splitTargetList.push(entity);
-
-                    foodElementList.push(entity);
-                    mergeList.push(entity);
-                }
-                else if (that.canEat(player.smallestCell, entity, constants.playerRatio)) {
-
-                	if (player.cells.length > 1 && player.mass / entity.mass < 10) {
-                    	// only split kill if it's moving
-                    	entity.isSplitTarget = !entity.isNotMoving();
-                	}
-                	
-                	foodElementList.push(entity);
-                    mergeList.push(entity);
-                	
-                } else {
-                	
-                	if (!that.canEat(entity, player.smallestCell, constants.enemeyRatio)) {
-                		if (player.cells.length > 1 && player.mass / entity.mass < 10 && !entity.isNotMoving()) {
-                            foodElementList.push(entity);
-                			entity.isSplitTarget = true;
-                			console.log("adding to food list: " + entity.name);
-                		}
-                	}
-                	
-                	if (!that.isVirus(null, entity)) {
-                		mergeList.push(entity);
-                	}
-                }
-                
-                if (isEnemy) {
-
-                	if (entity.closestCell.size * entity.closestCell.size / 2 < entity.size * entity.size * 1.265) {
-                		if (entity.distance < 750 + entity.closestCell.size) {
-                    		player.safeToSplit = false;
-                		}
-                	}
-
-                	enemyList.push(entity);
-                    drawPoint(entity.x, entity.y+20, 1, "m:" + that.getMass(entity).toFixed(2) + " s:" + that.getSplitMass(entity).toFixed(2));
-                }
-            }/*else if(isMe && (getBlobCount(getPlayer()) > 0)){
-                //Attempt to make the other cell follow the mother one
-                foodElementList.push(entity);
-            }*/
-        });
-
-        if (player.isSplitting || player.cells.length > 1 || player.splitTargets.length === 0) {
-        	player.safeToSplit = false;
-        }
-        
-        var foodList = [];
-        for (i = 0; i < foodElementList.length; i++) {
-        	if (!this.foodInVirus(foodElementList[i], virusList)) {
-        		foodList.push(foodElementList[i]);
-        	}
-        }
-        
-        //console.log("Merglist length: " +  mergeList.length)
-        //cell merging
-        for (i = 0; i < mergeList.length; i++) {
-            for (var z = 0; z < mergeList.length; z++) {
-                if (z != i && that.isMerging(mergeList[i], mergeList[z])) { //z != i && 
-                    //found cells that appear to be merging - if they constitute a threat add them to the theatlist
-                    
-                    //clone us a new cell
-                    var newThreat = {};
-                    var prop;
-                    
-                    for (prop in mergeList[i]) {
-                        newThreat[prop] = mergeList[i][prop];
-                    }
-                    
-                    //average distance and sum the size
-                    newThreat.x = (mergeList[i].x + mergeList[z].x)/2;
-                    newThreat.y = (mergeList[i].y + mergeList[z].y)/2;
-                    newThreat.mass = mergeList[i].mass + mergeList[z].mass;
-                    newThreat.size = Math.sqrt(newThreat.mass * 100);
-                    newThreat.isMovingTowards = true;
-                	closestInfo = that.closestCell(player, newThreat.x, newThreat.y);
-
-                	newThreat.closestCell = closestInfo.cell;
-                	newThreat.distance = closestInfo.distance;
-                    
-                    newThreat.nopredict = true;
-                    //check its a threat
-                    if (that.isThreat(player.smallestCell, newThreat)) {
-                         //IT'S DANGER!
-                        threatList.push(newThreat);
-                    }   
-                }
-            }
-        }
-        
-        player.food = foodList;
-        player.threats = threatList;
-        player.viruses = virusList;
-        player.splitTargets = splitTargetList;
-        player.enemies = enemyList;
-        
-        return [foodList, threatList, virusList, splitTargetList, enemyList];
-    };
-
-    this.getAll = function(player) {
-        var interNodes = getMemoryCells();
-
-        return this.separateListBasedOnFunction(player, this, interNodes);
-    };
-
-    this.clusterFood = function(player, foodList, blobSize) {
-        var clusters = [];
-        var addedCluster = false;
-
-        for (var i = 0; i < foodList.length; i++) {
-        	
-        	var food = foodList[i];
-        	var foodSize = food.size;
-        	
-        	if (food.size <= 14) {
-        		foodSize = food.size-9;
-        	}
-
-        	if (!food.isNotMoving()) {
-        		
-            	var lastPos = food.getLastPos();
-
-            	var predictedX = food.x - (lastPos.x - food.x) * (food.distance/750) * constants.velocity;
-            	var predictedY = food.y - (lastPos.y - food.y) * (food.distance/750) * constants.velocity;
-
-                clusters.push({
-                	x: predictedX, y: predictedY, size: food.size, cell: food
-                });
-        	} else {
-	            for (var j = 0; j < clusters.length; j++) {
-	            	if (!clusters[j].cell) {
-		                if (this.computeInexpensiveDistance(food.x, food.y, clusters[j].x, clusters[j].y) < blobSize * 2) {
-		                	
-		                    clusters[j].x = (food.x + clusters[j].x) / 2;
-		                    clusters[j].y = (food.y + clusters[j].y) / 2;
-		                    clusters[j].size += foodSize;
-		                    addedCluster = true;
-		                    break;
-		                }
-	            	}
-	            }
-	            if (!addedCluster) {
-	                clusters.push({
-	                	x: food.x, y: food.y, size: foodSize, cell: null
-	                });
-	            }
-        	}
-            addedCluster = false;
-        }
-        
-        return clusters;
     };
 
     this.getAngle = function(x1, y1, x2, y2) {
@@ -1221,592 +1769,7 @@ function AposBot() {
 
         return info;
     };
-    
-    this.getBestFood = function(player) {
-    	
-    	var i;
-    	
-        for (i = 0; i < player.foodClusters.length; i++) {
-        	
-            //This is the cost function. Higher is better.
 
-        	var cluster = player.foodClusters[i];
-        	var multiplier = 3;
-
-        	var closestInfo = this.closestCell(player, cluster.x, cluster.y);
-            cluster.closestCell = closestInfo.cell;
-            cluster.distance = closestInfo.distance;
-
-            // if (!cluster.cell) {  // lets try not to follow enemies towards wall
-            	if ((cluster.x < getMapStartX()+2000 && cluster.x < player.x) ||
-            		(cluster.y < getMapStartY()+2000 && cluster.y < player.y) ||
-            		(cluster.x > getMapEndX()-2000 && cluster.x > player.x) ||
-            		(cluster.y > getMapEndY()-2000 && cluster.y > player.y)) {
-            		
-            		// everything close to the wall will seem very far away
-            		multiplier = 25;
-            	}
-            // }
-
-            var weight = cluster.size;
-            if (cluster.cell) {
-            	
-            	if (player.isSplitting && player.splitTarget == cluster.cell) {
-            		weight = weight * 10;
-           			console.log("increasing weight");
-            	}
-            	if (cluster.cell.isSplitTarget && player.cells.length == 1) {
-            		weight = weight * 2.5;
-            	}
-
-            	if (cluster.cell.isNotMoving()) {
-                	// easy food
-            		weight = weight * 25;
-            	} else if (player.safeToSplit && cluster.cell.isSplitTarget && 
-            			this.inSplitRange(cluster.cell)) {
-            		weight = weight * 3;
-            		cluster.canSplitKill = true;
-                }
-            	if (cluster.cell.isMovingTowards) {
-                	// prioritize enemies moving towards us
-            		weight = weight * 1.2;
-                }
-            	
-            	if (!cluster.cell.isNotMoving()) {
-                	weight *= Math.log(closestInfo.distance / 1000 * 20);
-            	}
-            }
-            cluster.clusterWeight = closestInfo.distance / weight * multiplier ;
-            
-            drawPoint(cluster.x, cluster.y+60, 1, "" + parseInt(cluster.clusterWeight, 10) + " " + parseInt(cluster.size, 10));
-        }
-        
-        var bestFoodI = 0;
-        var bestClusterWeight = player.foodClusters[0].clusterWeight;
-        for (i = 1; i < player.foodClusters.length; i++) {
-            if (player.foodClusters[i].clusterWeight < bestClusterWeight) {
-                bestClusterWeight = player.foodClusters[i].clusterWeight;
-                bestFoodI = i;
-            }
-        }
-        return player.foodClusters[bestFoodI];
-    };
-    
-    this.determineDestination = function(player, tempPoint, allPossibleThreats, allPossibleViruses) {
-    	
-        //The bot works by removing angles in which it is too
-        //dangerous to travel towards to.
-        var badAngles = [];
-        var obstacleList = [];
-        var tempMoveX = getPointX();
-        var tempMoveY = getPointY();
-        var i, j, angle1, angle2, tempOb, line1, line2, diff, threat, shiftedAngle, destination, closestCell;
-        var destinationChoices;
-        var panicMode = false;
-
-        for (j = 0; j < player.cells.length; j++) {
-            for (i = 0; i < allPossibleThreats.length; i++) {
-            	if (this.circlesIntersect(player.cells[j], allPossibleThreats[i])) {
-            		panicMode = true;
-            		break;
-            	}
-            }
-        }
-
-        for (i = 0; i < allPossibleThreats.length; i++) {
-        	
-        	threat = allPossibleThreats[i];
-
-            closestCell = threat.closestCell;
-            var enemyDistance = threat.distance;
-
-            if (enemyCanSplit) {	
-                drawPoint(threat.x, threat.y+40, 1, "c:" + (this.getSplitMass(threat) / this.getMass(threat)).toFixed(2));
-            }
-            
-            var enemyCanSplit = this.canSplitKill(threat, player.smallestCell, constants.enemyRatio);
-            
-            if (enemyCanSplit && this.getRatio(threat, player.smallestCell) > 20) {
-            	enemyCanSplit = false;
-            }
-
-            if (panicMode) {
-            	console.log('panic mode');
-            	enemyCanSplit = false;
-            	
-            	// save the biggest cell
-//            	closestCell = player.largestCell;
-            }
-
-            var normalDangerDistance = threat.size + constants.safeDistance;
-            var shiftDistance = player.size;
-            var splitDangerDistance = threat.size + constants.enemySplitDistance + constants.safeDistance;
-            var secureDistance = (enemyCanSplit ? splitDangerDistance : normalDangerDistance);
-            
-            threat.dangerZone = secureDistance;
-
-            for (j = player.foodClusters.length - 1; j >= 0 ; j--) {
-                if (this.computeDistance(threat.x, threat.y, player.foodClusters[j].x, player.foodClusters[j].y) < secureDistance + shiftDistance)
-                    player.foodClusters.splice(j, 1);
-            }
-
-            if (panicMode || threat.danger && getLastUpdate() - threat.dangerTimeOut > 400) {
-
-                threat.danger = false;
-            }
-
-            /*if ((enemyCanSplit && enemyDistance < splitDangerDistance) ||
-                (!enemyCanSplit && enemyDistance < normalDangerDistance)) {
-
-                threat.danger = true;
-                threat.dangerTimeOut = f.getLastUpdate();
-            }*/
-
-            //console.log("Figured out who was important.");
-            
-            if ((enemyCanSplit && enemyDistance < splitDangerDistance) || (enemyCanSplit && threat.danger)) {
-
-                badAngles.push(this.getAngleRange(closestCell, threat, i, splitDangerDistance).concat(threat.distance));
-
-            } else if ((!enemyCanSplit && enemyDistance < normalDangerDistance) || (!enemyCanSplit && threat.danger)) {
-
-                badAngles.push(this.getAngleRange(closestCell, threat, i, normalDangerDistance).concat(threat.distance));
-
-            } else if (enemyCanSplit && enemyDistance < splitDangerDistance + shiftDistance) {
-                tempOb = this.getAngleRange(closestCell, threat, i, splitDangerDistance + shiftDistance);
-                angle1 = tempOb[0];
-                angle2 = this.rangeToAngle(tempOb);
-
-                obstacleList.push([[angle1, true], [angle2, false]]);
-            } else if (!enemyCanSplit && enemyDistance < normalDangerDistance + shiftDistance) {
-                tempOb = this.getAngleRange(closestCell, threat, i, normalDangerDistance + shiftDistance);
-                angle1 = tempOb[0];
-                angle2 = this.rangeToAngle(tempOb);
-
-                obstacleList.push([[angle1, true], [angle2, false]]);
-            }
-            //console.log("Done with enemy: " + i);
-        }
-
-        //console.log("Done looking for enemies!");
-
-		for (i = 0; i < allPossibleViruses.length; i++) {
-			var virus = allPossibleViruses[i];
-			
-			for (j = 0; j < player.cells.length; j++) {
-				var cell = player.cells[j];
-				
-	            if (virus.distance < (cell.size * 2)) {
-	                tempOb = this.getAngleRange(cell, virus, i, cell.size + 70); // was 50
-	                angle1 = tempOb[0];
-	                angle2 = this.rangeToAngle(tempOb);
-	                obstacleList.push([[angle1, true], [angle2, false]]);
-	            }
-			}
-        }
-		/*
-		 * original - if after splitting, a virus is inside the enclosing player, the player can hit the virus
-		for (i = 0; i < allPossibleViruses.length; i++) {
-            var virusDistance = this.computeDistance(allPossibleViruses[i].x, allPossibleViruses[i].y, player.x, player.y);
-            if (player.largestCell.size < allPossibleViruses[i].size) {
-                if (virusDistance < (allPossibleViruses[i].size * 2)) {
-                    tempOb = this.getAngleRange(player, allPossibleViruses[i], i, allPossibleViruses[i].size + 10);
-                    angle1 = tempOb[0];
-                    angle2 = this.rangeToAngle(tempOb);
-                    obstacleList.push([[angle1, true], [angle2, false]]);
-                }
-            } else {
-                if (virusDistance < (player.size * 2)) {
-                    tempOb = this.getAngleRange(player, allPossibleViruses[i], i, player.size + 50);
-                    angle1 = tempOb[0];
-                    angle2 = this.rangeToAngle(tempOb);
-                    obstacleList.push([[angle1, true], [angle2, false]]);
-                }
-            }
-        }
-		 */
-
-        var stupidList = [];
-
-        if (badAngles.length > 0) {
-            //NOTE: This is only bandaid wall code. It's not the best way to do it.
-            stupidList = this.addWall(stupidList, player);
-        }
-
-        for (i = 0; i < badAngles.length; i++) {
-            angle1 = badAngles[i][0];
-            angle2 = this.rangeToAngle(badAngles[i]);
-            stupidList.push([[angle1, true], [angle2, false], badAngles[i][2]]);
-        }
-
-        //stupidList.push([[45, true], [135, false]]);
-        //stupidList.push([[10, true], [200, false]]);
-
-        stupidList.sort(function(a, b){
-            return a[2]-b[2];
-        });
-
-        var sortedInterList = [];
-        var sortedObList = [];
-
-        for (i = 0; i < stupidList.length; i++) {
-
-            var tempList = this.addAngle(sortedInterList, stupidList[i]);
-
-            if (tempList.length === 0) {
-                console.log("MAYDAY IT'S HAPPENING!");
-
-                break;
-            } else {
-                sortedInterList = tempList;
-            }
-        }
-
-        for (i = 0; i < obstacleList.length; i++) {
-            sortedObList = this.addAngle(sortedObList, obstacleList[i]);
-
-            if (sortedObList.length === 0) {
-                break;
-            }
-        }
-
-        var offsetI = 0;
-        var obOffsetI = 1;
-
-        if (sortedInterList.length > 0 && sortedInterList[0][1]) {
-            offsetI = 1;
-        }
-        if (sortedObList.length > 0 && sortedObList[0][1]) {
-            obOffsetI = 0;
-        }
-
-        var goodAngles = [];
-        var obstacleAngles = [];
-
-        for (i = 0; i < sortedInterList.length; i += 2) {
-            angle1 = sortedInterList[this.mod(i + offsetI, sortedInterList.length)][0];
-            angle2 = sortedInterList[this.mod(i + 1 + offsetI, sortedInterList.length)][0];
-            diff = this.mod(angle2 - angle1, 360);
-            goodAngles.push([angle1, diff]);
-        }
-
-        for (i = 0; i < sortedObList.length; i += 2) {
-            angle1 = sortedObList[this.mod(i + obOffsetI, sortedObList.length)][0];
-            angle2 = sortedObList[this.mod(i + 1 + obOffsetI, sortedObList.length)][0];
-            diff = this.mod(angle2 - angle1, 360);
-            obstacleAngles.push([angle1, diff]);
-        }
-
-        for (i = 0; i < goodAngles.length; i++) {
-            line1 = this.followAngle(goodAngles[i][0], player.x, player.y, 100 + player.size);
-            line2 = this.followAngle(this.mod(goodAngles[i][0] + goodAngles[i][1], 360), player.x, player.y, 100 + player.size);
-            drawLine(player.x, player.y, line1[0], line1[1], 1);
-            drawLine(player.x, player.y, line2[0], line2[1], 1);
-
-            drawArc(line1[0], line1[1], line2[0], line2[1], player.x, player.y, 1);
-
-            //drawPoint(player[0].x, player[0].y, 2, "");
-
-            drawPoint(line1[0], line1[1], 0, "" + i + ": 0");
-            drawPoint(line2[0], line2[1], 0, "" + i + ": 1");
-        }
-
-        for (i = 0; i < obstacleAngles.length; i++) {
-            line1 = this.followAngle(obstacleAngles[i][0], player.x, player.y, 50 + player.size);
-            line2 = this.followAngle(this.mod(obstacleAngles[i][0] + obstacleAngles[i][1], 360), player.x, player.y, 50 + player.size);
-            drawLine(player.x, player.y, line1[0], line1[1], 6);
-            drawLine(player.x, player.y, line2[0], line2[1], 6);
-
-            drawArc(line1[0], line1[1], line2[0], line2[1], player.x, player.y, 6);
-
-            //drawPoint(player[0].x, player[0].y, 2, "");
-
-            drawPoint(line1[0], line1[1], 0, "" + i + ": 0");
-            drawPoint(line2[0], line2[1], 0, "" + i + ": 1");
-        }
-
-        if (this.toggleFollow && goodAngles.length === 0) {
-            //This is the follow the mouse mode
-            var distance = this.computeDistance(player.x, player.y, tempPoint[0], tempPoint[1]);
-
-            shiftedAngle = this.shiftAngle(obstacleAngles, this.getAngle(tempPoint[0], tempPoint[1], player.x, player.y), [0, 360]);
-
-            destination = this.followAngle(shiftedAngle, player.x, player.y, distance);
-
-            destinationChoices = destination;
-            drawLine(player.x, player.y, destination[0], destination[1], 1);
-            //tempMoveX = destination[0];
-            //tempMoveY = destination[1];
-
-        } else if (goodAngles.length > 0) {
-            var bIndex = goodAngles[0];
-            var biggest = goodAngles[0][1];
-            for (i = 1; i < goodAngles.length; i++) {
-                var size = goodAngles[i][1];
-                if (size > biggest) {
-                    biggest = size;
-                    bIndex = goodAngles[i];
-                }
-            }
-            var perfectAngle = this.mod(bIndex[0] + bIndex[1] / 2, 360);
-
-            perfectAngle = this.shiftAngle(obstacleAngles, perfectAngle, bIndex);
-
-            line1 = this.followAngle(perfectAngle, player.x, player.y, verticalDistance());
-
-            destinationChoices = line1;
-            drawLine(player.x, player.y, line1[0], line1[1], 7);
-            //tempMoveX = line1[0];
-            //tempMoveY = line1[1];
-        } else if (badAngles.length > 0 && goodAngles.length === 0) {
-            //When there are enemies around but no good angles
-            //You're likely screwed. (This should never happen.)
-
-            console.log("Failed");
-            destinationChoices = [tempMoveX, tempMoveY];
-            /*var angleWeights = [] //Put weights on the angles according to enemy distance
-            for (var i = 0; i < allPossibleThreats.length; i++){
-                var dist = this.computeDistance(player.x, player.y, allPossibleThreats[i].x, allPossibleThreats[i].y);
-                var angle = this.getAngle(allPossibleThreats[i].x, allPossibleThreats[i].y, player.x, player.y);
-                angleWeights.push([angle,dist]);
-            }
-            var maxDist = 0;
-            var finalAngle = 0;
-            for (var i = 0; i < angleWeights.length; i++){
-                if (angleWeights[i][1] > maxDist){
-                    maxDist = angleWeights[i][1];
-                    finalAngle = this.mod(angleWeights[i][0] + 180, 360);
-                }
-            }
-            line1 = this.followAngle(finalAngle,player.x,player.y,f.verticalDistance());
-            drawLine(player.x, player.y, line1[0], line1[1], 2);
-            destinationChoices.push(line1);*/
-        } else if (player.foodClusters.length > 0) {
-        	
-        	var doSplit = player.largestCell.mass >= 36 && player.mass <= 50 && player.cells.length == 1;
-        	var doLure = false;
-
-        	var cluster = this.getBestFood(player);
-
-        	drawCircle(cluster.x, cluster.y, cluster.size + 30, 2);
-
-            // drawPoint(bestFood.x, bestFood.y, 1, "");
-            if (cluster.canSplitKill && player.safeToSplit) {
-                
-                doSplit = true;
-            }
-
-            var angle = this.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
-            shiftedAngle = this.shiftAngle(obstacleAngles, angle, [0, 360]);
-
-            destination = this.followAngle(shiftedAngle, cluster.closestCell.x, cluster.closestCell.y, cluster.distance);
-
-            // really bad condition logic - but check if it's a split target just outside of range
-            if (!doSplit && 
-            		!player.isLuring && 
-            		obstacleAngles.length === 0 && 
-            		player.safeToSplit && 
-            		cluster.cell && 
-            		cluster.cell.isSplitTarget &&
-            		!cluster.cell.isMovingTowards && 
-        			cluster.cell.distance < constants.lureDistance && // use current distant (not predicted)
-        			player.mass > 250 && 
-        			(player.mass - cluster.cell.mass > 25)) {
-
-            	// TODO: figure out lure amount
-            	player.isLuring = true;
-            	doLure = true;
-                setTimeout(function() {
-                	player.isLuring = false;
-                	console.log('luring');
-                }, 5000);
-            }
-        			
-            // are we avoiding obstacles ??
-            if (doSplit && obstacleAngles.length === 0) {
-				player.isSplitting = true;
-            	player.splitTarget = cluster.cell;
-            	player.splitSize = player.size;
-            	
-        		player.splitTimer = Date.now();
-        		player.splitLocation = { 
-        				x: player.largestCell.x + (cluster.x - player.largestCell.x) * 4,
-        				y: player.largestCell.y + (cluster.y - player.largestCell.y) * 4,
-        				startx: player.largestCell.x,
-        				starty: player.largestCell.y
-        		};
-        		
-        		destination[0] = player.splitLocation.x;
-        		destination[1] = player.splitLocation.y;        		
-        		
-        		player.splitDistance = 0;
-
-            } else {
-            	doSplit = false;
-            }
-            
-            destinationChoices = [ destination[0], destination[1], doSplit, doLure ];
-
-            drawLine(cluster.closestCell.x, cluster.closestCell.y, destination[0], destination[1], 1);
-                        
-        } else {
-            //If there are no enemies around and no food to eat.
-            destinationChoices = [tempMoveX, tempMoveY];
-        }
-        
-        return destinationChoices;
-    };
-
-    /**
-     * This is the main bot logic. This is called quite often.
-     * @return A 2 dimensional array with coordinates for every cells.  [[x, y], [x, y]]
-     */
-    this.mainLoop = function(cells) {
-        var player = this.player;
-        var interNodes = getMemoryCells();
-        var i;
-        
-        player.setCells(cells);
-
-        if ( /*!toggle*/ 1) {
-            //The following code converts the mouse position into an
-            //absolute game coordinate.
-            var useMouseX = screenToGameX(getMouseX());
-            var useMouseY = screenToGameY(getMouseY());
-            var tempPoint = [useMouseX, useMouseY, 1];
-
-            //The current destination that the cells were going towards.
-
-            drawLine(getX() - (1920 / 2) / getZoomlessRatio(), getY() - (1080 / 2) / getZoomlessRatio(), getX() + (1920 / 2) / getZoomlessRatio(), getY() - (1080 / 2) / getZoomlessRatio(), 7);
-            drawLine(getX() - (1920 / 2) / getZoomlessRatio(), getY() + (1080 / 2) / getZoomlessRatio(), getX() + (1920 / 2) / getZoomlessRatio(), getY() + (1080 / 2) / getZoomlessRatio(), 7);
-            drawLine(getX() - (1920 / 2) / getZoomlessRatio(), getY() - (1080 / 2) / getZoomlessRatio(), getX() - (1920 / 2) / getZoomlessRatio(), getY() + (1080 / 2) / getZoomlessRatio(), 7);
-            drawLine(getX() + (1920 / 2) / getZoomlessRatio(), getY() - (1080 / 2) / getZoomlessRatio(), getX() + (1920 / 2) / getZoomlessRatio(), getY() + (1080 / 2) / getZoomlessRatio(), 7);
-
-            //This variable will be returned at the end.
-            //It will contain the destination choices for all the cells.
-            //BTW!!! ERROR ERROR ABORT MISSION!!!!!!! READ BELOW -----------
-            //
-            //SINCE IT'S STUPID NOW TO ASK EACH CELL WHERE THEY WANT TO GO,
-            //THE BOT SHOULD SIMPLY PICK ONE AND THAT'S IT, I MEAN WTF....
-            var destinationChoices = []; //destination, size, danger
-
-            //Just to make sure the player is alive.
-            if (player.isAlive) {
-
-            	//Loop through all the player's cells.
-            	/*
-                for (var k = 0; k < cells.length; k++) {
-                	var cell = cells[k];
-                    drawPoint(cell.x, cell.y + cell.size, 0, "" + (getLastUpdate() - cell.birth) + " / " + 
-                    		(30000 + (cell.birthMass * 57) - (getLastUpdate() - cell.birth)) + " / " + cell.birthMass);
-                }
-                */
-
-            	if (player.isSplitting && player.cells.length > 1) {
-            		var distance = this.computeDistance(player.cells[0].x, player.cells[0].y, 
-            				player.cells[1].x, player.cells[1].y);
-            		if (distance > player.splitDistance) {
-            			player.splitDistance = distance;
-            			player.splitVelocity = distance / (Date.now() - player.splitTimer);
-            			console.log(Date.now() - player.splitTimer);
-            			console.log('max distance = ' + player.splitDistance);
-            			console.log('velocity = ' + player.splitVelocity);
-            			console.log('end ' + this.computeDistance(player.splitLocation.startx, player.splitLocation.starty,
-                				player.cells[1].x, player.cells[1].y));
-            		}
-            	}
-            	
-            	if (player.isSplitting) {
-            		
-            		if (player.size <= player.splitSize && (Date.now() - player.splitTimer > 200)) {
-            			// player size grows as long as we are splitting
-                    	player.isSplitting = false;
-                    	player.splitTarget = null;
-                    	console.log('i think we are done splitting');
-            		} else {
-	                	player.splitSize = player.size;
-	            		
-	                    drawCircle(player.splitLocation.x, player.splitLocation.y, 50, constants.green);
-	            		if (player.splitTarget) {
-	                		return [ player.splitTarget.x, player.splitTarget.y ];
-	            		}
-	            		return [ getPointX(), getPointY() ];
-            		}
-            	}
-
-            	if (player.cells.length > 1) {
-                    drawCircle(player.x, player.y, player.size, 6);
-            	}
-            	
-            	if (player.safeToSplit) {
-                	drawCircle(player.x, player.y, player.size + 30, 2);
-            	}
-
-            	drawCircle(player.x, player.y, player.size + constants.enemySplitDistance, 5);
-            	
-                // drawLine(player.x, player.y, player.x, player.y + player.size + this.splitDistance, 7);
-                //drawPoint(player[0].x, player[0].y - player[0].size, 3, "" + Math.floor(player[0].x) + ", " + Math.floor(player[0].y));
-
-                //loop through everything that is on the screen and
-                //separate everything in it's own category.
-                var allIsAll = this.getAll(player);
-
-                //The food stored in element 0 of allIsAll
-                var allPossibleFood = allIsAll[0];
-                //The threats are stored in element 1 of allIsAll
-                var allPossibleThreats = allIsAll[1];
-                //The viruses are stored in element 2 of allIsAll
-                var allPossibleViruses = allIsAll[2];
-
-                player.foodClusters = this.clusterFood(player, allPossibleFood, player.largestCell.size);
-                
-                /*allPossibleThreats.sort(function(a, b){
-                    return a.distance-b.distance;
-                })*/
-
-                for (i = 0; i < allPossibleViruses.length; i++) {
-                    if (player.largestCell.size < allPossibleViruses[i].size) {
-                        drawCircle(allPossibleViruses[i].x, allPossibleViruses[i].y, allPossibleViruses[i].size + 10, 3);
-                        drawCircle(allPossibleViruses[i].x, allPossibleViruses[i].y, allPossibleViruses[i].size * 2, 6);
-
-                    } else {
-                        drawCircle(allPossibleViruses[i].x, allPossibleViruses[i].y, player.largestCell.size + 50, 3);
-                        drawCircle(allPossibleViruses[i].x, allPossibleViruses[i].y, player.largestCell.size * 2, 6);
-                    }
-                }
-                
-                for (i = 0; i < player.splitTargets.length; i++) {
-                	var splitTarget = player.splitTargets[i];
-                    drawCircle(splitTarget.x, splitTarget.y, splitTarget.size + 50, splitTarget.isSplitTarget ? constants.green : constants.gray );
-                }
-
-                destinationChoices = this.determineDestination(player, tempPoint, allPossibleThreats, allPossibleViruses);
-                
-                for (i = 0; i < allPossibleThreats.length; i++) {
-
-                	drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, allPossibleThreats[i].size + 30, 0);
-                	
-                	if (allPossibleThreats[i].isMovingTowards) {
-                    	drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, allPossibleThreats[i].size + 10, 3);
-                	}
-
-                    drawCircle(allPossibleThreats[i].x, allPossibleThreats[i].y, allPossibleThreats[i].dangerZone, 0);
-                }
-                
-                drawPoint(tempPoint[0], tempPoint[1], tempPoint[2], "");
-                //drawPoint(tempPoint[0], tempPoint[1], tempPoint[2], "" + Math.floor(this.computeDistance(tempPoint[0], tempPoint[1], I, J)));
-                //drawLine(tempPoint[0], tempPoint[1], player[0].x, player[0].y, 6);
-                //console.log("Slope: " + slope(tempPoint[0], tempPoint[1], player[0].x, player[0].y) + " Angle: " + getAngle(tempPoint[0], tempPoint[1], player[0].x, player[0].y) + " Side: " + this.mod(getAngle(tempPoint[0], tempPoint[1], player[0].x, player[0].y) - 90, 360));
-                tempPoint[2] = 1;
-
-            }
-            //console.log("MOVING RIGHT NOW!");
-
-            //console.log("______Never lied ever in my life.");
-
-            return destinationChoices;
-        }
-    };
 }
 
 window.botList.push(new AposBot());
