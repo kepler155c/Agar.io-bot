@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.929
+// @version     3.930
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.929;
+var aposBotVersion = 3.930;
 
 var constants = {
 	safeDistance: 150,
@@ -795,7 +795,7 @@ function AposBot() {
      */
     this.mainLoop = function(cells) {
         var player = this.player;
-        var interNodes = getMemoryCells();
+        var listToUse = getMemoryCells();
         var i;
         
         player.setCells(cells);
@@ -859,8 +859,6 @@ function AposBot() {
         //loop through everything that is on the screen and
         //separate everything in it's own category.
     	
-        var listToUse = getMemoryCells();
-
         this.separateListBasedOnFunction(player, listToUse);
 
         player.foodClusters = this.clusterFood(player, player.largestCell.size);
@@ -872,7 +870,7 @@ function AposBot() {
         var destinationChoices = this.determineDestination(player, tempPoint);
 
         for (i = 0; i < listToUse.length; i++) {
-        	var entity = player.listToUse[i];
+        	var entity = listToUse[i];
         	
         	switch (entity.classification) {
 	            case Classification.virus:
@@ -918,28 +916,28 @@ function AposBot() {
         //console.log("Slope: " + slope(tempPoint[0], tempPoint[1], player[0].x, player[0].y) + " Angle: " + getAngle(tempPoint[0], tempPoint[1], player[0].x, player[0].y) + " Side: " + this.mod(getAngle(tempPoint[0], tempPoint[1], player[0].x, player[0].y) - 90, 360));
         tempPoint[2] = 1;
 
-        infoStrings.push("Player Mass: " + parseInt(player.mass, 10));
+        this.infoStrings.push("Player Mass: " + parseInt(player.mass, 10));
         if (player.cells.length > 1) {
-	        infoStrings.push("Player Min:  " + parseInt(player.smallestCell.size, 10));
-	        infoStrings.push("Player Max:  " + parseInt(player.largestCell.size, 10));
+	        this.infoStrings.push("Player Min:  " + parseInt(player.smallestCell.size, 10));
+	        this.infoStrings.push("Player Max:  " + parseInt(player.largestCell.size, 10));
         }
-        infoStrings.push("Food:        " + player.food.length);
-        infoStrings.push("Threats:     " + player.threats.length);
-        infoStrings.push("Viruses:     " + player.viruses.length);
-        infoStrings.push("Split Tgts:  " + player.splitTargets.length);
-        infoStrings.push("Enemies:     " + player.enemies.length);
+        this.infoStrings.push("Food:        " + player.food.length);
+        this.infoStrings.push("Threats:     " + player.threats.length);
+        this.infoStrings.push("Viruses:     " + player.viruses.length);
+        this.infoStrings.push("Split Tgts:  " + player.splitTargets.length);
+        this.infoStrings.push("Enemies:     " + player.enemies.length);
 
-        for (var i = 0; i < player.cells.length; i++) {
+        for (i = 0; i < player.cells.length; i++) {
 
         	var cell = player.cells[i];
         	var cellInfo = "Cell " + i + " Mass: " + parseInt(cell.size, 10);
         	if (cell.fuseTimer) {
         		cellInfo += " Fuse: " + parseInt((cell.fuseTimer - Date.now()) / 1000, 10);
         	}
-            infoStrings.push(cellInfo);
+            this.infoStrings.push(cellInfo);
         }
 
-        infoStrings.push("");
+        this.infoStrings.push("");
 
         return destinationChoices;
     };
