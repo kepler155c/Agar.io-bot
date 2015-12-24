@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.936
+// @version     3.937
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.936;
+var aposBotVersion = 3.937;
 
 var constants = {
 	safeDistance: 150,
@@ -387,8 +387,8 @@ function AposBot() {
             if (cluster.cell) {
             	
             	if ((player.cells.length == 1) &&
-            			this.typeIs(cluster.cell, Classification.splitTarget) ||
-            			this.typeIs(cluster.cell, Classification.mergeTarget)) {
+            			this.isType(cluster.cell, Classification.splitTarget) ||
+            			this.isType(cluster.cell, Classification.mergeTarget)) {
             		weight = weight * 2.5;
             	}
 
@@ -396,7 +396,7 @@ function AposBot() {
                 	// easy food
             		weight = weight * 25;
             	} else if (player.safeToSplit && 
-            			this.typeIs(cluster.cell, Classification.splitTarget) &&
+            			this.isType(cluster.cell, Classification.splitTarget) &&
             			this.inSplitRange(cluster.cell)) {
             		weight = weight * 3;
             		cluster.canSplitKill = true;
