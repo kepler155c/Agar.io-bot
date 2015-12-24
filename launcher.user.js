@@ -20,11 +20,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.224
+// @version     4.225
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.224;
+var aposLauncherVersion = 4.225;
 
 var showAd = true;
 
@@ -848,6 +848,8 @@ console.log("Running Bot Launcher!");
     	var splitdown = $.Event("keydown", { keyCode: 32}); //space button
         var splitup = $.Event("keyup", { keyCode: 32}); //space button
 
+    	var firedown = $.Event("keydown", { keyCode: 87}); //w button
+        var fireup = $.Event("keyup", { keyCode: 87}); // w button
 
         var a, b = Date.now();
         ++zb;
@@ -906,7 +908,9 @@ console.log("Running Bot Launcher!");
 					//window.opCode(17);
                 }
                 if (moveLoc[3]) {
-                    window.opCode(21);
+                    $("body").trigger(firedown);
+                    $("body").trigger(fireup);
+                    //window.opCode(21);
                 }
             }
         }
