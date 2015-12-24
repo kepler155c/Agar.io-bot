@@ -20,11 +20,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.226
+// @version     4.228
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.226;
+var aposLauncherVersion = 4.228;
 
 var showAd = true;
 
@@ -897,7 +897,8 @@ console.log("Running Bot Launcher!");
         for (d = 0; d < v.length; d++) v[d].w(f);
         for (d = 0; d < Q.length; d++) Q[d].w(f);
         //UPDATE
-        if (getPlayer().length > 0) {
+
+        if (getPlayer() && getPlayer().length > 0) {
             var moveLoc = window.botList[botIndex].mainLoop(k);
             if (!toggle) {
                 setPoint(moveLoc[0], moveLoc[1]);
@@ -1117,32 +1118,6 @@ console.log("Running Bot Launcher!");
         var debugStrings = [];
         debugStrings.push("Bot:         " + window.botList[botIndex].name);
         debugStrings.push("Launcher: AposLauncher " + aposLauncherVersion);
-        debugStrings.push("");
-
-        debugStrings.push("Player Mass: " + parseInt(player.mass, 10));
-        if (player.cells.length > 1) {
-	        debugStrings.push("Player Min:  " + parseInt(player.smallestCell.size, 10));
-	        debugStrings.push("Player Max:  " + parseInt(player.largestCell.size, 10));
-        }
-        debugStrings.push("Food:        " + player.food.length);
-        debugStrings.push("Threats:     " + player.threats.length);
-        debugStrings.push("Viruses:     " + player.viruses.length);
-        debugStrings.push("Split Tgts:  " + player.splitTargets.length);
-        debugStrings.push("Enemies:     " + player.enemies.length);
-        if (player.chasing > 0) {
-            debugStrings.push("Chasing:     " + player.chasing);
-        }
-
-        for (var i = 0; i < player.cells.length; i++) {
-
-        	var cell = player.cells[i];
-        	var cellInfo = "Cell " + i + " Mass: " + parseInt(cell.size, 10);
-        	if (cell.fuseTimer) {
-        		cellInfo += " Fuse: " + parseInt((cell.fuseTimer - Date.now()) / 1000, 10);
-        	}
-            debugStrings.push(cellInfo);
-        }
-
         debugStrings.push("");
 
         for (var i = 0; i < botString.length; i++) {
@@ -2205,21 +2180,21 @@ console.log("Running Bot Launcher!");
                     name: null,
                     o: null,
                     O: null,
-                    x: 0,
-                    y: 0,
+                    x: 0, // x
+                    y: 0, // y
                     size: 0,
-                    s: 0,
-                    t: 0,
+                    s: 0, // previousX
+                    t: 0, // previousY
                     r: 0,
                     J: 0,
                     K: 0,
                     q: 0,
                     ba: 0,
-                    Q: 0,
+                    Q: 0, // uptime
                     sa: 0,
                     ia: 0,
                     G: !1,
-                    h: !1,
+                    h: !1, // isVirus
                     n: !1,
                     R: !0,
                     Y: 0,

@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.927
+// @version     3.928
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.927;
+var aposBotVersion = 3.928;
 
 var constants = {
 	safeDistance: 150,
@@ -918,6 +918,29 @@ function AposBot() {
         //console.log("Slope: " + slope(tempPoint[0], tempPoint[1], player[0].x, player[0].y) + " Angle: " + getAngle(tempPoint[0], tempPoint[1], player[0].x, player[0].y) + " Side: " + this.mod(getAngle(tempPoint[0], tempPoint[1], player[0].x, player[0].y) - 90, 360));
         tempPoint[2] = 1;
 
+        infoStrings.push("Player Mass: " + parseInt(player.mass, 10));
+        if (player.cells.length > 1) {
+	        infoStrings.push("Player Min:  " + parseInt(player.smallestCell.size, 10));
+	        infoStrings.push("Player Max:  " + parseInt(player.largestCell.size, 10));
+        }
+        infoStrings.push("Food:        " + player.food.length);
+        infoStrings.push("Threats:     " + player.threats.length);
+        infoStrings.push("Viruses:     " + player.viruses.length);
+        infoStrings.push("Split Tgts:  " + player.splitTargets.length);
+        infoStrings.push("Enemies:     " + player.enemies.length);
+
+        for (var i = 0; i < player.cells.length; i++) {
+
+        	var cell = player.cells[i];
+        	var cellInfo = "Cell " + i + " Mass: " + parseInt(cell.size, 10);
+        	if (cell.fuseTimer) {
+        		cellInfo += " Fuse: " + parseInt((cell.fuseTimer - Date.now()) / 1000, 10);
+        	}
+            infoStrings.push(cellInfo);
+        }
+
+        infoStrings.push("");
+
         return destinationChoices;
     };
 
@@ -928,7 +951,7 @@ function AposBot() {
     this.displayText = function() {
     	var debugStrings = ["Q - Follow Mouse: " + (this.toggleFollow ? "On" : "Off")];
     	for (var i = 0; i < this.infoStrings.length; i++) {
-    		debugStrings.push(this.infoString[i]);
+    		debugStrings.push(this.infoStrings[i]);
     	}
         return debugStrings;
     };
