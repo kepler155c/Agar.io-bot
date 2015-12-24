@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.928
+// @version     3.929
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.928;
+var aposBotVersion = 3.929;
 
 var constants = {
 	safeDistance: 150,
@@ -308,13 +308,13 @@ function AposBot() {
         }
     };
 
-    this.clusterFood = function(player, foodList, blobSize) {
+    this.clusterFood = function(player, blobSize) {
         var clusters = [];
         var addedCluster = false;
 
-        for (var i = 0; i < foodList.length; i++) {
+        for (var i = 0; i < player.food.length; i++) {
         	
-        	var food = foodList[i];
+        	var food = player.food[i];
         	var foodSize = food.size;
         	
         	if (food.size <= 14) {
@@ -863,7 +863,7 @@ function AposBot() {
 
         this.separateListBasedOnFunction(player, listToUse);
 
-        player.foodClusters = this.clusterFood(player, player.foodList, player.largestCell.size);
+        player.foodClusters = this.clusterFood(player, player.largestCell.size);
         
         /*player.threats.sort(function(a, b){
             return a.distance-b.distance;
