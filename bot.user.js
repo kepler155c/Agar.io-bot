@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.924
+// @version     3.925
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.924;
+var aposBotVersion = 3.925;
 
 var constants = {
 	safeDistance: 150,
@@ -1255,7 +1255,7 @@ function AposBot() {
             		weight = weight * 10;
            			console.log("increasing weight");
             	}
-            	if (cluster.cell.isSplitTarget) {
+            	if (cluster.cell.isSplitTarget && player.cells.length == 1) {
             		weight = weight * 2.5;
             	}
 
