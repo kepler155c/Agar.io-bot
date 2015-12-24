@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.932
+// @version     3.933
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.932;
+var aposBotVersion = 3.933;
 
 var constants = {
 	safeDistance: 150,
@@ -183,7 +183,7 @@ function AposBot() {
             var isEnemy = true;
             
             if (isMe) {
-            	entity.classification = player;
+            	entity.classification = Classification.player;
                 drawPoint(entity.x, entity.y+20, 1, "m:" + that.getMass(entity).toFixed(2) + " s:" + that.getSplitMass(entity).toFixed(2));
             } else {
             	
