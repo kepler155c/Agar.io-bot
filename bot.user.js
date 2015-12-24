@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.933
+// @version     3.934
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.933;
+var aposBotVersion = 3.934;
 
 var constants = {
 	safeDistance: 150,
@@ -870,8 +870,9 @@ function AposBot() {
 
         var destinationChoices = this.determineDestination(player, tempPoint);
 
-        for (i = 0; i < listToUse.length; i++) {
-        	var entity = listToUse[i];
+        Object.keys(listToUse).forEach(function(element, index) {
+
+        	var entity = listToUse[element];
         	
         	switch (entity.classification) {
 	            case Classification.virus:
@@ -903,7 +904,7 @@ function AposBot() {
 	            	}
 	            break;
         	}
-        }
+        });
 
         for (i = 0; i < player.threats.length; i++) {
 
