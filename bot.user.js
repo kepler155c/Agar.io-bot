@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.930
+// @version     3.931
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.930;
+var aposBotVersion = 3.931;
 
 var constants = {
 	safeDistance: 150,
@@ -297,9 +297,8 @@ function AposBot() {
                 	newThreat.closestCell = closestInfo.cell;
                 	newThreat.distance = closestInfo.distance;
                     
-                    newThreat.nopredict = true;
                     //check its a threat
-                    if (that.isThreat(player.smallestCell, newThreat)) {
+                    if (that.canEat(newThreat, player.smallestCell, constants.enemeyRatio)) {
                          //IT'S DANGER!
                         player.threats.push(newThreat);
                     }   

@@ -20,11 +20,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.228
+// @version     4.229
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.228;
+var aposLauncherVersion = 4.229;
 
 var showAd = true;
 
@@ -1132,11 +1132,11 @@ console.log("Running Bot Launcher!");
         debugStrings.push("");
 //        debugStrings.push(serverIP);
 
-        if (player.cells.length > 0) {
+        if (player.length > 0) {
             var offsetX = -getMapStartX();
             var offsetY = -getMapStartY();
-            //debugStrings.push("Location: " + Math.floor(getPlayer().cells[0].x + offsetX) + ", " + Math.floor(getPlayer().cells[0].y + offsetY));
-            debugStrings.push("Location: " + Math.floor(getPlayer().cells[0].x ) + ", " + Math.floor(getPlayer().cells[0].y ));
+            //debugStrings.push("Location: " + Math.floor(getPlayer()[0].x + offsetX) + ", " + Math.floor(getPlayer()[0].y + offsetY));
+            debugStrings.push("Location: " + Math.floor(getPlayer()[0].x ) + ", " + Math.floor(getPlayer()[0].y ));
         }
 
         var offsetValue = 20;
