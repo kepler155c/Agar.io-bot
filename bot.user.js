@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.934
+// @version     3.935
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.934;
+var aposBotVersion = 3.935;
 
 var constants = {
 	safeDistance: 150,
@@ -926,7 +926,6 @@ function AposBot() {
         this.infoStrings.push("Food:        " + player.food.length);
         this.infoStrings.push("Threats:     " + player.threats.length);
         this.infoStrings.push("Viruses:     " + player.viruses.length);
-        this.infoStrings.push("Split Tgts:  " + player.splitTargets.length);
         this.infoStrings.push("Enemies:     " + player.enemies.length);
 
         for (i = 0; i < player.cells.length; i++) {
