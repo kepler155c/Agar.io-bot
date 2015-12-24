@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.926
+// @version     3.927
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.926;
+var aposBotVersion = 3.927;
 
 var constants = {
 	safeDistance: 150,
@@ -60,6 +60,17 @@ var constants = {
     
     playerRatio: 1.285,
     enemyRatio: 1.27,
+};
+
+var Classification = {
+	unknown: 0,
+	virus: 1,
+	food: 2,
+	noThreat: 3,
+	smallThreat: 4,
+	largeThreat: 5,
+	mergeTarget: 6,
+	splitTarget: 7
 };
 
 //TODO: Team mode
@@ -85,9 +96,7 @@ var Player = function() {
     this.food = [];
     this.threats = [];
     this.viruses = [];
-    this.splitTargets = [];
-    this.enemies = [];
-    
+
     this.chasing = 0;
     this.splitVelocity = 0;
     this.splitLocation = null;
@@ -137,175 +146,15 @@ Player.prototype.setCells = function(cells) {
 	}
 };
 
-function randomizedList(array) {
-  var i,
-      n = (array = array.slice()).length,
-      head = null,
-      node = head;
-  while (n) {
-    var next = {id: array.length - n, value: array[n - 1], next: null};
-    if (node) node = node.next = next;
-    else node = head = next;
-    array[i] = array[--n];
-  }
-  return {head: head, tail: node};
-}
-// Returns the smallest circle that contains the specified circles.
-function enclosingCircle(circles) {
-  return enclosingCircleIntersectingCircles(randomizedList(circles), []);
-}
-// Returns the smallest circle that contains the circles L
-// and intersects the circles B.
-function enclosingCircleIntersectingCircles(L, B) {
-  var circle,
-      l0 = null,
-      l1 = L.head,
-      l2,
-      p1;
-  switch (B.length) {
-    case 1: circle = B[0]; break;
-    case 2: circle = circleIntersectingTwoCircles(B[0], B[1]); break;
-    case 3: circle = circleIntersectingThreeCircles(B[0], B[1], B[2]); break;
-  }
-  while (l1) {
-    p1 = l1.value, l2 = l1.next;
-    if (!circle || !circleContainsCircle(circle, p1)) {
-      // Temporarily truncate L before l1.
-      if (l0) L.tail = l0, l0.next = null;
-      else L.head = L.tail = null;
-      B.push(p1);
-      circle = enclosingCircleIntersectingCircles(L, B); // Note: reorders L!
-      B.pop();
-      // Move l1 to the front of L and reconnect the truncated list L.
-      if (L.head) l1.next = L.head, L.head = l1;
-      else l1.next = null, L.head = L.tail = l1;
-      l0 = L.tail, l0.next = l2;
-    } else {
-      l0 = l1;
-    }
-    l1 = l2;
-  }
-  L.tail = l0;
-  return circle;
-}
-// Returns true if the specified circle1 contains the specified circle2.
-function circleContainsCircle(circle1, circle2) {
-  var xc0 = circle1.x - circle2.x,
-      yc0 = circle1.y - circle2.y;
-  return Math.sqrt(xc0 * xc0 + yc0 * yc0) < circle1.size - circle2.size + 1e-6;
-}
-// Returns the smallest circle that intersects the two specified circles.
-function circleIntersectingTwoCircles(circle1, circle2) {
-  var x1 = circle1.x, y1 = circle1.y, r1 = circle1.size,
-      x2 = circle2.x, y2 = circle2.y, r2 = circle2.size,
-      x12 = x2 - x1, y12 = y2 - y1, r12 = r2 - r1,
-      l = Math.sqrt(x12 * x12 + y12 * y12);
-  return {
-    x: (x1 + x2 + x12 / l * r12) / 2,
-    y: (y1 + y2 + y12 / l * r12) / 2,
-    size: (l + r1 + r2) / 2
-  };
-}
-// Returns the smallest circle that intersects the three specified circles.
-function circleIntersectingThreeCircles(circle1, circle2, circle3) {
-  var x1 = circle1.x, y1 = circle1.y, r1 = circle1.size,
-      x2 = circle2.x, y2 = circle2.y, r2 = circle2.size,
-      x3 = circle3.x, y3 = circle3.y, r3 = circle3.size,
-      a2 = 2 * (x1 - x2),
-      b2 = 2 * (y1 - y2),
-      c2 = 2 * (r2 - r1),
-      d2 = x1 * x1 + y1 * y1 - r1 * r1 - x2 * x2 - y2 * y2 + r2 * r2,
-      a3 = 2 * (x1 - x3),
-      b3 = 2 * (y1 - y3),
-      c3 = 2 * (r3 - r1),
-      d3 = x1 * x1 + y1 * y1 - r1 * r1 - x3 * x3 - y3 * y3 + r3 * r3,
-      ab = a3 * b2 - a2 * b3,
-      xa = (b2 * d3 - b3 * d2) / ab - x1,
-      xb = (b3 * c2 - b2 * c3) / ab,
-      ya = (a3 * d2 - a2 * d3) / ab - y1,
-      yb = (a2 * c3 - a3 * c2) / ab,
-      A = xb * xb + yb * yb - 1,
-      B = 2 * (xa * xb + ya * yb + r1),
-      C = xa * xa + ya * ya - r1 * r1,
-      r = (-B - Math.sqrt(B * B - 4 * A * C)) / (2 * A);
-  return {
-    x: xa + xb * r + x1,
-    y: ya + yb * r + y1,
-    size: r
-  };
-}
-
-Array.prototype.peek = function() {
-    return this[this.length - 1];
-};
-
-var sha = "efde0488cc2cc176db48dd23b28a20b90314352b";
-function getLatestCommit() {
-    window.jQuery.ajax({
-            url: "https://api.github.com/repos/kepler155c/Agar.io-bot/git/refs/heads/master",
-            cache: false,
-            dataType: "jsonp"
-        }).done(function(data) {
-            console.dir(data.data);
-            console.log("hmm: " + data.data.object.sha);
-            sha = data.data.object.sha;
-
-            function update(prefix, name, url) {
-                window.jQuery(document.body).prepend("<div id='" + prefix + "Dialog' style='position: absolute; left: 0px; right: 0px; top: 0px; bottom: 0px; z-index: 100; display: none;'>");
-                window.jQuery('#' + prefix + 'Dialog').append("<div id='" + prefix + "Message' style='width: 350px; background-color: #FFFFFF; margin: 100px auto; border-radius: 15px; padding: 5px 15px 5px 15px;'>");
-                window.jQuery('#' + prefix + 'Message').append("<h2>UPDATE TIME!!!</h2>");
-                window.jQuery('#' + prefix + 'Message').append("<p>Grab the update for: <a id='" + prefix + "Link' href='" + url + "' target=\"_blank\">" + name + "</a></p>");
-                window.jQuery('#' + prefix + 'Link').on('click', function() {
-                    window.jQuery("#" + prefix + "Dialog").hide();
-                    window.jQuery("#" + prefix + "Dialog").remove();
-                });
-                window.jQuery("#" + prefix + "Dialog").show();
-            }
-
-            $.get('https://raw.githubusercontent.com/kepler155c/Agar.io-bot/master/bot.user.js?' + Math.floor((Math.random() * 1000000) + 1), function(data) {
-                var latestVersion = data.replace(/(\r\n|\n|\r)/gm,"");
-                latestVersion = latestVersion.substring(latestVersion.indexOf("// @version")+11,latestVersion.indexOf("// @grant"));
-
-                latestVersion = parseFloat(latestVersion + 0.0000);
-                var myVersion = parseFloat(aposBotVersion + 0.0000); 
-                
-                if(latestVersion > myVersion)
-                {
-                    update("aposBot", "bot.user.js", "https://github.com/kepler155c/Agar.io-bot/blob/" + sha + "/bot.user.js/");
-                }
-                console.log('Current bot.user.js Version: ' + myVersion + " on Github: " + latestVersion);
-            });
-
-        }).fail(function() {});
-}
-getLatestCommit();
-
-console.log("Running Apos Bot!");
-
-var f = window;
-var g = window.jQuery;
-
 console.log("Apos Bot!");
 
 window.botList = window.botList || [];
-
-/*function QuickBot() {
-    this.name = "QuickBot V1";
-    this.customParameters = {};
-    this.keyAction = function(key) {};
-    this.displayText = function() {return [];};
-    this.mainLoop = function() {
-        return [screenToGameX(getMouseX()),
-                screenToGameY(getMouseY())];
-    };
-}
-
-window.botList.push(new QuickBot());*/
 
 function AposBot() {
     this.name = "AposBot " + aposBotVersion;
 
     this.toggleFollow = false;
+    this.infoStrings = [];
     this.keyAction = function(key) {
         if (81 == key.keyCode) {
             console.log("Toggle Follow Mouse!");
@@ -315,18 +164,15 @@ function AposBot() {
     
     this.player = new Player();
 
-    this.separateListBasedOnFunction = function(player) {
-        var foodElementList = [];
-        var threatList = [];
-        var virusList = [];
-        var splitTargetList = [];
-        var enemyList = [];
+    this.separateListBasedOnFunction = function(player, listToUse) {
         var mergeList = [];
         var i;
         var closestInfo;
-        var listToUse = getMemoryCells();
 
-    	player.safeToSplit = true;
+    	player.safeToSplit = player.cells.length == 1;
+        player.food = [];
+        player.threats = [];
+        player.viruses = [];
 
     	var that = this;
         Object.keys(listToUse).forEach(function(element, index) {
@@ -339,7 +185,6 @@ function AposBot() {
                 drawPoint(entity.x, entity.y+20, 1, "m:" + that.getMass(entity).toFixed(2) + " s:" + that.getSplitMass(entity).toFixed(2));
             } else {
             	
-            	entity.isSplitTarget = false;
             	entity.isMovingTowards = that.isMovingTowards(player, entity);
             	entity.mass = that.calculateMass(entity);
             	closestInfo = that.closestCell(player, entity.x, entity.y);
@@ -347,83 +192,82 @@ function AposBot() {
             	entity.closestCell = closestInfo.cell;
                 entity.distance = closestInfo.distance;
 
-                if (that.isFood(player.smallestCell, entity) && entity.isNotMoving()) {
+                /* danger types */
+                entity.classification = Classification.unknown;
+
+                if (that.isFood(player.smallestCell, entity)) {
                     //IT'S FOOD!
-               		foodElementList.push(entity);
-                    isEnemy = false;
-                } else if (that.isThreat(player.smallestCell, entity)) {
+               		player.food.push(entity);
+               		entity.classification = Classification.food;
+                } else if (entity.isVirus(entity)) {
+                    //IT'S VIRUS!
+               		entity.classification = Classification.virus;
+                    player.viruses.push(entity);
+                } else if (that.canSplitKill(entity, player.smallestCell, constants.enemyRatio)) {
+                	entity.classification = Classification.largeThreat;
+                    player.threats.push(entity);
+                    mergeList.push(entity);
+                } else if (that.canEat(player.smallestCell, entity, constants.playerRatio)) {
                     //IT'S DANGER!
-                    threatList.push(entity);
+                	entity.classification = Classification.smallThreat;
+                    player.threats.push(entity);
                     mergeList.push(entity);
                     
                 //} else if (that.isThreatIfSplit(blob, entity)) {
                 //	threatIfSplitList.push()
-                } else if (that.isVirus(player.largestCell, entity)) {
-                    //IT'S VIRUS!
-                    virusList.push(entity);
-                    isEnemy = false;
+                } else if (entity.isNotMoving()) {
+                   	entity.classification = Classification.food;
+                   	player.food.push(entity);
+                    mergeList.push(entity);
                 }
                 else if (entity.closestCell.mass > 36 && that.canSplitKill(entity.closestCell, entity, constants.playerRatio)) {
 
-                	if (player.largestCell.mass / entity.mass < 10) {
-                    	// only split kill if it's moving
-                    	entity.isSplitTarget = !entity.isNotMoving();
+                	if (player.cells.length == 1 && player.mass / entity.mass < 10) {
+                    	// split worthy
+                    	entity.classification = Classification.splitTarget;
+                	} else {
+                		// too small
+                		entity.classification = Classification.food;
                 	}
-                    splitTargetList.push(entity);
 
-                    foodElementList.push(entity);
+                	player.food.push(entity);
                     mergeList.push(entity);
                 }
                 else if (that.canEat(player.smallestCell, entity, constants.playerRatio)) {
 
-                	if (player.cells.length > 1 && player.mass / entity.mass < 10) {
-                    	// only split kill if it's moving
-                    	entity.isSplitTarget = !entity.isNotMoving();
-                	}
+                   	entity.classification = Classification.food;
                 	
-                	foodElementList.push(entity);
+                	player.food.push(entity);
                     mergeList.push(entity);
                 	
-                } else {
-                	
-                	if (!that.canEat(entity, player.smallestCell, constants.enemeyRatio)) {
-                		if (player.cells.length > 1 && player.mass / entity.mass < 10 && !entity.isNotMoving()) {
-                            foodElementList.push(entity);
-                			entity.isSplitTarget = true;
-                			console.log("adding to food list: " + entity.name);
-                		}
-                	}
-                	
-                	if (!that.isVirus(null, entity)) {
-                		mergeList.push(entity);
-                	}
-                }
-                
-                if (isEnemy) {
+                } else if (!that.canEat(entity, player.smallestCell, constants.enemeyRatio)) {
+            		if (player.cells.length > 1 && player.mass / entity.mass < 10 && !entity.isNotMoving()) {
+                        player.food.push(entity);
+                       	entity.classification = Classification.mergeTarget;
+            		}
+            	} else {
+            		entity.classification = Classification.noThreat;
+            	}
+
+                if (entity.classification == Classification.unknown) {
+            		console.log('unknown');
+            		console.log(entity);
+            	}
+
+                if (!entity.isVirus() && entity.size > 14) {
 
                 	if (entity.closestCell.size * entity.closestCell.size / 2 < entity.size * entity.size * 1.265) {
                 		if (entity.distance < 750 + entity.closestCell.size) {
                     		player.safeToSplit = false;
                 		}
                 	}
-
-                	enemyList.push(entity);
-                    drawPoint(entity.x, entity.y+20, 1, "m:" + that.getMass(entity).toFixed(2) + " s:" + that.getSplitMass(entity).toFixed(2));
                 }
-            }/*else if(isMe && (getBlobCount(getPlayer()) > 0)){
-                //Attempt to make the other cell follow the mother one
-                foodElementList.push(entity);
-            }*/
+            }
         });
 
-        if (player.isSplitting || player.cells.length > 1 || player.splitTargets.length === 0) {
-        	player.safeToSplit = false;
-        }
-        
-        var foodList = [];
-        for (i = 0; i < foodElementList.length; i++) {
-        	if (!this.foodInVirus(foodElementList[i], virusList)) {
-        		foodList.push(foodElementList[i]);
+        for (i = player.food.length - 1; i >= 0; i--) {
+        	if (this.foodInVirus(player, player.food[i], player.viruses)) {
+        		player.food.splice(i, 1);
         	}
         }
         
@@ -457,17 +301,11 @@ function AposBot() {
                     //check its a threat
                     if (that.isThreat(player.smallestCell, newThreat)) {
                          //IT'S DANGER!
-                        threatList.push(newThreat);
+                        player.threats.push(newThreat);
                     }   
                 }
             }
         }
-        
-        player.food = foodList;
-        player.threats = threatList;
-        player.viruses = virusList;
-        player.splitTargets = splitTargetList;
-        player.enemies = enemyList;
     };
 
     this.clusterFood = function(player, foodList, blobSize) {
@@ -547,18 +385,17 @@ function AposBot() {
             var weight = cluster.size;
             if (cluster.cell) {
             	
-            	if (player.isSplitting && player.splitTarget == cluster.cell) {
-            		weight = weight * 10;
-           			console.log("increasing weight");
-            	}
-            	if (cluster.cell.isSplitTarget && player.cells.length == 1) {
+            	if ((player.cells.length == 1) &&
+            			this.typeIs(cluster.cell, Classification.splitTarget) ||
+            			this.typeIs(cluster.cell, Classification.mergeTarget)) {
             		weight = weight * 2.5;
             	}
 
             	if (cluster.cell.isNotMoving()) {
                 	// easy food
             		weight = weight * 25;
-            	} else if (player.safeToSplit && cluster.cell.isSplitTarget && 
+            	} else if (player.safeToSplit && 
+            			this.typeIs(cluster.cell, Classification.splitTarget) &&
             			this.inSplitRange(cluster.cell)) {
             		weight = weight * 3;
             		cluster.canSplitKill = true;
@@ -568,9 +405,7 @@ function AposBot() {
             		weight = weight * 1.2;
                 }
             	
-            	if (!cluster.cell.isNotMoving()) {
-                	weight *= Math.log(closestInfo.distance / 1000 * 20);
-            	}
+               	weight *= Math.log(closestInfo.distance / 1000 * 20);
             }
             cluster.clusterWeight = closestInfo.distance / weight * multiplier ;
             
@@ -906,7 +741,7 @@ function AposBot() {
             		cluster.cell.isSplitTarget &&
             		!cluster.cell.isMovingTowards && 
         			cluster.distance < constants.lureDistance &&
-        			cluster.distance > constants.splitRangeMin && // not already in range (might have been an enemy close)
+        			cluster.distance > constants.splitRangeMax && // not already in range (might have been an enemy close)
         			player.mass > 250 && 
         			(player.mass - cluster.cell.mass > 25)) {
 
@@ -1023,7 +858,10 @@ function AposBot() {
 
         //loop through everything that is on the screen and
         //separate everything in it's own category.
-        this.separateListBasedOnFunction(player);
+    	
+        var listToUse = getMemoryCells();
+
+        this.separateListBasedOnFunction(player, listToUse);
 
         player.foodClusters = this.clusterFood(player, player.foodList, player.largestCell.size);
         
@@ -1031,36 +869,47 @@ function AposBot() {
             return a.distance-b.distance;
         })*/
 
-        for (i = 0; i < player.viruses.length; i++) {
-        	var virus = player.viruses[i];
-            if (player.largestCell.size < virus.size) {
-                drawCircle(virus.x, virus.y, virus.size + 10, 3);
-                drawCircle(virus.x, virus.y, virus.size * 2, 6);
-
-            } else {
-                drawCircle(virus.x, virus.y, player.largestCell.size + 50, 3);
-                drawCircle(virus.x, virus.y, player.largestCell.size * 2, 6);
-            }
-        }
-        
-        for (i = 0; i < player.splitTargets.length; i++) {
-        	var splitTarget = player.splitTargets[i];
-            drawCircle(splitTarget.x, splitTarget.y, splitTarget.size + 50, splitTarget.isSplitTarget ? constants.green : constants.gray );
-        }
-
         var destinationChoices = this.determineDestination(player, tempPoint);
-        
-        for (i = 0; i < player.threats.length; i++) {
-        	
-        	var threat = player.threats[i];
 
-        	drawCircle(threat.x, threat.y, threat.size + 30, 0);
+        for (i = 0; i < listToUse.length; i++) {
+        	var entity = player.listToUse[i];
         	
-        	if (threat.isMovingTowards) {
-            	drawCircle(threat.x, threat.y, threat.size + 10, 3);
+        	switch (entity.classification) {
+	            case Classification.virus:
+	                if (player.largestCell.size < entity.size) {
+	                    drawCircle(entity.x, entity.y, entity.size + 10, 3);
+	                    drawCircle(entity.x, entity.y, entity.size * 2, 6);
+	
+	                } else {
+	                    drawCircle(entity.x, entity.y, player.largestCell.size + 50, 3);
+	                    drawCircle(entity.x, entity.y, player.largestCell.size * 2, 6);
+	                }
+                break;
+	            case Classification.splitTarget:
+	            	drawCircle(entity.x, entity.y, entity.size + 50, constants.green);
+	            break;
+	            case Classification.mergeTarget:
+	            break;
+	            case Classification.smallThreat:
+	            case Classification.largeThreat:
+	            	drawCircle(entity.x, entity.y, entity.size + 30, 0);
+	                drawCircle(entity.x, entity.y, entity.dangerZone, 0);
+	            	if (entity.isMovingTowards) {
+	                	drawCircle(entity.x, entity.y, entity.size + 10, 3);
+	            	}
+	            break;
+	            case Classification.food:
+	            	if (!entity.isNotMoving()) {
+		            	drawCircle(entity.x, entity.y, entity.size + 50, constants.gray);
+	            	}
+	            break;
         	}
+        }
 
-            drawCircle(threat.x, threat.y, threat.dangerZone, 0);
+        for (i = 0; i < player.threats.length; i++) {
+
+        	var threat = player.threats[i];
+        	
         }
         
         drawPoint(tempPoint[0], tempPoint[1], tempPoint[2], "what ?");
@@ -1072,8 +921,16 @@ function AposBot() {
         return destinationChoices;
     };
 
+    this.isType = function(entity, classification) {
+    	return entity.classification == classification;
+    };
+
     this.displayText = function() {
-        return ["Q - Follow Mouse: " + (this.toggleFollow ? "On" : "Off")];
+    	var debugStrings = ["Q - Follow Mouse: " + (this.toggleFollow ? "On" : "Off")];
+    	for (var i = 0; i < this.infoStrings.length; i++) {
+    		debugStrings.push(this.infoString[i]);
+    	}
+        return debugStrings;
     };
 
     // Using mod function instead the prototype directly as it is very slow
@@ -1209,12 +1066,8 @@ function AposBot() {
     };
 
     this.isFood = function(blob, cell) {
-    	
-    	if (cell.size <= 14) {
-    		return true;
-    	}
 
-    	if (!cell.isVirus() && this.canEat(blob, cell, constants.playerRatio)) {
+    	if (cell.isNotMoving() && !cell.isVirus() && this.canEat(blob, cell, constants.playerRatio)) {
             return true;
         }
         return false;
@@ -1252,14 +1105,6 @@ function AposBot() {
     	return false;
     };
 
-    this.isThreat = function(blob, cell) {
-    	
-        if (!cell.isVirus() && this.canEat(cell, blob, constants.playerRatio)) {
-            return true;
-        }
-        return false;
-    };
-    
     this.isVirus = function(blob, cell) {
         if (blob === null) {
             if (cell.isVirus()){return true;} 
@@ -1285,13 +1130,17 @@ function AposBot() {
         return distanceX * distanceX + distanceY * distanceY <= radiusSum * radiusSum;
     };
     
-    this.foodInVirus = function(food, viruses) {
-        for (var i = 0; i < viruses.length; i++) {
+    this.foodInVirus = function(player, food, viruses) {
+
+    	for (var i = 0; i < viruses.length; i++) {
         	var virus = viruses[i];
         	if (this.circlesIntersect(food, virus)) {
         		
-                drawCircle(food.x, food.y, food.size + 10, 7);
-        		return true;
+            	if (player.mass + food.mass > virus.mass) {
+            		
+	                drawCircle(food.x, food.y, food.size + 10, 7);
+	        		return true;
+            	}
         	}
         }
         return false;
@@ -1769,9 +1618,158 @@ function AposBot() {
 
         return info;
     };
+}
 
+function randomizedList(array) {
+  var i,
+      n = (array = array.slice()).length,
+      head = null,
+      node = head;
+  while (n) {
+    var next = {id: array.length - n, value: array[n - 1], next: null};
+    if (node) node = node.next = next;
+    else node = head = next;
+    array[i] = array[--n];
+  }
+  return {head: head, tail: node};
+}
+// Returns the smallest circle that contains the specified circles.
+function enclosingCircle(circles) {
+  return enclosingCircleIntersectingCircles(randomizedList(circles), []);
+}
+// Returns the smallest circle that contains the circles L
+// and intersects the circles B.
+function enclosingCircleIntersectingCircles(L, B) {
+  var circle,
+      l0 = null,
+      l1 = L.head,
+      l2,
+      p1;
+  switch (B.length) {
+    case 1: circle = B[0]; break;
+    case 2: circle = circleIntersectingTwoCircles(B[0], B[1]); break;
+    case 3: circle = circleIntersectingThreeCircles(B[0], B[1], B[2]); break;
+  }
+  while (l1) {
+    p1 = l1.value, l2 = l1.next;
+    if (!circle || !circleContainsCircle(circle, p1)) {
+      // Temporarily truncate L before l1.
+      if (l0) L.tail = l0, l0.next = null;
+      else L.head = L.tail = null;
+      B.push(p1);
+      circle = enclosingCircleIntersectingCircles(L, B); // Note: reorders L!
+      B.pop();
+      // Move l1 to the front of L and reconnect the truncated list L.
+      if (L.head) l1.next = L.head, L.head = l1;
+      else l1.next = null, L.head = L.tail = l1;
+      l0 = L.tail, l0.next = l2;
+    } else {
+      l0 = l1;
+    }
+    l1 = l2;
+  }
+  L.tail = l0;
+  return circle;
+}
+// Returns true if the specified circle1 contains the specified circle2.
+function circleContainsCircle(circle1, circle2) {
+  var xc0 = circle1.x - circle2.x,
+      yc0 = circle1.y - circle2.y;
+  return Math.sqrt(xc0 * xc0 + yc0 * yc0) < circle1.size - circle2.size + 1e-6;
+}
+// Returns the smallest circle that intersects the two specified circles.
+function circleIntersectingTwoCircles(circle1, circle2) {
+  var x1 = circle1.x, y1 = circle1.y, r1 = circle1.size,
+      x2 = circle2.x, y2 = circle2.y, r2 = circle2.size,
+      x12 = x2 - x1, y12 = y2 - y1, r12 = r2 - r1,
+      l = Math.sqrt(x12 * x12 + y12 * y12);
+  return {
+    x: (x1 + x2 + x12 / l * r12) / 2,
+    y: (y1 + y2 + y12 / l * r12) / 2,
+    size: (l + r1 + r2) / 2
+  };
+}
+// Returns the smallest circle that intersects the three specified circles.
+function circleIntersectingThreeCircles(circle1, circle2, circle3) {
+  var x1 = circle1.x, y1 = circle1.y, r1 = circle1.size,
+      x2 = circle2.x, y2 = circle2.y, r2 = circle2.size,
+      x3 = circle3.x, y3 = circle3.y, r3 = circle3.size,
+      a2 = 2 * (x1 - x2),
+      b2 = 2 * (y1 - y2),
+      c2 = 2 * (r2 - r1),
+      d2 = x1 * x1 + y1 * y1 - r1 * r1 - x2 * x2 - y2 * y2 + r2 * r2,
+      a3 = 2 * (x1 - x3),
+      b3 = 2 * (y1 - y3),
+      c3 = 2 * (r3 - r1),
+      d3 = x1 * x1 + y1 * y1 - r1 * r1 - x3 * x3 - y3 * y3 + r3 * r3,
+      ab = a3 * b2 - a2 * b3,
+      xa = (b2 * d3 - b3 * d2) / ab - x1,
+      xb = (b3 * c2 - b2 * c3) / ab,
+      ya = (a3 * d2 - a2 * d3) / ab - y1,
+      yb = (a2 * c3 - a3 * c2) / ab,
+      A = xb * xb + yb * yb - 1,
+      B = 2 * (xa * xb + ya * yb + r1),
+      C = xa * xa + ya * ya - r1 * r1,
+      r = (-B - Math.sqrt(B * B - 4 * A * C)) / (2 * A);
+  return {
+    x: xa + xb * r + x1,
+    y: ya + yb * r + y1,
+    size: r
+  };
 }
 
 window.botList.push(new AposBot());
 
 window.updateBotList(); //This function might not exist yet.
+
+/*
+Array.prototype.peek = function() {
+    return this[this.length - 1];
+};
+
+console.log("Running Apos Bot!");
+
+var f = window;
+var g = window.jQuery;
+
+var sha = "efde0488cc2cc176db48dd23b28a20b90314352b";
+function getLatestCommit() {
+    window.jQuery.ajax({
+            url: "https://api.github.com/repos/kepler155c/Agar.io-bot/git/refs/heads/master",
+            cache: false,
+            dataType: "jsonp"
+        }).done(function(data) {
+            console.dir(data.data);
+            console.log("hmm: " + data.data.object.sha);
+            sha = data.data.object.sha;
+
+            function update(prefix, name, url) {
+                window.jQuery(document.body).prepend("<div id='" + prefix + "Dialog' style='position: absolute; left: 0px; right: 0px; top: 0px; bottom: 0px; z-index: 100; display: none;'>");
+                window.jQuery('#' + prefix + 'Dialog').append("<div id='" + prefix + "Message' style='width: 350px; background-color: #FFFFFF; margin: 100px auto; border-radius: 15px; padding: 5px 15px 5px 15px;'>");
+                window.jQuery('#' + prefix + 'Message').append("<h2>UPDATE TIME!!!</h2>");
+                window.jQuery('#' + prefix + 'Message').append("<p>Grab the update for: <a id='" + prefix + "Link' href='" + url + "' target=\"_blank\">" + name + "</a></p>");
+                window.jQuery('#' + prefix + 'Link').on('click', function() {
+                    window.jQuery("#" + prefix + "Dialog").hide();
+                    window.jQuery("#" + prefix + "Dialog").remove();
+                });
+                window.jQuery("#" + prefix + "Dialog").show();
+            }
+
+            $.get('https://raw.githubusercontent.com/kepler155c/Agar.io-bot/master/bot.user.js?' + Math.floor((Math.random() * 1000000) + 1), function(data) {
+                var latestVersion = data.replace(/(\r\n|\n|\r)/gm,"");
+                latestVersion = latestVersion.substring(latestVersion.indexOf("// @version")+11,latestVersion.indexOf("// @grant"));
+
+                latestVersion = parseFloat(latestVersion + 0.0000);
+                var myVersion = parseFloat(aposBotVersion + 0.0000); 
+                
+                if(latestVersion > myVersion)
+                {
+                    update("aposBot", "bot.user.js", "https://github.com/kepler155c/Agar.io-bot/blob/" + sha + "/bot.user.js/");
+                }
+                console.log('Current bot.user.js Version: ' + myVersion + " on Github: " + latestVersion);
+            });
+
+        }).fail(function() {});
+}
+getLatestCommit();
+*/
