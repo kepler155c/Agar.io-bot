@@ -20,11 +20,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.220
+// @version     4.221
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.220;
+var aposLauncherVersion = 4.221;
 
 var showAd = true;
 
@@ -634,11 +634,7 @@ console.log("Running Bot Launcher!");
                 // rrr && (n.C = rrr);    // what is m.C
                 rrr && console.log(rrr);
                 q && n.B(q); - 1 != M.indexOf(d) && -1 == k.indexOf(n) && (document.getElementById("overlays").style.display = "none", k.push(n), n.birth = getLastUpdate(), n.birthMass = (n.size * n.size / 100), 1 == k.length && (s = n.x, t = n.y, db()))
-                if (window.getCells()[d].size < badSize) {
-                    clone[d] = window.getCells()[d];
-                } else {
-                    console.log('rejecting + ' + window.getCells()[d].size);
-                }
+                clone[d] = window.getCells()[d];
             }
 
             //UPDATE
@@ -1107,6 +1103,9 @@ console.log("Running Bot Launcher!");
 
     function drawStats(d) {
         d.save();
+        
+        var bot = getPlayer();
+        var player = bot.player;
 
         sessionScore = Math.max(getCurrentScore(), sessionScore);
 
