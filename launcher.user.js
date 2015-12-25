@@ -20,11 +20,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.236
+// @version     4.237
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.236;
+var aposLauncherVersion = 4.237;
 
 var showAd = true;
 
@@ -113,7 +113,6 @@ console.log("Running Bot Launcher!");
         if (82 == e.keyCode) {
             console.log("ToggleDraw");
             toggleDraw = !toggleDraw;
-//            interNodes = [];
         }
         if (68 == e.keyCode) {
             window.setDarkTheme(!getDarkBool());
@@ -1125,6 +1124,7 @@ console.log("Running Bot Launcher!");
 
         debugStrings.push("T - Bot:     " + (!toggle ? "On" : "Off"));
         debugStrings.push("R - Lines:   " + (!toggleDraw ? "On" : "Off"));
+        debugStrings.push("Best Score: " + ~~(sessionScore / 100));
 
 //        debugStrings.push("Best Score: " + ~~(sessionScore / 100));
 //        debugStrings.push("Best Time: " + bestTime + " seconds");

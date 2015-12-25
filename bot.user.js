@@ -33,16 +33,16 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.968
+// @version     3.969
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.968;
+var aposBotVersion = 3.969;
 
 var constants = {
 	safeDistance: 150,
-	velocity: 22,
+	velocity: 32, // 22,
     splitRangeMin: 650,
     splitRangeMax: 674.5,
     enemySplitDistance: 710,
