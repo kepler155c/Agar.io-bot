@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.974
+// @version     3.975
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.974;
+var aposBotVersion = 3.975;
 
 var constants = {
 	safeDistance: 150,
@@ -182,7 +182,7 @@ function AposBot() {
             var isMe = that.isItMe(player, entity);
             var isEnemy = true;
 
-            entity.hasMoved = entity.isMoving(this.lastUpdateTime);
+            entity.hasMoved = entity.isMoving();
 
             if (isMe) {
             	entity.classification = Classification.player;
@@ -797,8 +797,6 @@ function AposBot() {
         var listToUse = getMemoryCells();
         var i;
         
-        this.lastUpdateTime = cells[0].Q;
-        
         player.setCells(cells);
 
         if (player.cells.length > 1) {
@@ -1095,7 +1093,7 @@ function AposBot() {
 
     this.isFood = function(blob, cell) {
 
-    	if (!cell.isMoving(this.lastUpdateTime) && !cell.isVirus() && this.canEat(blob, cell, constants.playerRatio)) {
+    	if (!cell.isMoving() && !cell.isVirus() && this.canEat(blob, cell, constants.playerRatio)) {
             return true;
         }
         return false;
