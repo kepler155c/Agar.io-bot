@@ -20,11 +20,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.239
+// @version     4.240
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.239;
+var aposLauncherVersion = 4.240;
 
 var showAd = true;
 
@@ -2205,14 +2205,24 @@ console.log("Running Bot Launcher!");
                     updateCode: 0,
                     danger: false,
                     dangerTimeOut: 0,
-                    moveCounter: 0,
+                    oldX, oldY,
+                    checkedMove = false,
                     isMoving: function() {
-                	    if (this.x != this.s || this.y != this.t) {
-                	    	this.moveCounter = 0;
-                	    	return true;
+                	    if (this.x == this.s && this.y == this.t) {
+                    	    return false;
                 	    }
-                	    this.moveCounter++;
-                	    return this.moveCounter > 10;
+                	    // some objects do not get the last pos updated (like a shot mass)
+            	    	if (!this.checkedMove) {
+            	    		this.oldX = this.s;
+            	    		this.oldY = this.t;
+            	    		this.checkedMove = true;
+            	    	} else {
+            	    		if (this.oldX == this.s && this.oldY == this.t) {
+            	    			this.checkedMove = false;
+            	    			return false;
+            	    		}
+            	    	}
+            	    	return true;
                     },
                     getLastPos: function() {
                     	return { x: this.s, y: this.t };
