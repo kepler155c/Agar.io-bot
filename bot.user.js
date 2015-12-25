@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.952
+// @version     3.953
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.952;
+var aposBotVersion = 3.953;
 
 var constants = {
 	safeDistance: 150,
@@ -156,7 +156,7 @@ function AposBot() {
 
     this.toggleFollow = false;
     this.infoStrings = [];
-    this.profileList = [];
+    this.profileList = {};
     this.profileCount = 0;
     this.keyAction = function(key) {
         if (81 == key.keyCode) {
@@ -824,7 +824,7 @@ function AposBot() {
         var listToUse = getMemoryCells();
         var i;
         
-        this.profileList = [];
+        this.profileList = {};
         this.profileStart('mainLoop');
         
         player.setCells(cells);
@@ -978,7 +978,8 @@ function AposBot() {
         this.infoStrings.push("");
         this.profileEnd('mainLoop');
         this.profileCount++;
-        if (this.profileCount > 10000) {
+        if (this.profileCount > 1000) {
+        	
         	this.profileCount = 0;
             Object.keys(this.profileList).forEach(function(element, index) {
 
