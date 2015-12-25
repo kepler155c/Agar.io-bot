@@ -249,6 +249,7 @@ function AposBot() {
             		} else {
             			entity.classification = Classification.noThreat;
             		}
+                    mergeList.push(entity);
             	}
 
                 if (entity.classification == Classification.unknown) {
