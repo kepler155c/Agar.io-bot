@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.947
+// @version     3.948
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.947;
+var aposBotVersion = 3.948;
 
 var constants = {
 	safeDistance: 150,
@@ -217,7 +217,7 @@ function AposBot() {
                     
                 //} else if (that.isThreatIfSplit(blob, entity)) {
                 //	threatIfSplitList.push()
-                } else if (entity.isNotMoving()) {
+                } else if (!entity.isMoving()) {
                    	entity.classification = Classification.food;
                    	player.food.push(entity);
                     mergeList.push(entity);
@@ -243,7 +243,7 @@ function AposBot() {
                     mergeList.push(entity);
                 	
                 } else if (!that.canEat(entity, player.smallestCell, constants.enemeyRatio)) {
-            		if (player.cells.length > 1 && player.mass / entity.mass < 10 && !entity.isNotMoving()) {
+            		if (player.cells.length > 1 && player.mass / entity.mass < 10) {
                         player.food.push(entity);
                        	entity.classification = Classification.mergeTarget;
             		} else {
@@ -299,11 +299,15 @@ function AposBot() {
 
                 	newThreat.closestCell = closestInfo.cell;
                 	newThreat.distance = closestInfo.distance;
-                    
+
                     //check its a threat
                     if (that.canEat(newThreat, player.smallestCell, constants.enemeyRatio)) {
                          //IT'S DANGER!
                         player.threats.push(newThreat);
+                        newThreat.classification = Classification.smallThreat;
+                    	if (that.canSplitKill(newThreat, player.smallestCell, constants.enemyRatio)) {
+                    		newThreat.classification = Classification.largeThreat;
+                    	}
                     }   
                 }
             }
@@ -323,7 +327,7 @@ function AposBot() {
         		foodSize = food.size-9;
         	}
 
-        	if (!food.isNotMoving()) {
+        	if (food.isMoving()) {
         		
             	var lastPos = food.getLastPos();
 
@@ -393,7 +397,7 @@ function AposBot() {
             		weight = weight * 2.5;
             	}
 
-            	if (cluster.cell.isNotMoving()) {
+            	if (!cluster.cell.isMoving()) {
                 	// easy food
             		weight = weight * 25;
             	} else if (player.safeToSplit && 
@@ -453,11 +457,11 @@ function AposBot() {
             closestCell = threat.closestCell;
             var enemyDistance = threat.distance;
 
+            var enemyCanSplit = this.canSplitKill(threat, player.smallestCell, constants.enemyRatio);
+            
             if (enemyCanSplit) {	
                 drawPoint(threat.x, threat.y+40, 1, "c:" + (this.getSplitMass(threat) / this.getMass(threat)).toFixed(2));
             }
-            
-            var enemyCanSplit = this.canSplitKill(threat, player.smallestCell, constants.enemyRatio);
             
             if (enemyCanSplit && this.getRatio(threat, player.smallestCell) > 20) {
             	enemyCanSplit = false;
@@ -890,17 +894,10 @@ function AposBot() {
 	            	drawCircle(entity.x, entity.y, entity.size + 20, constants.green);
 	            break;
 	            case Classification.mergeTarget:
-	            break;
-	            case Classification.smallThreat:
-	            case Classification.largeThreat:
-	            	drawCircle(entity.x, entity.y, entity.size + 20, 0);
-	                drawCircle(entity.x, entity.y, entity.dangerZone, 0);
-	            	if (entity.isMovingTowards) {
-	                	drawCircle(entity.x, entity.y, entity.size + 40, 3);
-	            	}
+	            	drawCircle(entity.x, entity.y, entity.size + 20, constants.cyan);
 	            break;
 	            case Classification.food:
-	            	if (!entity.isNotMoving()) {
+	            	if (entity.isMoving()) {
 		            	drawCircle(entity.x, entity.y, entity.size + 20, constants.gray);
 	            	}
 	            break;
@@ -912,8 +909,18 @@ function AposBot() {
 
         for (i = 0; i < player.threats.length; i++) {
 
-        	var threat = player.threats[i];
+        	var entity = player.threats[i];
         	
+        	switch (entity.classification) {
+		        case Classification.smallThreat:
+		        case Classification.largeThreat:
+		        	drawCircle(entity.x, entity.y, entity.size + 20, 0);
+		            drawCircle(entity.x, entity.y, entity.dangerZone, 0);
+		        	if (entity.isMovingTowards) {
+		            	drawCircle(entity.x, entity.y, entity.size + 40, 3);
+		        	}
+		        break;
+        	}
         }
         
         // drawPoint(tempPoint[0], tempPoint[1], tempPoint[2], "what ?");
@@ -1023,23 +1030,6 @@ function AposBot() {
         return distance;
     };
 
-    this.computeDistanceFromCircleEdgeDeprecated = function(x1, y1, x2, y2, s2) {
-        var tempD = this.computeDistance(x1, y1, x2, y2);
-
-        var offsetX = 0;
-        var offsetY = 0;
-
-        var ratioX = tempD / (x1 - x2);
-        var ratioY = tempD / (y1 - y2);
-
-        offsetX = x1 - (s2 / ratioX);
-        offsetY = y1 - (s2 / ratioY);
-
-        drawPoint(offsetX, offsetY, 5, "");
-
-        return this.computeDistance(x2, y2, offsetX, offsetY);
-    };
-
     this.compareSize = function(player1, player2, ratio) {
         if (player1.size * player1.size * ratio < player2.size * player2.size) {
             return true;
@@ -1091,7 +1081,7 @@ function AposBot() {
 
     this.isFood = function(blob, cell) {
 
-    	if (cell.isNotMoving() && !cell.isVirus() && this.canEat(blob, cell, constants.playerRatio)) {
+    	if (!cell.isMoving() && !cell.isVirus() && this.canEat(blob, cell, constants.playerRatio)) {
             return true;
         }
         return false;
@@ -1172,7 +1162,7 @@ function AposBot() {
     
     this.isMovingTowards = function(a, b) {
 
-    	if (b.isNotMoving()) {
+    	if (!b.isMoving()) {
     		return false;
     	}
 
