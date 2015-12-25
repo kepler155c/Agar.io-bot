@@ -850,7 +850,7 @@ function AposBot() {
     	}
     	
     	if (player.safeToSplit) {
-        	drawCircle(player.x, player.y, player.size + 10, 2);
+        	drawCircle(player.x, player.y, player.size + 16, constants.green);
     	}
 
     	drawCircle(player.x, player.y, player.size + constants.enemySplitDistance, 5);
@@ -887,13 +887,13 @@ function AposBot() {
 	                }
                 break;
 	            case Classification.splitTarget:
-	            	drawCircle(entity.x, entity.y, entity.size + 8, constants.green);
+	            	drawCircle(entity.x, entity.y, entity.size + 16, constants.green);
 	            break;
 	            case Classification.mergeTarget:
 	            break;
 	            case Classification.smallThreat:
 	            case Classification.largeThreat:
-	            	drawCircle(entity.x, entity.y, entity.size + 10, 0);
+	            	drawCircle(entity.x, entity.y, entity.size + 16, 0);
 	                drawCircle(entity.x, entity.y, entity.dangerZone, 0);
 	            	if (entity.isMovingTowards) {
 	                	drawCircle(entity.x, entity.y, entity.size + 20, 3);
@@ -901,11 +901,11 @@ function AposBot() {
 	            break;
 	            case Classification.food:
 	            	if (!entity.isNotMoving()) {
-		            	drawCircle(entity.x, entity.y, entity.size + 10, constants.gray);
+		            	drawCircle(entity.x, entity.y, entity.size + 16, constants.gray);
 	            	}
 	            break;
 	            case Classification.unknown:
-	            	drawCircle(entity.x, entity.y, entity.size + 10, constants.cyan);
+	            	drawCircle(entity.x, entity.y, entity.size + 16, constants.cyan);
 	            break;
         	}
         });
