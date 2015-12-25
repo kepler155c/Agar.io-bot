@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.961
+// @version     3.962
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.961;
+var aposBotVersion = 3.962;
 
 var constants = {
 	safeDistance: 150,
@@ -661,10 +661,20 @@ function AposBot() {
         this.profileEnd('determineDestination3');
         this.profileStart('determineDestination4');
         for (i = 0; i < goodAngles.length; i++) {
-            line1 = this.followAngle(goodAngles[i][0], player.x, player.y, 100 + player.size);
+            
+            this.profileStart('determineDestination41');
+        	
+            line1 = this.followAngle(goodAngles[i][0], player.x, player.y, 100 + player.size);            
             line2 = this.followAngle(this.mod(goodAngles[i][0] + goodAngles[i][1], 360), player.x, player.y, 100 + player.size);
+            
+            this.profileEnd('determineDestination41');
+            this.profileStart('determineDestination42');
+            
             drawLine(player.x, player.y, line1[0], line1[1], 1);
             drawLine(player.x, player.y, line2[0], line2[1], 1);
+
+            this.profileEnd('determineDestination42');
+            this.profileStart('determineDestination43');
 
             drawArc(line1[0], line1[1], line2[0], line2[1], player.x, player.y, 1);
 
@@ -672,6 +682,7 @@ function AposBot() {
 
             drawPoint(line1[0], line1[1], 0, "" + i + ": 0");
             drawPoint(line2[0], line2[1], 0, "" + i + ": 1");
+            this.profileEnd('determineDestination43');
         }
         this.profileEnd('determineDestination4');
         this.profileStart('determineDestination5');
