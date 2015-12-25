@@ -6,7 +6,6 @@
 /* global getPointX, getPointY, getMapEndX, getMapEndY, getMouseX, getMouseY */
 /* global getZoomlessRatio, verticalDistance, getPlayer, screenToGameX, screenToGameY */
 /* global getX, getY, getMemoryCells, getCells, getMode, getLastUpdate */
-/* global da */
 
 /*The MIT License (MIT)
 
@@ -34,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.971
+// @version     3.972
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.971;
+var aposBotVersion = 3.972;
 
 var constants = {
 	safeDistance: 150,
@@ -147,25 +146,6 @@ Player.prototype.setCells = function(cells) {
 		this.y = enclosingCell.y;
 	}
 };
-
-var initialized = false;
-function init() {
-	
-	if (initialized) {
-		return;
-	}
-	initialized = true;
-	
-	da.Prototype.isMoving = function() {
-		
-	    if (this.x != this.s || this.y != this.t) {
-	    	this.moveCounter = 0;
-	    	return true;
-	    }
-	    this.moveCounter++;
-	    return this.moveCounter > 10;
-	};
-}
 
 console.log("Apos Bot!");
 
@@ -811,9 +791,6 @@ function AposBot() {
      * @return A 2 dimensional array with coordinates for every cells.  [[x, y], [x, y]]
      */
     this.mainLoop = function(cells) {
-    	
-    	init();
-    	
         var player = this.player;
         var listToUse = getMemoryCells();
         var i;
