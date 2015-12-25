@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.973
+// @version     3.974
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.973;
+var aposBotVersion = 3.974;
 
 var constants = {
 	safeDistance: 150,
@@ -801,6 +801,10 @@ function AposBot() {
         
         player.setCells(cells);
 
+        if (player.cells.length > 1) {
+        	console.log('cell ' + player.cells[1].id);
+        }
+        
         var useMouseX = screenToGameX(getMouseX());
         var useMouseY = screenToGameY(getMouseY());
         var tempPoint = [useMouseX, useMouseY, 1];
@@ -900,9 +904,6 @@ function AposBot() {
         			}
 	            break;
 	            case Classification.unknown:
-	            	drawCircle(entity.x, entity.y, entity.size + 20, constants.cyan);
-	            break;
-	            case Classification:player:
 	            	drawCircle(entity.x, entity.y, entity.size + 20, constants.cyan);
 	            break;
         	}
