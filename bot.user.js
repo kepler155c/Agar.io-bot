@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.966
+// @version     3.967
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.966;
+var aposBotVersion = 3.967;
 
 var constants = {
 	safeDistance: 150,
@@ -279,12 +279,12 @@ function AposBot() {
         for (i = 0; i < mergeList.length; i++) {
             for (var z = 0; z < mergeList.length; z++) {
                 if (z != i && this.isMerging(mergeList[i], mergeList[z])) { //z != i && 
-                    //found cells that appear to be merging - if they constitute a threat add them to the theatlist
-                    
+                    //found cells that appear to be merging - if they constitute a threat add them to the threatlist
+
                     //clone us a new cell
                     var newThreat = {};
                     var prop;
-                    
+
                     for (prop in mergeList[i]) {
                         newThreat[prop] = mergeList[i][prop];
                     }
@@ -300,7 +300,7 @@ function AposBot() {
                 	newThreat.closestCell = closestInfo.cell;
                 	newThreat.distance = closestInfo.distance;
                     //check its a threat
-                    if (this.canEat(newThreat, player.smallestCell, constants.enemeyRatio)) {
+                    if (this.canEat(newThreat, player.smallestCell, constants.enemyRatio)) {
                          //IT'S DANGER!
                         player.threats.push(newThreat);
                         newThreat.classification = Classification.smallThreat;
@@ -457,7 +457,7 @@ function AposBot() {
             closestCell = threat.closestCell;
             var enemyDistance = threat.distance;
 
-            var enemyCanSplit = this.isType(Classification.largeThreat);
+            var enemyCanSplit = this.isType(threat, Classification.largeThreat);
             
             if (panicMode) {
             	console.log('panic mode');
