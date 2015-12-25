@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.946
+// @version     3.947
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.946;
+var aposBotVersion = 3.947;
 
 var constants = {
 	safeDistance: 150,
@@ -916,9 +916,7 @@ function AposBot() {
         	
         }
         
-        drawPoint(tempPoint[0], tempPoint[1], tempPoint[2], "what ?");
-        //drawPoint(tempPoint[0], tempPoint[1], tempPoint[2], "" + Math.floor(this.computeDistance(tempPoint[0], tempPoint[1], I, J)));
-        //drawLine(tempPoint[0], tempPoint[1], player[0].x, player[0].y, 6);
+        // drawPoint(tempPoint[0], tempPoint[1], tempPoint[2], "what ?");
         //console.log("Slope: " + slope(tempPoint[0], tempPoint[1], player[0].x, player[0].y) + " Angle: " + getAngle(tempPoint[0], tempPoint[1], player[0].x, player[0].y) + " Side: " + this.mod(getAngle(tempPoint[0], tempPoint[1], player[0].x, player[0].y) - 90, 360));
         tempPoint[2] = 1;
 
