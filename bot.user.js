@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.954
+// @version     3.956
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.954;
+var aposBotVersion = 3.956;
 
 var constants = {
 	safeDistance: 150,
@@ -824,7 +824,6 @@ function AposBot() {
         var listToUse = getMemoryCells();
         var i;
         
-        this.profileList = {};
         this.profileStart('mainLoop');
         
         player.setCells(cells);
@@ -846,11 +845,13 @@ function AposBot() {
     		if (distance > player.splitDistance) {
     			player.splitDistance = distance;
     			player.splitVelocity = distance / (Date.now() - player.splitTimer);
+    			/*
     			console.log(Date.now() - player.splitTimer);
     			console.log('max distance = ' + player.splitDistance);
     			console.log('velocity = ' + player.splitVelocity);
     			console.log('end ' + this.computeDistance(player.splitLocation.startx, player.splitLocation.starty,
         				player.cells[1].x, player.cells[1].y));
+				*/
     		}
     	}
     	
@@ -980,15 +981,14 @@ function AposBot() {
         this.profileCount++;
         if (this.profileCount > 1000) {
         	
-        	this.profileCount = 0;
         	var that = this;
             Object.keys(this.profileList).forEach(function(element, index) {
 
             	var entry = that.profileList[element];
-            	console.log('element: ' + element);
-            	console.log('count: ' + entry.count);
-            	console.log('elapsed: ' + entry.elapsed);
+            	console.log('element: ' + element + ' count: ' + entry.count + ' elapsed: ' + entry.elapsed);
             });
+        	this.profileCount = 0;
+            this.profileList = {};
         }
         
         return destinationChoices;
