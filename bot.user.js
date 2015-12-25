@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.967
+// @version     3.968
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.967;
+var aposBotVersion = 3.968;
 
 var constants = {
 	safeDistance: 150,
@@ -277,9 +277,10 @@ function AposBot() {
         //console.log("Merglist length: " +  mergeList.length)
         //cell merging
         for (i = 0; i < mergeList.length; i++) {
-            for (var z = 0; z < mergeList.length; z++) {
-                if (z != i && this.isMerging(mergeList[i], mergeList[z])) { //z != i && 
-                    //found cells that appear to be merging - if they constitute a threat add them to the threatlist
+            for (var z = i+1; z < mergeList.length; z++) {
+                if (this.isMerging(mergeList[i], mergeList[z]) &&
+                		(mergeList[i].mass + mergeList[z].mass) / player.smallestCell.mass > constants.enemyRatio) {
+                	//found cells that appear to be merging - if they constitute a threat add them to the threatlist
 
                     //clone us a new cell
                     var newThreat = {};
@@ -288,27 +289,23 @@ function AposBot() {
                     for (prop in mergeList[i]) {
                         newThreat[prop] = mergeList[i][prop];
                     }
-                    
-                    //average distance and sum the size
+
                     newThreat.x = (mergeList[i].x + mergeList[z].x)/2;
                     newThreat.y = (mergeList[i].y + mergeList[z].y)/2;
                     newThreat.mass = mergeList[i].mass + mergeList[z].mass;
                     newThreat.size = Math.sqrt(newThreat.mass * 100);
                     newThreat.isMovingTowards = true;
-                	closestInfo = this.closestCell(player, newThreat.x, newThreat.y);
+                    closestInfo = this.closestCell(player, newThreat.x, newThreat.y);
 
                 	newThreat.closestCell = closestInfo.cell;
                 	newThreat.distance = closestInfo.distance;
-                    //check its a threat
-                    if (this.canEat(newThreat, player.smallestCell, constants.enemyRatio)) {
-                         //IT'S DANGER!
-                        player.threats.push(newThreat);
-                        newThreat.classification = Classification.smallThreat;
-                    	if (this.canSplitKill(newThreat, player.smallestCell, constants.enemyRatio)) {
-                    		newThreat.classification = Classification.largeThreat;
-                    	}
-                    	console.log('merging');
-                    }
+
+                	player.threats.push(newThreat);
+                    newThreat.classification = Classification.smallThreat;
+                	if (this.canSplitKill(newThreat, player.smallestCell, constants.enemyRatio)) {
+                		newThreat.classification = Classification.largeThreat;
+                	}
+                	console.log('merging');
                 }
             }
         }
