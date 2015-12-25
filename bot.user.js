@@ -33,16 +33,16 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.942
+// @version     3.943
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.942;
+var aposBotVersion = 3.943;
 
 var constants = {
 	safeDistance: 150,
-	velocity: 18,
+	velocity: 22,
     splitRangeMin: 650,
     splitRangeMax: 674.5,
     enemySplitDistance: 710,
@@ -893,7 +893,7 @@ function AposBot() {
 	            break;
 	            case Classification.smallThreat:
 	            case Classification.largeThreat:
-	            	drawCircle(entity.x, entity.y, entity.size + 30, 0);
+	            	drawCircle(entity.x, entity.y, entity.size + 5, 0);
 	                drawCircle(entity.x, entity.y, entity.dangerZone, 0);
 	            	if (entity.isMovingTowards) {
 	                	drawCircle(entity.x, entity.y, entity.size + 10, 3);
