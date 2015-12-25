@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.959
+// @version     3.960
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.959;
+var aposBotVersion = 3.960;
 
 var constants = {
 	safeDistance: 150,
@@ -501,7 +501,7 @@ function AposBot() {
 
             for (j = player.foodClusters.length - 1; j >= 0 ; j--) {
             	cluster = player.foodClusters[j];
-                if (cluster.distance < secureDistance + shiftDistance) {
+                if (this.computeDistance(threat.x, threat.y, player.foodClusters[j].x, player.foodClusters[j].y) < secureDistance + shiftDistance)
                     player.foodClusters.splice(j, 1);
                 }
             }
@@ -1263,12 +1263,16 @@ function AposBot() {
     };
 
     this.slopeFromAngle = function(degree) {
+        this.profileStart('slopeFromAngle');
         if (degree == 270) {
             degree = 271;
         } else if (degree == 90) {
             degree = 91;
         }
-        return Math.tan((degree - 180) / 180 * Math.PI);
+        var slope = Math.tan((degree - 180) / 180 * Math.PI);
+
+        this.profileEnd('slopeFromAngle');
+        return slope;
     };
 
     //Given two points on a line, finds the slope of a perpendicular line crossing it.
@@ -1279,6 +1283,7 @@ function AposBot() {
 
     //Given a slope and an offset, returns two points on that line.
     this.pointsOnLine = function(slope, useX, useY, distance) {
+        this.profileStart('pointsOnLine');
         var b = useY - slope * useX;
         var r = Math.sqrt(1 + slope * slope);
 
@@ -1287,6 +1292,7 @@ function AposBot() {
         var newX2 = (useX + ((-distance) / r));
         var newY2 = (useY + (((-distance) * slope) / r));
 
+        this.profileEnd('pointsOnLine');
         return [
             [newX1, newY1],
             [newX2, newY2]
