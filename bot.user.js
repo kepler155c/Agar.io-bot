@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.950
+// @version     3.951
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.950;
+var aposBotVersion = 3.951;
 
 var constants = {
 	safeDistance: 150,
@@ -156,6 +156,8 @@ function AposBot() {
 
     this.toggleFollow = false;
     this.infoStrings = [];
+    this.profileList = [];
+    this.profileCount = 0;
     this.keyAction = function(key) {
         if (81 == key.keyCode) {
             console.log("Toggle Follow Mouse!");
@@ -165,6 +167,27 @@ function AposBot() {
     
     this.player = new Player();
 
+    this.profileStart = function(method) {
+    	var profile = this.profileList[method];
+    	
+    	if (!profile) {
+    		profile = {
+    			count: 0,
+    			elapsed: 0
+    		};
+    		this.profileList[method] = profile;
+    	}
+    	profile.count += 1;
+    	profile.start = Date.now();
+    };
+    
+    this.profileEnd = function(method) {
+    	
+    	var profile = this.profileList[method];
+    	
+    	profile.elapsed += Date.now() - profile.start;
+    };
+    
     this.separateListBasedOnFunction = function(player, listToUse) {
         var mergeList = [];
         var i;
@@ -804,6 +827,9 @@ console.log('checking merge');
         var listToUse = getMemoryCells();
         var i;
         
+        this.profileList = [];
+        this.profileStart('mainLoop');
+        
         player.setCells(cells);
 
         var useMouseX = screenToGameX(getMouseX());
@@ -865,15 +891,21 @@ console.log('checking merge');
         //loop through everything that is on the screen and
         //separate everything in it's own category.
     	
+        this.profileStart('separateListBasedOnFunction');
         this.separateListBasedOnFunction(player, listToUse);
+        this.profileEnd('separateListBasedOnFunction');
 
+        this.profileStart('clusterFood');
         player.foodClusters = this.clusterFood(player, player.largestCell.size);
-        
+        this.profileEnd('clusterFood');
+
         /*player.threats.sort(function(a, b){
             return a.distance-b.distance;
         })*/
 
+        this.profileStart('determineDestination');
         var destinationChoices = this.determineDestination(player, tempPoint);
+        this.profileEnd('determineDestination');
 
         Object.keys(listToUse).forEach(function(element, index) {
 
@@ -948,10 +980,30 @@ console.log('checking merge');
         }
 
         this.infoStrings.push("");
+        this.profileEnd('mainLoop');
+        this.profileCount++;
+        if (this.profileCount > 10000) {
+        	this.profileCount = 0;
+            Object.keys(this.profileList).forEach(function(element, index) {
 
+            	var entry = this.profileList[element];
+            	console.log('element: ' + element);
+            	console.log('count: ' + entry.count);
+            	console.log('elapsed: ' + entry.elapsed);
+            });
+        }
+        
         return destinationChoices;
     };
 
+    
+    
+    
+    
+    
+    
+    
+    
     this.isType = function(entity, classification) {
     	return entity.classification == classification;
     };
