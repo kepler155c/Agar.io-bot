@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.958
+// @version     3.959
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.958;
+var aposBotVersion = 3.959;
 
 var constants = {
 	safeDistance: 150,
@@ -461,7 +461,7 @@ function AposBot() {
         var tempMoveX = getPointX();
         var tempMoveY = getPointY();
         var i, j, angle1, angle2, tempOb, line1, line2, diff, threat, shiftedAngle, destination, closestCell;
-        var destinationChoices;
+        var destinationChoices, cluster;
         var panicMode = false;
 
         this.profileStart('determineDestination1');
@@ -500,7 +500,7 @@ function AposBot() {
             threat.dangerZone = secureDistance;
 
             for (j = player.foodClusters.length - 1; j >= 0 ; j--) {
-            	var cluster = player.foodClusters[j];
+            	cluster = player.foodClusters[j];
                 if (cluster.distance < secureDistance + shiftDistance) {
                     player.foodClusters.splice(j, 1);
                 }
@@ -672,6 +672,8 @@ function AposBot() {
             drawPoint(line1[0], line1[1], 0, "" + i + ": 0");
             drawPoint(line2[0], line2[1], 0, "" + i + ": 1");
         }
+        this.profileEnd('determineDestination4');
+        this.profileStart('determineDestination5');
 
         for (i = 0; i < obstacleAngles.length; i++) {
             line1 = this.followAngle(obstacleAngles[i][0], player.x, player.y, 50 + player.size);
@@ -686,9 +688,11 @@ function AposBot() {
             drawPoint(line1[0], line1[1], 0, "" + i + ": 0");
             drawPoint(line2[0], line2[1], 0, "" + i + ": 1");
         }
+        this.profileEnd('determineDestination5');
 
         if (this.toggleFollow && goodAngles.length === 0) {
             //This is the follow the mouse mode
+            this.profileStart('determineDestination6');
             var distance = this.computeDistance(player.x, player.y, tempPoint[0], tempPoint[1]);
 
             shiftedAngle = this.shiftAngle(obstacleAngles, this.getAngle(tempPoint[0], tempPoint[1], player.x, player.y), [0, 360]);
@@ -699,8 +703,10 @@ function AposBot() {
             drawLine(player.x, player.y, destination[0], destination[1], 1);
             //tempMoveX = destination[0];
             //tempMoveY = destination[1];
+            this.profileEnd('determineDestination6');
 
         } else if (goodAngles.length > 0) {
+            this.profileStart('determineDestination7');
             var bIndex = goodAngles[0];
             var biggest = goodAngles[0][1];
             for (i = 1; i < goodAngles.length; i++) {
@@ -718,6 +724,7 @@ function AposBot() {
 
             destinationChoices = line1;
             drawLine(player.x, player.y, line1[0], line1[1], 7);
+            this.profileEnd('determineDestination7');
             //tempMoveX = line1[0];
             //tempMoveY = line1[1];
         } else if (badAngles.length > 0 && goodAngles.length === 0) {
@@ -745,10 +752,11 @@ function AposBot() {
             destinationChoices.push(line1);*/
         } else if (player.foodClusters.length > 0) {
         	
+            this.profileStart('determineDestination8');
         	var doSplit = player.largestCell.mass >= 36 && player.mass <= 50 && player.cells.length == 1 && player.safeToSplit;
         	var doLure = false;
 
-        	var cluster = this.getBestFood(player);
+        	cluster = this.getBestFood(player);
 
         	drawCircle(cluster.x, cluster.y, cluster.size + 30, constants.orange);
 
@@ -811,6 +819,7 @@ function AposBot() {
             destinationChoices = [ destination[0], destination[1], doSplit, doLure ];
 
             drawLine(cluster.closestCell.x, cluster.closestCell.y, destination[0], destination[1], 1);
+            this.profileStart('determineDestination8');
                         
         } else {
             //If there are no enemies around and no food to eat.
