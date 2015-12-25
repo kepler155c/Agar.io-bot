@@ -20,11 +20,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.242
+// @version     4.243
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.242;
+var aposLauncherVersion = 4.243;
 
 var showAd = true;
 
@@ -544,53 +544,6 @@ console.log("Running Bot Launcher!");
                 p && g && (g.X(), g.s = g.x, g.t = g.y, g.r = g.size, g.J = p.x, g.K = p.y, g.q = g.size, g.Q =
                     C)
             }
-            /*
-            for (u = 0;;) {
-                d = a.getUint32(b, !0);
-                b += 4;
-                ++u;
-                if (0 == d) break;
-                var f, p;
-                p = a.getInt16(b, !0);
-                b += 4;
-                g = a.getInt16(b, !0);
-                b += 4;
-                f = a.getInt16(b, !0);
-                b += 2;
-                for (var h = a.getUint8(b++), w = a.getUint8(b++), m = a.getUint8(b++), h = (h << 16 | w << 8 | m).toString(16); 6 > h.length;) h = "0" + h;
-                var h = "#" + h,
-                    w = a.getUint8(b++),
-                    m = !!(w & 1),
-                    r = !!(w & 16);
-                w & 2 && (b += 4);
-                w & 4 && (b += 8);
-                w & 8 && (b += 16);
-                for (var q, n = "";;) {
-                    q = a.getUint16(b, !0);
-                    b += 2;
-                    if (0 == q) break;
-                    n += String.fromCharCode(q)
-                }
-                q = n;
-                n = null;
-                E.hasOwnProperty(d) ? (n = E[d], n.P(), n.s = n.x, n.t = n.y, n.r = n.size, n.color = h) :
-                    (n = new da(d, p, g, f, h, q), v.push(n), E[d] = n, n.ua = p, n.va = g);
-                n.h = m;
-                n.n = r;
-                n.J = p;
-                n.K = g;
-                n.q = f;
-                n.sa = c;
-                n.Q = C;
-                n.ba = w;
-                q && n.B(q); - 1 != M.indexOf(d) && -1 == k.indexOf(n) && (document.getElementById("overlays").style.display = "none", k.push(n), n.birth = getLastUpdate(), n.birthMass = (n.size * n.size / 100), 1 == k.length && (s = n.x, t = n.y, db()))
-                if (window.getCells()[d].size < badSize) {
-                    clone[d] = window.getCells()[d];
-                } else {
-                    console.log('rejecting + ' + window.getCells()[d].size);
-                }
-            }
-            */
             for (u = 0;;) {
                 d = a.getUint32(b, !0);
                 b += 4;
@@ -2188,12 +2141,12 @@ console.log("Running Bot Launcher!");
                     size: 0,
                     s: 0, // previousX
                     t: 0, // previousY
-                    r: 0,
+                    r: 0, // current size ?
                     J: 0,
                     K: 0,
-                    q: 0,
+                    q: 0, // old size ?
                     ba: 0,
-                    Q: 0, // uptime
+                    Q: 0, // update time
                     sa: 0,
                     ia: 0,
                     G: !1,
@@ -2208,20 +2161,13 @@ console.log("Running Bot Launcher!");
                     oldX: 0,
                     oldY: 0,
                     checkedMove: false,
-                    isMoving: function() {
+                    isMoving: function(compareDate) {
                 	    if (this.x == this.s && this.y == this.t) {
                     	    return false;
                 	    }
                 	    // some objects do not get the last pos updated (like a shot mass)
-            	    	if (!this.checkedMove) {
-            	    		this.oldX = this.s;
-            	    		this.oldY = this.t;
-            	    		this.checkedMove = true;
-            	    	} else {
-            	    		if (this.oldX == this.s && this.oldY == this.t) {
-            	    			this.checkedMove = false;
-            	    			return false;
-            	    		}
+                	    if (this.Q < compareDate) {
+        	    			return false;
             	    	}
             	    	return true;
                     },

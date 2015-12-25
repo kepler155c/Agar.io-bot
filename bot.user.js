@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.972
+// @version     3.973
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.972;
+var aposBotVersion = 3.973;
 
 var constants = {
 	safeDistance: 150,
@@ -181,7 +181,9 @@ function AposBot() {
         	var entity = listToUse[element];
             var isMe = that.isItMe(player, entity);
             var isEnemy = true;
-            
+
+            entity.hasMoved = entity.isMoving(this.lastUpdateTime);
+
             if (isMe) {
             	entity.classification = Classification.player;
                 drawPoint(entity.x, entity.y+20, 1, "m:" + that.getMass(entity).toFixed(2) + " s:" + that.getSplitMass(entity).toFixed(2));
@@ -217,7 +219,7 @@ function AposBot() {
                     
                 //} else if (that.isThreatIfSplit(blob, entity)) {
                 //	threatIfSplitList.push()
-                } else if (!entity.isMoving()) {
+                } else if (!entity.hasMoved) {
                    	entity.classification = Classification.food;
                    	player.food.push(entity);
                     mergeList.push(entity);
@@ -324,7 +326,7 @@ function AposBot() {
         		foodSize = food.size-9;
         	}
 
-        	if (food.isMoving()) {
+        	if (food.hasMoved) {
         		
             	var lastPos = food.getLastPos();
 
@@ -394,7 +396,7 @@ function AposBot() {
             		weight = weight * 2.5;
             	}
 
-            	if (!cluster.cell.isMoving()) {
+            	if (!cluster.cell.hasMoved) {
                 	// easy food
             		weight = weight * 25;
             	} else if (player.safeToSplit && 
@@ -795,6 +797,8 @@ function AposBot() {
         var listToUse = getMemoryCells();
         var i;
         
+        this.lastUpdateTime = cells[0].Q;
+        
         player.setCells(cells);
 
         var useMouseX = screenToGameX(getMouseX());
@@ -889,11 +893,16 @@ function AposBot() {
 	            	drawCircle(entity.x, entity.y, entity.size + 20, constants.cyan);
 	            break;
 	            case Classification.food:
-	            	if (entity.isMoving()) {
+	            	if (entity.hasMoved) {
 		            	drawCircle(entity.x, entity.y, entity.size + 20, constants.gray);
-	            	}
+	            	} else {
+    	            	drawCircle(entity.x, entity.y, entity.size + 20, constants.cyan);
+        			}
 	            break;
 	            case Classification.unknown:
+	            	drawCircle(entity.x, entity.y, entity.size + 20, constants.cyan);
+	            break;
+	            case Classification:player:
 	            	drawCircle(entity.x, entity.y, entity.size + 20, constants.cyan);
 	            break;
         	}
@@ -1085,7 +1094,7 @@ function AposBot() {
 
     this.isFood = function(blob, cell) {
 
-    	if (!cell.isMoving() && !cell.isVirus() && this.canEat(blob, cell, constants.playerRatio)) {
+    	if (!cell.isMoving(this.lastUpdateTime) && !cell.isVirus() && this.canEat(blob, cell, constants.playerRatio)) {
             return true;
         }
         return false;
@@ -1166,7 +1175,7 @@ function AposBot() {
     
     this.isMovingTowards = function(a, b) {
 
-    	if (!b.isMoving()) {
+    	if (!b.hasMoved) {
     		return false;
     	}
 
