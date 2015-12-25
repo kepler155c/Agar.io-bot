@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.945
+// @version     3.946
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.945;
+var aposBotVersion = 3.946;
 
 var constants = {
 	safeDistance: 150,
@@ -716,12 +716,12 @@ function AposBot() {
             destinationChoices.push(line1);*/
         } else if (player.foodClusters.length > 0) {
         	
-        	var doSplit = player.largestCell.mass >= 36 && player.mass <= 50 && player.cells.length == 1;
+        	var doSplit = player.largestCell.mass >= 36 && player.mass <= 50 && player.cells.length == 1 && player.safeToSplit;
         	var doLure = false;
 
         	var cluster = this.getBestFood(player);
 
-        	drawCircle(cluster.x, cluster.y, cluster.size + 30, 2);
+        	drawCircle(cluster.x, cluster.y, cluster.size + 30, constants.orange);
 
             // drawPoint(bestFood.x, bestFood.y, 1, "");
             if (cluster.canSplitKill && player.safeToSplit) {
@@ -878,7 +878,7 @@ function AposBot() {
         	switch (entity.classification) {
 	            case Classification.virus:
 	                if (player.largestCell.size < entity.size) {
-	                    drawCircle(entity.x, entity.y, entity.size + 10, 3);
+	                    // drawCircle(entity.x, entity.y, entity.size + 10, 3);
 	                    drawCircle(entity.x, entity.y, entity.size * 2, 6);
 	
 	                } else {
@@ -887,25 +887,25 @@ function AposBot() {
 	                }
                 break;
 	            case Classification.splitTarget:
-	            	drawCircle(entity.x, entity.y, entity.size + 16, constants.green);
+	            	drawCircle(entity.x, entity.y, entity.size + 20, constants.green);
 	            break;
 	            case Classification.mergeTarget:
 	            break;
 	            case Classification.smallThreat:
 	            case Classification.largeThreat:
-	            	drawCircle(entity.x, entity.y, entity.size + 16, 0);
+	            	drawCircle(entity.x, entity.y, entity.size + 20, 0);
 	                drawCircle(entity.x, entity.y, entity.dangerZone, 0);
 	            	if (entity.isMovingTowards) {
-	                	drawCircle(entity.x, entity.y, entity.size + 20, 3);
+	                	drawCircle(entity.x, entity.y, entity.size + 40, 3);
 	            	}
 	            break;
 	            case Classification.food:
 	            	if (!entity.isNotMoving()) {
-		            	drawCircle(entity.x, entity.y, entity.size + 16, constants.gray);
+		            	drawCircle(entity.x, entity.y, entity.size + 20, constants.gray);
 	            	}
 	            break;
 	            case Classification.unknown:
-	            	drawCircle(entity.x, entity.y, entity.size + 16, constants.cyan);
+	            	drawCircle(entity.x, entity.y, entity.size + 20, constants.cyan);
 	            break;
         	}
         });
