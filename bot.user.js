@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.964
+// @version     3.965
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.964;
+var aposBotVersion = 3.965;
 
 var constants = {
 	safeDistance: 150,
@@ -156,8 +156,6 @@ function AposBot() {
 
     this.toggleFollow = false;
     this.infoStrings = [];
-    this.profileList = {};
-    this.profileCount = 0;
     this.keyAction = function(key) {
         if (81 == key.keyCode) {
             console.log("Toggle Follow Mouse!");
@@ -167,27 +165,6 @@ function AposBot() {
     
     this.player = new Player();
 
-    this.profileStart = function(method) {
-    	var profile = this.profileList[method];
-    	
-    	if (!profile) {
-    		profile = {
-    			count: 0,
-    			elapsed: 0
-    		};
-    		this.profileList[method] = profile;
-    	}
-    	profile.count += 1;
-    	profile.start = Date.now();
-    };
-    
-    this.profileEnd = function(method) {
-    	
-    	var profile = this.profileList[method];
-    	
-    	profile.elapsed += Date.now() - profile.start;
-    };
-    
     this.separateListBasedOnFunction = function(player, listToUse) {
         var mergeList = [];
         var i;
@@ -464,8 +441,6 @@ function AposBot() {
         var destinationChoices, cluster;
         var panicMode = false;
 
-        this.profileStart('determineDestination1');
-
         for (j = 0; j < player.cells.length; j++) {
             for (i = 0; i < player.threats.length; i++) {
             	if (this.circlesIntersect(player.cells[j], player.threats[i])) {
@@ -544,8 +519,6 @@ function AposBot() {
             }
             //console.log("Done with enemy: " + i);
         }
-        this.profileEnd('determineDestination1');
-        this.profileStart('determineDestination2');
 
         //console.log("Done looking for enemies!");
 
@@ -608,8 +581,6 @@ function AposBot() {
         var sortedInterList = [];
         var sortedObList = [];
 
-        this.profileEnd('determineDestination2');
-        this.profileStart('determineDestination3');
         for (i = 0; i < stupidList.length; i++) {
 
             var tempList = this.addAngle(sortedInterList, stupidList[i]);
@@ -658,34 +629,19 @@ function AposBot() {
             obstacleAngles.push([angle1, diff]);
         }
 
-        this.profileEnd('determineDestination3');
-        this.profileStart('determineDestination4');
         for (i = 0; i < goodAngles.length; i++) {
             
-            this.profileStart('determineDestination41');
-        	
             line1 = this.followAngle(goodAngles[i][0], player.x, player.y, 100 + player.size);            
             line2 = this.followAngle(this.mod(goodAngles[i][0] + goodAngles[i][1], 360), player.x, player.y, 100 + player.size);
-            
-            this.profileEnd('determineDestination41');
-            this.profileStart('determineDestination42');
-            
             drawLine(player.x, player.y, line1[0], line1[1], 1);
             drawLine(player.x, player.y, line2[0], line2[1], 1);
-
-            this.profileEnd('determineDestination42');
-            this.profileStart('determineDestination43');
-
             drawArc(line1[0], line1[1], line2[0], line2[1], player.x, player.y, 1);
 
             //drawPoint(player[0].x, player[0].y, 2, "");
 
             drawPoint(line1[0], line1[1], 0, "" + i + ": 0");
             drawPoint(line2[0], line2[1], 0, "" + i + ": 1");
-            this.profileEnd('determineDestination43');
         }
-        this.profileEnd('determineDestination4');
-        this.profileStart('determineDestination5');
 
         for (i = 0; i < obstacleAngles.length; i++) {
             line1 = this.followAngle(obstacleAngles[i][0], player.x, player.y, 50 + player.size);
@@ -700,11 +656,9 @@ function AposBot() {
             drawPoint(line1[0], line1[1], 0, "" + i + ": 0");
             drawPoint(line2[0], line2[1], 0, "" + i + ": 1");
         }
-        this.profileEnd('determineDestination5');
 
         if (this.toggleFollow && goodAngles.length === 0) {
             //This is the follow the mouse mode
-            this.profileStart('determineDestination6');
             var distance = this.computeDistance(player.x, player.y, tempPoint[0], tempPoint[1]);
 
             shiftedAngle = this.shiftAngle(obstacleAngles, this.getAngle(tempPoint[0], tempPoint[1], player.x, player.y), [0, 360]);
@@ -715,10 +669,8 @@ function AposBot() {
             drawLine(player.x, player.y, destination[0], destination[1], 1);
             //tempMoveX = destination[0];
             //tempMoveY = destination[1];
-            this.profileEnd('determineDestination6');
 
         } else if (goodAngles.length > 0) {
-            this.profileStart('determineDestination7');
             var bIndex = goodAngles[0];
             var biggest = goodAngles[0][1];
             for (i = 1; i < goodAngles.length; i++) {
@@ -736,7 +688,6 @@ function AposBot() {
 
             destinationChoices = line1;
             drawLine(player.x, player.y, line1[0], line1[1], 7);
-            this.profileEnd('determineDestination7');
             //tempMoveX = line1[0];
             //tempMoveY = line1[1];
         } else if (badAngles.length > 0 && goodAngles.length === 0) {
@@ -764,7 +715,6 @@ function AposBot() {
             destinationChoices.push(line1);*/
         } else if (player.foodClusters.length > 0) {
         	
-            this.profileStart('determineDestination8');
         	var doSplit = player.largestCell.mass >= 36 && player.mass <= 50 && player.cells.length == 1 && player.safeToSplit;
         	var doLure = false;
 
@@ -831,13 +781,10 @@ function AposBot() {
             destinationChoices = [ destination[0], destination[1], doSplit, doLure ];
 
             drawLine(cluster.closestCell.x, cluster.closestCell.y, destination[0], destination[1], 1);
-            this.profileStart('determineDestination8');
-                        
         } else {
             //If there are no enemies around and no food to eat.
             destinationChoices = [tempMoveX, tempMoveY];
         }
-        this.profileEnd('determineDestination4');
 
         return destinationChoices;
     };
@@ -850,8 +797,6 @@ function AposBot() {
         var player = this.player;
         var listToUse = getMemoryCells();
         var i;
-        
-        this.profileStart('mainLoop');
         
         player.setCells(cells);
 
@@ -915,21 +860,15 @@ function AposBot() {
         //loop through everything that is on the screen and
         //separate everything in it's own category.
     	
-        this.profileStart('separateListBasedOnFunction');
         this.separateListBasedOnFunction(player, listToUse);
-        this.profileEnd('separateListBasedOnFunction');
 
-        this.profileStart('clusterFood');
         player.foodClusters = this.clusterFood(player, player.largestCell.size);
-        this.profileEnd('clusterFood');
 
         /*player.threats.sort(function(a, b){
             return a.distance-b.distance;
         })*/
 
-        this.profileStart('determineDestination');
         var destinationChoices = this.determineDestination(player, tempPoint);
-        this.profileEnd('determineDestination');
 
         Object.keys(listToUse).forEach(function(element, index) {
 
@@ -1008,22 +947,6 @@ function AposBot() {
         }
 
         this.infoStrings.push("");
-        
-        this.infoStrings = [];
-        
-        this.profileEnd('mainLoop');
-        this.profileCount++;
-        if (this.profileCount > 1000) {
-        	
-        	var that = this;
-            Object.keys(this.profileList).forEach(function(element, index) {
-
-            	var entry = that.profileList[element];
-            	console.log('element: ' + element + ' count: ' + entry.count + ' elapsed: ' + entry.elapsed);
-            });
-        	this.profileCount = 0;
-            this.profileList = {};
-        }
         
         return destinationChoices;
     };
@@ -1278,16 +1201,12 @@ function AposBot() {
     };
 
     this.slopeFromAngle = function(degree) {
-        this.profileStart('slopeFromAngle');
         if (degree == 270) {
             degree = 271;
         } else if (degree == 90) {
             degree = 91;
         }
-        var slope = Math.tan((degree - 180) / 180 * Math.PI);
-
-        this.profileEnd('slopeFromAngle');
-        return slope;
+        return slope = Math.tan((degree - 180) / 180 * Math.PI);
     };
 
     //Given two points on a line, finds the slope of a perpendicular line crossing it.
@@ -1298,7 +1217,6 @@ function AposBot() {
 
     //Given a slope and an offset, returns two points on that line.
     this.pointsOnLine = function(slope, useX, useY, distance) {
-        this.profileStart('pointsOnLine');
         var b = useY - slope * useX;
         var r = Math.sqrt(1 + slope * slope);
 
@@ -1307,7 +1225,6 @@ function AposBot() {
         var newX2 = (useX + ((-distance) / r));
         var newY2 = (useY + (((-distance) * slope) / r));
 
-        this.profileEnd('pointsOnLine');
         return [
             [newX1, newY1],
             [newX2, newY2]
