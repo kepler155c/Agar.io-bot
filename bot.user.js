@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.948
+// @version     3.949
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.948;
+var aposBotVersion = 3.949;
 
 var constants = {
 	safeDistance: 150,
@@ -278,7 +278,7 @@ function AposBot() {
         //cell merging
         for (i = 0; i < mergeList.length; i++) {
             for (var z = 0; z < mergeList.length; z++) {
-                if (z != i && that.isMerging(mergeList[i], mergeList[z])) { //z != i && 
+                if (z != i && this.isMerging(mergeList[i], mergeList[z])) { //z != i && 
                     //found cells that appear to be merging - if they constitute a threat add them to the theatlist
                     
                     //clone us a new cell
@@ -295,19 +295,20 @@ function AposBot() {
                     newThreat.mass = mergeList[i].mass + mergeList[z].mass;
                     newThreat.size = Math.sqrt(newThreat.mass * 100);
                     newThreat.isMovingTowards = true;
-                	closestInfo = that.closestCell(player, newThreat.x, newThreat.y);
+                	closestInfo = this.closestCell(player, newThreat.x, newThreat.y);
 
                 	newThreat.closestCell = closestInfo.cell;
                 	newThreat.distance = closestInfo.distance;
 
                     //check its a threat
-                    if (that.canEat(newThreat, player.smallestCell, constants.enemeyRatio)) {
+                    if (this.canEat(newThreat, player.smallestCell, constants.enemeyRatio)) {
                          //IT'S DANGER!
                         player.threats.push(newThreat);
                         newThreat.classification = Classification.smallThreat;
-                    	if (that.canSplitKill(newThreat, player.smallestCell, constants.enemyRatio)) {
+                    	if (this.canSplitKill(newThreat, player.smallestCell, constants.enemyRatio)) {
                     		newThreat.classification = Classification.largeThreat;
                     	}
+                    	console.log('merging');
                     }   
                 }
             }
@@ -457,16 +458,13 @@ function AposBot() {
             closestCell = threat.closestCell;
             var enemyDistance = threat.distance;
 
-            var enemyCanSplit = this.canSplitKill(threat, player.smallestCell, constants.enemyRatio);
-            
+            var enemyCanSplit = this.isType(Classification.largeThreat);
+
+            drawPoint(threat.x, threat.y+20, 1, "m:" + this.getMass(threat).toFixed(2) + " s:" + this.getSplitMass(threat).toFixed(2));
             if (enemyCanSplit) {	
                 drawPoint(threat.x, threat.y+40, 1, "c:" + (this.getSplitMass(threat) / this.getMass(threat)).toFixed(2));
             }
             
-            if (enemyCanSplit && this.getRatio(threat, player.smallestCell) > 20) {
-            	enemyCanSplit = false;
-            }
-
             if (panicMode) {
             	console.log('panic mode');
             	enemyCanSplit = false;
@@ -977,9 +975,9 @@ function AposBot() {
         
         //debug logging
         if (false){
-        var params = [cell1.x, cell1.y, cell2.x, cell2.y, cell1.size, cell2.size, dist];
-        var debugString = params.join(", ");
-        console.log("Merge:" + debugString);
+	        var params = [cell1.x, cell1.y, cell2.x, cell2.y, cell1.size, cell2.size, dist];
+	        var debugString = params.join(", ");
+	        console.log("Merge:" + debugString);
         }
         
         return dist <= -50;

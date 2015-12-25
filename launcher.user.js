@@ -225,7 +225,6 @@ console.log("Running Bot Launcher!");
 
     function Ra(a) {
         J *= Math.pow(0.9, a.wheelDelta / -120 || a.detail || 0);
-        console.log("J: " + J);
         //UPDATE
         0.07 > J && (J = 0.07);
         J > 4 / h && (J = 4 / h)
