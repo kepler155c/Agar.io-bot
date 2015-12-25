@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.949
+// @version     3.950
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.949;
+var aposBotVersion = 3.950;
 
 var constants = {
 	safeDistance: 150,
@@ -299,7 +299,7 @@ function AposBot() {
 
                 	newThreat.closestCell = closestInfo.cell;
                 	newThreat.distance = closestInfo.distance;
-
+console.log('checking merge');
                     //check its a threat
                     if (this.canEat(newThreat, player.smallestCell, constants.enemeyRatio)) {
                          //IT'S DANGER!
@@ -309,7 +309,9 @@ function AposBot() {
                     		newThreat.classification = Classification.largeThreat;
                     	}
                     	console.log('merging');
-                    }   
+                    } else {
+                    	console.log('cant eat');
+                    }
                 }
             }
         }
