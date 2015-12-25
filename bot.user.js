@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.941
+// @version     3.942
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.941;
+var aposBotVersion = 3.942;
 
 var constants = {
 	safeDistance: 150,
@@ -739,7 +739,7 @@ function AposBot() {
             		obstacleAngles.length === 0 && 
             		player.safeToSplit && 
             		cluster.cell && 
-            		cluster.cell.isSplitTarget &&
+            		this.isType(cluster.cell, Classification.splitTarget) &&
             		!cluster.cell.isMovingTowards && 
         			cluster.distance < constants.lureDistance &&
         			cluster.distance > constants.splitRangeMax && // not already in range (might have been an enemy close)
