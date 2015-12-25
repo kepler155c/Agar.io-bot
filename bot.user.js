@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.956
+// @version     3.957
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.956;
+var aposBotVersion = 3.957;
 
 var constants = {
 	safeDistance: 150,
@@ -464,6 +464,8 @@ function AposBot() {
         var destinationChoices;
         var panicMode = false;
 
+        this.profileStart('determineDestination1');
+
         for (j = 0; j < player.cells.length; j++) {
             for (i = 0; i < player.threats.length; i++) {
             	if (this.circlesIntersect(player.cells[j], player.threats[i])) {
@@ -544,6 +546,8 @@ function AposBot() {
             }
             //console.log("Done with enemy: " + i);
         }
+        this.profileEnd('determineDestination1');
+        this.profileStart('determineDestination2');
 
         //console.log("Done looking for enemies!");
 
@@ -606,6 +610,8 @@ function AposBot() {
         var sortedInterList = [];
         var sortedObList = [];
 
+        this.profileEnd('determineDestination2');
+        this.profileStart('determineDestination3');
         for (i = 0; i < stupidList.length; i++) {
 
             var tempList = this.addAngle(sortedInterList, stupidList[i]);
@@ -654,6 +660,8 @@ function AposBot() {
             obstacleAngles.push([angle1, diff]);
         }
 
+        this.profileEnd('determineDestination3');
+        this.profileStart('determineDestination4');
         for (i = 0; i < goodAngles.length; i++) {
             line1 = this.followAngle(goodAngles[i][0], player.x, player.y, 100 + player.size);
             line2 = this.followAngle(this.mod(goodAngles[i][0] + goodAngles[i][1], 360), player.x, player.y, 100 + player.size);
@@ -811,7 +819,8 @@ function AposBot() {
             //If there are no enemies around and no food to eat.
             destinationChoices = [tempMoveX, tempMoveY];
         }
-        
+        this.profileEnd('determineDestination4');
+
         return destinationChoices;
     };
 
