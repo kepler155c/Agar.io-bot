@@ -6,6 +6,7 @@
 /* global getPointX, getPointY, getMapEndX, getMapEndY, getMouseX, getMouseY */
 /* global getZoomlessRatio, verticalDistance, getPlayer, screenToGameX, screenToGameY */
 /* global getX, getY, getMemoryCells, getCells, getMode, getLastUpdate */
+/* global da */
 
 /*The MIT License (MIT)
 
@@ -33,16 +34,16 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.969
+// @version     3.970
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.969;
+var aposBotVersion = 3.970;
 
 var constants = {
 	safeDistance: 150,
-	velocity: 32, // 22,
+	velocity: 24, // 22,
     splitRangeMin: 650,
     splitRangeMax: 674.5,
     enemySplitDistance: 710,
@@ -145,6 +146,16 @@ Player.prototype.setCells = function(cells) {
 		this.x = enclosingCell.x;
 		this.y = enclosingCell.y;
 	}
+};
+
+da.Prototype.isMoving = function() {
+	
+    if (this.x != this.s || this.y != this.t) {
+    	this.moveCounter = 0;
+    	return true;
+    }
+    this.moveCounter++;
+    return this.moveCounter > 10;
 };
 
 console.log("Apos Bot!");
