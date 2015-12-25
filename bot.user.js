@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.953
+// @version     3.954
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.953;
+var aposBotVersion = 3.954;
 
 var constants = {
 	safeDistance: 150,
@@ -981,9 +981,10 @@ function AposBot() {
         if (this.profileCount > 1000) {
         	
         	this.profileCount = 0;
+        	var that = this;
             Object.keys(this.profileList).forEach(function(element, index) {
 
-            	var entry = this.profileList[element];
+            	var entry = that.profileList[element];
             	console.log('element: ' + element);
             	console.log('count: ' + entry.count);
             	console.log('elapsed: ' + entry.elapsed);
