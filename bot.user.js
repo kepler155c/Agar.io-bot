@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.944
+// @version     3.945
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.944;
+var aposBotVersion = 3.945;
 
 var constants = {
 	safeDistance: 150,
@@ -850,7 +850,7 @@ function AposBot() {
     	}
     	
     	if (player.safeToSplit) {
-        	drawCircle(player.x, player.y, player.size + 30, 2);
+        	drawCircle(player.x, player.y, player.size + 10, 2);
     	}
 
     	drawCircle(player.x, player.y, player.size + constants.enemySplitDistance, 5);
@@ -893,19 +893,19 @@ function AposBot() {
 	            break;
 	            case Classification.smallThreat:
 	            case Classification.largeThreat:
-	            	drawCircle(entity.x, entity.y, entity.size + 8, 0);
+	            	drawCircle(entity.x, entity.y, entity.size + 10, 0);
 	                drawCircle(entity.x, entity.y, entity.dangerZone, 0);
 	            	if (entity.isMovingTowards) {
-	                	drawCircle(entity.x, entity.y, entity.size + 16, 3);
+	                	drawCircle(entity.x, entity.y, entity.size + 20, 3);
 	            	}
 	            break;
 	            case Classification.food:
 	            	if (!entity.isNotMoving()) {
-		            	drawCircle(entity.x, entity.y, entity.size + 8, constants.gray);
+		            	drawCircle(entity.x, entity.y, entity.size + 10, constants.gray);
 	            	}
 	            break;
 	            case Classification.unknown:
-	            	drawCircle(entity.x, entity.y, entity.size + 50, constants.cyan);
+	            	drawCircle(entity.x, entity.y, entity.size + 10, constants.cyan);
 	            break;
         	}
         });
