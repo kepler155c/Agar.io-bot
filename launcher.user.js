@@ -20,11 +20,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.235
+// @version     4.236
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.235;
+var aposLauncherVersion = 4.236;
 
 var showAd = true;
 
@@ -1188,8 +1188,10 @@ console.log("Running Bot Launcher!");
         f.save();
         f.strokeStyle = ta ? "#AAAAAA" : "#000000";
         f.globalAlpha = .2 * h;
-        for (var a = m / h, b = r / h, c = (a / 2 - s) % 50; c < a; c += 50) {};
-        for (c = (b / 2 - t) % 50; c < b; c += 50) {};
+        for (var a = m / h, b = r / h, c = (a / 2 - s) % 250; c < a; c += 250) f.beginPath(), f.moveTo(c * h - .5, 0), f.lineTo(c * h - .5, b * h), f.stroke();
+        for (c = (b / 2 - t) % 250; c < b; c += 250) f.beginPath(), f.moveTo(0, c * h - .5), f.lineTo(a * h, c * h - .5), f.stroke();
+        //for (var a = m / h, b = r / h, c = (a / 2 - s) % 50; c < a; c += 50) {};
+        //for (c = (b / 2 - t) % 50; c < b; c += 50) {};
         //for (var a = m / h, b = r / h, c = (a / 2 - s) % 50; c < a; c += 50) f.beginPath(), f.moveTo(c * h - .5, 0), f.lineTo(c * h - .5, b * h), f.stroke();
         //for (c = (b / 2 - t) % 50; c < b; c += 50) f.beginPath(), f.moveTo(0, c * h - .5), f.lineTo(a * h, c * h - .5), f.stroke();
         f.restore()
