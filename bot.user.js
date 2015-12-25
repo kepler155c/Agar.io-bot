@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.965
+// @version     3.966
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.965;
+var aposBotVersion = 3.966;
 
 var constants = {
 	safeDistance: 150,
@@ -1206,7 +1206,7 @@ function AposBot() {
         } else if (degree == 90) {
             degree = 91;
         }
-        return slope = Math.tan((degree - 180) / 180 * Math.PI);
+        return Math.tan((degree - 180) / 180 * Math.PI);
     };
 
     //Given two points on a line, finds the slope of a perpendicular line crossing it.
