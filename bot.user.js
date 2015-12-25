@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.957
+// @version     3.958
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.957;
+var aposBotVersion = 3.958;
 
 var constants = {
 	safeDistance: 150,
@@ -483,11 +483,6 @@ function AposBot() {
             var enemyDistance = threat.distance;
 
             var enemyCanSplit = this.isType(Classification.largeThreat);
-
-            drawPoint(threat.x, threat.y+20, 1, "m:" + this.getMass(threat).toFixed(2) + " s:" + this.getSplitMass(threat).toFixed(2));
-            if (enemyCanSplit) {	
-                drawPoint(threat.x, threat.y+40, 1, "c:" + (this.getSplitMass(threat) / this.getMass(threat)).toFixed(2));
-            }
             
             if (panicMode) {
             	console.log('panic mode');
@@ -505,8 +500,10 @@ function AposBot() {
             threat.dangerZone = secureDistance;
 
             for (j = player.foodClusters.length - 1; j >= 0 ; j--) {
-                if (this.computeDistance(threat.x, threat.y, player.foodClusters[j].x, player.foodClusters[j].y) < secureDistance + shiftDistance)
+            	var cluster = player.foodClusters[j];
+                if (cluster.distance < secureDistance + shiftDistance) {
                     player.foodClusters.splice(j, 1);
+                }
             }
 
             if (panicMode || threat.danger && getLastUpdate() - threat.dangerTimeOut > 400) {
@@ -952,6 +949,10 @@ function AposBot() {
         	switch (entity.classification) {
 		        case Classification.smallThreat:
 		        case Classification.largeThreat:
+		            drawPoint(entity.x, entity.y+20, 1, "m:" + this.getMass(entity).toFixed(2) + " s:" + this.getSplitMass(entity).toFixed(2));
+		            if (this.isType(entity, Classification.largeThreat)) {
+		                drawPoint(entity.x, entity.y+40, 1, "c:" + (this.getSplitMass(entity) / this.getMass(entity)).toFixed(2));
+		            }
 		        	drawCircle(entity.x, entity.y, entity.size + 20, 0);
 		            drawCircle(entity.x, entity.y, entity.dangerZone, 0);
 		        	if (entity.isMovingTowards) {
