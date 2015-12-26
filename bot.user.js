@@ -35,20 +35,24 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1024
+// @version     3.1025
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1024;
+var aposBotVersion = 3.1025;
 
 var constants = {
-	safeDistance: 150,
-	velocity: 24, // 22,
     splitRangeMin: 650,
     splitRangeMax: 674.5,
     enemySplitDistance: 710,
-    lureDistance: 1000,
+    playerRatio: 1.285,
+    enemyRatio: 1.27,
+
+    // adjustables
+	safeDistance: 150,
+    lureDistance: 1100,
+    largeThreatRatio: 10,
 
 	red: 0,
     green: 1,
@@ -59,9 +63,6 @@ var constants = {
     cyan: 6,
     gray: 7,
     black: 8,
-    
-    playerRatio: 1.285,
-    enemyRatio: 1.27,
 };
 
 var Classification = {
@@ -233,7 +234,7 @@ function AposBot() {
                 }
                 else if (entity.closestCell.mass > 36 && that.canSplitKill(entity.closestCell, entity, constants.playerRatio)) {
 
-                	if (player.cells.length == 1 && player.mass / entity.mass < 10) {  // should be constant
+                	if (player.cells.length == 1 && player.mass / entity.mass < constants.largeThreatRatio) {  // should be constant
                     	// split worthy
                     	entity.classification = Classification.splitTarget;
                 	} else {
@@ -252,7 +253,7 @@ function AposBot() {
                     mergeList.push(entity);
                 	
                 } else if (!that.canEat(entity, player.smallestCell, constants.enemeyRatio)) {
-            		if (player.cells.length > 1 && player.mass / entity.mass < 10) {
+            		if (player.cells.length > 1 && player.mass / entity.mass < 10) {  // ?? mass check ?
                         player.food.push(entity);
                        	entity.classification = Classification.mergeTarget;
             		} else {
@@ -311,7 +312,9 @@ function AposBot() {
                 	player.threats.push(newThreat);
                     newThreat.classification = Classification.smallThreat;
                 	if (this.canSplitKill(newThreat, player.smallestCell, constants.enemyRatio)) {
-                		newThreat.classification = Classification.largeThreat;
+                    	if (newThreat.mass / player.mass >= constants.largeThreatRatio) {
+                			newThreat.classification = Classification.largeThreat;
+                		}
                 	}
                 }
             }
