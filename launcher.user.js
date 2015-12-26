@@ -20,11 +20,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.251
+// @version     4.252
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.251;
+var aposLauncherVersion = 4.252;
 
 var showAd = true;
 
@@ -594,7 +594,7 @@ console.log("Running Bot Launcher!");
                 var isRemoved = !window.getCells().hasOwnProperty(element);
     
                 //console.log("Time not updated: " + (window.getLastUpdate() - interNodes[element].getUptimeTime()));
-                if (isRemoved && (window.getLastUpdate() - clone[element].getUptimeTime()) > 3000) {
+                if (isRemoved && (window.getLastUpdate() - clone[element].getUptimeTime()) > 800) {
                     delete clone[element];
                 } else {
                     if (isRemoved &&
