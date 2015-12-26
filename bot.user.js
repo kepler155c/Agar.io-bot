@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1026
+// @version     3.1027
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1026;
+var aposBotVersion = 3.1027;
 
 var constants = {
     splitRangeMin: 650,
@@ -324,23 +324,13 @@ function AposBot() {
     this.predictPosition = function(cell, timeDiff) {
 		var lastPos = cell.getLastPos();
 
-//		var distance = this.computeDistance(cell.x, cell.y, 
-//				lastPos.x, lastPos.y);
-
-//		var elapsed = (getLastUpdate() - this.previousUpdated) / 120;
-//		var velocity = distance / elapsed;	
-
-		
-        var a = (getLastUpdate() - this.previousUpdated) / 60;
+        var a = (getLastUpdate() - this.previousUpdated) / 120;
         a = 0 > a ? 0 : 1 < a ? 1 : a;
 
-        timeDiff = timeDiff / 120;
+        timeDiff = timeDiff / 60;
 
         cell.px = timeDiff * a * (cell.J - cell.s) + cell.x;
         cell.py = timeDiff * a * (cell.K - cell.t) + cell.y;
-
-//		cell.px = cell.x - (lastPos.x - cell.x) * velocity * timeDiff;
-//		cell.py = cell.y - (lastPos.y - cell.y) * velocity * timeDiff;
     };
     
     this.interceptPosition = function(player, enemy) {
@@ -605,11 +595,11 @@ function AposBot() {
 				var cell = player.cells[j];
 
 	            if (virus.distance < cell.size + 750 && cell.mass > virus.mass) {
-	                tempOb = this.getAngleRange(cell, virus, i, cell.size + 70); // was 50
+	                tempOb = this.getAngleRange(cell, virus, i, normalDangerDistance + virus.size / 2); // was 50
 	                angle1 = tempOb[0];
 	                angle2 = this.rangeToAngle(tempOb);
 	                obstacleList.push([[angle1, true], [angle2, false]]);
-	            	drawCircle(virus.x, virus.y, virus.size + 5, constants.red);
+	            	// drawCircle(virus.x, virus.y, virus.size + 5, constants.red);
 	            }
 			}
         }
