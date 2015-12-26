@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.978
+// @version     3.979
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.978;
+var aposBotVersion = 3.979;
 
 var constants = {
 	safeDistance: 150,
@@ -272,9 +272,7 @@ function AposBot() {
 
         // increase virus mass if food is within
         for (i = player.food.length - 1; i >= 0; i--) {
-        	if (this.foodInVirus(player, player.food[i], player.viruses)) {
-        		virus.mass += food.mass;
-        	}
+        	this.foodInVirus(player, player.food[i], player.viruses);
         }
         
         //console.log("Merglist length: " +  mergeList.length)
@@ -1161,6 +1159,7 @@ function AposBot() {
     	for (var i = 0; i < viruses.length; i++) {
         	var virus = viruses[i];
         	if (this.circlesIntersect(food, virus)) {
+        		virus.mass += food.mass;
         		return true;
         	}
         }
