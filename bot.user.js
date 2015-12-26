@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.980
+// @version     3.981
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.980;
+var aposBotVersion = 3.981;
 
 var constants = {
 	safeDistance: 150,
@@ -485,12 +485,15 @@ function AposBot() {
                 threat.danger = false;
             }
 
-            /*if ((enemyCanSplit && enemyDistance < splitDangerDistance) ||
-                (!enemyCanSplit && enemyDistance < normalDangerDistance)) {
-
-                threat.danger = true;
-                threat.dangerTimeOut = f.getLastUpdate();
-            }*/
+            if (!panicMode) {
+            	
+	            if ((enemyCanSplit && enemyDistance < splitDangerDistance) ||
+	                (!enemyCanSplit && enemyDistance < normalDangerDistance)) {
+	
+	                threat.danger = true;
+	                threat.dangerTimeOut = f.getLastUpdate();
+	            }
+            }
 
             //console.log("Figured out who was important.");
             
@@ -525,7 +528,7 @@ function AposBot() {
 			
 			for (j = 0; j < player.cells.length; j++) {
 				var cell = player.cells[j];
-	            if (virus.distance < (cell.size * 2) && this.canEat(virus, cell, constants.enemyRatio)) {
+	            if (virus.distance < (cell.size * 2) && !this.canEat(cell, virus, constants.playerRatio)) {
 	                tempOb = this.getAngleRange(cell, virus, i, cell.size + 70); // was 50
 	                angle1 = tempOb[0];
 	                angle2 = this.rangeToAngle(tempOb);
