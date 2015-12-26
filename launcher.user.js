@@ -597,7 +597,7 @@ console.log("Running Bot Launcher!");
                 //console.log("Time not updated: " + (window.getLastUpdate() - interNodes[element].getUptimeTime()));
                 if (isRemoved && (window.getLastUpdate() - clone[element].getUptimeTime()) > 1500) {
                     delete clone[element];
-                } else (isRemoved) {
+                } else if (isRemoved) {
                 	clone[element].continueMoving();
                 } else {
                     if (isRemoved &&
