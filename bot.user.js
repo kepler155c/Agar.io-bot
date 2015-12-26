@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.998
+// @version     3.1000
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.998;
+var aposBotVersion = 3.1000;
 
 var constants = {
 	safeDistance: 150,
@@ -324,7 +324,7 @@ function AposBot() {
         var xdis = enemy.x - lastPos.x; // <--- FAKE AmS OF COURSE!
         var ydis = enemy.y - lastPos.y;
 
-    	var bulletSpeed = 1000;
+    	var bulletSpeed = 100;
     	var vx = Math.sqrt(xdis * xdis) / velocity;
     	var vy = Math.sqrt(ydis * ydis) / velocity;
     	
@@ -348,8 +348,8 @@ function AposBot() {
     	    if (t0 >= 0)
     	    {
     	        /* Compute the ship's heading */
-    	        var shootx = vx + dx / t0;
-    	        var shooty = vy + dy / t0;
+    	        var shootx = vx + dx / t0 + enemy.x;
+    	        var shooty = vy + dy / t0 + enemy.y;
     	    	return [ shootx, shooty ];
     	    }
     	}
@@ -369,13 +369,13 @@ function AposBot() {
         		foodSize = food.size-9;
         	}
 
-        	if (food.hasMoved) {
+        	if (food.hasMoved && food.distance < 750) {
         		
-        		var intercept = this.interceptPosition(player, food);
+        		//var intercept = this.interceptPosition(player, food);
             	// 700 ms to split ?
             	
-            	var predictedX = intercept[0];
-            	var predictedY = intercept[1];
+            	var predictedX = food.x; // intercept[0];
+            	var predictedY = food.y; //intercept[1];
 
             	// really should clone da
                 clusters.push({
@@ -768,7 +768,15 @@ function AposBot() {
 
         	cluster = this.getBestFood(player);
 
-        	drawCircle(cluster.x, cluster.y, cluster.size + 30, constants.orange);
+        	if (cluster.cell && cluster.distance < 750) {
+        		
+	    		var intercept = this.interceptPosition(player, cluster);
+	
+	    		if (intercept.length > 0) {
+	    			
+		        	drawCircle(intercept[0], intercept[1], cluster.size + 30, constants.orange);
+	    		}
+        	}
 
             // drawPoint(bestFood.x, bestFood.y, 1, "");
             if (cluster.canSplitKill && player.safeToSplit) {
@@ -783,7 +791,7 @@ function AposBot() {
 	            angle2 = this.rangeToAngle(tempOb);
 	            diff = this.mod(angle2 - angle1, 360);
 	            
-	        	this.drawAngle(cluster.closestCell, [angle1, diff], 50, constants.green);
+	        	//this.drawAngle(cluster.closestCell, [angle1, diff], 50, constants.green);
             }
 
             var angle = this.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
