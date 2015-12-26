@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1019
+// @version     3.1020
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1019;
+var aposBotVersion = 3.1020;
 
 var constants = {
 	safeDistance: 150,
@@ -422,7 +422,9 @@ function AposBot() {
 	            if (!addedCluster) {
 	                clusters.push({
 	                	x: food.x, 
-	                	y: food.y, 
+	                	y: fio()) {
+	                	    
+	                        delete clone[element];ood.y, 
 	                	size: foodSize, 
 	                	cell: null,
 	                	classification: Classification.cluster
@@ -555,7 +557,7 @@ function AposBot() {
                 }
             }
 
-            if (panicMode || threat.danger && getLastUpdate() - threat.dangerTimeOut > 1000) {
+            if (panicMode || threat.danger && getLastUpdate() - threat.dangerTimeOut > 1500) {
 
                 threat.danger = false;
             }

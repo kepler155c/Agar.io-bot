@@ -20,11 +20,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.257
+// @version     4.259
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.257;
+var aposLauncherVersion = 4.259;
 
 var showAd = true;
 
@@ -531,6 +531,7 @@ console.log("Running Bot Launcher!");
 //        try {
             var clone = interNodes.slice(0);
             
+            lastC = C;
             bb = C = Date.now();
             bo || (bo = !0, e("#connecting").hide(), cb(), L && (L(), L = null));
             var c = Math.random();
@@ -594,8 +595,10 @@ console.log("Running Bot Launcher!");
                 var isRemoved = !window.getCells().hasOwnProperty(element);
     
                 //console.log("Time not updated: " + (window.getLastUpdate() - interNodes[element].getUptimeTime()));
-                if (isRemoved && (window.getLastUpdate() - clone[element].getUptimeTime()) > 500) {
+                if (isRemoved && (window.getLastUpdate() - clone[element].getUptimeTime()) > 1500) {
                     delete clone[element];
+                } else (isRemoved) {
+                	clone[element].continueMoving();
                 } else {
                     if (isRemoved &&
                         clone[element].x > (getX() - (1920 / 2) / getZoomlessRatio()) &&
@@ -1440,6 +1443,7 @@ console.log("Running Bot Launcher!");
 
                 zb = 0,
                 C = 0,
+                lastC = 0,
                 ib = 0,
                 K = null,
                 pa = 0,
@@ -2251,6 +2255,20 @@ console.log("Running Bot Launcher!");
                             a[c].x = this.x + Math.cos(d * c + g) * e;
                             a[c].y = this.y + Math.sin(d * c + g) * e
                         }
+                    },
+                    continueMoving: function() {
+                        if (0 >= this.id) return 1;
+                        var a;
+                        a = (C - lastC) / 120;
+                        a = 0 > a ? 0 : 1 < a ? 1 : a;
+                        this.s = this.J;
+                        this.J = this.x;
+                        this.x =
+                            a * (this.J - this.s) + this.s;
+                        this.t - this.K;
+                        this.K - this.y;
+                        this.y = a * (this.K - this.t) + this.t;
+                        this.Q = C;
                     },
                     P: function() {
                         if (0 >= this.id) return 1;
