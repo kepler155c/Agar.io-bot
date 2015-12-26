@@ -5,7 +5,9 @@
 /* global drawPoint, drawLine, drawCircle, drawArc, getModek, getMapStartX, getMapStartY */
 /* global getPointX, getPointY, getMapEndX, getMapEndY, getMouseX, getMouseY */
 /* global getZoomlessRatio, verticalDistance, getPlayer, screenToGameX, screenToGameY */
-/* global getX, getY, getMemoryCells, getCells, getMode, getLastUpdate */
+/* global getX, getY, getMemoryCells, getCells, getMode, getLastUpdate, getLastUpdateTime */
+
+
 
 /*The MIT License (MIT)
 
@@ -33,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.994
+// @version     3.995
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.994;
+var aposBotVersion = 3.995;
 
 var constants = {
 	safeDistance: 150,
@@ -156,6 +158,7 @@ function AposBot() {
 
     this.toggleFollow = false;
     this.infoStrings = [];
+    this.previousUpdated = Date.now();
     this.keyAction = function(key) {
         if (81 == key.keyCode) {
             console.log("Toggle Follow Mouse!");
@@ -311,6 +314,48 @@ function AposBot() {
         }
     };
 
+    this.interceptPosition = function(player, enemy) {
+    	
+    	var lastPos = enemy.getLastPos();
+
+    	var timeDiff = getLastUpdateTime() - this.previousUpdated;
+    	var velocity = this.computeDistance(enemy.x, enemy.y, lastPos.x, lastPos.y) / timeDiff;
+
+        var xdis = enemy.x - lastPos.x; // <--- FAKE AmS OF COURSE!
+        var ydis = enemy.y - lastPos.y;
+
+    	var bulletSpeed = 100;
+    	var vx = Math.sqrt(xdis * xdis) / velocity;
+    	var vy = Math.sqrt(ydis * ydis) / velocity;
+    	
+    	/* Relative player position */
+    	var dx = player.x - enemy.x;
+    	var dy = player.y - enemy.y;
+    	/* Relative player velocity */
+
+    	var a = vx * vx + vy * vy - bulletSpeed * bulletSpeed;
+    	var b = 2 * (vx * dx + vy * dy);
+    	var c = dx * dx + dy * dy;
+    	var disc = b * b - 4 * a * c;
+
+    	if (disc >= 0)
+    	{
+    	    var t0 = (-b - Math.sqrt(disc)) / (2 * a);
+    	    var t1 = (-b + Math.sqrt(disc)) / (2 * a);
+    	    /* If t0 is negative, or t1 is a better solution, use t1 */
+    	    if (t0 < 0 || (t1 < t0 && t1 >= 0))
+    	        t0 = t1;
+    	    if (t0 >= 0)
+    	    {
+    	        /* Compute the ship's heading */
+    	        var shootx = vx + dx / t0;
+    	        var shooty = vy + dy / t0;
+    	    	return [ shootx, shooty ];
+    	    }
+    	}
+    	return [];
+    };
+    
     this.clusterFood = function(player, blobSize) {
         var clusters = [];
         var addedCluster = false;
@@ -326,10 +371,11 @@ function AposBot() {
 
         	if (food.hasMoved) {
         		
-            	var lastPos = food.getLastPos();
-
-            	var predictedX = food.x - (lastPos.x - food.x) * (food.distance/750) * constants.velocity;
-            	var predictedY = food.y - (lastPos.y - food.y) * (food.distance/750) * constants.velocity;
+        		var intercept = this.interceptPosition(player, food);
+            	// 700 ms to split ?
+            	
+            	var predictedX = intercept[0];
+            	var predictedY = intercept[1];
 
             	// really should clone da
                 clusters.push({
@@ -746,6 +792,7 @@ function AposBot() {
 
             destination = this.followAngle(shiftedAngle, cluster.closestCell.x, cluster.closestCell.y, cluster.distance);
 
+            doSplit = false;
             // really bad condition logic - but check if it's a split target just outside of range
             if (!doSplit && 
             		!player.isLuring && 
@@ -968,6 +1015,8 @@ function AposBot() {
         }
 
         this.infoStrings.push("");
+
+        this.previousUpdated = getLastUpdateTime();
         
         return destinationChoices;
     };
