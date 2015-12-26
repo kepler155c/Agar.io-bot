@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1011
+// @version     3.1012
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1011;
+var aposBotVersion = 3.1012;
 
 var constants = {
 	safeDistance: 150,
@@ -327,8 +327,8 @@ function AposBot() {
 		var elapsed = getLastUpdate() - this.previousUpdated;
 		var velocity = distance / elapsed;		
 
-		cell.px = x;
-		cell.py = y;
+		cell.px = cell.x - (lastPos.x - cell.x) * velocity * timeDiff;
+		cell.py = cell.y - (lastPos.y - cell.y) * velocity * timeDiff;
     };
     
     this.interceptPosition = function(player, enemy) {
@@ -385,14 +385,14 @@ function AposBot() {
         		foodSize = food.size-9;
         	}
 
-        	if (food.hasMoved && food.distance < 750) {
-        		
-            	this.predictPosition(cluster.cell, 500);
+        	if (food.hasMoved && food.distance < 850) {
+
+            	this.predictPosition(food, 500);
 
             	// really should clone da
                 clusters.push({
-                	x: cluster.cell.px, 
-                	y: cluster.cell.py, 
+                	x: food.px, 
+                	y: food.py, 
                 	size: food.size, 
                 	cell: food, 
                 	classification: Classification.cluster
