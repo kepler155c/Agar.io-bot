@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.993
+// @version     3.994
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.993;
+var aposBotVersion = 3.994;
 
 var constants = {
 	safeDistance: 150,
@@ -518,13 +518,13 @@ function AposBot() {
                 angle1 = tempOb[0];
                 angle2 = this.rangeToAngle(tempOb);
 
-                obstacleList.push([[angle1, true], [angle2, false], closestCell]);
+                obstacleList.push([[angle1, true], [angle2, false]]);
             } else if (!enemyCanSplit && enemyDistance < normalDangerDistance + shiftDistance) {
                 tempOb = this.getAngleRange(closestCell, threat, i, normalDangerDistance + shiftDistance);
                 angle1 = tempOb[0];
                 angle2 = this.rangeToAngle(tempOb);
 
-                obstacleList.push([[angle1, true], [angle2, false], closestCell]);
+                obstacleList.push([[angle1, true], [angle2, false]]);
             }
             //console.log("Done with enemy: " + i);
         }
@@ -541,7 +541,7 @@ function AposBot() {
 	                tempOb = this.getAngleRange(cell, virus, i, cell.size + 70); // was 50
 	                angle1 = tempOb[0];
 	                angle2 = this.rangeToAngle(tempOb);
-	                obstacleList.push([[angle1, true], [angle2, false], cell]);
+	                obstacleList.push([[angle1, true], [angle2, false]]);
 	                console.log('adding virus to obstacle list ' + angle1 + ' ' + angle2);
 	            	drawCircle(virus.x, virus.y, virus.size + 5, constants.red);
 	            }
@@ -656,7 +656,6 @@ function AposBot() {
 
         for (i = 0; i < obstacleAngles.length; i++) {
 
-        	// aren't we drawing twice ?
         	this.drawAngle(player, obstacleAngles[i], 50, 6);
         }
 
@@ -736,8 +735,9 @@ function AposBot() {
 	            tempOb = this.getAngleRange(cluster.closestCell, cluster, 1, cluster.cell.size);
 	            angle1 = tempOb[0];
 	            angle2 = this.rangeToAngle(tempOb);
+	            diff = this.mod(angle2 - angle1, 360);
 	            
-	        	this.drawAngle(cluster.closestCell, [angle1, angle2], cluster.distance, constants.green);
+	        	this.drawAngle(cluster.closestCell, [angle1, diff], 50, constants.green);
             }
 
             var angle = this.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
