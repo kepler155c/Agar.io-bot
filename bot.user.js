@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1003
+// @version     3.1004
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1003;
+var aposBotVersion = 3.1004;
 
 var constants = {
 	safeDistance: 150,
@@ -211,7 +211,11 @@ function AposBot() {
                		entity.classification = Classification.virus;
                     player.viruses.push(entity);
                 } else if (that.canSplitKill(entity, player.smallestCell, constants.enemyRatio)) {
+                	
                 	entity.classification = Classification.largeThreat;
+                	if (entity.mass / player.mass > 10) {    // should be constant
+                    	entity.classification = Classification.smallThreat;
+                	}
                     player.threats.push(entity);
                     mergeList.push(entity);
                 } else if (that.canEat(entity, player.smallestCell, constants.enemyRatio)) {
@@ -229,7 +233,7 @@ function AposBot() {
                 }
                 else if (entity.closestCell.mass > 36 && that.canSplitKill(entity.closestCell, entity, constants.playerRatio)) {
 
-                	if (player.cells.length == 1 && player.mass / entity.mass < 10) {
+                	if (player.cells.length == 1 && player.mass / entity.mass < 10) {  // should be constant
                     	// split worthy
                     	entity.classification = Classification.splitTarget;
                 	} else {
@@ -897,7 +901,8 @@ function AposBot() {
     			var timeDiff = getLastUpdate() - this.previousUpdated;
     			player.splitVelocity = cellDistance / timeDiff;
 
-    			console.log('velocity = ' + player.splitVelocity);
+    			console.log([ player.splitVelocity, cellDistance, timeDiff, player.cells[1].x, player.cells[1].y, 
+    	        				lastPos.x, lastPos.y ]);
     			/*
     			console.log(Date.now() - player.splitTimer);
     			console.log('max distance = ' + player.splitDistance);
