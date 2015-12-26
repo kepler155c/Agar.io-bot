@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.976
+// @version     3.978
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.976;
+var aposBotVersion = 3.978;
 
 var constants = {
 	safeDistance: 150,
@@ -270,9 +270,10 @@ function AposBot() {
             }
         });
 
+        // increase virus mass if food is within
         for (i = player.food.length - 1; i >= 0; i--) {
         	if (this.foodInVirus(player, player.food[i], player.viruses)) {
-        		player.food.splice(i, 1);
+        		virus.mass += food.mass;
         	}
         }
         
@@ -526,8 +527,7 @@ function AposBot() {
 			
 			for (j = 0; j < player.cells.length; j++) {
 				var cell = player.cells[j];
-				
-	            if (virus.distance < (cell.size * 2)) {
+	            if (virus.distance < (cell.size * 2) && this.canEat(virus, cell.mass, constants.enemyRatio)) {
 	                tempOb = this.getAngleRange(cell, virus, i, cell.size + 70); // was 50
 	                angle1 = tempOb[0];
 	                angle2 = this.rangeToAngle(tempOb);
@@ -1161,12 +1161,7 @@ function AposBot() {
     	for (var i = 0; i < viruses.length; i++) {
         	var virus = viruses[i];
         	if (this.circlesIntersect(food, virus)) {
-        		
-            	if (player.mass + food.mass > virus.mass) {
-            		
-	                drawCircle(food.x, food.y, food.size + 10, 7);
-	        		return true;
-            	}
+        		return true;
         	}
         }
         return false;
