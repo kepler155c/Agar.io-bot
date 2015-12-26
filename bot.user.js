@@ -5,7 +5,7 @@
 /* global drawPoint, drawLine, drawCircle, drawArc, getModek, getMapStartX, getMapStartY */
 /* global getPointX, getPointY, getMapEndX, getMapEndY, getMouseX, getMouseY */
 /* global getZoomlessRatio, verticalDistance, getPlayer, screenToGameX, screenToGameY */
-/* global getX, getY, getMemoryCells, getCells, getMode, getLastUpdate, getLastUpdateTime */
+/* global getX, getY, getMemoryCells, getCells, getMode, getLastUpdate */
 
 
 
@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.996
+// @version     3.997
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.996;
+var aposBotVersion = 3.997;
 
 var constants = {
 	safeDistance: 150,
@@ -318,7 +318,7 @@ function AposBot() {
     	
     	var lastPos = enemy.getLastPos();
 
-    	var timeDiff = getUptimeTime() - this.previousUpdated;
+    	var timeDiff = getLastUpdate() - this.previousUpdated;
     	var velocity = this.computeDistance(enemy.x, enemy.y, lastPos.x, lastPos.y) / timeDiff;
 
         var xdis = enemy.x - lastPos.x; // <--- FAKE AmS OF COURSE!
@@ -1016,7 +1016,7 @@ function AposBot() {
 
         this.infoStrings.push("");
 
-        this.previousUpdated = getUptimeTime();
+        this.previousUpdated = getLastUpdate();
         
         return destinationChoices;
     };
