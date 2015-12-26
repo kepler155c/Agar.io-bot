@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1002
+// @version     3.1003
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1002;
+var aposBotVersion = 3.1003;
 
 var constants = {
 	safeDistance: 150,
@@ -800,7 +800,6 @@ function AposBot() {
 
             destination = this.followAngle(shiftedAngle, cluster.closestCell.x, cluster.closestCell.y, cluster.distance);
 
-            doSplit = false;
             // really bad condition logic - but check if it's a split target just outside of range
             if (!doSplit && 
             		!player.isLuring && 
@@ -888,12 +887,20 @@ function AposBot() {
     		var distance = this.computeDistance(player.cells[0].x, player.cells[0].y, 
     				player.cells[1].x, player.cells[1].y);
     		if (distance > player.splitDistance) {
+    			
+        		var lastPos = player.cells[1].getLastPos();
+
+        		var cellDistance = this.computeDistance(player.cells[1].x, player.cells[1].y, 
+        				lastPos.x, lastPos.y);
+
     			player.splitDistance = distance;
-    			player.splitVelocity = distance / (Date.now() - player.splitTimer);
+    			var timeDiff = getLastUpdate() - this.previousUpdated;
+    			player.splitVelocity = cellDistance / timeDiff;
+
+    			console.log('velocity = ' + player.splitVelocity);
     			/*
     			console.log(Date.now() - player.splitTimer);
     			console.log('max distance = ' + player.splitDistance);
-    			console.log('velocity = ' + player.splitVelocity);
     			console.log('end ' + this.computeDistance(player.splitLocation.startx, player.splitLocation.starty,
         				player.cells[1].x, player.cells[1].y));
 				*/
