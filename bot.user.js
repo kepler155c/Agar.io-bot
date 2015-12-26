@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1006
+// @version     3.1007
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1006;
+var aposBotVersion = 3.1007;
 
 var constants = {
 	safeDistance: 150,
@@ -318,6 +318,21 @@ function AposBot() {
         }
     };
 
+    this.predictPosition = function(cell, timeDiff) {
+		var lastPos = cell.getLastPos();
+
+		var distance = this.computeDistance(cell.x, cell.y, 
+				lastPos.x, lastPos.y);
+
+		var elapsed = getLastUpdate() - this.previousUpdated;
+		var velocity = distance / elapsed;		
+
+		return { 
+			x: cell.x - (lastPos.x - cell.x) * velocity * timeDiff,
+			y: cell.y - (lastPos.y - cell.y) * velocity * timeDiff,
+		};
+    };
+    
     this.interceptPosition = function(player, enemy) {
     	
     	var lastPos = enemy.getLastPos();
@@ -772,7 +787,7 @@ function AposBot() {
 
         	if (cluster.cell) {
         		
-	    		var intercept = this.interceptPosition(player, cluster.cell);
+	    		var intercept = this.predictPosition(player, cluster.cell);
 	
 	    		if (intercept.length > 0) {
 	    			
