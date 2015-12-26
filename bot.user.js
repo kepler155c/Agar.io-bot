@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.989
+// @version     3.990
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.989;
+var aposBotVersion = 3.990;
 
 var constants = {
 	safeDistance: 150,
@@ -71,7 +71,8 @@ var Classification = {
 	largeThreat: 5,
 	mergeTarget: 6,
 	splitTarget: 7,
-	player: 8
+	player: 8,
+	cluster: 9
 };
 
 //TODO: Team mode
@@ -330,8 +331,13 @@ function AposBot() {
             	var predictedX = food.x - (lastPos.x - food.x) * (food.distance/750) * constants.velocity;
             	var predictedY = food.y - (lastPos.y - food.y) * (food.distance/750) * constants.velocity;
 
+            	// really should clone da
                 clusters.push({
-                	x: predictedX, y: predictedY, size: food.size, cell: food
+                	x: predictedX, 
+                	y: predictedY, 
+                	size: food.size, 
+                	cell: food, 
+                	classification: Classification.cluster
                 });
         	} else {
 	            for (var j = 0; j < clusters.length; j++) {
@@ -348,7 +354,11 @@ function AposBot() {
 	            }
 	            if (!addedCluster) {
 	                clusters.push({
-	                	x: food.x, y: food.y, size: foodSize, cell: null
+	                	x: food.x, 
+	                	y: food.y, 
+	                	size: foodSize, 
+	                	cell: null,
+	                	classification: Classification.cluster
 	                });
 	            }
         	}
@@ -526,8 +536,8 @@ function AposBot() {
 			
 			for (j = 0; j < player.cells.length; j++) {
 				var cell = player.cells[j];
-//	            if (virus.distance < (cell.size * 2) && !this.canEat(cell, virus, constants.playerRatio)) {
-	            if (cell.mass > virus.mass) {
+
+	            if (virus.distance < cell.size + 750 && cell.mass > virus.mass) {
 	                tempOb = this.getAngleRange(cell, virus, i, cell.size + 70); // was 50
 	                angle1 = tempOb[0];
 	                angle2 = this.rangeToAngle(tempOb);
@@ -646,6 +656,7 @@ function AposBot() {
 
         for (i = 0; i < obstacleAngles.length; i++) {
 
+        	// aren't we drawing twice ?
         	this.drawAngle(player, obstacleAngles[i], 50, 6);
         }
 
@@ -726,7 +737,7 @@ function AposBot() {
 	            angle1 = tempOb[0];
 	            angle2 = this.rangeToAngle(tempOb);
 	            
-	        	this.drawAngle(cluster.closestCell, [[angle1, true], [angle2, false]], cluster.distance, constants.green);
+	        	// this.drawAngle(cluster.closestCell, [[angle1, true], [angle2, false]], cluster.distance, constants.green);
             }
 
             var angle = this.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
@@ -1584,20 +1595,18 @@ function AposBot() {
         var lineLeft = this.followAngle(leftAngle, blob1.x, blob1.y, constants.safeDistance + blob1.size - index * 10);
         var lineRight = this.followAngle(rightAngle, blob1.x, blob1.y, constants.safeDistance + blob1.size - index * 10);
 
-/*        if (blob2.isVirus()) {
-            drawLine(blob1.x, blob1.y, lineLeft[0], lineLeft[1], 6);
-            drawLine(blob1.x, blob1.y, lineRight[0], lineRight[1], 6);
-            drawArc(lineLeft[0], lineLeft[1], lineRight[0], lineRight[1], blob1.x, blob1.y, 6);
-        } else if(getCells().hasOwnProperty(blob2.id)) {
-            drawLine(blob1.x, blob1.y, lineLeft[0], lineLeft[1], 0);
-            drawLine(blob1.x, blob1.y, lineRight[0], lineRight[1], 0);
-            drawArc(lineLeft[0], lineLeft[1], lineRight[0], lineRight[1], blob1.x, blob1.y, 0);
-        } else {
-        */
-            drawLine(blob1.x, blob1.y, lineLeft[0], lineLeft[1], 3);
-            drawLine(blob1.x, blob1.y, lineRight[0], lineRight[1], 3);
-            drawArc(lineLeft[0], lineLeft[1], lineRight[0], lineRight[1], blob1.x, blob1.y, 3);
-        // }
+        var color = 3;
+        if (this.isType(blob2, Classification.virus)) {
+        	color = 6;
+        } else if (this.isType(blob2, Classification.player)) { // (getCells().hasOwnProperty(blob2.id)) {
+        	color = 0;
+        } else if (this.isType(blob2, Classification.cluster)) {
+        	color = constants.orange;
+        }
+
+        drawLine(blob1.x, blob1.y, lineLeft[0], lineLeft[1], 3);
+        drawLine(blob1.x, blob1.y, lineRight[0], lineRight[1], 3);
+        drawArc(lineLeft[0], lineLeft[1], lineRight[0], lineRight[1], blob1.x, blob1.y, 3);
 
         return [leftAngle, difference];
     };
