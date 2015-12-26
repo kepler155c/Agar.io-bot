@@ -2158,9 +2158,6 @@ console.log("Running Bot Launcher!");
                     updateCode: 0,
                     danger: false,
                     dangerTimeOut: 0,
-                    oldX: 0,
-                    oldY: 0,
-                    checkedMove: false,
                     isMoving: function() {
                 	    if (this.x == this.s && this.y == this.t) {
                     	    return false;
