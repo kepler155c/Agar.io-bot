@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1004
+// @version     3.1005
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1004;
+var aposBotVersion = 3.1005;
 
 var constants = {
 	safeDistance: 150,
@@ -592,7 +592,6 @@ function AposBot() {
 	                angle1 = tempOb[0];
 	                angle2 = this.rangeToAngle(tempOb);
 	                obstacleList.push([[angle1, true], [angle2, false]]);
-	                console.log('adding virus to obstacle list ' + angle1 + ' ' + angle2);
 	            	drawCircle(virus.x, virus.y, virus.size + 5, constants.red);
 	            }
 			}
@@ -772,7 +771,7 @@ function AposBot() {
 
         	cluster = this.getBestFood(player);
 
-        	if (cluster.cell && cluster.distance < 750) {
+        	if (cluster.cell) {
         		
 	    		var intercept = this.interceptPosition(player, cluster.cell);
 	
