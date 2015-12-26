@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.986
+// @version     3.987
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.986;
+var aposBotVersion = 3.987;
 
 var constants = {
 	safeDistance: 150,
@@ -508,13 +508,13 @@ function AposBot() {
                 angle1 = tempOb[0];
                 angle2 = this.rangeToAngle(tempOb);
 
-                obstacleList.push([[angle1, true], [angle2, false]]);
+                obstacleList.push([[angle1, true], [angle2, false], closestCell]);
             } else if (!enemyCanSplit && enemyDistance < normalDangerDistance + shiftDistance) {
                 tempOb = this.getAngleRange(closestCell, threat, i, normalDangerDistance + shiftDistance);
                 angle1 = tempOb[0];
                 angle2 = this.rangeToAngle(tempOb);
 
-                obstacleList.push([[angle1, true], [angle2, false]]);
+                obstacleList.push([[angle1, true], [angle2, false], closestCell]);
             }
             //console.log("Done with enemy: " + i);
         }
@@ -531,7 +531,7 @@ function AposBot() {
 	                tempOb = this.getAngleRange(cell, virus, i, cell.size + 70); // was 50
 	                angle1 = tempOb[0];
 	                angle2 = this.rangeToAngle(tempOb);
-	                obstacleList.push([[angle1, true], [angle2, false]]);
+	                obstacleList.push([[angle1, true], [angle2, false], cell]);
 	                console.log('adding virus to obstacle list ' + angle1 + ' ' + angle2);
 	            	drawCircle(virus.x, virus.y, virus.size + 5, constants.red);
 	            }
@@ -645,17 +645,8 @@ function AposBot() {
         }
 
         for (i = 0; i < obstacleAngles.length; i++) {
-            line1 = this.followAngle(obstacleAngles[i][0], player.x, player.y, 50 + player.size);
-            line2 = this.followAngle(this.mod(obstacleAngles[i][0] + obstacleAngles[i][1], 360), player.x, player.y, 50 + player.size);
-            drawLine(player.x, player.y, line1[0], line1[1], 6);
-            drawLine(player.x, player.y, line2[0], line2[1], 6);
 
-            drawArc(line1[0], line1[1], line2[0], line2[1], player.x, player.y, 6);
-
-            //drawPoint(player[0].x, player[0].y, 2, "");
-
-            drawPoint(line1[0], line1[1], 0, "" + i + ": 0");
-            drawPoint(line2[0], line2[1], 0, "" + i + ": 1");
+        	this.drawAngle(player, obstacleAngles[i], i, 50, 6);
         }
 
         if (this.toggleFollow && goodAngles.length === 0) {
@@ -730,6 +721,8 @@ function AposBot() {
             }
 
             var angle = this.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
+
+            console.log(angle);
             shiftedAngle = this.shiftAngle(obstacleAngles, angle, [0, 360]);
 
             destination = this.followAngle(shiftedAngle, cluster.closestCell.x, cluster.closestCell.y, cluster.distance);
@@ -777,12 +770,6 @@ function AposBot() {
 
             } else {
                 
-            	tempOb = this.getAngleRange(cluster.closestCell, cluster, 1, cluster.cell.size + 70); // was 50
-                angle1 = tempOb[0];
-                angle2 = this.rangeToAngle(tempOb);
-                
-                console.log('obstacle: ' + angle1 + ' ' + angle2);
-
                 doSplit = false;
             }
             
@@ -1241,6 +1228,21 @@ function AposBot() {
             [newX2, newY2]
         ];
     };
+
+	this.drawAngle = function(cell, angle, index, distance, color) {
+        var line1 = this.followAngle(angle[0], cell.x, cell.y, distance + cell.size);
+        var line2 = this.followAngle(this.mod(angle[0] + angle[1], 360), cell.x, cell.y, distance + cell.size);
+
+        drawLine(cell.x, cell.y, line1[0], line1[1], color);
+        drawLine(cell.x, cell.y, line2[0], line2[1], color);
+
+        drawArc(line1[0], line1[1], line2[0], line2[1], cell.x, cell.y, color);
+
+        //drawPoint(cell[0].x, cell[0].y, 2, "");
+
+        drawPoint(line1[0], line1[1], 0, "" + index + ": 0 " + parseInt(angle[0], 10));
+        drawPoint(line2[0], line2[1], 0, "" + index + ": 1 " + parseInt(angle[1], 10));
+	};
 
     this.followAngle = function(angle, useX, useY, distance) {
         var slope = this.slopeFromAngle(angle);
