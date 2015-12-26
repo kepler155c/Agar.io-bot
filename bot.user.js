@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1015
+// @version     3.1016
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1015;
+var aposBotVersion = 3.1016;
 
 var constants = {
 	safeDistance: 150,
@@ -396,7 +396,7 @@ function AposBot() {
 
         	if (food.hasMoved && food.distance < 850) {
 
-            	this.predictPosition(food, 500);
+            	this.predictPosition(food, 800);
 
             	// really should clone da
                 clusters.push({
