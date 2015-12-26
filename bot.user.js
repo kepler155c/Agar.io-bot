@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.982
+// @version     3.983
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.982;
+var aposBotVersion = 3.983;
 
 var constants = {
 	safeDistance: 150,
@@ -76,7 +76,6 @@ var Classification = {
 
 //TODO: Team mode
 //      Detect when people are merging
-//      Split to catch smaller targets
 //      Angle based cluster code
 //      Better wall code
 //      In team mode, make allies be obstacles.
@@ -306,7 +305,6 @@ function AposBot() {
                 	if (this.canSplitKill(newThreat, player.smallestCell, constants.enemyRatio)) {
                 		newThreat.classification = Classification.largeThreat;
                 	}
-                	console.log('merging');
                 }
             }
         }
@@ -528,12 +526,14 @@ function AposBot() {
 			
 			for (j = 0; j < player.cells.length; j++) {
 				var cell = player.cells[j];
-	            if (virus.distance < (cell.size * 2) && !this.canEat(cell, virus, constants.playerRatio)) {
+//	            if (virus.distance < (cell.size * 2) && !this.canEat(cell, virus, constants.playerRatio)) {
+	            if (cell.mass > virus.mass) {
 	                tempOb = this.getAngleRange(cell, virus, i, cell.size + 70); // was 50
 	                angle1 = tempOb[0];
 	                angle2 = this.rangeToAngle(tempOb);
 	                obstacleList.push([[angle1, true], [angle2, false]]);
 	                console.log('adding virus to obstacle list');
+	            	drawCircle(virus.x, virus.y, virus.size + 5, constants.red);
 	            }
 			}
         }
@@ -1163,7 +1163,7 @@ function AposBot() {
     	for (var i = 0; i < viruses.length; i++) {
         	var virus = viruses[i];
         	if (this.circlesIntersect(food, virus)) {
-        		virus.mass += food.mass;
+        		virus.mass -= food.mass;
         		return true;
         	}
         }
