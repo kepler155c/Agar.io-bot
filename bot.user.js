@@ -525,7 +525,7 @@ function AposBot() {
 			
 			for (j = 0; j < player.cells.length; j++) {
 				var cell = player.cells[j];
-	            if (virus.distance < (cell.size * 2) && (virus.mass >= cell.mass)) {
+	            if (virus.distance < (cell.size * 2) && this.canEat(virus, cell, constants.enemyRatio)) {
 	                tempOb = this.getAngleRange(cell, virus, i, cell.size + 70); // was 50
 	                angle1 = tempOb[0];
 	                angle2 = this.rangeToAngle(tempOb);
