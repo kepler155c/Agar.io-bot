@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1025
+// @version     3.1026
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1025;
+var aposBotVersion = 3.1026;
 
 var constants = {
     splitRangeMin: 650,
@@ -331,7 +331,7 @@ function AposBot() {
 //		var velocity = distance / elapsed;	
 
 		
-        var a = (getLastUpdate() - this.previousUpdated) / 120;
+        var a = (getLastUpdate() - this.previousUpdated) / 60;
         a = 0 > a ? 0 : 1 < a ? 1 : a;
 
         timeDiff = timeDiff / 120;
