@@ -20,11 +20,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.250
+// @version     4.251
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.250;
+var aposLauncherVersion = 4.251;
 
 var showAd = true;
 
@@ -2159,6 +2159,10 @@ console.log("Running Bot Launcher!");
                     danger: false,
                     dangerTimeOut: 0,
                     isMoving: function() {
+                    	if (this.danger) {  // cells that have gone off screen do not get the position updated
+                    		return true;
+                    	}
+                    	
                 	    if (this.x == this.s && this.y == this.t) {
                     	    return false;
                 	    }
