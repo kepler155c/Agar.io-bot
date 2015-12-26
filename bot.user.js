@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1028
+// @version     3.1029
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1028;
+var aposBotVersion = 3.1029;
 
 var constants = {
     splitRangeMin: 650,
@@ -600,6 +600,9 @@ function AposBot() {
 	                angle2 = this.rangeToAngle(tempOb);
 	                obstacleList.push([[angle1, true], [angle2, false]]);
 	            	// drawCircle(virus.x, virus.y, virus.size + 5, constants.red);
+		            if (this.circlesIntersect(cell, virus)) {
+		                badAngles.push(this.getAngleRange(cell, virus, 0, cell.size + virus.size).concat(virus.distance));
+		            }
 	            }
 			}
         }
