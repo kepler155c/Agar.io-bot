@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1010
+// @version     3.1011
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1010;
+var aposBotVersion = 3.1011;
 
 var constants = {
 	safeDistance: 150,
@@ -327,10 +327,8 @@ function AposBot() {
 		var elapsed = getLastUpdate() - this.previousUpdated;
 		var velocity = distance / elapsed;		
 
-		return { 
-			x: cell.x - (lastPos.x - cell.x) * velocity * timeDiff,
-			y: cell.y - (lastPos.y - cell.y) * velocity * timeDiff,
-		};
+		cell.px = x;
+		cell.py = y;
     };
     
     this.interceptPosition = function(player, enemy) {
@@ -389,16 +387,12 @@ function AposBot() {
 
         	if (food.hasMoved && food.distance < 750) {
         		
-        		//var intercept = this.interceptPosition(player, food);
-            	// 700 ms to split ?
-            	
-            	var predictedX = food.x; // intercept[0];
-            	var predictedY = food.y; //intercept[1];
+            	this.predictPosition(cluster.cell, 500);
 
             	// really should clone da
                 clusters.push({
-                	x: predictedX, 
-                	y: predictedY, 
+                	x: cluster.cell.px, 
+                	y: cluster.cell.py, 
                 	size: food.size, 
                 	cell: food, 
                 	classification: Classification.cluster
@@ -784,16 +778,8 @@ function AposBot() {
         	var doLure = false;
 
         	cluster = this.getBestFood(player);
-
-        	if (cluster.cell) {
-        		
-	    		var intercept = this.predictPosition(cluster.cell, 500);
-	
-	    		if (intercept.length > 0) {
 	    			
-		        	drawCircle(intercept.x, intercept.y, cluster.size + 30, constants.orange);
-	    		}
-        	}
+        	drawCircle(cluster.x, cluster.y, cluster.size + 30, constants.orange);
 
             // drawPoint(bestFood.x, bestFood.y, 1, "");
             if (cluster.canSplitKill && player.safeToSplit) {
