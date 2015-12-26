@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.992
+// @version     3.993
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.992;
+var aposBotVersion = 3.993;
 
 var constants = {
 	safeDistance: 150,
@@ -737,9 +737,7 @@ function AposBot() {
 	            angle1 = tempOb[0];
 	            angle2 = this.rangeToAngle(tempOb);
 	            
-	            console.log(angle1);
-	            
-	        	this.drawAngle(cluster.closestCell, [[angle1, true], [angle2, false]], cluster.distance, constants.green);
+	        	this.drawAngle(cluster.closestCell, [angle1, angle2], cluster.distance, constants.green);
             }
 
             var angle = this.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
