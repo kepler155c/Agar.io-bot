@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1001
+// @version     3.1002
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1001;
+var aposBotVersion = 3.1002;
 
 var constants = {
 	safeDistance: 150,
@@ -348,9 +348,9 @@ function AposBot() {
     	    if (t0 >= 0)
     	    {
     	        /* Compute the ship's heading */
-    	        var shootx = vx + dx / t0 + enemy.x;
-    	        var shooty = vy + dy / t0 + enemy.y;
-    	    	return [ shootx, shooty ];
+    	        var shootx = vx + dx / t0;
+    	        var shooty = vy + dy / t0;
+    	    	return [ enemy.x - shootx, enemy.y - shooty ];
     	    }
     	}
     	return [];
