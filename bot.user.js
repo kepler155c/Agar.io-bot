@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.988
+// @version     3.989
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.988;
+var aposBotVersion = 3.989;
 
 var constants = {
 	safeDistance: 150,
@@ -1584,7 +1584,7 @@ function AposBot() {
         var lineLeft = this.followAngle(leftAngle, blob1.x, blob1.y, constants.safeDistance + blob1.size - index * 10);
         var lineRight = this.followAngle(rightAngle, blob1.x, blob1.y, constants.safeDistance + blob1.size - index * 10);
 
-        if (blob2.isVirus()) {
+/*        if (blob2.isVirus()) {
             drawLine(blob1.x, blob1.y, lineLeft[0], lineLeft[1], 6);
             drawLine(blob1.x, blob1.y, lineRight[0], lineRight[1], 6);
             drawArc(lineLeft[0], lineLeft[1], lineRight[0], lineRight[1], blob1.x, blob1.y, 6);
@@ -1593,10 +1593,11 @@ function AposBot() {
             drawLine(blob1.x, blob1.y, lineRight[0], lineRight[1], 0);
             drawArc(lineLeft[0], lineLeft[1], lineRight[0], lineRight[1], blob1.x, blob1.y, 0);
         } else {
+        */
             drawLine(blob1.x, blob1.y, lineLeft[0], lineLeft[1], 3);
             drawLine(blob1.x, blob1.y, lineRight[0], lineRight[1], 3);
             drawArc(lineLeft[0], lineLeft[1], lineRight[0], lineRight[1], blob1.x, blob1.y, 3);
-        }
+        // }
 
         return [leftAngle, difference];
     };
