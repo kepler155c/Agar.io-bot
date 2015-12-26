@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.981
+// @version     3.982
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.981;
+var aposBotVersion = 3.982;
 
 var constants = {
 	safeDistance: 150,
@@ -491,7 +491,7 @@ function AposBot() {
 	                (!enemyCanSplit && enemyDistance < normalDangerDistance)) {
 	
 	                threat.danger = true;
-	                threat.dangerTimeOut = f.getLastUpdate();
+	                threat.dangerTimeOut = getLastUpdate();
 	            }
             }
 
