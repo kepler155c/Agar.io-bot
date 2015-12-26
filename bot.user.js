@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1009
+// @version     3.1010
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1009;
+var aposBotVersion = 3.1010;
 
 var constants = {
 	safeDistance: 150,
@@ -787,11 +787,11 @@ function AposBot() {
 
         	if (cluster.cell) {
         		
-	    		var intercept = this.predictPosition(cluster.cell, 80);
+	    		var intercept = this.predictPosition(cluster.cell, 500);
 	
 	    		if (intercept.length > 0) {
 	    			
-		        	drawCircle(intercept[0], intercept[1], cluster.size + 30, constants.orange);
+		        	drawCircle(intercept.x, intercept.y, cluster.size + 30, constants.orange);
 	    		}
         	}
 
