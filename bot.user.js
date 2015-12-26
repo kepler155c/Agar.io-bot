@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.997
+// @version     3.998
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.997;
+var aposBotVersion = 3.998;
 
 var constants = {
 	safeDistance: 150,
@@ -324,7 +324,7 @@ function AposBot() {
         var xdis = enemy.x - lastPos.x; // <--- FAKE AmS OF COURSE!
         var ydis = enemy.y - lastPos.y;
 
-    	var bulletSpeed = 100;
+    	var bulletSpeed = 1000;
     	var vx = Math.sqrt(xdis * xdis) / velocity;
     	var vy = Math.sqrt(ydis * ydis) / velocity;
     	
