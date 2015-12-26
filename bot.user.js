@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.991
+// @version     3.992
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.991;
+var aposBotVersion = 3.992;
 
 var constants = {
 	safeDistance: 150,
@@ -737,12 +737,13 @@ function AposBot() {
 	            angle1 = tempOb[0];
 	            angle2 = this.rangeToAngle(tempOb);
 	            
+	            console.log(angle1);
+	            
 	        	this.drawAngle(cluster.closestCell, [[angle1, true], [angle2, false]], cluster.distance, constants.green);
             }
 
             var angle = this.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
 
-            console.log(angle);
             shiftedAngle = this.shiftAngle(obstacleAngles, angle, [0, 360]);
 
             destination = this.followAngle(shiftedAngle, cluster.closestCell.x, cluster.closestCell.y, cluster.distance);
@@ -1595,11 +1596,12 @@ function AposBot() {
         var lineLeft = this.followAngle(leftAngle, blob1.x, blob1.y, constants.safeDistance + blob1.size - index * 10);
         var lineRight = this.followAngle(rightAngle, blob1.x, blob1.y, constants.safeDistance + blob1.size - index * 10);
 
-        var color = 3;
+        var color = constants.orange;
         if (this.isType(blob2, Classification.virus)) {
-        	color = 6;
-        } else if (this.isType(blob2, Classification.player)) { // (getCells().hasOwnProperty(blob2.id)) {
-        	color = 0;
+        	color = constants.cyan;
+        } else if (this.isType(blob2, Classification.smallThreat) || 
+        		this.isType(blob2, Classification.largeThreat)) { // (getCells().hasOwnProperty(blob2.id)) {
+        	color = constants.red;
         } else if (this.isType(blob2, Classification.cluster)) {
         	color = constants.green;
         }
