@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1013
+// @version     3.1014
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1013;
+var aposBotVersion = 3.1014;
 
 var constants = {
 	safeDistance: 150,
@@ -321,16 +321,23 @@ function AposBot() {
     this.predictPosition = function(cell, timeDiff) {
 		var lastPos = cell.getLastPos();
 
-		var distance = this.computeDistance(cell.x, cell.y, 
-				lastPos.x, lastPos.y);
+//		var distance = this.computeDistance(cell.x, cell.y, 
+//				lastPos.x, lastPos.y);
 
-		var elapsed = getLastUpdate() - this.previousUpdated;
-		var velocity = distance / elapsed;	
+//		var elapsed = (getLastUpdate() - this.previousUpdated) / 120;
+//		var velocity = distance / elapsed;	
+
 		
-		velocity = cell.sa; // maybe ?
+        var a = (getLastUpdate() - cell.Q) / 120;
+        a = 0 > a ? 0 : 1 < a ? 1 : a;
 
-		cell.px = cell.x - (lastPos.x - cell.x) * velocity * timeDiff;
-		cell.py = cell.y - (lastPos.y - cell.y) * velocity * timeDiff;
+        timeDiff = timeDiff / 120;
+
+        cell.px = timeDiff * a * (cell.J - cell.s) + cell.x;
+        cell.py = timeDiff * a * (cell.K - cell.t) + cell.y;
+
+//		cell.px = cell.x - (lastPos.x - cell.x) * velocity * timeDiff;
+//		cell.py = cell.y - (lastPos.y - cell.y) * velocity * timeDiff;
     };
     
     this.interceptPosition = function(player, enemy) {
