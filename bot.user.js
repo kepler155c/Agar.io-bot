@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.985
+// @version     3.986
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.985;
+var aposBotVersion = 3.986;
 
 var constants = {
 	safeDistance: 150,
@@ -532,7 +532,7 @@ function AposBot() {
 	                angle1 = tempOb[0];
 	                angle2 = this.rangeToAngle(tempOb);
 	                obstacleList.push([[angle1, true], [angle2, false]]);
-	                console.log('adding virus to obstacle list');
+	                console.log('adding virus to obstacle list ' + angle1 + ' ' + angle2);
 	            	drawCircle(virus.x, virus.y, virus.size + 5, constants.red);
 	            }
 			}
@@ -755,7 +755,7 @@ function AposBot() {
                 	console.log('luring');
                 }, 5000);
             }
-        			
+
             // are we avoiding obstacles ??
             if (doSplit && obstacleAngles.length === 0) {
 				player.isSplitting = true;
@@ -776,7 +776,14 @@ function AposBot() {
         		player.splitDistance = 0;
 
             } else {
-            	doSplit = false;
+                
+            	tempOb = this.getAngleRange(cluster.closestCell, cluster, 1, cluster.cell.size + 70); // was 50
+                angle1 = tempOb[0];
+                angle2 = this.rangeToAngle(tempOb);
+                
+                console.log('obstacle: ' + angle1 + ' ' + angle2);
+
+                doSplit = false;
             }
             
             destinationChoices = [ destination[0], destination[1], doSplit, doLure ];
@@ -802,7 +809,7 @@ function AposBot() {
         player.setCells(cells);
 
         if (player.cells.length > 1) {
-        	console.log('cell ' + player.cells[1].id);
+//        	console.log('cell ' + player.cells[1].id);
         }
         
         var useMouseX = screenToGameX(getMouseX());
