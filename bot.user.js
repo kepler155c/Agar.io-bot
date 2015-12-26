@@ -33,12 +33,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.990
+// @version     3.991
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.990;
+var aposBotVersion = 3.991;
 
 var constants = {
 	safeDistance: 150,
@@ -737,7 +737,7 @@ function AposBot() {
 	            angle1 = tempOb[0];
 	            angle2 = this.rangeToAngle(tempOb);
 	            
-	        	// this.drawAngle(cluster.closestCell, [[angle1, true], [angle2, false]], cluster.distance, constants.green);
+	        	this.drawAngle(cluster.closestCell, [[angle1, true], [angle2, false]], cluster.distance, constants.green);
             }
 
             var angle = this.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
@@ -1601,12 +1601,12 @@ function AposBot() {
         } else if (this.isType(blob2, Classification.player)) { // (getCells().hasOwnProperty(blob2.id)) {
         	color = 0;
         } else if (this.isType(blob2, Classification.cluster)) {
-        	color = constants.orange;
+        	color = constants.green;
         }
 
-        drawLine(blob1.x, blob1.y, lineLeft[0], lineLeft[1], 3);
-        drawLine(blob1.x, blob1.y, lineRight[0], lineRight[1], 3);
-        drawArc(lineLeft[0], lineLeft[1], lineRight[0], lineRight[1], blob1.x, blob1.y, 3);
+        drawLine(blob1.x, blob1.y, lineLeft[0], lineLeft[1], color);
+        drawLine(blob1.x, blob1.y, lineRight[0], lineRight[1], color);
+        drawArc(lineLeft[0], lineLeft[1], lineRight[0], lineRight[1], blob1.x, blob1.y, color);
 
         return [leftAngle, difference];
     };
