@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1022
+// @version     3.1023
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1022;
+var aposBotVersion = 3.1023;
 
 var constants = {
 	safeDistance: 150,
@@ -593,10 +593,7 @@ function AposBot() {
 
                 obstacleList.push([[angle1, true], [angle2, false]]);
             }
-            //console.log("Done with enemy: " + i);
         }
-
-        //console.log("Done looking for enemies!");
 
 		for (i = 0; i < player.viruses.length; i++) {
 			var virus = player.viruses[i];
@@ -830,7 +827,6 @@ function AposBot() {
             	doLure = true;
                 setTimeout(function() {
                 	player.isLuring = false;
-                	console.log('luring');
                 }, 5000);
             }
 
@@ -909,14 +905,8 @@ function AposBot() {
     			var timeDiff = getLastUpdate() - this.previousUpdated;
     			player.splitVelocity = cellDistance / timeDiff;
 
-    			console.log([ player.splitVelocity, cellDistance, timeDiff, player.cells[1].x, player.cells[1].y, 
-    	        				lastPos.x, lastPos.y ]);
-    			/*
-    			console.log(Date.now() - player.splitTimer);
-    			console.log('max distance = ' + player.splitDistance);
-    			console.log('end ' + this.computeDistance(player.splitLocation.startx, player.splitLocation.starty,
-        				player.cells[1].x, player.cells[1].y));
-				*/
+    			//console.log([ player.splitVelocity, cellDistance, timeDiff, player.cells[1].x, player.cells[1].y, 
+    	        //				lastPos.x, lastPos.y ]);
     		}
     	}
     	
