@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.995
+// @version     3.996
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.995;
+var aposBotVersion = 3.996;
 
 var constants = {
 	safeDistance: 150,
@@ -318,7 +318,7 @@ function AposBot() {
     	
     	var lastPos = enemy.getLastPos();
 
-    	var timeDiff = getLastUpdateTime() - this.previousUpdated;
+    	var timeDiff = getUptimeTime() - this.previousUpdated;
     	var velocity = this.computeDistance(enemy.x, enemy.y, lastPos.x, lastPos.y) / timeDiff;
 
         var xdis = enemy.x - lastPos.x; // <--- FAKE AmS OF COURSE!
@@ -1016,7 +1016,7 @@ function AposBot() {
 
         this.infoStrings.push("");
 
-        this.previousUpdated = getLastUpdateTime();
+        this.previousUpdated = getUptimeTime();
         
         return destinationChoices;
     };
