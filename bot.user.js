@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1031
+// @version     3.1032
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1031;
+var aposBotVersion = 3.1032;
 
 var constants = {
     splitRangeMin: 650,
@@ -600,33 +600,15 @@ function AposBot() {
         return true;
     };
     
-    /**
-     * The bot works by removing angles in which it is too
-     * dangerous to travel towards to.
-     */
-    this.determineDestination = function(player, tempPoint) {
-    	
-    	var badAngles = [];
-        var obstacleList = [];
-        var i, j, angle1, angle2, tempOb, line1, line2, diff, threat, shiftedAngle, destination, closestCell;
-        var panicMode = false;
+    this.determineThreats = function(player, panicMode, badAngles, obstacleAngles, obstacleList) {
 
-        var destinationChoices = [ getPointX(), getPointY() ];
+        var angle1, angle2, tempOb;        
 
-        for (j = 0; j < player.cells.length; j++) {
-            for (i = 0; i < player.threats.length; i++) {
-            	if (this.circlesIntersect(player.cells[j], player.threats[i])) {
-            		panicMode = true;
-            		break;
-            	}
-            }
-        }
-
-        for (i = 0; i < player.threats.length; i++) {
+        for (var i = 0; i < player.threats.length; i++) {
         	
-        	threat = player.threats[i];
+        	var threat = player.threats[i];
 
-            closestCell = threat.closestCell;
+            var closestCell = threat.closestCell;
             var enemyDistance = threat.distance;
 
             var enemyCanSplit = this.isType(threat, Classification.largeThreat);
@@ -683,7 +665,32 @@ function AposBot() {
                 obstacleList.push([[angle1, true], [angle2, false]]);
             }
         }
+    };
+    
+    /**
+     * The bot works by removing angles in which it is too
+     * dangerous to travel towards to.
+     */
+    this.determineDestination = function(player, tempPoint) {
+    	
+    	var badAngles = [];
+        var obstacleList = [];
+        var i, j, angle1, angle2, tempOb, line1, line2, diff, shiftedAngle, destination;
+        var panicMode = false;
 
+        var destinationChoices = [ getPointX(), getPointY() ];
+
+        for (j = 0; j < player.cells.length; j++) {
+            for (i = 0; i < player.threats.length; i++) {
+            	if (this.circlesIntersect(player.cells[j], player.threats[i])) {
+            		panicMode = true;
+            		break;
+            	}
+            }
+        }
+
+        this.determineThreats(player, panicMode, badAngles, obstacleAngles, obstacleList);
+        
 		for (i = 0; i < player.viruses.length; i++) {
 			var virus = player.viruses[i];
 			
