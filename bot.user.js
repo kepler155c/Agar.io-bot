@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1030
+// @version     3.1031
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1030;
+var aposBotVersion = 3.1031;
 
 var constants = {
     splitRangeMin: 650,
@@ -495,17 +495,123 @@ function AposBot() {
         return player.foodClusters[bestFoodI];
     };
     
+    this.determineFoodDestination = function(player, destination, obstacleAngles) {
+
+    	var i, j;
+
+        for (i = 0; i < player.threats.length; i++) {
+        	var threat = player.threats[i];
+
+	        for (j = player.foodClusters.length - 1; j >= 0 ; j--) {
+	        	cluster = player.foodClusters[j];
+
+	            if (this.computeDistance(threat.x, threat.y, player.foodClusters[j].x, player.foodClusters[j].y) < 
+	            		threat.dangerZone) {
+	                player.foodClusters.splice(j, 1);
+	            }
+	        }
+        }
+
+	    if (player.foodClusters.length === 0) {
+	    	return false;
+	    }
+	    	
+    	var doSplit = player.largestCell.mass >= 36 && player.mass <= 50 && player.cells.length == 1 && player.safeToSplit;
+    	var doLure = false;
+
+    	var cluster = this.getBestFood(player);
+    			
+    	drawCircle(cluster.x, cluster.y, cluster.size + 30, constants.orange);
+
+        // drawPoint(bestFood.x, bestFood.y, 1, "");
+        if (cluster.canSplitKill && player.safeToSplit) {
+            
+            doSplit = true;
+        }
+        
+        if (cluster.cell) {
+        	
+            var tempOb = this.getAngleRange(cluster.closestCell, cluster, 1, cluster.cell.size);
+            var angle1 = tempOb[0];
+            var angle2 = this.rangeToAngle(tempOb);
+            var diff = this.mod(angle2 - angle1, 360);
+            
+        	//this.drawAngle(cluster.closestCell, [angle1, diff], 50, constants.green);
+        }
+
+        var angle = this.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
+
+        var shiftedAngle = this.shiftAngle(obstacleAngles, angle, [0, 360]);
+
+        var destinationAngle = this.followAngle(shiftedAngle, cluster.closestCell.x, cluster.closestCell.y, cluster.distance);
+        destination[0] = destinationAngle[0];
+        destination[1] = destinationAngle[1];
+
+        // really bad condition logic - but check if it's a split target just outside of range
+        if (!doSplit && 
+        		!player.isLuring && 
+        		obstacleAngles.length === 0 && 
+        		player.safeToSplit && 
+        		cluster.cell && 
+        		this.isType(cluster.cell, Classification.splitTarget) &&
+        		!cluster.cell.isMovingTowards && 
+    			cluster.distance < constants.lureDistance &&
+    			cluster.distance > constants.splitRangeMax && // not already in range (might have been an enemy close)
+    			player.mass > 250 && 
+    			(player.mass - cluster.cell.mass > 25)) {
+
+        	// TODO: figure out lure amount
+        	player.isLuring = true;
+        	doLure = true;
+            setTimeout(function() {
+            	player.isLuring = false;
+            }, 5000);
+        }
+
+        // are we avoiding obstacles ??
+        if (doSplit && obstacleAngles.length === 0) {
+			player.isSplitting = true;
+        	player.splitTarget = cluster.cell;
+        	player.splitSize = player.size;
+        	
+    		player.splitTimer = Date.now();
+    		player.splitLocation = { 
+    				x: player.largestCell.x + (cluster.x - player.largestCell.x) * 4,
+    				y: player.largestCell.y + (cluster.y - player.largestCell.y) * 4,
+    				startx: player.largestCell.x,
+    				starty: player.largestCell.y
+    		};
+    		
+    		destination[0] = player.splitLocation.x;
+    		destination[1] = player.splitLocation.y;        		
+    		
+    		player.splitDistance = 0;
+
+        } else {
+            
+            doSplit = false;
+        }
+        
+        destination[2] = doSplit;
+        destination[3] = doLure;
+
+        drawLine(cluster.closestCell.x, cluster.closestCell.y, destination[0], destination[1], 1);
+        
+        return true;
+    };
+    
+    /**
+     * The bot works by removing angles in which it is too
+     * dangerous to travel towards to.
+     */
     this.determineDestination = function(player, tempPoint) {
     	
-        //The bot works by removing angles in which it is too
-        //dangerous to travel towards to.
-        var badAngles = [];
+    	var badAngles = [];
         var obstacleList = [];
-        var tempMoveX = getPointX();
-        var tempMoveY = getPointY();
         var i, j, angle1, angle2, tempOb, line1, line2, diff, threat, shiftedAngle, destination, closestCell;
-        var destinationChoices, cluster;
         var panicMode = false;
+
+        var destinationChoices = [ getPointX(), getPointY() ];
 
         for (j = 0; j < player.cells.length; j++) {
             for (i = 0; i < player.threats.length; i++) {
@@ -540,14 +646,6 @@ function AposBot() {
             
             threat.dangerZone = secureDistance;
 
-            for (j = player.foodClusters.length - 1; j >= 0 ; j--) {
-            	cluster = player.foodClusters[j];
-                if (this.computeDistance(threat.x, threat.y, player.foodClusters[j].x, player.foodClusters[j].y) < 
-                		secureDistance + shiftDistance) {
-                    player.foodClusters.splice(j, 1);
-                }
-            }
-
             if (panicMode || threat.danger && getLastUpdate() - threat.dangerTimeOut > 1500) {
 
                 threat.danger = false;
@@ -563,8 +661,6 @@ function AposBot() {
 	            }
             }
 
-            //console.log("Figured out who was important.");
-            
             if ((enemyCanSplit && enemyDistance < splitDangerDistance) || (enemyCanSplit && threat.danger)) {
 
                 badAngles.push(this.getAngleRange(closestCell, threat, i, splitDangerDistance).concat(threat.distance));
@@ -606,27 +702,6 @@ function AposBot() {
 	            }
 			}
         }
-		/*
-		 * original - if after splitting, a virus is inside the enclosing player, the player can hit the virus
-		for (i = 0; i < player.viruses.length; i++) {
-            var virusDistance = this.computeDistance(player.viruses[i].x, player.viruses[i].y, player.x, player.y);
-            if (player.largestCell.size < player.viruses[i].size) {
-                if (virusDistance < (player.viruses[i].size * 2)) {
-                    tempOb = this.getAngleRange(player, player.viruses[i], i, player.viruses[i].size + 10);
-                    angle1 = tempOb[0];
-                    angle2 = this.rangeToAngle(tempOb);
-                    obstacleList.push([[angle1, true], [angle2, false]]);
-                }
-            } else {
-                if (virusDistance < (player.size * 2)) {
-                    tempOb = this.getAngleRange(player, player.viruses[i], i, player.size + 50);
-                    angle1 = tempOb[0];
-                    angle2 = this.rangeToAngle(tempOb);
-                    obstacleList.push([[angle1, true], [angle2, false]]);
-                }
-            }
-        }
-		 */
 
         var stupidList = [];
 
@@ -640,9 +715,6 @@ function AposBot() {
             angle2 = this.rangeToAngle(badAngles[i]);
             stupidList.push([[angle1, true], [angle2, false], badAngles[i][2]]);
         }
-
-        //stupidList.push([[45, true], [135, false]]);
-        //stupidList.push([[10, true], [200, false]]);
 
         stupidList.sort(function(a, b){
             return a[2]-b[2];
@@ -756,7 +828,6 @@ function AposBot() {
             //You're likely screwed. (This should never happen.)
 
             console.log("Failed");
-            destinationChoices = [tempMoveX, tempMoveY];
             /*var angleWeights = [] //Put weights on the angles according to enemy distance
             for (var i = 0; i < player.threats.length; i++){
                 var dist = this.computeDistance(player.x, player.y, player.threats[i].x, player.threats[i].y);
@@ -774,88 +845,8 @@ function AposBot() {
             line1 = this.followAngle(finalAngle,player.x,player.y,f.verticalDistance());
             drawLine(player.x, player.y, line1[0], line1[1], 2);
             destinationChoices.push(line1);*/
-        } else if (player.foodClusters.length > 0) {
-        	
-        	var doSplit = player.largestCell.mass >= 36 && player.mass <= 50 && player.cells.length == 1 && player.safeToSplit;
-        	var doLure = false;
-
-        	cluster = this.getBestFood(player);
-	    			
-        	drawCircle(cluster.x, cluster.y, cluster.size + 30, constants.orange);
-
-            // drawPoint(bestFood.x, bestFood.y, 1, "");
-            if (cluster.canSplitKill && player.safeToSplit) {
-                
-                doSplit = true;
-            }
-            
-            if (cluster.cell) {
-            	
-	            tempOb = this.getAngleRange(cluster.closestCell, cluster, 1, cluster.cell.size);
-	            angle1 = tempOb[0];
-	            angle2 = this.rangeToAngle(tempOb);
-	            diff = this.mod(angle2 - angle1, 360);
-	            
-	        	//this.drawAngle(cluster.closestCell, [angle1, diff], 50, constants.green);
-            }
-
-            var angle = this.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
-
-            shiftedAngle = this.shiftAngle(obstacleAngles, angle, [0, 360]);
-
-            destination = this.followAngle(shiftedAngle, cluster.closestCell.x, cluster.closestCell.y, cluster.distance);
-
-            // really bad condition logic - but check if it's a split target just outside of range
-            if (!doSplit && 
-            		!player.isLuring && 
-            		obstacleAngles.length === 0 && 
-            		player.safeToSplit && 
-            		cluster.cell && 
-            		this.isType(cluster.cell, Classification.splitTarget) &&
-            		!cluster.cell.isMovingTowards && 
-        			cluster.distance < constants.lureDistance &&
-        			cluster.distance > constants.splitRangeMax && // not already in range (might have been an enemy close)
-        			player.mass > 250 && 
-        			(player.mass - cluster.cell.mass > 25)) {
-
-            	// TODO: figure out lure amount
-            	player.isLuring = true;
-            	doLure = true;
-                setTimeout(function() {
-                	player.isLuring = false;
-                }, 5000);
-            }
-
-            // are we avoiding obstacles ??
-            if (doSplit && obstacleAngles.length === 0) {
-				player.isSplitting = true;
-            	player.splitTarget = cluster.cell;
-            	player.splitSize = player.size;
-            	
-        		player.splitTimer = Date.now();
-        		player.splitLocation = { 
-        				x: player.largestCell.x + (cluster.x - player.largestCell.x) * 4,
-        				y: player.largestCell.y + (cluster.y - player.largestCell.y) * 4,
-        				startx: player.largestCell.x,
-        				starty: player.largestCell.y
-        		};
-        		
-        		destination[0] = player.splitLocation.x;
-        		destination[1] = player.splitLocation.y;        		
-        		
-        		player.splitDistance = 0;
-
-            } else {
-                
-                doSplit = false;
-            }
-            
-            destinationChoices = [ destination[0], destination[1], doSplit, doLure ];
-
-            drawLine(cluster.closestCell.x, cluster.closestCell.y, destination[0], destination[1], 1);
         } else {
-            //If there are no enemies around and no food to eat.
-            destinationChoices = [tempMoveX, tempMoveY];
+        	this.determineFoodDestination(player, destinationChoices, obstacleAngles);
         }
 
         return destinationChoices;
