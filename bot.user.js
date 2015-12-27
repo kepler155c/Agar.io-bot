@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1033
+// @version     3.1034
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1033;
+var aposBotVersion = 3.1034;
 
 var constants = {
     splitRangeMin: 650,
@@ -869,7 +869,7 @@ function AposBot() {
             }
         }
         
-        this.determineBestDestination(player, destinationChoices, tempPoint, panicMode);
+        this.determineDestination(player, destinationChoices, tempPoint, panicMode);
         
         return destinationChoices;
     };
