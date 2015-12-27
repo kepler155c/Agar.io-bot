@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1032
+// @version     3.1033
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1032;
+var aposBotVersion = 3.1033;
 
 var constants = {
     splitRangeMin: 650,
@@ -671,23 +671,11 @@ function AposBot() {
      * The bot works by removing angles in which it is too
      * dangerous to travel towards to.
      */
-    this.determineDestination = function(player, tempPoint) {
+    this.determineDestination = function(player, destinationChoices, tempPoint, panicMode) {
     	
     	var badAngles = [];
         var obstacleList = [];
         var i, j, angle1, angle2, tempOb, line1, line2, diff, shiftedAngle, destination;
-        var panicMode = false;
-
-        var destinationChoices = [ getPointX(), getPointY() ];
-
-        for (j = 0; j < player.cells.length; j++) {
-            for (i = 0; i < player.threats.length; i++) {
-            	if (this.circlesIntersect(player.cells[j], player.threats[i])) {
-            		panicMode = true;
-            		break;
-            	}
-            }
-        }
 
         this.determineThreats(player, panicMode, badAngles, obstacleAngles, obstacleList);
         
@@ -805,10 +793,12 @@ function AposBot() {
 
             destination = this.followAngle(shiftedAngle, player.x, player.y, distance);
 
-            destinationChoices = destination;
+            destinationChoices[0] = destination[0];
+            destinationChoices[1] = destination[1];
+
             drawLine(player.x, player.y, destination[0], destination[1], 1);
-            //tempMoveX = destination[0];
-            //tempMoveY = destination[1];
+
+            return true;
 
         } else if (goodAngles.length > 0) {
             var bIndex = goodAngles[0];
@@ -826,10 +816,13 @@ function AposBot() {
 
             line1 = this.followAngle(perfectAngle, player.x, player.y, verticalDistance());
 
-            destinationChoices = line1;
+            destinationChoices[0] = line1[0];
+            destinationChoices[1] = line1[1];
+
             drawLine(player.x, player.y, line1[0], line1[1], 7);
-            //tempMoveX = line1[0];
-            //tempMoveY = line1[1];
+
+            return true;
+
         } else if (badAngles.length > 0 && goodAngles.length === 0) {
             //When there are enemies around but no good angles
             //You're likely screwed. (This should never happen.)
@@ -852,10 +845,32 @@ function AposBot() {
             line1 = this.followAngle(finalAngle,player.x,player.y,f.verticalDistance());
             drawLine(player.x, player.y, line1[0], line1[1], 2);
             destinationChoices.push(line1);*/
-        } else {
-        	this.determineFoodDestination(player, destinationChoices, obstacleAngles);
-        }
+            
+            return false;
+        } 
 
+        this.determineFoodDestination(player, destinationChoices, obstacleAngles);
+
+        return true;
+    };
+    
+    this.determineBestDestination = function(player, tempPoint) {
+
+    	var i, j;
+    	var panicMode = false;
+        var destinationChoices = [ getPointX(), getPointY() ];
+
+        for (j = 0; j < player.cells.length; j++) {
+            for (i = 0; i < player.threats.length; i++) {
+            	if (this.circlesIntersect(player.cells[j], player.threats[i])) {
+            		panicMode = true;
+            		break;
+            	}
+            }
+        }
+        
+        this.determineBestDestination(player, destinationChoices, tempPoint, panicMode);
+        
         return destinationChoices;
     };
 
@@ -945,7 +960,7 @@ function AposBot() {
             return a.distance-b.distance;
         })*/
 
-        var destinationChoices = this.determineDestination(player, tempPoint);
+        var destinationChoices = this.determineBestDestination(player, tempPoint);
 
         Object.keys(listToUse).forEach(function(element, index) {
 
