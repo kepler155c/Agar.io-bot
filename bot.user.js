@@ -506,7 +506,8 @@ function AposBot() {
 	        	cluster = player.foodClusters[j];
 
 	            if (this.computeDistance(threat.x, threat.y, player.foodClusters[j].x, player.foodClusters[j].y) < 
-	            		threat.dangerZone) {
+	            		threat.dangerZone + 50) {  // remove some extra food from outside the radius in order to
+	            	                               // prevent choosing food too close (and cause bumping)
 	                player.foodClusters.splice(j, 1);
 	            }
 	        }
@@ -868,7 +869,12 @@ function AposBot() {
             	}
             }
         }
-        
+
+        // is moving towards
+        // reduce large threat ratio
+        // circles intersect
+        // split enemy...
+        // largest previous distance - current distance is the cell chasing
         this.determineDestination(player, destinationChoices, tempPoint, panicMode);
         
         return destinationChoices;
