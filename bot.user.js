@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1038
+// @version     3.1039
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1038;
+var aposBotVersion = 3.1039;
 
 var constants = {
     splitRangeMin: 650,
@@ -541,15 +541,17 @@ function AposBot() {
 
         var color = constants.orange;
 
-        if (doSplit && !shiftedAngle.shifted) {
+        if (doSplit && shiftedAngle) {
+        	color = constants.red;  // cannot split, our angle was shifted from target
+        } else if (doSplit && !shiftedAngle.shifted) {
             //var tempOb = this.getAngleRange(cluster.closestCell, cluster, 1, cluster.cell.size);
             //var enemyAngle = this.rangeToAngle(tempOb[0]);
 
         	for (i = 0; i < obstacleAngles.length; i++) {
         		var obstacle = obstacleAngles[i];
         		
-        		// is there a virus in the same angle ?
 	        	if (this.angleRangeIsWithin(destinationAngle, obstacle)) {
+	        		// cannot split, there is a virus in the path
 	            	doSplit = false;
 	            	color = constants.red;
 	            	break;
@@ -557,7 +559,7 @@ function AposBot() {
         	}
         }
         
-    	drawCircle(cluster.x, cluster.y, cluster.size + 30, color);
+    	drawCircle(cluster.x, cluster.y, cluster.size + 40, color);
 
         destination[0] = destinationAngle[0];
         destination[1] = destinationAngle[1];
