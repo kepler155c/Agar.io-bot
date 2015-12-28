@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1045
+// @version     3.1046
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1045;
+var aposBotVersion = 3.1046;
 
 var constants = {
     splitRangeMin: 650,
@@ -48,6 +48,7 @@ var constants = {
     enemySplitDistance: 710,
     playerRatio: 1.285,
     enemyRatio: 1.27,
+    splitDuration: 900,  // 800 was pretty good
 
     // adjustables
 	safeDistance: 150,
@@ -389,7 +390,7 @@ function AposBot() {
 
         	if (food.hasMoved && food.distance < 850) {
 
-            	this.predictPosition(food, 800);
+            	this.predictPosition(food, constants.splitDuration);
 
             	// really should clone da
                 clusters.push({
