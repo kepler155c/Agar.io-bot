@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1035
+// @version     3.1036
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1035;
+var aposBotVersion = 3.1036;
 
 var constants = {
     splitRangeMin: 650,
@@ -553,7 +553,7 @@ function AposBot() {
         	}
         }
 
-    	drawCircle(cluster.x, cluster.y, cluster.size + 30, constants.orange);
+    	drawCircle(cluster.x, cluster.y, cluster.size + 30, color);
 
         var angle = this.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
 
@@ -566,7 +566,6 @@ function AposBot() {
         // really bad condition logic - but check if it's a split target just outside of range
         if (!doSplit && 
         		!player.isLuring && 
-        		obstacleAngles.length === 0 && 
         		player.safeToSplit && 
         		cluster.cell && 
         		this.isType(cluster.cell, Classification.splitTarget) &&
