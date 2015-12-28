@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1044
+// @version     3.1045
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1044;
+var aposBotVersion = 3.1045;
 
 var constants = {
     splitRangeMin: 650,
@@ -667,6 +667,11 @@ function AposBot() {
 	            }
             }
 
+            // try to move out of enemy
+        	if (this.circlesIntersect(closestCell, threat)) {
+                badAngles.push(this.getAngleRange(closestCell, threat, 0, closestCell.size + threat.size).concat(threat.distance));
+        	}
+        	
             if ((enemyCanSplit && enemyDistance < splitDangerDistance) || (enemyCanSplit && threat.danger)) {
 
                 badAngles.push(this.getAngleRange(closestCell, threat, i, splitDangerDistance).concat(threat.distance));
