@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1041
+// @version     3.1042
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1041;
+var aposBotVersion = 3.1042;
 
 var constants = {
     splitRangeMin: 650,
@@ -579,7 +579,7 @@ function AposBot() {
         		this.isType(cluster.cell, Classification.splitTarget) &&
         		!cluster.cell.isMovingTowards && 
     			cluster.distance < constants.lureDistance &&
-    			cluster.distance > constants.splitRangeMax && // not already in range (might have been an enemy close)
+    			cluster.distance > constants.enemySplitDistance && // not already in range (might have been an enemy close)
     			player.mass > 250 && 
     			(player.mass - cluster.cell.mass > 25)) {
 
@@ -975,7 +975,8 @@ function AposBot() {
     	drawCircle(player.x, player.y, player.size + constants.splitRangeMin, 5);
     	drawCircle(player.x, player.y, player.size + constants.splitRangeMax, 5);
     	drawCircle(player.x, player.y, player.size + constants.enemySplitDistance, 5);
-    	
+    	drawCircle(player.x, player.y, player.size + constants.lureDistance, 5);
+
         // drawLine(player.x, player.y, player.x, player.y + player.size + this.splitDistance, 7);
 
         //loop through everything that is on the screen and
