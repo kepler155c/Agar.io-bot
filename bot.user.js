@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1036
+// @version     3.1037
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1036;
+var aposBotVersion = 3.1037;
 
 var constants = {
     splitRangeMin: 650,
@@ -530,36 +530,35 @@ function AposBot() {
             
             doSplit = true;
         }
-        
+
+        var tempOb = this.getAngleRange(cluster.closestCell, cluster, 1, cluster.cell.size);
+        var enemyAngle = this.rangeToAngle(tempOb[0]);
+
         var color = constants.orange;
-        if (cluster.cell && obstacleAngles.length > 0) {
-        	
-            var tempOb = this.getAngleRange(cluster.closestCell, cluster, 1, cluster.cell.size);
-            var angle1 = tempOb[0];
-            var angle2 = this.rangeToAngle(tempOb);
-            // var diff = this.mod(angle2 - angle1, 360);
-            
-        	// this.drawAngle(cluster.closestCell, [angle1, diff], 50, constants.green);
-            
-        	for (i = 0; i < obstacleAngles.length; i++) {
-        		
-        		var obstacle = obstacleAngles[i];
-        		
-                if (this.angleRangeIsWithin(angle2, obstacle)) {
-                	doSplit = true;
-                	color = constants.red;
-                	break;
-                }
-        	}
-        }
 
-    	drawCircle(cluster.x, cluster.y, cluster.size + 30, color);
-
+        // angle of enemy
         var angle = this.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
 
+        // angle towards enemy when obstacles are in the way
         var shiftedAngle = this.shiftAngle(obstacleAngles, angle, [0, 360]);
 
-        var destinationAngle = this.followAngle(shiftedAngle, cluster.closestCell.x, cluster.closestCell.y, cluster.distance);
+        var destinationAngle = this.followAngle(shiftedAngle.angle, cluster.closestCell.x, cluster.closestCell.y, cluster.distance);
+
+        if (!shiftedAngle.shifted) {
+        	for (i = 0; i < obstacleAngles.length; i++) {
+        		var obstacle = obstacleAngles[i];
+        		
+        		// is there a virus in the same angle ?
+	        	if (this.angleRangeIsWithin(destinationAngle, obstacle)) {
+	            	doSplit = false;
+	            	color = constants.red;
+	            	break;
+	            }
+        	}
+        }
+        
+    	drawCircle(cluster.x, cluster.y, cluster.size + 30, color);
+
         destination[0] = destinationAngle[0];
         destination[1] = destinationAngle[1];
 
@@ -584,7 +583,7 @@ function AposBot() {
         }
 
         // are we avoiding obstacles ??
-        if (doSplit && obstacleAngles.length === 0) {
+        if (doSplit) {
 			player.isSplitting = true;
         	player.splitTarget = cluster.cell;
         	player.splitSize = player.size;
@@ -806,7 +805,7 @@ function AposBot() {
 
             shiftedAngle = this.shiftAngle(obstacleAngles, this.getAngle(tempPoint[0], tempPoint[1], player.x, player.y), [0, 360]);
 
-            destination = this.followAngle(shiftedAngle, player.x, player.y, distance);
+            destination = this.followAngle(shiftedAngle.angle, player.x, player.y, distance);
 
             destinationChoices[0] = destination[0];
             destinationChoices[1] = destination[1];
@@ -829,7 +828,7 @@ function AposBot() {
 
             perfectAngle = this.shiftAngle(obstacleAngles, perfectAngle, bIndex);
 
-            line1 = this.followAngle(perfectAngle, player.x, player.y, verticalDistance());
+            line1 = this.followAngle(perfectAngle.angle, player.x, player.y, verticalDistance());
 
             destinationChoices[0] = line1[0];
             destinationChoices[1] = line1[1];
@@ -1708,6 +1707,7 @@ function AposBot() {
 
     //Given a list of conditions, shift the angle to the closest available spot respecting the range given.
     this.shiftAngle = function(listToUse, angle, range) {
+    	
         //TODO: shiftAngle needs to respect the range! DONE?
         for (var i = 0; i < listToUse.length; i++) {
             if (this.angleIsWithin(angle, listToUse[i])) {
@@ -1721,21 +1721,19 @@ function AposBot() {
 
                 if (dist1 < dist2) {
                     if (this.angleIsWithin(angle1, range)) {
-                        return angle1;
-                    } else {
-                        return angle2;
+                        return { angle: angle1, shifted: true };
                     }
-                } else {
-                    if (this.angleIsWithin(angle2, range)) {
-                        return angle2;
-                    } else {
-                        return angle1;
-                    }
+                    return { angle: angle2, shifted: true };
                 }
+
+                if (this.angleIsWithin(angle2, range)) {
+                    return { angle: angle2, shifted: true };
+                }
+                return { angle: angle1, shifted: true };
             }
         }
         //console.log("No Shifting Was needed!");
-        return angle;
+        return { angle: angle, shifted: false };
     };
     this.inSplitRange = function(target) {
 
