@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1043
+// @version     3.1044
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1043;
+var aposBotVersion = 3.1044;
 
 var constants = {
     splitRangeMin: 650,
@@ -550,16 +550,17 @@ function AposBot() {
             //var enemyAngle = this.rangeToAngle(tempOb[0]);
 
         	this.moreInfoStrings = [];
-        	this.moreInfoStrings.push(destinationAngle);
+        	console.log('DUMPING');
+        	console.log(destinationAngle);
 
         	for (i = 0; i < obstacleAngles.length; i++) {
         		var obstacle = obstacleAngles[i];
         		
-            	this.moreInfoStrings.push(obstacle);
+            	console.log(obstacle);
 	        	if (this.angleRangeIsWithin(destinationAngle, obstacle)) {
 	        		// cannot split, there is a virus in the path
 	            	doSplit = false;
-	            	this.moreInfoStrings.push('inrange');
+	            	console.log('inrange');
 	            	color = constants.red;
 	            	break;
 	            }
