@@ -859,7 +859,6 @@ console.log("Running Bot Launcher!");
                 if (moveLoc[2]) {
                     $("body").trigger(splitdown);
                     $("body").trigger(splitup);
-                	console.log('split attempt');
 					//window.opCode(17);
                 }
                 if (moveLoc[3]) {

@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1034
+// @version     3.1035
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1034;
+var aposBotVersion = 3.1035;
 
 var constants = {
     splitRangeMin: 650,
@@ -434,8 +434,6 @@ function AposBot() {
     	
         for (i = 0; i < player.foodClusters.length; i++) {
         	
-            //This is the cost function. Higher is better.
-
         	var cluster = player.foodClusters[i];
         	var multiplier = 3;
 
@@ -458,7 +456,11 @@ function AposBot() {
             if (cluster.cell) {
             	
             	if ((player.cells.length == 1) &&
-            			this.isType(cluster.cell, Classification.splitTarget) ||
+            			this.isType(cluster.cell, Classification.splitTarget)) {
+            		weight = weight * 2.5;
+            	}
+
+            	if ((player.cells.length > 1) &&
             			this.isType(cluster.cell, Classification.mergeTarget)) {
             		weight = weight * 2.5;
             	}
@@ -497,7 +499,7 @@ function AposBot() {
     
     this.determineFoodDestination = function(player, destination, obstacleAngles) {
 
-    	var i, j;
+    	var i, j, cluster;
 
         for (i = 0; i < player.threats.length; i++) {
         	var threat = player.threats[i];
@@ -505,7 +507,7 @@ function AposBot() {
 	        for (j = player.foodClusters.length - 1; j >= 0 ; j--) {
 	        	cluster = player.foodClusters[j];
 
-	            if (this.computeDistance(threat.x, threat.y, player.foodClusters[j].x, player.foodClusters[j].y) < 
+	            if (this.computeDistance(threat.x, threat.y, cluster.x, cluster.y) < 
 	            		threat.dangerZone + 50) {  // remove some extra food from outside the radius in order to
 	            	                               // prevent choosing food too close (and cause bumping)
 	                player.foodClusters.splice(j, 1);
@@ -520,9 +522,8 @@ function AposBot() {
     	var doSplit = player.largestCell.mass >= 36 && player.mass <= 50 && player.cells.length == 1 && player.safeToSplit;
     	var doLure = false;
 
-    	var cluster = this.getBestFood(player);
-    			
-    	drawCircle(cluster.x, cluster.y, cluster.size + 30, constants.orange);
+    	cluster = this.getBestFood(player);
+
 
         // drawPoint(bestFood.x, bestFood.y, 1, "");
         if (cluster.canSplitKill && player.safeToSplit) {
@@ -530,15 +531,29 @@ function AposBot() {
             doSplit = true;
         }
         
-        if (cluster.cell) {
+        var color = constants.orange;
+        if (cluster.cell && obstacleAngles.length > 0) {
         	
             var tempOb = this.getAngleRange(cluster.closestCell, cluster, 1, cluster.cell.size);
             var angle1 = tempOb[0];
             var angle2 = this.rangeToAngle(tempOb);
-            var diff = this.mod(angle2 - angle1, 360);
+            // var diff = this.mod(angle2 - angle1, 360);
             
-        	//this.drawAngle(cluster.closestCell, [angle1, diff], 50, constants.green);
+        	// this.drawAngle(cluster.closestCell, [angle1, diff], 50, constants.green);
+            
+        	for (i = 0; i < obstacleAngles.length; i++) {
+        		
+        		var obstacle = obstacleAngles[i];
+        		
+                if (this.angleRangeIsWithin(angle2, obstacle)) {
+                	doSplit = true;
+                	color = constants.red;
+                	break;
+                }
+        	}
         }
+
+    	drawCircle(cluster.x, cluster.y, cluster.size + 30, constants.orange);
 
         var angle = this.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
 
@@ -953,7 +968,6 @@ function AposBot() {
     	drawCircle(player.x, player.y, player.size + constants.enemySplitDistance, 5);
     	
         // drawLine(player.x, player.y, player.x, player.y + player.size + this.splitDistance, 7);
-        //drawPoint(player[0].x, player[0].y - player[0].size, 3, "" + Math.floor(player[0].x) + ", " + Math.floor(player[0].y));
 
         //loop through everything that is on the screen and
         //separate everything in it's own category.
@@ -990,7 +1004,7 @@ function AposBot() {
 	            	drawCircle(entity.x, entity.y, entity.size + 20, constants.cyan);
 	            break;
 	            case Classification.food:
-		            drawPoint(entity.x, entity.y+20, 1, "m:" + entity.mass.toFixed(2));
+		            // drawPoint(entity.x, entity.y+20, 1, "m:" + entity.mass.toFixed(2));
 	            	if (entity.hasMoved) {
 		            	drawCircle(entity.x, entity.y, entity.size + 20, constants.gray);
 	            	} else if (entity.size > 14) {
