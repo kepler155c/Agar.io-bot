@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1042
+// @version     3.1043
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1042;
+var aposBotVersion = 3.1043;
 
 var constants = {
     splitRangeMin: 650,
@@ -51,7 +51,7 @@ var constants = {
 
     // adjustables
 	safeDistance: 150,
-    lureDistance: 1100,
+    lureDistance: 1000,
     largeThreatRatio: 10,
 
 	red: 0,
@@ -578,8 +578,8 @@ function AposBot() {
         		cluster.cell && 
         		this.isType(cluster.cell, Classification.splitTarget) &&
         		!cluster.cell.isMovingTowards && 
-    			cluster.distance < constants.lureDistance &&
-    			cluster.distance > constants.enemySplitDistance && // not already in range (might have been an enemy close)
+    			cluster.distance < player.size + constants.lureDistance &&
+    			cluster.distance > player.size + constants.splitRangeMin && // not already in range (might have been an enemy close)
     			player.mass > 250 && 
     			(player.mass - cluster.cell.mass > 25)) {
 
