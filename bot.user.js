@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1039
+// @version     3.1040
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1039;
+var aposBotVersion = 3.1040;
 
 var constants = {
     splitRangeMin: 650,
@@ -159,6 +159,7 @@ function AposBot() {
 
     this.toggleFollow = false;
     this.infoStrings = [];
+    this.moreInfoStrings = [];
     this.previousUpdated = Date.now();
     this.keyAction = function(key) {
         if (81 == key.keyCode) {
@@ -283,7 +284,6 @@ function AposBot() {
         	this.foodInVirus(player, player.food[i], player.viruses);
         }
         
-        //console.log("Merglist length: " +  mergeList.length)
         //cell merging
         for (i = 0; i < mergeList.length; i++) {
             for (var z = i+1; z < mergeList.length; z++) {
@@ -543,16 +543,23 @@ function AposBot() {
 
         if (doSplit && shiftedAngle) {
         	color = constants.red;  // cannot split, our angle was shifted from target
+        	this.moreInfoStrings = [];
+        	this.moreInfoStrings.push('shifted');
         } else if (doSplit && !shiftedAngle.shifted) {
             //var tempOb = this.getAngleRange(cluster.closestCell, cluster, 1, cluster.cell.size);
             //var enemyAngle = this.rangeToAngle(tempOb[0]);
 
+        	this.moreInfoStrings = [];
+        	this.moreInfoStrings.push(destinationAngle);
+
         	for (i = 0; i < obstacleAngles.length; i++) {
         		var obstacle = obstacleAngles[i];
         		
+            	this.moreInfoStrings.push(obstacle);
 	        	if (this.angleRangeIsWithin(destinationAngle, obstacle)) {
 	        		// cannot split, there is a virus in the path
 	            	doSplit = false;
+	            	this.moreInfoStrings.push('inrange');
 	            	color = constants.red;
 	            	break;
 	            }
@@ -1038,30 +1045,8 @@ function AposBot() {
         }
         
         // drawPoint(tempPoint[0], tempPoint[1], tempPoint[2], "what ?");
-        //console.log("Slope: " + slope(tempPoint[0], tempPoint[1], player[0].x, player[0].y) + " Angle: " + getAngle(tempPoint[0], tempPoint[1], player[0].x, player[0].y) + " Side: " + this.mod(getAngle(tempPoint[0], tempPoint[1], player[0].x, player[0].y) - 90, 360));
-        tempPoint[2] = 1;
 
-        this.infoStrings = [];
-        this.infoStrings.push("Player Mass: " + parseInt(player.mass, 10));
-        if (player.cells.length > 1) {
-	        this.infoStrings.push("Player Min:  " + parseInt(player.smallestCell.size, 10));
-	        this.infoStrings.push("Player Max:  " + parseInt(player.largestCell.size, 10));
-        }
-        this.infoStrings.push("Food:        " + player.food.length);
-        this.infoStrings.push("Threats:     " + player.threats.length);
-        this.infoStrings.push("Viruses:     " + player.viruses.length);
-
-        for (i = 0; i < player.cells.length; i++) {
-
-        	var cell = player.cells[i];
-        	var cellInfo = "Cell " + i + " Mass: " + parseInt(cell.size, 10);
-        	if (cell.fuseTimer) {
-        		cellInfo += " Fuse: " + parseInt((cell.fuseTimer - Date.now()) / 1000, 10);
-        	}
-            this.infoStrings.push(cellInfo);
-        }
-
-        this.infoStrings.push("");
+        this.updateInfo(player);
 
         this.previousUpdated = getLastUpdate();
         
@@ -1074,16 +1059,45 @@ function AposBot() {
     
     
     
-    
+
+    this.updateInfo = function(player) {
+        this.infoStrings = [];
+        this.infoStrings.push("Player Mass: " + parseInt(player.mass, 10));
+        if (player.cells.length > 1) {
+	        this.infoStrings.push("Player Min:  " + parseInt(player.smallestCell.size, 10));
+	        this.infoStrings.push("Player Max:  " + parseInt(player.largestCell.size, 10));
+        }
+        this.infoStrings.push("Food:        " + player.food.length);
+        this.infoStrings.push("Threats:     " + player.threats.length);
+        this.infoStrings.push("Viruses:     " + player.viruses.length);
+
+        for (var i = 0; i < player.cells.length; i++) {
+
+        	var cell = player.cells[i];
+        	var cellInfo = "Cell " + i + " Mass: " + parseInt(cell.size, 10);
+        	if (cell.fuseTimer) {
+        		cellInfo += " Fuse: " + parseInt((cell.fuseTimer - Date.now()) / 1000, 10);
+        	}
+            this.infoStrings.push(cellInfo);
+        }
+
+        this.infoStrings.push("");
+    };
     
     this.isType = function(entity, classification) {
     	return entity.classification == classification;
     };
 
     this.displayText = function() {
+    	
+    	var i;
+    	
     	var debugStrings = ["Q - Follow Mouse: " + (this.toggleFollow ? "On" : "Off")];
-    	for (var i = 0; i < this.infoStrings.length; i++) {
+    	for (i = 0; i < this.infoStrings.length; i++) {
     		debugStrings.push(this.infoStrings[i]);
+    	}
+    	for (i = 0; i < this.moreInfoStrings.length; i++) {
+    		debugStrings.push(this.moreInfoStrings[i]);
     	}
         return debugStrings;
     };
