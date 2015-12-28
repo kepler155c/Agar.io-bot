@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1040
+// @version     3.1041
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1040;
+var aposBotVersion = 3.1041;
 
 var constants = {
     splitRangeMin: 650,
@@ -215,7 +215,7 @@ function AposBot() {
                 } else if (that.canSplitKill(entity, player.smallestCell, constants.enemyRatio)) {
                 	
                 	entity.classification = Classification.largeThreat;
-                	if (entity.mass / player.mass > 10) {    // should be constant
+                	if (entity.mass / player.mass > constants.largeThreatRatio) {
                     	entity.classification = Classification.smallThreat;
                 	}
                     player.threats.push(entity);
@@ -312,7 +312,7 @@ function AposBot() {
                 	player.threats.push(newThreat);
                     newThreat.classification = Classification.smallThreat;
                 	if (this.canSplitKill(newThreat, player.smallestCell, constants.enemyRatio)) {
-                    	if (newThreat.mass / player.mass >= constants.largeThreatRatio) {
+                    	if (newThreat.mass / player.mass < constants.largeThreatRatio) {
                 			newThreat.classification = Classification.largeThreat;
                 		}
                 	}
@@ -972,6 +972,8 @@ function AposBot() {
         	drawCircle(player.x, player.y, player.size + 16, constants.green);
     	}
 
+    	drawCircle(player.x, player.y, player.size + constants.splitRangeMin, 5);
+    	drawCircle(player.x, player.y, player.size + constants.splitRangeMax, 5);
     	drawCircle(player.x, player.y, player.size + constants.enemySplitDistance, 5);
     	
         // drawLine(player.x, player.y, player.x, player.y + player.size + this.splitDistance, 7);
