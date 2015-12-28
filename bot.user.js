@@ -35,12 +35,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1037
+// @version     3.1038
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.1037;
+var aposBotVersion = 3.1038;
 
 var constants = {
     splitRangeMin: 650,
@@ -531,11 +531,6 @@ function AposBot() {
             doSplit = true;
         }
 
-        var tempOb = this.getAngleRange(cluster.closestCell, cluster, 1, cluster.cell.size);
-        var enemyAngle = this.rangeToAngle(tempOb[0]);
-
-        var color = constants.orange;
-
         // angle of enemy
         var angle = this.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
 
@@ -544,7 +539,12 @@ function AposBot() {
 
         var destinationAngle = this.followAngle(shiftedAngle.angle, cluster.closestCell.x, cluster.closestCell.y, cluster.distance);
 
-        if (!shiftedAngle.shifted) {
+        var color = constants.orange;
+
+        if (doSplit && !shiftedAngle.shifted) {
+            //var tempOb = this.getAngleRange(cluster.closestCell, cluster, 1, cluster.cell.size);
+            //var enemyAngle = this.rangeToAngle(tempOb[0]);
+
         	for (i = 0; i < obstacleAngles.length; i++) {
         		var obstacle = obstacleAngles[i];
         		
