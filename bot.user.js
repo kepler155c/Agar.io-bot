@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1085
+// @version     3.1086
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1085;
+var aposBotVersion = 3.1086;
 
 var constants = {
 	splitRangeMin : 650,
@@ -48,7 +48,6 @@ var constants = {
 	splitDuration : 1000, // 800 was pretty good
 
 	// adjustables
-	safeDistance : 200,
 	lureDistance : 1000,
 	largeThreatRatio : 10,
 
@@ -560,7 +559,7 @@ function AposBot() {
 
 				if (this.isType(threat, Classification.largeThreat)) {
 					if (this.computeDistance(threat.x, threat.y, cluster.x, cluster.y) < threat.size
-							+ constants.enemySplitDistance) {
+							+ player.largestCell.size + constants.enemySplitDistance) {
 						player.foodClusters.splice(j, 1);
 					}
 				}
@@ -707,9 +706,9 @@ function AposBot() {
 				}
 			}
 
-			var safeDistance = this.getVelocity(threat) * 2 + threat.closestCell.velocity;
+			threat.safeDistance = this.getVelocity(threat) * 2 + threat.closestCell.velocity;
 
-			threat.dangerZone = threat.size + threat.closestCell.size + safeDistance;
+			threat.dangerZone = threat.size + threat.closestCell.size + threat.safeDistance;
 			if (enemyCanSplit) {
 				threat.dangerZone += constants.enemySplitDistance;
 			}
@@ -719,7 +718,8 @@ function AposBot() {
 				badAngles.push(this.getAngleRange(threat.closestCell, threat, i, threat.dangerZone).concat(
 						threat.distance));
 
-				var tempOb = this.getAngleRange(threat.closestCell, threat, i, threat.dangerZone + threat.closestCell.size);
+				var tempOb = this.getAngleRange(threat.closestCell, threat, i, threat.dangerZone
+						+ threat.closestCell.size);
 				var angle1 = tempOb[0];
 				var angle2 = this.rangeToAngle(tempOb);
 
@@ -1097,6 +1097,7 @@ function AposBot() {
 			switch (entity.classification) {
 			case Classification.largeThreat:
 				drawCircle(entity.x, entity.y, entity.dangerZone, 0);
+				/* falls through */
 			case Classification.smallThreat:
 				drawPoint(entity.x, entity.y + 20, 1, parseInt(entity.distance - entity.size));
 				drawCircle(entity.x, entity.y, entity.size + 20, 0);
