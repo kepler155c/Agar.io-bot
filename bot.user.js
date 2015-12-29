@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1078
+// @version     3.1079
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1078;
+var aposBotVersion = 3.1079;
 
 var constants = {
 	splitRangeMin : 650,
@@ -705,6 +705,7 @@ function AposBot() {
 
 			// due to lag, we need to increase distance the smaller we are
 			var safeDistance = Math.max(constants.safeDistance - threat.closestCell.size, 0);
+			this.infoStrings.push("safe distance: " + safeDistance);
 
 			var normalDangerDistance = threat.size + safeDistance;
 			var splitDangerDistance = threat.size + constants.enemySplitDistance + safeDistance;
