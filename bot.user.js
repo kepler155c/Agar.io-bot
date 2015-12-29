@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1095
+// @version     3.1096
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1095;
+var aposBotVersion = 3.1096;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1191,14 +1191,7 @@ function AposBot() {
 	this.isMerging = function(cell1, cell2) {
 		var dist = this.computeDistance(cell1.x, cell1.y, cell2.x, cell2.y, cell1.size, cell2.size);
 
-		//debug logging
-		if (false) {
-			var params = [ cell1.x, cell1.y, cell2.x, cell2.y, cell1.size, cell2.size, dist ];
-			var debugString = params.join(", ");
-			console.log("Merge:" + debugString);
-		}
-
-		return dist <= -50;
+		return dist <= -5; // was -50
 	};
 
 	//Given an angle value that was gotten from valueAndleBased(),
