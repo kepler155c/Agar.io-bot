@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1060
+// @version     3.1061
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1060;
+var aposBotVersion = 3.1061;
 
 var constants = {
 	splitRangeMin : 650,
@@ -498,6 +498,7 @@ function AposBot() {
 		for (var i = 0; i < viruses.length; i++) {
 			var virus = viruses[i];
 			if (this.circlesIntersect(food, virus)) {
+				drawCircle(food.x, food.y, food.size + 10, constants.red);
 				virus.foodMass += food.mass;
 				virus.foodList.push(food);
 			}
@@ -516,12 +517,11 @@ function AposBot() {
 		for (i = 0; i < player.viruses.length; i++) {
 			var virus = player.viruses[i];
 
-			drawPoint(virus.x, virus.y, 1, virus.mass.toFixed(2));
-
 			if (virus.mass + virus.foodMass >= virus.closestCell.mass) {
 				for (var j = 0; j > virus.foodList.length; j++) {
 					var food = virus.foodList[j];
 					food.eatable = false;
+					drawCircle(food.x, food.y, food.size + 20, constants.pink);
 				}
 			}
 		}
@@ -1040,6 +1040,9 @@ function AposBot() {
 
 			switch (entity.classification) {
 			case Classification.virus:
+				drawPoint(entity.x, entity.y, 1, entity.mass.toFixed(2));
+				drawPoint(entity.x, entity.y + 20, 1, entity.foodMass.toFixed(2));
+
 				if (player.largestCell.size < entity.size) {
 					// drawCircle(entity.x, entity.y, entity.size + 10, 3);
 					drawCircle(entity.x, entity.y, entity.size * 2, 6);
