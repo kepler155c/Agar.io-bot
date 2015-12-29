@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1087
+// @version     3.1088
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1087;
+var aposBotVersion = 3.1088;
 
 var constants = {
 	splitRangeMin : 650,
@@ -684,13 +684,15 @@ function AposBot() {
 		return true;
 	};
 
+	this.getMinimumDistance = function(threat) {
+		return threat.size + threat.closestCell.size + threat.safeDistance;
+	};
+
 	this.determineThreats = function(player, panicLevel, badAngles, obstacleAngles, obstacleList) {
 
 		for (var i = 0; i < player.threats.length; i++) {
 
 			var threat = player.threats[i];
-
-			var enemyCanSplit = this.isType(threat, Classification.largeThreat);
 
 			if (panicLevel >= 2) {
 				console.log('panic level: ' + panicLevel);
@@ -706,8 +708,7 @@ function AposBot() {
 				}
 			}
 
-			threat.safeDistance = this.getVelocity(threat) * 2 + threat.closestCell.velocity;
-
+			var enemyCanSplit = this.isType(threat, Classification.largeThreat);
 			threat.dangerZone = threat.size + threat.closestCell.size + threat.safeDistance;
 			if (enemyCanSplit) {
 				threat.dangerZone += constants.enemySplitDistance;
@@ -940,13 +941,34 @@ function AposBot() {
 		var panicLevel = 0;
 		var destinationChoices = [ getPointX(), getPointY() ];
 
+		// panic levels:
+		// 2 = partially inside a threat
+		// 1 = in the split distance of a threat
+
 		for (j = 0; j < player.cells.length; j++) {
 			for (i = 0; i < player.threats.length; i++) {
-				if (this.circlesIntersect(player.cells[j], player.threats[i])) {
+				var threat = player.threats[i];
+
+				threat.safeDistance = this.getVelocity(threat) * 2 + threat.closestCell.velocity;
+				threat.dangerZone = this.getMinimumDistance(threat);
+
+				if (this.isType(threat, Classification.largeThreat)) {
+					threat.dangerZone += constants.enemySplitDistance;
+				}
+
+				if (this.circlesIntersect(player.cells[j], threat)) {
 					panicLevel = 2;
-					break;
+					break; // max panic level
+				}
+				if (threat.distance + threat.closestCell.size < threat.dangerZone) {
+					panicLevel = 1;
+					drawCircle(threat.closestCell.x, threat.closestCell.y, threat.closestCell.size + 16, constants.orange);
 				}
 			}
+		}
+
+		if (panicLevel == 2) {
+			drawCircle(threat.closestCell.x, threat.closestCell.y, threat.closestCell.size + 16, constants.red);
 		}
 
 		// is moving towards (panic level 1)
