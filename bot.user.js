@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1061
+// @version     3.1062
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1061;
+var aposBotVersion = 3.1062;
 
 var constants = {
 	splitRangeMin : 650,
@@ -45,7 +45,7 @@ var constants = {
 	enemySplitDistance : 710,
 	playerRatio : 1.285,
 	enemyRatio : 1.27,
-	splitDuration : 900, // 800 was pretty good
+	splitDuration : 1000, // 800 was pretty good
 
 	// adjustables
 	safeDistance : 150,
@@ -517,11 +517,11 @@ function AposBot() {
 		for (i = 0; i < player.viruses.length; i++) {
 			var virus = player.viruses[i];
 
-			if (virus.mass + virus.foodMass >= virus.closestCell.mass) {
+			if (virus.closestCell.mass >= virus.mass + virus.foodMass) {
 				for (var j = 0; j > virus.foodList.length; j++) {
 					var food = virus.foodList[j];
 					food.eatable = false;
-					drawCircle(food.x, food.y, food.size + 20, constants.pink);
+					drawCircle(food.x, food.y, food.size + 40, constants.pink);
 				}
 			}
 		}
@@ -551,7 +551,7 @@ function AposBot() {
 		}
 
 		var doSplit = (player.largestCell.mass >= 36 && player.mass <= 50 && player.cells.length == 1 && player.safeToSplit);
-//				|| (player.largestCell.mass >= 900 && player.cells.length < 16);
+		//				|| (player.largestCell.mass >= 900 && player.cells.length < 16);
 		var doLure = false;
 
 		cluster = this.getBestFood(player);
@@ -580,7 +580,8 @@ function AposBot() {
 
 			this.moreInfoStrings = [];
 			console.log('DUMPING');
-			var destinationAngle = this.getAngle(destinationPoint[0], destinationPoint[1], cluster.closestCell.x, cluster.closestCell.y);
+			var destinationAngle = this.getAngle(destinationPoint[0], destinationPoint[1], cluster.closestCell.x,
+					cluster.closestCell.y);
 			console.log(destinationAngle);
 
 			for (i = 0; i < player.viruses.length; i++) {
@@ -588,7 +589,7 @@ function AposBot() {
 
 				if (virus.range) {
 					console.log(virus.range);
-					
+
 					if (this.angleIsWithin(destinationAngle, virus.range)) {
 						// cannot split, there is a virus in the path
 						doSplit = false;
@@ -606,7 +607,7 @@ function AposBot() {
 		destination[1] = destinationPoint[1];
 
 		// really bad condition logic - but check if it's a split target just outside of range
-		if (!doSplit && !player.isLuring && player.safeToSplit && cluster.cell
+		if (!doSplit && !player.isLuring && player.safeToSplit && cluster.cell && !shiftedAngle.shifted
 				&& this.isType(cluster.cell, Classification.splitTarget) && !cluster.cell.isMovingTowards
 				&& cluster.distance < player.size + constants.lureDistance
 				&& cluster.distance > player.size + constants.splitRangeMin && // not already in range (might have been an enemy close)
