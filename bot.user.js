@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1076
+// @version     3.1078
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1076;
+var aposBotVersion = 3.1078;
 
 var constants = {
 	splitRangeMin : 650,
@@ -48,7 +48,7 @@ var constants = {
 	splitDuration : 1000, // 800 was pretty good
 
 	// adjustables
-	safeDistance : 150,
+	safeDistance : 200,
 	lureDistance : 1000,
 	largeThreatRatio : 10,
 
@@ -1118,12 +1118,7 @@ function AposBot() {
 			switch (entity.classification) {
 			case Classification.smallThreat:
 			case Classification.largeThreat:
-				drawPoint(entity.x, entity.y + 20, 1, "m:" + this.getMass(entity).toFixed(2) + " s:"
-						+ this.getSplitMass(entity).toFixed(2));
-				if (this.isType(entity, Classification.largeThreat)) {
-					drawPoint(entity.x, entity.y + 40, 1, "c:"
-							+ (this.getSplitMass(entity) / this.getMass(entity)).toFixed(2));
-				}
+				drawPoint(entity.x, entity.y + 20, 1, parseInt(entity.distance));
 				drawCircle(entity.x, entity.y, entity.size + 20, 0);
 				drawCircle(entity.x, entity.y, entity.dangerZone, 0);
 				if (entity.isMovingTowards) {
