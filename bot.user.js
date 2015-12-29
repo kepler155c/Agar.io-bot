@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1091
+// @version     3.1092
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1091;
+var aposBotVersion = 3.1092;
 
 var constants = {
 	splitRangeMin : 650,
@@ -560,7 +560,7 @@ function AposBot() {
 				for (j = player.foodClusters.length - 1; j >= 0; j--) {
 					cluster = player.foodClusters[j];
 
-					if (this.computeInexpensiveDistance(threat.x, threat.y, cluster.x, cluster.y) < threat.size
+					if (this.computeDistance(threat.x, threat.y, cluster.x, cluster.y) < threat.size
 							+ player.largestCell.size + constants.splitRangeMax) {
 						player.foodClusters.splice(j, 1);
 					}
@@ -950,7 +950,7 @@ function AposBot() {
 			for (i = 0; i < player.threats.length; i++) {
 				var threat = player.threats[i];
 
-				threat.safeDistance = (this.getVelocity(threat) + threat.closestCell.velocity) * 10;
+				threat.safeDistance = (this.getVelocity(threat) + threat.closestCell.velocity) * 2;
 				threat.dangerZone = this.getMinimumDistance(threat, this.isType(threat, Classification.largeThreat));
 
 				if (this.circlesIntersect(player.cells[j], threat)) {
