@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1062
+// @version     3.1063
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1062;
+var aposBotVersion = 3.1063;
 
 var constants = {
 	splitRangeMin : 650,
@@ -497,8 +497,8 @@ function AposBot() {
 
 		for (var i = 0; i < viruses.length; i++) {
 			var virus = viruses[i];
+
 			if (this.circlesIntersect(food, virus)) {
-				drawCircle(food.x, food.y, food.size + 10, constants.red);
 				virus.foodMass += food.mass;
 				virus.foodList.push(food);
 			}
@@ -517,11 +517,11 @@ function AposBot() {
 		for (i = 0; i < player.viruses.length; i++) {
 			var virus = player.viruses[i];
 
-			if (virus.closestCell.mass >= virus.mass + virus.foodMass) {
+			if (virus.closestCell.mass + virus.foodMass >= virus.mass) {
 				for (var j = 0; j > virus.foodList.length; j++) {
 					var food = virus.foodList[j];
 					food.eatable = false;
-					drawCircle(food.x, food.y, food.size + 40, constants.pink);
+					drawCircle(food.x, food.y, food.size + 40, constants.red);
 				}
 			}
 		}
