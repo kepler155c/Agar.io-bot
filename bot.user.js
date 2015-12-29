@@ -187,6 +187,12 @@ function AposBot() {
 					var isEnemy = true;
 
 					entity.hasMoved = entity.isMoving();
+					
+					/*
+					if (entity.hasMoved) {
+						this.predictPosition(entity, constants.splitDuration);
+					}
+					*/
 
 					if (isMe) {
 						entity.classification = Classification.player;
@@ -379,14 +385,9 @@ function AposBot() {
 
 			if (food.eatable) {
 
-				var foodSize = food.size;
 				var addedCluster = false;
 
-				if (food.size <= 14) {
-					foodSize = food.size - 9;
-				}
-
-				if (food.hasMoved && food.distance < 850) {
+				if (food.hasMoved) {
 
 					this.predictPosition(food, constants.splitDuration);
 
@@ -395,6 +396,7 @@ function AposBot() {
 						x : food.px,
 						y : food.py,
 						size : food.size,
+						mass : food.mass,
 						cell : food,
 						classification : Classification.cluster
 					});
@@ -407,7 +409,8 @@ function AposBot() {
 
 								cluster.x = (food.x + cluster.x) / 2;
 								cluster.y = (food.y + cluster.y) / 2;
-								cluster.size += foodSize;
+								cluster.mass += food.mass;
+								cluster.size = Math.sqrt(cluster.mass * 100);
 								addedCluster = true;
 								break;
 							}
@@ -417,7 +420,8 @@ function AposBot() {
 						player.foodClusters.push({
 							x : food.x,
 							y : food.y,
-							size : foodSize,
+							size : food.size,
+							mass : food.mass,
 							cell : null,
 							classification : Classification.cluster
 						});
@@ -665,21 +669,21 @@ function AposBot() {
 		return true;
 	};
 
-	this.determineThreats = function(player, panicMode, badAngles, obstacleAngles, obstacleList) {
+	this.determineThreats = function(player, panicLevel, badAngles, obstacleAngles, obstacleList) {
 
 		var angle1, angle2, tempOb;
 
 		for (var i = 0; i < player.threats.length; i++) {
 
 			var threat = player.threats[i];
-
+			
 			var closestCell = threat.closestCell;
 			var enemyDistance = threat.distance;
 
 			var enemyCanSplit = this.isType(threat, Classification.largeThreat);
 
-			if (panicMode) {
-				console.log('panic mode');
+			if (panicLevel >= 2) {
+				console.log('panic level: ' + panicLevel);
 				enemyCanSplit = false;
 
 				// save the biggest cell
@@ -687,18 +691,25 @@ function AposBot() {
 			}
 
 			var normalDangerDistance = threat.size + constants.safeDistance;
-			var shiftDistance = player.size;
+			var shiftDistance = threat.closestCell.size;
 			var splitDangerDistance = threat.size + constants.enemySplitDistance + constants.safeDistance;
 			var secureDistance = (enemyCanSplit ? splitDangerDistance : normalDangerDistance);
 
 			threat.dangerZone = secureDistance;
 
-			if (panicMode || threat.danger && getLastUpdate() - threat.dangerTimeOut > 1500) {
+			if (panicLevel > 0) {
+				if (!threat.isMovingTowards) {
+					
+				}
+			}
+
+			/*
+			if (panicLevel > 0 || threat.danger && getLastUpdate() - threat.dangerTimeOut > 1500) {
 
 				threat.danger = false;
 			}
 
-			if (!panicMode) {
+			if (!panicLevel) {
 
 				if ((enemyCanSplit && enemyDistance < splitDangerDistance)
 						|| (!enemyCanSplit && enemyDistance < normalDangerDistance)) {
@@ -707,21 +718,25 @@ function AposBot() {
 					threat.dangerTimeOut = getLastUpdate();
 				}
 			}
+			*/
 
 			// try to move out of enemy
 			if (this.circlesIntersect(closestCell, threat)) {
 				badAngles.push(this.getAngleRange(closestCell, threat, 0, closestCell.size + threat.size).concat(
 						threat.distance));
+				drawCircle(threat.x, threat.y, threat.size + 100, constants.red);
 			}
 
-			if ((enemyCanSplit && enemyDistance < splitDangerDistance) || (enemyCanSplit && threat.danger)) {
+			if ((enemyCanSplit && enemyDistance < splitDangerDistance)) {
 
 				badAngles.push(this.getAngleRange(closestCell, threat, i, splitDangerDistance).concat(threat.distance));
+				drawCircle(threat.x, threat.y, threat.size + 60, constants.blue);
 
-			} else if ((!enemyCanSplit && enemyDistance < normalDangerDistance) || (!enemyCanSplit && threat.danger)) {
+			} else if ((!enemyCanSplit && enemyDistance < normalDangerDistance)) {
 
 				badAngles
 						.push(this.getAngleRange(closestCell, threat, i, normalDangerDistance).concat(threat.distance));
+				drawCircle(threat.x, threat.y, threat.size + 60, constants.pink);
 
 			} else if (enemyCanSplit && enemyDistance < splitDangerDistance + shiftDistance) {
 				tempOb = this.getAngleRange(closestCell, threat, i, splitDangerDistance + shiftDistance);
@@ -729,12 +744,15 @@ function AposBot() {
 				angle2 = this.rangeToAngle(tempOb);
 
 				obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
+				drawCircle(threat.x, threat.y, threat.size + 80, constants.green);
+
 			} else if (!enemyCanSplit && enemyDistance < normalDangerDistance + shiftDistance) {
 				tempOb = this.getAngleRange(closestCell, threat, i, normalDangerDistance + shiftDistance);
 				angle1 = tempOb[0];
 				angle2 = this.rangeToAngle(tempOb);
 
 				obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
+				drawCircle(threat.x, threat.y, threat.size + 80, constants.orange);
 			}
 		}
 	};
@@ -743,13 +761,13 @@ function AposBot() {
 	 * The bot works by removing angles in which it is too
 	 * dangerous to travel towards to.
 	 */
-	this.determineDestination = function(player, destinationChoices, tempPoint, panicMode) {
+	this.determineDestination = function(player, destinationChoices, tempPoint, panicLevel) {
 
 		var badAngles = [];
 		var obstacleList = [];
 		var i, j, angle1, angle2, tempOb, line1, line2, diff, shiftedAngle, destination;
 
-		this.determineThreats(player, panicMode, badAngles, obstacleAngles, obstacleList);
+		this.determineThreats(player, panicLevel, badAngles, obstacleAngles, obstacleList);
 
 		for (i = 0; i < player.viruses.length; i++) {
 			var virus = player.viruses[i];
@@ -935,24 +953,29 @@ function AposBot() {
 	this.determineBestDestination = function(player, tempPoint) {
 
 		var i, j;
-		var panicMode = false;
+		var panicLevel = 0;
 		var destinationChoices = [ getPointX(), getPointY() ];
 
 		for (j = 0; j < player.cells.length; j++) {
 			for (i = 0; i < player.threats.length; i++) {
 				if (this.circlesIntersect(player.cells[j], player.threats[i])) {
-					panicMode = true;
+					panicLevel = 2;
 					break;
 				}
 			}
 		}
 
-		// is moving towards
+		// is moving towards (panic level 1)
 		// reduce large threat ratio
 		// circles intersect
 		// split enemy...
 		// largest previous distance - current distance is the cell chasing
-		this.determineDestination(player, destinationChoices, tempPoint, panicMode);
+		while (panicLevel < 3) {
+			if (this.determineDestination(player, destinationChoices, tempPoint, panicLevel)) {
+				break;
+			}
+			panicLevel++;
+		}
 
 		return destinationChoices;
 	};
