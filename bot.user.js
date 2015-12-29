@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1049
+// @version     3.1050
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1049;
+var aposBotVersion = 3.1050;
 
 var constants = {
 	splitRangeMin : 650,
@@ -400,7 +400,7 @@ function AposBot() {
 				} else {
 					for (var j = 0; j < player.foodClusters.length; j++) {
 						var cluster = player.foodClusters[j];
-						
+
 						if (!cluster.cell) {
 							if (this.computeInexpensiveDistance(food.x, food.y, cluster.x, cluster.y) < blobSize * 2) {
 
@@ -581,16 +581,21 @@ function AposBot() {
 			console.log('DUMPING');
 			console.log(destinationAngle);
 
-			for (i = 0; i < obstacleAngles.length; i++) {
-				var obstacle = obstacleAngles[i];
+			for (i = 0; i < player.viruses.length; i++) {
+				var virus = player.viruses[i];
 
-				console.log(obstacle);
-				if (this.angleRangeIsWithin(destinationAngle, obstacle)) {
-					// cannot split, there is a virus in the path
-					doSplit = false;
-					console.log('inrange');
-					color = constants.red;
-					break;
+				if (virus.range) {
+					console.log('checking');
+					console.log(destinationAngle);
+					console.log(virus.range);
+					
+					if (this.angleIsWithin(destinationAngle, virus.range)) {
+						// cannot split, there is a virus in the path
+						doSplit = false;
+						console.log('inrange');
+						color = constants.red;
+						break;
+					}
 				}
 			}
 		}
@@ -736,7 +741,7 @@ function AposBot() {
 		for (i = 0; i < player.viruses.length; i++) {
 			var virus = player.viruses[i];
 
-			virus.angle = null;
+			virus.range = null;
 
 			for (j = 0; j < player.cells.length; j++) {
 				var cell = player.cells[j];
@@ -747,8 +752,7 @@ function AposBot() {
 					angle2 = this.rangeToAngle(tempOb);
 					obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
 
-					virus.angle = 1;
-					// drawCircle(virus.x, virus.y, virus.size + 5, constants.red);
+					virus.range = tempOb;
 					if (this.circlesIntersect(cell, virus)) {
 						badAngles.push(this.getAngleRange(cell, virus, 0, cell.size + virus.size / 2.1).concat(
 								virus.distance));
