@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1086
+// @version     3.1087
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1086;
+var aposBotVersion = 3.1087;
 
 var constants = {
 	splitRangeMin : 650,
@@ -799,9 +799,11 @@ function AposBot() {
 			var tempList = this.addAngle(sortedInterList, stupidList[i]);
 
 			if (tempList.length === 0) {
-				console.log("MAYDAY IT'S HAPPENING!");
 
-				break;
+				console.log("MAYDAY IT'S HAPPENING!");
+				// break;
+				return false;
+
 			} else {
 				sortedInterList = tempList;
 			}
