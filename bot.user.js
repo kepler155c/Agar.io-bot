@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1050
+// @version     3.1051
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1050;
+var aposBotVersion = 3.1051;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1033,7 +1033,7 @@ function AposBot() {
 		    return a.distance-b.distance;
 		})*/
 
-		this.determineVirusThreats(player);
+		this.calculateVirusMass(player);
 
 		var destinationChoices = this.determineBestDestination(player, tempPoint);
 
