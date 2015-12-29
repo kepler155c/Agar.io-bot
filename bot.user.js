@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1079
+// @version     3.1080
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1079;
+var aposBotVersion = 3.1080;
 
 var constants = {
 	splitRangeMin : 650,
@@ -483,7 +483,7 @@ function AposBot() {
 			}
 			cluster.clusterWeight = closestInfo.distance / weight * multiplier;
 
-			// drawPoint(cluster.x, cluster.y+60, 1, "" + parseInt(cluster.clusterWeight, 10) + " " + parseInt(cluster.size, 10));
+			drawPoint(cluster.x, cluster.y+60, 1, "" + parseInt(cluster.clusterWeight, 10) + " " + parseInt(cluster.size, 10));
 		}
 
 		var bestFoodI = 0;
@@ -544,15 +544,11 @@ function AposBot() {
 			for (j = player.foodClusters.length - 1; j >= 0; j--) {
 				cluster = player.foodClusters[j];
 
-				var safeDistance = Math.max(constants.safeDistance - player.smallestCell.size, 0);
-				var distance = threat.size + safeDistance;
 				if (this.isType(threat, Classification.largeThreat)) {
-					distance += constants.enemySplitDistance;
-				}
-
-				// should use eatable flag
-				if (this.computeDistance(threat.x, threat.y, cluster.x, cluster.y) < threat.dangerZone) {
-					player.foodClusters.splice(j, 1);
+					if (this.computeDistance(threat.x, threat.y, cluster.x, cluster.y) < threat.size
+							+ constants.enemySplitDistance) {
+						player.foodClusters.splice(j, 1);
+					}
 				}
 			}
 		}
@@ -683,9 +679,6 @@ function AposBot() {
 
 			var threat = player.threats[i];
 
-			var closestCell = threat.closestCell;
-			var enemyDistance = threat.distance;
-
 			var enemyCanSplit = this.isType(threat, Classification.largeThreat);
 
 			if (panicLevel >= 2) {
@@ -707,9 +700,10 @@ function AposBot() {
 			var safeDistance = Math.max(constants.safeDistance - threat.closestCell.size, 0);
 			this.infoStrings.push("safe distance: " + safeDistance);
 
-			var normalDangerDistance = threat.size + safeDistance;
-			var splitDangerDistance = threat.size + constants.enemySplitDistance + safeDistance;
-			threat.dangerZone = (enemyCanSplit ? splitDangerDistance : normalDangerDistance);
+			threat.dangerZone = threat.size + threat.closestCell.size;
+			if (enemyCanSplit) {
+				threat.dangerZone += constants.enemySplitDistance;
+			}
 
 			/*
 			if (panicLevel > 0 || threat.danger && getLastUpdate() - threat.dangerTimeOut > 1500) {
@@ -738,12 +732,15 @@ function AposBot() {
 
 			} else 
 			*/
-			if (enemyDistance < threat.dangerZone) {
+			if (threat.distance < threat.dangerZone) {
 
-				badAngles.push(this.getAngleRange(closestCell, threat, i, threat.dangerZone).concat(threat.distance));
+				badAngles.push(this.getAngleRange(threat.closestCell, threat, i, threat.dangerZone).concat(
+						threat.distance));
 				drawCircle(threat.x, threat.y, threat.size + 60, constants.blue);
 
-			} else if (enemyDistance < threat.dangerZone + threat.closestCell.size) {
+			}
+			/*
+			else if (enemyDistance < threat.dangerZone + threat.closestCell.size) {
 
 				tempOb = this.getAngleRange(closestCell, threat, i, threat.dangerZone + threat.closestCell.size);
 				angle1 = tempOb[0];
@@ -752,6 +749,7 @@ function AposBot() {
 				obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
 				drawCircle(threat.x, threat.y, threat.size + 60, constants.green);
 			}
+			*/
 		}
 	};
 
@@ -1119,7 +1117,7 @@ function AposBot() {
 			switch (entity.classification) {
 			case Classification.smallThreat:
 			case Classification.largeThreat:
-				drawPoint(entity.x, entity.y + 20, 1, parseInt(entity.distance));
+				drawPoint(entity.x, entity.y + 20, 1, parseInt(entity.distance - entity.size));
 				drawCircle(entity.x, entity.y, entity.size + 20, 0);
 				drawCircle(entity.x, entity.y, entity.dangerZone, 0);
 				if (entity.isMovingTowards) {
@@ -1752,15 +1750,15 @@ function AposBot() {
 		var leftAngle = angleStuff[0];
 		var rightAngle = this.rangeToAngle(angleStuff);
 		var difference = angleStuff[1];
+		var safeDistance = blob1.size + blob2.size;
 
 		drawPoint(angleStuff[2][0], angleStuff[2][1], 3, "");
 		drawPoint(angleStuff[3][0], angleStuff[3][1], 3, "");
 
 		//console.log("Adding badAngles: " + leftAngle + ", " + rightAngle + " diff: " + difference);
 
-		var lineLeft = this.followAngle(leftAngle, blob1.x, blob1.y, constants.safeDistance + blob1.size - index * 10);
-		var lineRight = this
-				.followAngle(rightAngle, blob1.x, blob1.y, constants.safeDistance + blob1.size - index * 10);
+		var lineLeft = this.followAngle(leftAngle, blob1.x, blob1.y, safeDistance - index * 10);
+		var lineRight = this.followAngle(rightAngle, blob1.x, blob1.y, safeDistance - index * 10);
 
 		var color = constants.orange;
 		if (this.isType(blob2, Classification.virus)) {
