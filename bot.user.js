@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1054
+// @version     3.1055
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1054;
+var aposBotVersion = 3.1055;
 
 var constants = {
 	splitRangeMin : 650,
@@ -492,7 +492,7 @@ function AposBot() {
 		return player.foodClusters[bestFoodI];
 	};
 
-	this.foodInVirus = function(player, food, viruses) {
+	this.foodInVirus = function(food, viruses) {
 
 		for (var i = 0; i < viruses.length; i++) {
 			var virus = viruses[i];
@@ -509,7 +509,7 @@ function AposBot() {
 
 		// increase virus mass if food is within
 		for (i = player.food.length - 1; i >= 0; i--) {
-			this.foodInVirus(player, player.food[i], player.viruses);
+			this.foodInVirus(player.food[i], player.viruses);
 		}
 
 		for (i = 0; i < player.viruses.length; i++) {
@@ -754,7 +754,7 @@ function AposBot() {
 					angle2 = this.rangeToAngle(tempOb);
 					obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
 
-					virus.range = tempOb;
+					virus.range = [ angle1, angle2 ];
 					if (this.circlesIntersect(cell, virus)) {
 						badAngles.push(this.getAngleRange(cell, virus, 0, cell.size + virus.size / 2.1).concat(
 								virus.distance));
