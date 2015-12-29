@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1052
+// @version     3.1053
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1052;
+var aposBotVersion = 3.1053;
 
 var constants = {
 	splitRangeMin : 650,
@@ -574,6 +574,7 @@ function AposBot() {
 			color = constants.red; // cannot split, our angle was shifted from target
 			this.moreInfoStrings = [];
 			this.moreInfoStrings.push('shifted');
+			doSplit = false;
 		} else if (doSplit && !shiftedAngle.shifted) {
 			//var tempOb = this.getAngleRange(cluster.closestCell, cluster, 1, cluster.cell.size);
 			//var enemyAngle = this.rangeToAngle(tempOb[0]);
