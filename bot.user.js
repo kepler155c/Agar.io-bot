@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1068
+// @version     3.1069
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1068;
+var aposBotVersion = 3.1069;
 
 var constants = {
 	splitRangeMin : 650,
@@ -572,7 +572,7 @@ function AposBot() {
 			this.moreInfoStrings.push("");
 			this.moreInfoStrings.push("Target ===");
 
-			this.moreInfoStrings.push("Mass: " + cluster.mass);
+			this.moreInfoStrings.push("Mass: " + parseInt(cluster.mass, 10));
 
 			this.moreInfoStrings.push("");
 
@@ -962,6 +962,10 @@ function AposBot() {
 			panicLevel++;
 		}
 
+		if (panicLevel > 0) {
+			this.infoStrings.push("Panic Level: " + panicLevel);
+		}
+
 		return destinationChoices;
 	};
 
@@ -973,6 +977,8 @@ function AposBot() {
 		var player = this.player;
 		var listToUse = getMemoryCells();
 		var i;
+
+		this.infoStrings = [];
 
 		player.setCells(cells);
 
@@ -1125,7 +1131,6 @@ function AposBot() {
 	};
 
 	this.updateInfo = function(player) {
-		this.infoStrings = [];
 		this.infoStrings.push("Player Mass: " + parseInt(player.mass, 10));
 		if (player.cells.length > 1) {
 			this.infoStrings.push("Player Min:  " + parseInt(player.smallestCell.size, 10));
