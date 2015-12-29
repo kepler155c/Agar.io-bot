@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1058
+// @version     3.1059
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1058;
+var aposBotVersion = 3.1059;
 
 var constants = {
 	splitRangeMin : 650,
@@ -515,7 +515,7 @@ function AposBot() {
 		for (i = 0; i < player.viruses.length; i++) {
 			var virus = player.viruses[i];
 
-			drawPoint(entity.x, entity.y, 1, "m:" + virus.mass.toFixed(2));
+			drawPoint(virus.x, virus.y, 1, virus.mass.toFixed(2));
 
 			if (virus.mass >= virus.closestCell.mass) {
 				for (var j = 0; j > virus.foodList.length; j++) {
