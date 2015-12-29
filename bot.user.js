@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1088
+// @version     3.1089
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1088;
+var aposBotVersion = 3.1089;
 
 var constants = {
 	splitRangeMin : 650,
@@ -558,8 +558,7 @@ function AposBot() {
 				cluster = player.foodClusters[j];
 
 				if (this.isType(threat, Classification.largeThreat)) {
-					if (this.computeDistance(threat.x, threat.y, cluster.x, cluster.y) < threat.size
-							+ player.largestCell.size + constants.enemySplitDistance) {
+					if (cluster.distance < threat.size + player.largestCell.size + constants.splitRangeMax) {
 						player.foodClusters.splice(j, 1);
 					}
 				}
@@ -590,7 +589,6 @@ function AposBot() {
 			this.moreInfoStrings.push("Mass: " + parseInt(cluster.mass, 10));
 
 			this.moreInfoStrings.push("");
-
 		}
 
 		// angle of enemy
@@ -684,7 +682,10 @@ function AposBot() {
 		return true;
 	};
 
-	this.getMinimumDistance = function(threat) {
+	this.getMinimumDistance = function(threat, enemyCanSplit) {
+		if (enemyCanSplit) {
+			return threat.size + constants.splitRangeMax;
+		}
 		return threat.size + threat.closestCell.size + threat.safeDistance;
 	};
 
@@ -693,6 +694,7 @@ function AposBot() {
 		for (var i = 0; i < player.threats.length; i++) {
 
 			var threat = player.threats[i];
+			var enemyCanSplit = this.isType(threat, Classification.largeThreat);
 
 			if (panicLevel >= 2) {
 				console.log('panic level: ' + panicLevel);
@@ -708,11 +710,7 @@ function AposBot() {
 				}
 			}
 
-			var enemyCanSplit = this.isType(threat, Classification.largeThreat);
-			threat.dangerZone = threat.size + threat.closestCell.size + threat.safeDistance;
-			if (enemyCanSplit) {
-				threat.dangerZone += constants.enemySplitDistance;
-			}
+			threat.dangerZone = this.getMinumumDistance(threat, enemyCanSplit);
 
 			if (threat.distance < threat.dangerZone) {
 
@@ -950,11 +948,7 @@ function AposBot() {
 				var threat = player.threats[i];
 
 				threat.safeDistance = this.getVelocity(threat) * 2 + threat.closestCell.velocity;
-				threat.dangerZone = this.getMinimumDistance(threat);
-
-				if (this.isType(threat, Classification.largeThreat)) {
-					threat.dangerZone += constants.enemySplitDistance;
-				}
+				threat.dangerZone = this.getMinimumDistance(threat, this.isType(threat, Classification.largeThreat));
 
 				if (this.circlesIntersect(player.cells[j], threat)) {
 					panicLevel = 2;
@@ -962,13 +956,14 @@ function AposBot() {
 				}
 				if (threat.distance + threat.closestCell.size < threat.dangerZone) {
 					panicLevel = 1;
-					drawCircle(threat.closestCell.x, threat.closestCell.y, threat.closestCell.size + 16, constants.orange);
+					drawCircle(threat.closestCell.x, threat.closestCell.y, threat.closestCell.size + 16,
+							constants.orange);
 				}
 			}
 		}
 
 		if (panicLevel == 2) {
-			drawCircle(threat.closestCell.x, threat.closestCell.y, threat.closestCell.size + 16, constants.red);
+			drawCircle(player.x, player.y, player.size + 16, constants.red);
 		}
 
 		// is moving towards (panic level 1)
