@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1069
+// @version     3.1071
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1069;
+var aposBotVersion = 3.1071;
 
 var constants = {
 	splitRangeMin : 650,
@@ -544,8 +544,13 @@ function AposBot() {
 			for (j = player.foodClusters.length - 1; j >= 0; j--) {
 				cluster = player.foodClusters[j];
 
+				var distance = threat.size;
+				if (this.isType(threat, Classification.largeThreat)) {
+					distance = threat.size + constants.enemySplitDistance;
+				}
+				
 				// should use eatable flag
-				if (this.computeDistance(threat.x, threat.y, cluster.x, cluster.y) < threat.dangerZone) {
+				if (this.computeDistance(threat.x, threat.y, cluster.x, cluster.y) < distance) { // threat.dangerZone) {
 					player.foodClusters.splice(j, 1);
 				}
 			}
