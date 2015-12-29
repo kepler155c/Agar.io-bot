@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1081
+// @version     3.1082
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1081;
+var aposBotVersion = 3.1082;
 
 var constants = {
 	splitRangeMin : 650,
@@ -196,7 +196,7 @@ function AposBot() {
 
 					if (isMe) {
 						entity.classification = Classification.player;
-						entity.velocity = this.getVelocity(entity);
+						entity.velocity = that.getVelocity(entity);
 						drawPoint(entity.x, entity.y + 20, 1, "m:" + that.getMass(entity).toFixed(2) + " s:"
 								+ that.getSplitMass(entity).toFixed(2));
 					} else {
@@ -335,7 +335,7 @@ function AposBot() {
 		var px = a * (cell.J - cell.s) + cell.x;
 		var py = a * (cell.K - cell.t) + cell.y;
 		
-		return computeInexpensiveDistance(cell.x, cell.y, px, py);
+		return this.computeInexpensiveDistance(cell.x, cell.y, px, py);
 	}
 
 	this.predictPosition = function(cell, timeDiff) {
