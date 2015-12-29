@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1072
+// @version     3.1073
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1072;
+var aposBotVersion = 3.1073;
 
 var constants = {
 	splitRangeMin : 650,
@@ -48,7 +48,7 @@ var constants = {
 	splitDuration : 1000, // 800 was pretty good
 
 	// adjustables
-	safeDistance : 0,
+	safeDistance : 150,
 	lureDistance : 1000,
 	largeThreatRatio : 10,
 
@@ -544,13 +544,14 @@ function AposBot() {
 			for (j = player.foodClusters.length - 1; j >= 0; j--) {
 				cluster = player.foodClusters[j];
 
-				var distance = threat.size;
+				var safeDistance = Math.max(constants.safeDistance - player.smallestCell.size, 0);
+				var distance = threat.size + safeDistance;
 				if (this.isType(threat, Classification.largeThreat)) {
-					distance = threat.size + constants.enemySplitDistance;
+					distance += constants.enemySplitDistance;
 				}
-				
+
 				// should use eatable flag
-				if (this.computeDistance(threat.x, threat.y, cluster.x, cluster.y) < distance) { // threat.dangerZone) {
+				if (this.computeDistance(threat.x, threat.y, cluster.x, cluster.y) < threat.dangerZone) {
 					player.foodClusters.splice(j, 1);
 				}
 			}
@@ -702,6 +703,9 @@ function AposBot() {
 				}
 			}
 
+			// due to lag, we need to increase distance the smaller we are
+			var safeDistance = Math.max(constants.safeDistance - player.closestCell.size, 0);
+
 			var normalDangerDistance = threat.size + constants.safeDistance;
 			var splitDangerDistance = threat.size + constants.enemySplitDistance + constants.safeDistance;
 			threat.dangerZone = (enemyCanSplit ? splitDangerDistance : normalDangerDistance);
@@ -724,13 +728,16 @@ function AposBot() {
 			*/
 
 			// try to move out of enemy
+			/*
 			if (this.circlesIntersect(closestCell, threat)) {
 
 				badAngles.push(this.getAngleRange(closestCell, threat, 0, closestCell.size + threat.size).concat(
 						threat.distance));
 				drawCircle(threat.x, threat.y, threat.size + 60, constants.red);
 
-			} else if (enemyDistance < threat.dangerZone) {
+			} else 
+			*/
+			if (enemyDistance < threat.dangerZone) {
 
 				badAngles.push(this.getAngleRange(closestCell, threat, i, threat.dangerZone).concat(threat.distance));
 				drawCircle(threat.x, threat.y, threat.size + 60, constants.blue);
