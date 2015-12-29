@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1067
+// @version     3.1068
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1067;
+var aposBotVersion = 3.1068;
 
 var constants = {
 	splitRangeMin : 650,
@@ -187,7 +187,7 @@ function AposBot() {
 					var isEnemy = true;
 
 					entity.hasMoved = entity.isMoving();
-					
+
 					/*
 					if (entity.hasMoved) {
 						this.predictPosition(entity, constants.splitDuration);
@@ -524,7 +524,7 @@ function AposBot() {
 			if (virus.closestCell.mass + virus.foodMass >= virus.mass) {
 				for (var j = 0; j < virus.foodList.length; j++) {
 					var food = virus.foodList[j];
-					if (!food.hasMoved) {  // keep chasing cells in viruses - it's kinda funny
+					if (!food.hasMoved) { // keep chasing cells in viruses - it's kinda funny
 						food.eatable = false;
 					}
 				}
@@ -575,9 +575,9 @@ function AposBot() {
 			this.moreInfoStrings.push("Mass: " + cluster.mass);
 
 			this.moreInfoStrings.push("");
-			
+
 		}
-		
+
 		// angle of enemy
 		var angle = this.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
 
@@ -676,7 +676,7 @@ function AposBot() {
 		for (var i = 0; i < player.threats.length; i++) {
 
 			var threat = player.threats[i];
-			
+
 			var closestCell = threat.closestCell;
 			var enemyDistance = threat.distance;
 
@@ -690,18 +690,16 @@ function AposBot() {
 				//            	closestCell = player.largestCell;
 			}
 
-			var normalDangerDistance = threat.size + constants.safeDistance;
-			var shiftDistance = threat.closestCell.size;
-			var splitDangerDistance = threat.size + constants.enemySplitDistance + constants.safeDistance;
-			var secureDistance = (enemyCanSplit ? splitDangerDistance : normalDangerDistance);
-
-			threat.dangerZone = secureDistance;
-
 			if (panicLevel > 0) {
 				if (!threat.isMovingTowards) {
-					
+					threat.dangerZone = threat.size;
+					enemyCanSplit = false;
 				}
 			}
+
+			var normalDangerDistance = threat.size + constants.safeDistance;
+			var splitDangerDistance = threat.size + constants.enemySplitDistance + constants.safeDistance;
+			threat.dangerZone = (enemyCanSplit ? splitDangerDistance : normalDangerDistance);
 
 			/*
 			if (panicLevel > 0 || threat.danger && getLastUpdate() - threat.dangerTimeOut > 1500) {
@@ -712,7 +710,7 @@ function AposBot() {
 			if (!panicLevel) {
 
 				if ((enemyCanSplit && enemyDistance < splitDangerDistance)
-						|| (!enemyCanSplit && enemyDistance < normalDangerDistance)) {
+						|| (!enemyCanSplit && enemyDistance < threat.dangerZone)) {
 
 					// threat.danger = true;
 					threat.dangerTimeOut = getLastUpdate();
@@ -722,37 +720,24 @@ function AposBot() {
 
 			// try to move out of enemy
 			if (this.circlesIntersect(closestCell, threat)) {
+
 				badAngles.push(this.getAngleRange(closestCell, threat, 0, closestCell.size + threat.size).concat(
 						threat.distance));
-				drawCircle(threat.x, threat.y, threat.size + 100, constants.red);
-			}
+				drawCircle(threat.x, threat.y, threat.size + 60, constants.red);
 
-			if ((enemyCanSplit && enemyDistance < splitDangerDistance)) {
+			} else if (enemyDistance < threat.dangerZone) {
 
-				badAngles.push(this.getAngleRange(closestCell, threat, i, splitDangerDistance).concat(threat.distance));
+				badAngles.push(this.getAngleRange(closestCell, threat, i, threat.dangerZone).concat(threat.distance));
 				drawCircle(threat.x, threat.y, threat.size + 60, constants.blue);
 
-			} else if ((!enemyCanSplit && enemyDistance < normalDangerDistance)) {
+			} else if (enemyDistance < threat.dangerZone + threat.closestCell.size) {
 
-				badAngles
-						.push(this.getAngleRange(closestCell, threat, i, normalDangerDistance).concat(threat.distance));
-				drawCircle(threat.x, threat.y, threat.size + 60, constants.pink);
-
-			} else if (enemyCanSplit && enemyDistance < splitDangerDistance + shiftDistance) {
-				tempOb = this.getAngleRange(closestCell, threat, i, splitDangerDistance + shiftDistance);
+				tempOb = this.getAngleRange(closestCell, threat, i, threat.dangerZone + threat.closestCell.size);
 				angle1 = tempOb[0];
 				angle2 = this.rangeToAngle(tempOb);
 
 				obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
-				drawCircle(threat.x, threat.y, threat.size + 80, constants.green);
-
-			} else if (!enemyCanSplit && enemyDistance < normalDangerDistance + shiftDistance) {
-				tempOb = this.getAngleRange(closestCell, threat, i, normalDangerDistance + shiftDistance);
-				angle1 = tempOb[0];
-				angle2 = this.rangeToAngle(tempOb);
-
-				obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
-				drawCircle(threat.x, threat.y, threat.size + 80, constants.orange);
+				drawCircle(threat.x, threat.y, threat.size + 60, constants.green);
 			}
 		}
 	};
