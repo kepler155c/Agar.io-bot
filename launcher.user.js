@@ -20,13 +20,13 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.264
+// @version     4.265
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.264;
+var aposLauncherVersion = 4.265;
 
-var showAd = true;
+var showAd = false;
 
 Number.prototype.mod = function(n) {
     return ((this % n) + n) % n;

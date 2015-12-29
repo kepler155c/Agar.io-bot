@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1057
+// @version     3.1058
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1057;
+var aposBotVersion = 3.1058;
 
 var constants = {
 	splitRangeMin : 650,
@@ -515,7 +515,9 @@ function AposBot() {
 		for (i = 0; i < player.viruses.length; i++) {
 			var virus = player.viruses[i];
 
-			if (virus.mass > virus.closestCell.mass) {
+			drawPoint(entity.x, entity.y, 1, "m:" + virus.mass.toFixed(2));
+
+			if (virus.mass >= virus.closestCell.mass) {
 				for (var j = 0; j > virus.foodList.length; j++) {
 					var food = virus.foodList[j];
 					food.eatable = false;
@@ -572,12 +574,8 @@ function AposBot() {
 
 		if (doSplit && shiftedAngle.shifted) {
 			color = constants.red; // cannot split, our angle was shifted from target
-			this.moreInfoStrings = [];
-			this.moreInfoStrings.push('shifted');
 			doSplit = false;
 		} else if (doSplit && !shiftedAngle.shifted) {
-			//var tempOb = this.getAngleRange(cluster.closestCell, cluster, 1, cluster.cell.size);
-			//var enemyAngle = this.rangeToAngle(tempOb[0]);
 
 			this.moreInfoStrings = [];
 			console.log('DUMPING');
@@ -588,7 +586,6 @@ function AposBot() {
 				var virus = player.viruses[i];
 
 				if (virus.range) {
-					console.log('checking');
 					console.log(virus.range);
 					
 					if (this.angleIsWithin(destinationAngle, virus.range)) {
@@ -1109,16 +1106,13 @@ function AposBot() {
 			this.infoStrings.push("Player Min:  " + parseInt(player.smallestCell.size, 10));
 			this.infoStrings.push("Player Max:  " + parseInt(player.largestCell.size, 10));
 		}
-		this.infoStrings.push("Food:        " + player.food.length);
-		this.infoStrings.push("Threats:     " + player.threats.length);
-		this.infoStrings.push("Viruses:     " + player.viruses.length);
 
 		for (var i = 0; i < player.cells.length; i++) {
 
 			var cell = player.cells[i];
 			var cellInfo = "Cell " + i + " Mass: " + parseInt(cell.size, 10);
 			if (cell.fuseTimer) {
-				cellInfo += " Fuse: " + parseInt((cell.fuseTimer - Date.now()) / 1000, 10);
+				cellInfo += "   Fuse: " + parseInt((cell.fuseTimer - Date.now()) / 1000, 10);
 			}
 			this.infoStrings.push(cellInfo);
 		}
