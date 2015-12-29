@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1059
+// @version     3.1060
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1059;
+var aposBotVersion = 3.1060;
 
 var constants = {
 	splitRangeMin : 650,
@@ -213,6 +213,7 @@ function AposBot() {
 							//IT'S VIRUS!
 							entity.classification = Classification.virus;
 							entity.foodList = [];
+							entity.foodMass = 0;
 							player.viruses.push(entity);
 						} else if (that.canSplitKill(entity, player.smallestCell, constants.enemyRatio)) {
 
@@ -497,7 +498,7 @@ function AposBot() {
 		for (var i = 0; i < viruses.length; i++) {
 			var virus = viruses[i];
 			if (this.circlesIntersect(food, virus)) {
-				virus.mass += food.mass;
+				virus.foodMass += food.mass;
 				virus.foodList.push(food);
 			}
 		}
@@ -517,7 +518,7 @@ function AposBot() {
 
 			drawPoint(virus.x, virus.y, 1, virus.mass.toFixed(2));
 
-			if (virus.mass >= virus.closestCell.mass) {
+			if (virus.mass + virus.foodMass >= virus.closestCell.mass) {
 				for (var j = 0; j > virus.foodList.length; j++) {
 					var food = virus.foodList[j];
 					food.eatable = false;
@@ -745,7 +746,7 @@ function AposBot() {
 			for (j = 0; j < player.cells.length; j++) {
 				var cell = player.cells[j];
 
-				if (virus.distance < cell.size + 750 && cell.mass > virus.mass) {
+				if (virus.distance < cell.size + 750 && cell.mass + virus.foodMass >= virus.mass) {
 					tempOb = this.getAngleRange(cell, virus, i, cell.size + virus.size); // was 50
 					angle1 = tempOb[0];
 					angle2 = this.rangeToAngle(tempOb);
