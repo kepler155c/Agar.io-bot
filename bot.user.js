@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1053
+// @version     3.1054
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1053;
+var aposBotVersion = 3.1054;
 
 var constants = {
 	splitRangeMin : 650,
@@ -570,7 +570,7 @@ function AposBot() {
 
 		var color = constants.orange;
 
-		if (doSplit && shiftedAngle) {
+		if (doSplit && shiftedAngle.shifted) {
 			color = constants.red; // cannot split, our angle was shifted from target
 			this.moreInfoStrings = [];
 			this.moreInfoStrings.push('shifted');
@@ -1019,10 +1019,7 @@ function AposBot() {
 			drawCircle(player.x, player.y, player.size + 16, constants.green);
 		}
 
-		drawCircle(player.x, player.y, player.size + constants.splitRangeMin, 5);
-		drawCircle(player.x, player.y, player.size + constants.splitRangeMax, 5);
 		drawCircle(player.x, player.y, player.size + constants.enemySplitDistance, 5);
-		drawCircle(player.x, player.y, player.size + constants.lureDistance, 5);
 
 		// drawLine(player.x, player.y, player.x, player.y + player.size + this.splitDistance, 7);
 
