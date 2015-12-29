@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1063
+// @version     3.1064
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1063;
+var aposBotVersion = 3.1064;
 
 var constants = {
 	splitRangeMin : 650,
@@ -501,6 +501,7 @@ function AposBot() {
 			if (this.circlesIntersect(food, virus)) {
 				virus.foodMass += food.mass;
 				virus.foodList.push(food);
+				drawCircle(food.x, food.y, food.size + 10, constants.red);
 			}
 		}
 	};
@@ -521,7 +522,7 @@ function AposBot() {
 				for (var j = 0; j > virus.foodList.length; j++) {
 					var food = virus.foodList[j];
 					food.eatable = false;
-					drawCircle(food.x, food.y, food.size + 40, constants.red);
+					drawCircle(food.x, food.y, food.size + 80, constants.red);
 				}
 			}
 		}
@@ -562,6 +563,17 @@ function AposBot() {
 			doSplit = true;
 		}
 
+		if (cluster.cell) {
+			this.moreInfoStrings = [];
+			this.moreInfoStrings.push("");
+			this.moreInfoStrings.push("Target ===");
+
+			this.moreInfoStrings.push("Mass: " + cluster.mass);
+
+			this.moreInfoStrings.push("");
+			
+		}
+		
 		// angle of enemy
 		var angle = this.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
 
