@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1048
+// @version     3.1049
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1048;
+var aposBotVersion = 3.1049;
 
 var constants = {
 	splitRangeMin : 650,
@@ -196,6 +196,7 @@ function AposBot() {
 
 						entity.isMovingTowards = that.isMovingTowards(player, entity);
 						entity.mass = that.calculateMass(entity);
+						entity.eatable = true;
 						closestInfo = that.closestCell(player, entity.x, entity.y);
 
 						entity.closestCell = closestInfo.cell;
@@ -211,6 +212,7 @@ function AposBot() {
 						} else if (entity.isVirus(entity)) {
 							//IT'S VIRUS!
 							entity.classification = Classification.virus;
+							entity.foodList = [];
 							player.viruses.push(entity);
 						} else if (that.canSplitKill(entity, player.smallestCell, constants.enemyRatio)) {
 
@@ -278,11 +280,6 @@ function AposBot() {
 						}
 					}
 				});
-
-		// increase virus mass if food is within
-		for (i = player.food.length - 1; i >= 0; i--) {
-			this.foodInVirus(player, player.food[i], player.viruses);
-		}
 
 		//cell merging
 		for (i = 0; i < mergeList.length; i++) {
@@ -373,57 +370,60 @@ function AposBot() {
 	};
 
 	this.clusterFood = function(player, blobSize) {
-		var clusters = [];
-		var addedCluster = false;
+		player.foodClusters = [];
 
 		for (var i = 0; i < player.food.length; i++) {
 
 			var food = player.food[i];
-			var foodSize = food.size;
 
-			if (food.size <= 14) {
-				foodSize = food.size - 9;
-			}
+			if (food.eatable) {
 
-			if (food.hasMoved && food.distance < 850) {
+				var foodSize = food.size;
+				var addedCluster = false;
 
-				this.predictPosition(food, constants.splitDuration);
-
-				// really should clone da
-				clusters.push({
-					x : food.px,
-					y : food.py,
-					size : food.size,
-					cell : food,
-					classification : Classification.cluster
-				});
-			} else {
-				for (var j = 0; j < clusters.length; j++) {
-					if (!clusters[j].cell) {
-						if (this.computeInexpensiveDistance(food.x, food.y, clusters[j].x, clusters[j].y) < blobSize * 2) {
-
-							clusters[j].x = (food.x + clusters[j].x) / 2;
-							clusters[j].y = (food.y + clusters[j].y) / 2;
-							clusters[j].size += foodSize;
-							addedCluster = true;
-							break;
-						}
-					}
+				if (food.size <= 14) {
+					foodSize = food.size - 9;
 				}
-				if (!addedCluster) {
-					clusters.push({
-						x : food.x,
-						y : food.y,
-						size : foodSize,
-						cell : null,
+
+				if (food.hasMoved && food.distance < 850) {
+
+					this.predictPosition(food, constants.splitDuration);
+
+					// really should clone da
+					player.foodClusters.push({
+						x : food.px,
+						y : food.py,
+						size : food.size,
+						cell : food,
 						classification : Classification.cluster
 					});
+				} else {
+					for (var j = 0; j < player.foodClusters.length; j++) {
+						var cluster = player.foodClusters[j];
+						
+						if (!cluster.cell) {
+							if (this.computeInexpensiveDistance(food.x, food.y, cluster.x, cluster.y) < blobSize * 2) {
+
+								cluster.x = (food.x + cluster.x) / 2;
+								cluster.y = (food.y + cluster.y) / 2;
+								cluster.size += foodSize;
+								addedCluster = true;
+								break;
+							}
+						}
+					}
+					if (!addedCluster) {
+						player.foodClusters.push({
+							x : food.x,
+							y : food.y,
+							size : foodSize,
+							cell : null,
+							classification : Classification.cluster
+						});
+					}
 				}
 			}
-			addedCluster = false;
 		}
-
-		return clusters;
 	};
 
 	this.getBestFood = function(player) {
@@ -492,7 +492,41 @@ function AposBot() {
 		return player.foodClusters[bestFoodI];
 	};
 
+	this.foodInVirus = function(player, food, viruses) {
+
+		for (var i = 0; i < viruses.length; i++) {
+			var virus = viruses[i];
+			if (this.circlesIntersect(food, virus)) {
+				virus.mass += food.mass;
+				virus.foodList.push(food);
+			}
+		}
+	};
+
+	this.calculateVirusMass = function(player) {
+
+		var i;
+
+		// increase virus mass if food is within
+		for (i = player.food.length - 1; i >= 0; i--) {
+			this.foodInVirus(player, player.food[i], player.viruses);
+		}
+
+		for (i = 0; i < player.viruses.length; i++) {
+			var virus = player.viruses[i];
+
+			if (virus.mass > player.closestCell.mass) {
+				for (var j = 0; j > virus.foodList.length; j++) {
+					var food = virus.foodList[j];
+					food.eatable = false;
+				}
+			}
+		}
+	};
+
 	this.determineFoodDestination = function(player, destination, obstacleAngles) {
+
+		this.clusterFood(player, player.largestCell.size);
 
 		var i, j, cluster;
 
@@ -502,8 +536,7 @@ function AposBot() {
 			for (j = player.foodClusters.length - 1; j >= 0; j--) {
 				cluster = player.foodClusters[j];
 
-				if (this.computeDistance(threat.x, threat.y, cluster.x, cluster.y) < threat.dangerZone + 50) { // remove some extra food from outside the radius in order to
-					// prevent choosing food too close (and cause bumping)
+				if (this.computeDistance(threat.x, threat.y, cluster.x, cluster.y) < threat.dangerZone) {
 					player.foodClusters.splice(j, 1);
 				}
 			}
@@ -703,6 +736,8 @@ function AposBot() {
 		for (i = 0; i < player.viruses.length; i++) {
 			var virus = player.viruses[i];
 
+			virus.angle = null;
+
 			for (j = 0; j < player.cells.length; j++) {
 				var cell = player.cells[j];
 
@@ -711,6 +746,8 @@ function AposBot() {
 					angle1 = tempOb[0];
 					angle2 = this.rangeToAngle(tempOb);
 					obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
+
+					virus.angle = 1;
 					// drawCircle(virus.x, virus.y, virus.size + 5, constants.red);
 					if (this.circlesIntersect(cell, virus)) {
 						badAngles.push(this.getAngleRange(cell, virus, 0, cell.size + virus.size / 2.1).concat(
@@ -988,11 +1025,11 @@ function AposBot() {
 
 		this.separateListBasedOnFunction(player, listToUse);
 
-		player.foodClusters = this.clusterFood(player, player.largestCell.size);
-
 		/*player.threats.sort(function(a, b){
 		    return a.distance-b.distance;
 		})*/
+
+		this.determineVirusThreats(player);
 
 		var destinationChoices = this.determineBestDestination(player, tempPoint);
 
@@ -1285,18 +1322,6 @@ function AposBot() {
 		var distanceY = circle1.y - circle2.y;
 		var radiusSum = circle1.size + circle2.size;
 		return distanceX * distanceX + distanceY * distanceY <= radiusSum * radiusSum;
-	};
-
-	this.foodInVirus = function(player, food, viruses) {
-
-		for (var i = 0; i < viruses.length; i++) {
-			var virus = viruses[i];
-			if (this.circlesIntersect(food, virus)) {
-				virus.mass -= food.mass;
-				return true;
-			}
-		}
-		return false;
 	};
 
 	this.isMovingTowards = function(a, b) {
