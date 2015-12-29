@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1051
+// @version     3.1052
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1051;
+var aposBotVersion = 3.1052;
 
 var constants = {
 	splitRangeMin : 650,
@@ -515,7 +515,7 @@ function AposBot() {
 		for (i = 0; i < player.viruses.length; i++) {
 			var virus = player.viruses[i];
 
-			if (virus.mass > player.closestCell.mass) {
+			if (virus.mass > virus.closestCell.mass) {
 				for (var j = 0; j > virus.foodList.length; j++) {
 					var food = virus.foodList[j];
 					food.eatable = false;
@@ -536,6 +536,7 @@ function AposBot() {
 			for (j = player.foodClusters.length - 1; j >= 0; j--) {
 				cluster = player.foodClusters[j];
 
+				// should use eatable flag
 				if (this.computeDistance(threat.x, threat.y, cluster.x, cluster.y) < threat.dangerZone) {
 					player.foodClusters.splice(j, 1);
 				}
