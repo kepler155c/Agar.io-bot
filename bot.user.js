@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1080
+// @version     3.1081
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1080;
+var aposBotVersion = 3.1081;
 
 var constants = {
 	splitRangeMin : 650,
@@ -196,6 +196,7 @@ function AposBot() {
 
 					if (isMe) {
 						entity.classification = Classification.player;
+						entity.velocity = this.getVelocity(entity);
 						drawPoint(entity.x, entity.y + 20, 1, "m:" + that.getMass(entity).toFixed(2) + " s:"
 								+ that.getSplitMass(entity).toFixed(2));
 					} else {
@@ -324,6 +325,18 @@ function AposBot() {
 			}
 		}
 	};
+	
+	this.getVelocity = function(cell) {
+		var lastPos = cell.getLastPos();
+
+		var a = (getLastUpdate() - this.previousUpdated) / 120;
+		a = 0 > a ? 0 : 1 < a ? 1 : a;
+
+		var px = a * (cell.J - cell.s) + cell.x;
+		var py = a * (cell.K - cell.t) + cell.y;
+		
+		return computeInexpensiveDistance(cell.x, cell.y, px, py);
+	}
 
 	this.predictPosition = function(cell, timeDiff) {
 		var lastPos = cell.getLastPos();
@@ -697,10 +710,10 @@ function AposBot() {
 			}
 
 			// due to lag, we need to increase distance the smaller we are
-			var safeDistance = Math.max(constants.safeDistance - threat.closestCell.size, 0);
+			var safeDistance = this.getVelocity(threat) + threat.closestCell.velocity;
 			this.infoStrings.push("safe distance: " + safeDistance);
 
-			threat.dangerZone = threat.size + threat.closestCell.size;
+			threat.dangerZone = threat.size + threat.closestCell.size + safeDistance;
 			if (enemyCanSplit) {
 				threat.dangerZone += constants.enemySplitDistance;
 			}
