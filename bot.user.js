@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1113
+// @version     3.1114
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1113;
+var aposBotVersion = 3.1114;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1162,7 +1162,7 @@ function AposBot() {
 
 					var entity = this.entities[key];
 
-					drawPoint(entity.x, entity.y + 40, 1, "type: " + this.classification);
+					drawPoint(entity.x, entity.y + 40, 1, "type: " + entity.classification);
 
 					switch (entity.classification) {
 					case Classification.player:
