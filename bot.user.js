@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1108
+// @version     3.1109
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1108;
+var aposBotVersion = 3.1109;
 
 var constants = {
 	splitRangeMin : 650,
@@ -221,30 +221,30 @@ function AposBot() {
 
 		this.teams = [];
 
-		Object.keys(this.entities).forEach(function(key, that) {
+		Object.keys(this.entities).forEach(function(key) {
 
-			var entity = that.entities[key];
+			var entity = this.entities[key];
 
 			if (entity.name.length > 0) {
 
-				var team = that.teams[entity.name];
+				var team = this.teams[entity.name];
 
 				if (!team) {
 					team = {
 						cells : []
 					};
-					that.teams[entity.name] = team;
+					this.teams[entity.name] = team;
 				}
-				that.teams[entity.name].cells.push(entity);
+				this.teams[entity.name].cells.push(entity);
 			}
 		}, this);
 
-		Object.keys(this.teams).forEach(function(key, that) {
+		Object.keys(this.teams).forEach(function(key) {
 
-			var team = that.teams[key];
+			var team = this.teams[key];
 
 			if (team.cells.length == 1) {
-				delete that.teams[key];
+				delete this.teams[key];
 			} else {
 				var circle = enclosingCircle(team.cells);
 				team.x = circle.x;
@@ -279,16 +279,16 @@ function AposBot() {
 
 	this.initializeEntities = function(player) {
 
-		Object.keys(this.entities).forEach(function(key, that) {
+		Object.keys(this.entities).forEach(function(key) {
 
-			var entity = that.entities[key];
+			var entity = this.entities[key];
 
 			entity.classification = Classification.unknown;
 			entity.hasMoved = entity.isMoving();
-			entity.isMovingTowards = that.isMovingTowards(player, entity);
-			entity.mass = that.calculateMass(entity);
+			entity.isMovingTowards = this.isMovingTowards(player, entity);
+			entity.mass = this.calculateMass(entity);
 
-			var closestInfo = that.closestCell(player, entity.x, entity.y);
+			var closestInfo = this.closestCell(player, entity.x, entity.y);
 			entity.closestCell = closestInfo.cell;
 			entity.distance = closestInfo.distance;
 
@@ -305,9 +305,9 @@ function AposBot() {
 
 		player.safeToSplit = player.cells.length == 1;
 
-		Object.keys(this.entities).forEach(function(key, that) {
+		Object.keys(this.entities).forEach(function(key) {
 
-			var entity = that.entities[key];
+			var entity = this.entities[key];
 			// if any largish enemies are within our split radius, dont allow split
 			if (!entity.isVirus() && entity.size > 14) {
 
@@ -323,16 +323,16 @@ function AposBot() {
 	this.separateListBasedOnFunction = function(player) {
 
 		Object.keys(this.entities).forEach(
-				function(key, that) {
+				function(key) {
 
-					var entity = that.entities[key];
+					var entity = this.entities[key];
 
-					if (that.isItMe(player, entity)) {
+					if (this.isItMe(player, entity)) {
 
 						entity.classification = Classification.player;
-						entity.velocity = that.getVelocity(entity);
+						entity.velocity = this.getVelocity(entity);
 
-					} else if (that.isFood(player.smallestCell, entity)) {
+					} else if (this.isFood(player.smallestCell, entity)) {
 
 						entity.classification = Classification.food;
 
@@ -346,16 +346,16 @@ function AposBot() {
 
 						entity.classification = Classification.smallThreat;
 
-					} else if (that.canSplitKill(entity, player.smallestCell, constants.enemyRatio)) {
+					} else if (this.canSplitKill(entity, player.smallestCell, constants.enemyRatio)) {
 
 						entity.classification = Classification.largeThreat;
 
-					} else if (that.canEat(entity, player.smallestCell, constants.enemyRatio)) {
+					} else if (this.canEat(entity, player.smallestCell, constants.enemyRatio)) {
 
 						entity.classification = Classification.smallThreat;
 
 					} else if (entity.closestCell.mass > 36
-							&& that.canSplitKill(entity.closestCell, entity, constants.playerRatio)) {
+							&& this.canSplitKill(entity.closestCell, entity, constants.playerRatio)) {
 
 						entity.classification = Classification.food;
 						if (player.cells.length == 1 && player.mass / entity.mass < constants.largeThreatRatio) {
@@ -363,7 +363,7 @@ function AposBot() {
 							entity.classification = Classification.splitTarget;
 						}
 
-					} else if (that.canEat(player.smallestCell, entity, constants.playerRatio)) {
+					} else if (this.canEat(player.smallestCell, entity, constants.playerRatio)) {
 
 						entity.classification = Classification.food;
 
@@ -451,17 +451,15 @@ function AposBot() {
 	this.clusterFood = function(player, blobSize) {
 		player.foodClusters = [];
 
-		var that = this;
-
 		Object.keys(this.entities).filter(this.foodFilter, this).forEach(function(key) {
 
-			var food = that.entities[key];
+			var food = this.entities[key];
 
 			var addedCluster = false;
 
 			if (food.hasMoved) {
 
-				that.predictPosition(food, constants.splitDuration);
+				this.predictPosition(food, constants.splitDuration);
 
 				// really should clone da
 				player.foodClusters.push({
@@ -477,7 +475,7 @@ function AposBot() {
 					var cluster = player.foodClusters[j];
 
 					if (!cluster.cell) {
-						if (that.computeInexpensiveDistance(food.x, food.y, cluster.x, cluster.y) < blobSize * 2) {
+						if (this.computeInexpensiveDistance(food.x, food.y, cluster.x, cluster.y) < blobSize * 2) {
 
 							cluster.x = (food.x + cluster.x) / 2;
 							cluster.y = (food.y + cluster.y) / 2;
@@ -499,7 +497,7 @@ function AposBot() {
 					});
 				}
 			}
-		});
+		}, this);
 	};
 
 	this.getBestFood = function(player) {
@@ -571,11 +569,11 @@ function AposBot() {
 
 	this.foodInVirus = function(food) {
 
-		Object.keys(this.entities).filter(this.virusFilter, this).forEach(function(key, that) {
+		Object.keys(this.entities).filter(this.virusFilter, this).forEach(function(key) {
 
-			var virus = that.entities[key];
+			var virus = this.entities[key];
 
-			if (that.circlesIntersect(food, virus)) {
+			if (this.circlesIntersect(food, virus)) {
 				virus.foodMass += food.mass;
 				virus.foodList.push(food);
 			}
@@ -584,16 +582,16 @@ function AposBot() {
 
 	this.calculateVirusMass = function(player) {
 
-		Object.keys(this.entities).filter(this.foodFilter, this).forEach(function(key, that) {
+		Object.keys(this.entities).filter(this.foodFilter, this).forEach(function(key) {
 
-			var food = that.entities[key];
+			var food = this.entities[key];
 			// increase virus mass if food is within
-			that.foodInVirus(food);
-		});
+			this.foodInVirus(food);
+		}, this);
 
-		Object.keys(this.entities).filter(this.virusFilter, this).forEach(function(key, that) {
+		Object.keys(this.entities).filter(this.virusFilter, this).forEach(function(key) {
 
-			var virus = that.entities[key];
+			var virus = this.entities[key];
 
 			if (virus.closestCell.mass + virus.foodMass >= virus.mass) {
 				for (var j = 0; j < virus.foodList.length; j++) {
@@ -614,14 +612,14 @@ function AposBot() {
 
 		// remove clusters within enemy split distance
 		Object.keys(this.entities).filter(this.largeThreatFilter, this).forEach(
-				function(key, that) {
+				function(key) {
 
-					var threat = that.entities[key];
+					var threat = this.entities[key];
 
 					for (j = player.foodClusters.length - 1; j >= 0; j--) {
 						cluster = player.foodClusters[j];
 
-						if (that.computeDistance(threat.x, threat.y, cluster.x, cluster.y) < threat.size
+						if (this.computeDistance(threat.x, threat.y, cluster.x, cluster.y) < threat.size
 								+ player.largestCell.size + constants.splitRangeMax) {
 							player.foodClusters.splice(j, 1);
 						}
@@ -676,14 +674,14 @@ function AposBot() {
 					cluster.closestCell.y);
 			console.log(destinationAngle);
 
-			Object.keys(this.entities).filter(this.virusFilter, this).forEach(function(key, that) {
+			Object.keys(this.entities).filter(this.virusFilter, this).forEach(function(key) {
 
-				var virus = that.entities[key];
+				var virus = this.entities[key];
 
 				if (virus.range) {
 					console.log(virus.range);
 
-					if (that.angleIsWithin(destinationAngle, virus.range)) {
+					if (this.angleIsWithin(destinationAngle, virus.range)) {
 						// cannot split, there is a virus in the path
 						doSplit = false;
 						console.log('inrange');
@@ -759,9 +757,9 @@ function AposBot() {
 		var i = 0;
 
 		Object.keys(this.entities).filter(this.threatFilter, this).forEach(
-				function(key, that) {
+				function(key) {
 
-					var threat = that.entities[key];
+					var threat = this.entities[key];
 
 					if (panicLevel >= 2) {
 						threat.classification = Classification.smallThreat;
@@ -816,9 +814,9 @@ function AposBot() {
 		this.determineThreats(player, panicLevel, badAngles, obstacleAngles, obstacleList);
 
 		Object.keys(this.entities).filter(this.virusFilter, this).forEach(
-				function(key, that) {
+				function(key) {
 
-					var virus = that.entities[key];
+					var virus = this.entities[key];
 
 					virus.range = null;
 
@@ -826,14 +824,14 @@ function AposBot() {
 						var cell = player.cells[j];
 
 						if (virus.distance < cell.size + 750 && cell.mass + virus.foodMass >= virus.mass) {
-							tempOb = that.getAngleRange(cell, virus, i, cell.size + virus.size); // was 50
+							tempOb = this.getAngleRange(cell, virus, i, cell.size + virus.size); // was 50
 							angle1 = tempOb[0];
-							angle2 = that.rangeToAngle(tempOb);
+							angle2 = this.rangeToAngle(tempOb);
 							obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
 
 							virus.range = [ angle1, angle2 ];
-							if (that.circlesIntersect(cell, virus)) {
-								badAngles.push(that.getAngleRange(cell, virus, 0, cell.size + virus.size / 2.1).concat(
+							if (this.circlesIntersect(cell, virus)) {
+								badAngles.push(this.getAngleRange(cell, virus, 0, cell.size + virus.size / 2.1).concat(
 										virus.distance));
 							}
 						}
@@ -1012,34 +1010,32 @@ function AposBot() {
 
 		var overlapCount = 0;
 
-		Object.keys(this.entities).filter(this.threatFilter, this).forEach(
-				function(key, that) {
+		Object.keys(this.entities).filter(this.threatFilter, this).forEach(function(key) {
 
-					for (j = 0; j < player.cells.length; j++) {
+			for (j = 0; j < player.cells.length; j++) {
 
-						var cell = player.cells[j];
+				var cell = player.cells[j];
 
-						var threat = that.entities[key];
+				var threat = this.entities[key];
 
-						var velocity = (that.getVelocity(threat) + threat.closestCell.velocity);
-						threat.safeDistance = threat.closestCell.mass < 50 ? velocity * 4 : velocity * 2;
-						threat.dangerZone = that.getMinimumDistance(threat, that.isType(threat,
-								Classification.largeThreat));
+				var velocity = (this.getVelocity(threat) + threat.closestCell.velocity);
+				threat.safeDistance = threat.closestCell.mass < 50 ? velocity * 4 : velocity * 2;
+				threat.dangerZone = this.getMinimumDistance(threat, this.isType(threat, Classification.largeThreat));
 
-						if (that.circlesIntersect(cell, threat)) {
-							panicLevel = 2;
-							return; // max panic level
-						}
-						if (threat.distance + threat.closestCell.size < threat.dangerZone) {
-							overlapCount++;
-							if (overlapCount > 1) {
-								panicLevel = 1;
-								return;
-							}
-							break;
-						}
+				if (this.circlesIntersect(cell, threat)) {
+					panicLevel = 2;
+					return; // max panic level
+				}
+				if (threat.distance + threat.closestCell.size < threat.dangerZone) {
+					overlapCount++;
+					if (overlapCount > 1) {
+						panicLevel = 1;
+						return;
 					}
-				}, this);
+					break;
+				}
+			}
+		}, this);
 
 		if (panicLevel == 1) {
 			drawCircle(player.x, player.y, player.size + 16, constants.green);
@@ -1071,11 +1067,9 @@ function AposBot() {
 	 * @return A 2 dimensional array with coordinates for every cells.  [[x, y], [x, y]]
 	 */
 	this.mainLoop = function(cells) {
-		var player = this.player;
-		this.entities = getMemoryCells();
-		var i;
 
 		this.infoStrings = [];
+		this.entities = getMemoryCells();
 
 		player.setCells(cells);
 
@@ -1158,14 +1152,14 @@ function AposBot() {
 		}
 
 		Object.keys(this.entities).forEach(
-				function(key, that) {
+				function(key) {
 
-					var entity = that.entities[key];
+					var entity = this.entities[key];
 
 					switch (entity.classification) {
 					case Classification.player:
-						drawPoint(entity.x, entity.y + 20, 1, "m:" + that.getMass(entity).toFixed(2) + " s:"
-								+ that.getSplitMass(entity).toFixed(2));
+						drawPoint(entity.x, entity.y + 20, 1, "m:" + this.getMass(entity).toFixed(2) + " s:"
+								+ this.getSplitMass(entity).toFixed(2));
 						break;
 					case Classification.virus:
 						drawPoint(entity.x, entity.y, 1, entity.mass.toFixed(2));
@@ -1204,9 +1198,9 @@ function AposBot() {
 					}
 				}, this);
 
-		Object.keys(this.teams).forEach(function(key, that) {
+		Object.keys(this.teams).forEach(function(key) {
 
-			var team = that.teams[key];
+			var team = this.teams[key];
 
 			drawCircle(team.x, team.y, team.size, constants.cyan);
 		}, this);
