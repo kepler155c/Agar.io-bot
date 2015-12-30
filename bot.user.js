@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1100
+// @version     3.1101
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1100;
+var aposBotVersion = 3.1101;
 
 var constants = {
 	splitRangeMin : 650,
@@ -177,7 +177,7 @@ function AposBot() {
 		player.threats = [];
 		player.viruses = [];
 
-		var teams = [];
+		this.teams = [];
 
 		var that = this;
 		Object.keys(entities).forEach(
@@ -188,14 +188,17 @@ function AposBot() {
 					var isEnemy = true;
 
 					entity.hasMoved = entity.isMoving();
-
 					entity.teamMate = null;
+
 					if (entity.name.length > 0) {
-						if (!teams[entity.name]) {
-							teams[entity.name] = entity;
-						} else {
-							teams[entity.name].teamMate = entity;
+						
+						var team = that.teams[entity.name];
+						
+						if (!team) {
+							team = { cells: [] };
+							that.teams[entity.name] = team;
 						}
+						that.teams[entity.name].cells.push(entity);
 					}
 
 					/*
@@ -339,12 +342,15 @@ function AposBot() {
 			}
 		}
 
-		Object.keys(teams).forEach(function(key) {
-			var team = teams[key];
-			if (team.teamMate) {
-				console.log("TEAM");
-				console.log(team);
-				console.log(team.teamMate);
+		Object.keys(this.teams).forEach(function(key) {
+			var team = that.teams[key];
+			if (team.cells.length == 1) {
+				that.teams[key] = null;
+			} else {
+				var circle = enclosingCircle(team.cells);
+				team.x = circle.x;
+				team.y = circle.y;
+				team.size = circle.size;
 			}
 		});
 	};
@@ -1137,6 +1143,14 @@ function AposBot() {
 			}
 		});
 
+		var teams = this.teams;
+		Object.keys(teams).forEach(function(key) {
+
+			var team = teams[key];
+			
+			drawCircle(team.x, team.y, team.size, constants.red);
+		});
+		
 		for (i = 0; i < player.threats.length; i++) {
 
 			var entity = player.threats[i];
