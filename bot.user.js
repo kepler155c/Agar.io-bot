@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1111
+// @version     3.1112
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1111;
+var aposBotVersion = 3.1112;
 
 var constants = {
 	splitRangeMin : 650,
@@ -262,6 +262,10 @@ function AposBot() {
 
 			var entityA = this.entities[keys[i]];
 
+			if (this.isType(entityA, Classification.player)) {
+				console.log('player??');
+			}
+			
 			for (var b = i + 1; b < keys.length; b++) {
 
 				var entityB = this.entities[keys[b]];
@@ -1382,7 +1386,7 @@ function AposBot() {
 	};
 
 	this.getSplitMass = function(cell) {
-		return (cell.size * cell.size) / 2 / 100;
+		return cell.mass / 2;
 	};
 
 	this.getRatio = function(eater, eatee) {
@@ -1390,7 +1394,7 @@ function AposBot() {
 	};
 
 	this.canEat = function(eater, eatee, ratio) {
-		if (eater.size > eatee.size) {
+		if (eater.mass > eatee.mass) {
 			return this.getMass(eater) / this.getMass(eatee) > ratio;
 		}
 		return false;
@@ -1399,7 +1403,7 @@ function AposBot() {
 	// can i split and eat someone
 	this.canSplitKill = function(eater, eatee, ratio) {
 
-		if (eater.size > eatee.size) {
+		if (eater.mass > eatee.mass) {
 			return this.getSplitMass(eater) / this.getMass(eatee) > ratio;
 		}
 		return false;
