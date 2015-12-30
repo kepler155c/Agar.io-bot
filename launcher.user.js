@@ -20,11 +20,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.269
+// @version     4.270
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.269;
+var aposLauncherVersion = 4.270;
 
 var showAd = false;
 
@@ -1805,7 +1805,7 @@ console.log("Running Bot Launcher!");
 
                 //UPDATE
                 window.isToggled = function() {
-                    return toggle;
+                    return !toggle;
                 }
                 /**
                  * Tells you if the game is in Dark mode.
