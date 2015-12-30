@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1096
+// @version     3.1097
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1096;
+var aposBotVersion = 3.1097;
 
 var constants = {
 	splitRangeMin : 650,
@@ -288,9 +288,25 @@ function AposBot() {
 					}
 				});
 
+		
+		var teams = [];
+		
 		//cell merging
 		for (i = 0; i < mergeList.length; i++) {
 			for (var z = i + 1; z < mergeList.length; z++) {
+				
+				var m1 = mergeList[i];
+				var m2 = mergeList[z];
+
+				if (!teams[m1.name]) {
+					teams[m1.name] = m1;
+					m1.teamMate = null;
+				}
+				
+				if (teams[m2.name]) {
+					teams[m2.name].teamMate = m2;
+				}
+				
 				if (this.isMerging(mergeList[i], mergeList[z])
 						&& (mergeList[i].mass + mergeList[z].mass) / player.smallestCell.mass > constants.enemyRatio) {
 					//found cells that appear to be merging - if they constitute a threat add them to the threatlist
@@ -321,6 +337,14 @@ function AposBot() {
 						}
 					}
 				}
+			}
+		}
+		for (i = 0; i < teams.length; i++) {
+			var team = teams[i];
+			if (team.teamMate) {
+				console.log("TEAM");
+				console.log(team);
+				console.log(team.teamMate);
 			}
 		}
 	};
