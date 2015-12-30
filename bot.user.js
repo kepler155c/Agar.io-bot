@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1107
+// @version     3.1108
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1107;
+var aposBotVersion = 3.1108;
 
 var constants = {
 	splitRangeMin : 650,
@@ -90,14 +90,6 @@ var Classification = {
 	cluster : 9
 };
 
-function foodFilter(key) {
-
-	var entity = this.entities[key];
-
-	return this.isType(entity, Classification.food) || this.isType(entity, Classification.splitTarget)
-			|| this.isType(entity, Classification.mergeTarget);
-}
-
 //TODO: Team mode
 //      Detect when people are merging
 //      Angle based cluster code
@@ -116,10 +108,6 @@ var Player = function() {
 	this.isReviving = false;
 	this.isSplitting = false;
 	this.isLuring = false;
-
-	this.food = [];
-	this.threats = [];
-	this.viruses = [];
 
 	this.chasing = 0;
 	this.splitVelocity = 0;
@@ -190,180 +178,71 @@ function AposBot() {
 
 	this.player = new Player();
 
-	this.separateListBasedOnFunction = function(player, entities) {
-		var mergeList = [];
-		var i;
-		var closestInfo;
+	this.foodFilter = function(key) {
 
-		player.safeToSplit = player.cells.length == 1;
-		player.threats = [];
-		player.viruses = [];
+		var entity = this.entities[key];
+
+		return this.isType(entity, Classification.food) || this.isType(entity, Classification.splitTarget)
+				|| this.isType(entity, Classification.mergeTarget);
+	};
+
+	this.virusFilter = function(key) {
+
+		var entity = this.entities[key];
+
+		return this.isType(entity, Classification.virus);
+	};
+
+	this.nonVirusFilter = function(key) {
+
+		var entity = this.entities[key];
+
+		if (entity.isVirus() || this.isType(entity, Classification.player)) {
+			return false;
+		}
+		return true;
+	};
+
+	this.largeThreatFilter = function(key) {
+
+		var entity = this.entities[key];
+
+		return this.isType(entity, Classification.largeThreat);
+	};
+
+	this.threatFilter = function(key) {
+
+		var entity = this.entities[key];
+
+		return this.isType(entity, Classification.largeThreat) || this.isType(entity, Classification.smallThreat);
+	};
+
+	this.determineTeams = function() {
 
 		this.teams = [];
 
-		var that = this;
-		Object.keys(entities).forEach(
-				function(key) {
+		Object.keys(this.entities).forEach(function(key, that) {
 
-					var entity = entities[key];
-					var isMe = that.isItMe(player, entity);
-					var isEnemy = true;
+			var entity = that.entities[key];
 
-					entity.hasMoved = entity.isMoving();
-					entity.teamMate = null;
+			if (entity.name.length > 0) {
 
-					if (entity.name.length > 0) {
+				var team = that.teams[entity.name];
 
-						var team = that.teams[entity.name];
-
-						if (!team) {
-							team = {
-								cells : []
-							};
-							that.teams[entity.name] = team;
-						}
-						that.teams[entity.name].cells.push(entity);
-					}
-
-					/*
-					if (entity.hasMoved) {
-						this.predictPosition(entity, constants.splitDuration);
-					}
-					*/
-
-					if (isMe) {
-						entity.classification = Classification.player;
-						entity.velocity = that.getVelocity(entity);
-						drawPoint(entity.x, entity.y + 20, 1, "m:" + that.getMass(entity).toFixed(2) + " s:"
-								+ that.getSplitMass(entity).toFixed(2));
-					} else {
-
-						entity.isMovingTowards = that.isMovingTowards(player, entity);
-						entity.mass = that.calculateMass(entity);
-						closestInfo = that.closestCell(player, entity.x, entity.y);
-
-						entity.closestCell = closestInfo.cell;
-						entity.distance = closestInfo.distance;
-
-						/* danger types */
-						entity.classification = Classification.unknown;
-
-						if (that.isFood(player.smallestCell, entity)) {
-							//IT'S FOOD!
-							entity.classification = Classification.food;
-						} else if (entity.isVirus(entity)) {
-							//IT'S VIRUS!
-							entity.classification = Classification.virus;
-							entity.foodList = [];
-							entity.foodMass = 0;
-							player.viruses.push(entity);
-						} else if (that.canSplitKill(entity, player.smallestCell, constants.enemyRatio)) {
-
-							entity.classification = Classification.largeThreat;
-							if (entity.mass / player.mass > constants.largeThreatRatio) {
-								entity.classification = Classification.smallThreat;
-							}
-							player.threats.push(entity);
-							mergeList.push(entity);
-						} else if (that.canEat(entity, player.smallestCell, constants.enemyRatio)) {
-							//IT'S DANGER!
-							entity.classification = Classification.smallThreat;
-							player.threats.push(entity);
-							mergeList.push(entity);
-
-							//} else if (that.isThreatIfSplit(blob, entity)) {
-							//	threatIfSplitList.push()
-						} else if (!entity.hasMoved) {
-							entity.classification = Classification.food;
-							mergeList.push(entity);
-						} else if (entity.closestCell.mass > 36
-								&& that.canSplitKill(entity.closestCell, entity, constants.playerRatio)) {
-
-							if (player.cells.length == 1 && player.mass / entity.mass < constants.largeThreatRatio) { // should be constant
-								// split worthy
-								entity.classification = Classification.splitTarget;
-							} else {
-								// too small
-								entity.classification = Classification.food;
-							}
-
-							mergeList.push(entity);
-						} else if (that.canEat(player.smallestCell, entity, constants.playerRatio)) {
-
-							entity.classification = Classification.food;
-
-							mergeList.push(entity);
-
-						} else if (!that.canEat(entity, player.smallestCell, constants.enemeyRatio)) {
-							if (player.cells.length > 1 && player.mass / entity.mass < 10) { // ?? mass check ?
-								entity.classification = Classification.mergeTarget;
-							} else {
-								entity.classification = Classification.noThreat;
-							}
-							mergeList.push(entity);
-						}
-
-						if (entity.classification == Classification.unknown) {
-							console.log('unknown');
-							console.log(entity);
-						}
-
-						if (!entity.isVirus() && entity.size > 14) {
-
-							if (entity.closestCell.size * entity.closestCell.size / 2 < entity.size * entity.size
-									* 1.265) {
-								if (entity.distance < 750 + entity.closestCell.size) {
-									player.safeToSplit = false;
-								}
-							}
-						}
-					}
-				});
-
-		//cell merging
-		for (i = 0; i < mergeList.length; i++) {
-			for (var z = i + 1; z < mergeList.length; z++) {
-
-				var m1 = mergeList[i];
-				var m2 = mergeList[z];
-
-				if (this.isMerging(mergeList[i], mergeList[z])
-						&& (mergeList[i].mass + mergeList[z].mass) / player.smallestCell.mass > constants.enemyRatio) {
-					//found cells that appear to be merging - if they constitute a threat add them to the threatlist
-
-					//clone us a new cell
-					var newThreat = {};
-					var prop;
-
-					for (prop in mergeList[i]) {
-						newThreat[prop] = mergeList[i][prop];
-					}
-
-					// TODO: remove from food list
-
-					newThreat.x = (mergeList[i].x + mergeList[z].x) / 2;
-					newThreat.y = (mergeList[i].y + mergeList[z].y) / 2;
-					newThreat.mass = mergeList[i].mass + mergeList[z].mass;
-					newThreat.size = Math.sqrt(newThreat.mass * 100);
-					newThreat.isMovingTowards = true;
-					closestInfo = this.closestCell(player, newThreat.x, newThreat.y);
-
-					newThreat.closestCell = closestInfo.cell;
-					newThreat.distance = closestInfo.distance;
-
-					player.threats.push(newThreat);
-					newThreat.classification = Classification.smallThreat;
-					if (this.canSplitKill(newThreat, player.smallestCell, constants.enemyRatio)) {
-						if (newThreat.mass / player.mass < constants.largeThreatRatio) {
-							newThreat.classification = Classification.largeThreat;
-						}
-					}
+				if (!team) {
+					team = {
+						cells : []
+					};
+					that.teams[entity.name] = team;
 				}
+				that.teams[entity.name].cells.push(entity);
 			}
-		}
+		}, this);
 
-		Object.keys(this.teams).forEach(function(key) {
+		Object.keys(this.teams).forEach(function(key, that) {
+
 			var team = that.teams[key];
+
 			if (team.cells.length == 1) {
 				delete that.teams[key];
 			} else {
@@ -372,7 +251,138 @@ function AposBot() {
 				team.y = circle.y;
 				team.size = circle.size;
 			}
-		});
+		}, this);
+	};
+
+	this.determineMerges = function() {
+
+		var keys = Object.keys(this.entities).filter(this.nonVirusFilter, this);
+
+		for (var i = 0; i < keys.length; i++) {
+
+			var entityA = this.entities[keys[i]];
+
+			for (var b = i + 1; b < keys.length; b++) {
+
+				var entityB = this.entities[keys[b]];
+
+				if (this.isMerging(entityA, entityB)) {
+
+					var largerEntity = entityA.mass > entityB.mass ? entityA : entityB;
+
+					largerEntity.mass = entityA.mass + entityB.mass;
+					// newThreat.size = Math.sqrt(newThreat.mass * 100);
+				}
+			}
+		}
+	};
+
+	this.initializeEntities = function(player) {
+
+		Object.keys(this.entities).forEach(function(key, that) {
+
+			var entity = that.entities[key];
+
+			entity.classification = Classification.unknown;
+			entity.hasMoved = entity.isMoving();
+			entity.isMovingTowards = that.isMovingTowards(player, entity);
+			entity.mass = that.calculateMass(entity);
+
+			var closestInfo = that.closestCell(player, entity.x, entity.y);
+			entity.closestCell = closestInfo.cell;
+			entity.distance = closestInfo.distance;
+
+			/*
+			if (entity.hasMoved) {
+				this.predictPosition(entity, constants.splitDuration);
+			}
+			*/
+
+		}, this);
+	};
+
+	this.isSafeToSplit = function(player) {
+
+		player.safeToSplit = player.cells.length == 1;
+
+		Object.keys(this.entities).forEach(function(key, that) {
+
+			var entity = that.entities[key];
+			// if any largish enemies are within our split radius, dont allow split
+			if (!entity.isVirus() && entity.size > 14) {
+
+				if (entity.closestCell.size * entity.closestCell.size / 2 < entity.size * entity.size * 1.265) {
+					if (entity.distance < 750 + entity.closestCell.size) {
+						player.safeToSplit = false;
+					}
+				}
+			}
+		}, this);
+	};
+
+	this.separateListBasedOnFunction = function(player) {
+
+		Object.keys(this.entities).forEach(
+				function(key, that) {
+
+					var entity = that.entities[key];
+
+					if (that.isItMe(player, entity)) {
+
+						entity.classification = Classification.player;
+						entity.velocity = that.getVelocity(entity);
+
+					} else if (that.isFood(player.smallestCell, entity)) {
+
+						entity.classification = Classification.food;
+
+					} else if (entity.isVirus(entity)) {
+
+						entity.classification = Classification.virus;
+						entity.foodList = [];
+						entity.foodMass = 0;
+
+					} else if (entity.mass / player.mass > constants.largeThreatRatio) {
+
+						entity.classification = Classification.smallThreat;
+
+					} else if (that.canSplitKill(entity, player.smallestCell, constants.enemyRatio)) {
+
+						entity.classification = Classification.largeThreat;
+
+					} else if (that.canEat(entity, player.smallestCell, constants.enemyRatio)) {
+
+						entity.classification = Classification.smallThreat;
+
+					} else if (entity.closestCell.mass > 36
+							&& that.canSplitKill(entity.closestCell, entity, constants.playerRatio)) {
+
+						entity.classification = Classification.food;
+						if (player.cells.length == 1 && player.mass / entity.mass < constants.largeThreatRatio) {
+							// split worthy
+							entity.classification = Classification.splitTarget;
+						}
+
+					} else if (that.canEat(player.smallestCell, entity, constants.playerRatio)) {
+
+						entity.classification = Classification.food;
+
+					} else {
+
+						entity.classification = Classification.noThreat;
+
+						if (player.cells.length > 1 && player.mass / entity.mass < 10) { // ?? mass check ?
+							entity.classification = Classification.mergeTarget;
+						}
+					}
+
+					if (entity.classification == Classification.unknown) {
+						console.log('unknown');
+						console.log(entity);
+					}
+
+				}, this);
+
 	};
 
 	this.getVelocity = function(cell) {
@@ -443,7 +453,7 @@ function AposBot() {
 
 		var that = this;
 
-		Object.keys(this.entities).filter(foodFilter, this).forEach(function(key) {
+		Object.keys(this.entities).filter(this.foodFilter, this).forEach(function(key) {
 
 			var food = that.entities[key];
 
@@ -559,32 +569,31 @@ function AposBot() {
 		return player.foodClusters[bestFoodI];
 	};
 
-	this.foodInVirus = function(food, viruses) {
+	this.foodInVirus = function(food) {
 
-		for (var i = 0; i < viruses.length; i++) {
-			var virus = viruses[i];
+		Object.keys(this.entities).filter(this.virusFilter, this).forEach(function(key, that) {
 
-			if (this.circlesIntersect(food, virus)) {
+			var virus = that.entities[key];
+
+			if (that.circlesIntersect(food, virus)) {
 				virus.foodMass += food.mass;
 				virus.foodList.push(food);
 			}
-		}
+		}, this);
 	};
 
 	this.calculateVirusMass = function(player) {
 
-		var i;
-		var that = this;
-
-		Object.keys(this.entities).filter(foodFilter, this).forEach(function(key) {
+		Object.keys(this.entities).filter(this.foodFilter, this).forEach(function(key, that) {
 
 			var food = that.entities[key];
 			// increase virus mass if food is within
-			that.foodInVirus(food, player.viruses);
+			that.foodInVirus(food);
 		});
 
-		for (i = 0; i < player.viruses.length; i++) {
-			var virus = player.viruses[i];
+		Object.keys(this.entities).filter(this.virusFilter, this).forEach(function(key, that) {
+
+			var virus = that.entities[key];
 
 			if (virus.closestCell.mass + virus.foodMass >= virus.mass) {
 				for (var j = 0; j < virus.foodList.length; j++) {
@@ -594,7 +603,7 @@ function AposBot() {
 					}
 				}
 			}
-		}
+		}, this);
 	};
 
 	this.determineFoodDestination = function(player, destination, obstacleAngles) {
@@ -604,21 +613,20 @@ function AposBot() {
 		var i, j, cluster;
 
 		// remove clusters within enemy split distance
-		for (i = 0; i < player.threats.length; i++) {
-			var threat = player.threats[i];
+		Object.keys(this.entities).filter(this.largeThreatFilter, this).forEach(
+				function(key, that) {
 
-			if (this.isType(threat, Classification.largeThreat)) {
+					var threat = that.entities[key];
 
-				for (j = player.foodClusters.length - 1; j >= 0; j--) {
-					cluster = player.foodClusters[j];
+					for (j = player.foodClusters.length - 1; j >= 0; j--) {
+						cluster = player.foodClusters[j];
 
-					if (this.computeDistance(threat.x, threat.y, cluster.x, cluster.y) < threat.size
-							+ player.largestCell.size + constants.splitRangeMax) {
-						player.foodClusters.splice(j, 1);
+						if (that.computeDistance(threat.x, threat.y, cluster.x, cluster.y) < threat.size
+								+ player.largestCell.size + constants.splitRangeMax) {
+							player.foodClusters.splice(j, 1);
+						}
 					}
-				}
-			}
-		}
+				}, this);
 
 		if (player.foodClusters.length === 0) {
 			return false;
@@ -668,21 +676,22 @@ function AposBot() {
 					cluster.closestCell.y);
 			console.log(destinationAngle);
 
-			for (i = 0; i < player.viruses.length; i++) {
-				var virus = player.viruses[i];
+			Object.keys(this.entities).filter(this.virusFilter, this).forEach(function(key, that) {
+
+				var virus = that.entities[key];
 
 				if (virus.range) {
 					console.log(virus.range);
 
-					if (this.angleIsWithin(destinationAngle, virus.range)) {
+					if (that.angleIsWithin(destinationAngle, virus.range)) {
 						// cannot split, there is a virus in the path
 						doSplit = false;
 						console.log('inrange');
 						color = constants.red;
-						break;
+						return;
 					}
 				}
-			}
+			}, this);
 		}
 
 		drawCircle(cluster.x, cluster.y, cluster.size + 40, color);
@@ -737,8 +746,9 @@ function AposBot() {
 		return true;
 	};
 
-	this.getMinimumDistance = function(threat, enemyCanSplit) {
-		if (enemyCanSplit) {
+	this.getMinimumDistance = function(threat) {
+
+		if (this.isType(threat, Classification.largeThreat)) {
 			return threat.size + constants.splitRangeMax;
 		}
 		return threat.size + threat.closestCell.size + threat.safeDistance;
@@ -746,51 +756,51 @@ function AposBot() {
 
 	this.determineThreats = function(player, panicLevel, badAngles, obstacleAngles, obstacleList) {
 
-		for (var i = 0; i < player.threats.length; i++) {
+		var i = 0;
 
-			var threat = player.threats[i];
-			var enemyCanSplit = this.isType(threat, Classification.largeThreat);
+		Object.keys(this.entities).filter(this.threatFilter, this).forEach(
+				function(key, that) {
 
-			if (panicLevel >= 2) {
-				console.log('panic level: ' + panicLevel);
-				enemyCanSplit = false;
+					var threat = that.entities[key];
 
-				// save the biggest cell
-				//            	closestCell = player.largestCell;
-			}
+					if (panicLevel >= 2) {
+						threat.classification = Classification.smallThreat;
+					}
 
-			if (panicLevel > 0) {
-				if (!threat.isMovingTowards) {
-					enemyCanSplit = false;
-				}
-			}
+					if (panicLevel >= 1) {
+						if (!threat.isMovingTowards) {
+							threat.classification = Classification.smallThreat;
+						}
+					}
 
-			threat.dangerZone = this.getMinimumDistance(threat, enemyCanSplit);
+					threat.dangerZone = this.getMinimumDistance(threat);
 
-			if (threat.distance < threat.dangerZone) {
+					if (threat.distance < threat.dangerZone) {
 
-				badAngles.push(this.getAngleRange(threat.closestCell, threat, i, threat.dangerZone).concat(
-						threat.distance));
+						badAngles.push(this.getAngleRange(threat.closestCell, threat, i, threat.dangerZone).concat(
+								threat.distance));
 
-				var tempOb = this.getAngleRange(threat.closestCell, threat, i, threat.dangerZone
-						+ threat.closestCell.size);
-				var angle1 = tempOb[0];
-				var angle2 = this.rangeToAngle(tempOb);
+						var tempOb = this.getAngleRange(threat.closestCell, threat, i, threat.dangerZone
+								+ threat.closestCell.size);
+						var angle1 = tempOb[0];
+						var angle2 = this.rangeToAngle(tempOb);
 
-				obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
-			}
-			/*
-			else if (enemyDistance < threat.dangerZone + threat.closestCell.size) {
+						obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
+					}
+					/*
+					else if (enemyDistance < threat.dangerZone + threat.closestCell.size) {
 
-				tempOb = this.getAngleRange(closestCell, threat, i, threat.dangerZone + threat.closestCell.size);
-				angle1 = tempOb[0];
-				angle2 = this.rangeToAngle(tempOb);
+						tempOb = this.getAngleRange(closestCell, threat, i, threat.dangerZone + threat.closestCell.size);
+						angle1 = tempOb[0];
+						angle2 = this.rangeToAngle(tempOb);
 
-				obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
-				drawCircle(threat.x, threat.y, threat.size + 60, constants.green);
-			}
-			*/
-		}
+						obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
+						drawCircle(threat.x, threat.y, threat.size + 60, constants.green);
+					}
+					*/
+					i++;
+
+				}, this);
 	};
 
 	/**
@@ -805,28 +815,30 @@ function AposBot() {
 
 		this.determineThreats(player, panicLevel, badAngles, obstacleAngles, obstacleList);
 
-		for (i = 0; i < player.viruses.length; i++) {
-			var virus = player.viruses[i];
+		Object.keys(this.entities).filter(this.virusFilter, this).forEach(
+				function(key, that) {
 
-			virus.range = null;
+					var virus = that.entities[key];
 
-			for (j = 0; j < player.cells.length; j++) {
-				var cell = player.cells[j];
+					virus.range = null;
 
-				if (virus.distance < cell.size + 750 && cell.mass + virus.foodMass >= virus.mass) {
-					tempOb = this.getAngleRange(cell, virus, i, cell.size + virus.size); // was 50
-					angle1 = tempOb[0];
-					angle2 = this.rangeToAngle(tempOb);
-					obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
+					for (j = 0; j < player.cells.length; j++) {
+						var cell = player.cells[j];
 
-					virus.range = [ angle1, angle2 ];
-					if (this.circlesIntersect(cell, virus)) {
-						badAngles.push(this.getAngleRange(cell, virus, 0, cell.size + virus.size / 2.1).concat(
-								virus.distance));
+						if (virus.distance < cell.size + 750 && cell.mass + virus.foodMass >= virus.mass) {
+							tempOb = that.getAngleRange(cell, virus, i, cell.size + virus.size); // was 50
+							angle1 = tempOb[0];
+							angle2 = that.rangeToAngle(tempOb);
+							obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
+
+							virus.range = [ angle1, angle2 ];
+							if (that.circlesIntersect(cell, virus)) {
+								badAngles.push(that.getAngleRange(cell, virus, 0, cell.size + virus.size / 2.1).concat(
+										virus.distance));
+							}
+						}
 					}
-				}
-			}
-		}
+				}, this);
 
 		var stupidList = [];
 
@@ -998,27 +1010,40 @@ function AposBot() {
 		// 2 = partially inside a threat
 		// 1 = in the split distance of a threat
 
-		for (j = 0; j < player.cells.length; j++) {
-			for (i = 0; i < player.threats.length; i++) {
-				var threat = player.threats[i];
+		var overlapCount = 0;
 
-				var velocity = (this.getVelocity(threat) + threat.closestCell.velocity);
-				threat.safeDistance = threat.closestCell.mass < 50 ? velocity * 4 : velocity * 2;
-				threat.dangerZone = this.getMinimumDistance(threat, this.isType(threat, Classification.largeThreat));
+		Object.keys(this.entities).filter(this.threatFilter, this).forEach(
+				function(key, that) {
 
-				if (this.circlesIntersect(player.cells[j], threat)) {
-					panicLevel = 2;
-					break; // max panic level
-				}
-				if (threat.distance + threat.closestCell.size < threat.dangerZone) {
-					panicLevel = 1;
-					drawCircle(threat.closestCell.x, threat.closestCell.y, threat.closestCell.size + 16,
-							constants.orange);
-				}
-			}
-		}
+					for (j = 0; j < player.cells.length; j++) {
 
-		if (panicLevel == 2) {
+						var cell = player.cells[j];
+
+						var threat = that.entities[key];
+
+						var velocity = (that.getVelocity(threat) + threat.closestCell.velocity);
+						threat.safeDistance = threat.closestCell.mass < 50 ? velocity * 4 : velocity * 2;
+						threat.dangerZone = that.getMinimumDistance(threat, that.isType(threat,
+								Classification.largeThreat));
+
+						if (that.circlesIntersect(cell, threat)) {
+							panicLevel = 2;
+							return; // max panic level
+						}
+						if (threat.distance + threat.closestCell.size < threat.dangerZone) {
+							overlapCount++;
+							if (overlapCount > 1) {
+								panicLevel = 1;
+								return;
+							}
+							break;
+						}
+					}
+				}, this);
+
+		if (panicLevel == 1) {
+			drawCircle(player.x, player.y, player.size + 16, constants.green);
+		} else if (panicLevel == 2) {
 			drawCircle(player.x, player.y, player.size + 16, constants.red);
 		}
 
@@ -1112,10 +1137,6 @@ function AposBot() {
 			drawCircle(player.x, player.y, player.size, 6);
 		}
 
-		if (player.safeToSplit) {
-			drawCircle(player.x, player.y, player.size + 16, constants.green);
-		}
-
 		drawCircle(player.x, player.y, player.size + constants.enemySplitDistance, 5);
 
 		// drawLine(player.x, player.y, player.x, player.y + player.size + this.splitDistance, 7);
@@ -1123,76 +1144,75 @@ function AposBot() {
 		//loop through everything that is on the screen and
 		//separate everything in it's own category.
 
-		this.separateListBasedOnFunction(player, this.entities);
-
-		/*player.threats.sort(function(a, b){
-		    return a.distance-b.distance;
-		})*/
-
+		this.initializeEntities(player);
+		this.determineMerges();
+		this.separateListBasedOnFunction(player);
+		this.determineTeams();
+		this.isSafeToSplit(player);
 		this.calculateVirusMass(player);
 
 		var destinationChoices = this.determineBestDestination(player, tempPoint);
 
-		var that = this;
-		Object.keys(this.entities).forEach(function(key) {
-
-			var entity = that.entities[key];
-
-			switch (entity.classification) {
-			case Classification.virus:
-				drawPoint(entity.x, entity.y, 1, entity.mass.toFixed(2));
-
-				if (player.largestCell.mass >= entity.mass) {
-					drawCircle(entity.x, entity.y, player.largestCell.size + 50, 3);
-				}
-				break;
-			case Classification.splitTarget:
-				drawCircle(entity.x, entity.y, entity.size + 20, constants.green);
-				break;
-			case Classification.mergeTarget:
-				drawCircle(entity.x, entity.y, entity.size + 20, constants.cyan);
-				break;
-			case Classification.food:
-				// drawPoint(entity.x, entity.y+20, 1, "m:" + entity.mass.toFixed(2));
-				if (entity.hasMoved) {
-					drawCircle(entity.x, entity.y, entity.size + 20, constants.gray);
-				} else if (entity.size > 14) {
-					drawCircle(entity.x, entity.y, entity.size + 20, constants.cyan);
-				}
-				break;
-			case Classification.unknown:
-				drawCircle(entity.x, entity.y, entity.size + 20, constants.cyan);
-				break;
-			}
-		});
-
-		var teams = this.teams;
-		Object.keys(teams).forEach(function(key) {
-
-			var team = teams[key];
-
-			drawCircle(team.x, team.y, team.size, constants.cyan);
-		});
-
-		for (i = 0; i < player.threats.length; i++) {
-
-			var entity = player.threats[i];
-
-			switch (entity.classification) {
-			case Classification.largeThreat:
-				drawCircle(entity.x, entity.y, entity.dangerZone, 0);
-				/* falls through */
-			case Classification.smallThreat:
-				drawPoint(entity.x, entity.y + 20, 1, parseInt(entity.distance - entity.size));
-				drawCircle(entity.x, entity.y, entity.size + 20, 0);
-				if (entity.isMovingTowards) {
-					drawCircle(entity.x, entity.y, entity.size + 40, 3);
-				}
-				break;
-			}
+		if (player.safeToSplit) {
+			drawCircle(player.x, player.y, player.size + 16, constants.green);
 		}
 
-		// drawPoint(tempPoint[0], tempPoint[1], tempPoint[2], "what ?");
+		Object.keys(this.entities).forEach(
+				function(key, that) {
+
+					var entity = that.entities[key];
+
+					switch (entity.classification) {
+					case Classification.player:
+						drawPoint(entity.x, entity.y + 20, 1, "m:" + that.getMass(entity).toFixed(2) + " s:"
+								+ that.getSplitMass(entity).toFixed(2));
+						break;
+					case Classification.virus:
+						drawPoint(entity.x, entity.y, 1, entity.mass.toFixed(2));
+
+						if (player.largestCell.mass >= entity.mass) {
+							drawCircle(entity.x, entity.y, player.largestCell.size + 50, 3);
+						}
+						break;
+					case Classification.splitTarget:
+						drawCircle(entity.x, entity.y, entity.size + 20, constants.green);
+						break;
+					case Classification.mergeTarget:
+						drawCircle(entity.x, entity.y, entity.size + 20, constants.cyan);
+						break;
+					case Classification.food:
+						// drawPoint(entity.x, entity.y+20, 1, "m:" + entity.mass.toFixed(2));
+						if (entity.hasMoved) {
+							drawCircle(entity.x, entity.y, entity.size + 20, constants.gray);
+						} else if (entity.size > 14) {
+							drawCircle(entity.x, entity.y, entity.size + 20, constants.cyan);
+						}
+						break;
+					case Classification.unknown:
+						drawCircle(entity.x, entity.y, entity.size + 20, constants.cyan);
+						break;
+					case Classification.largeThreat:
+						drawCircle(entity.x, entity.y, entity.dangerZone, 0);
+						/* falls through */
+					case Classification.smallThreat:
+						drawPoint(entity.x, entity.y + 20, 1, parseInt(entity.distance - entity.size));
+						drawCircle(entity.x, entity.y, entity.size + 20, 0);
+						if (entity.isMovingTowards) {
+							drawCircle(entity.x, entity.y, entity.size + 40, 3);
+						}
+						break;
+					}
+				}, this);
+
+		Object.keys(this.teams).forEach(function(key, that) {
+
+			var team = that.teams[key];
+
+			drawCircle(team.x, team.y, team.size, constants.cyan);
+		}, this);
+
+		// cursor
+		// drawPoint(tempPoint[0], tempPoint[1], tempPoint[2], "");
 
 		this.updateInfo(player);
 
@@ -1389,6 +1409,7 @@ function AposBot() {
 		return false;
 	};
 
+	/*
 	this.isVirus = function(blob, cell) {
 		if (blob === null) {
 			if (cell.isVirus()) {
@@ -1405,6 +1426,7 @@ function AposBot() {
 		}
 		return false;
 	};
+	*/
 
 	this.getTimeToRemerge = function(mass) {
 		return ((mass * 0.02) + 30);
