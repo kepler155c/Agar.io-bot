@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1099
+// @version     3.1100
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1099;
+var aposBotVersion = 3.1100;
 
 var constants = {
 	splitRangeMin : 650,
@@ -177,6 +177,8 @@ function AposBot() {
 		player.threats = [];
 		player.viruses = [];
 
+		var teams = [];
+
 		var that = this;
 		Object.keys(entities).forEach(
 				function(key) {
@@ -186,6 +188,15 @@ function AposBot() {
 					var isEnemy = true;
 
 					entity.hasMoved = entity.isMoving();
+
+					entity.teamMate = null;
+					if (entity.name.length > 0) {
+						if (!teams[entity.name]) {
+							teams[entity.name] = entity;
+						} else {
+							teams[entity.name].teamMate = entity;
+						}
+					}
 
 					/*
 					if (entity.hasMoved) {
@@ -288,24 +299,12 @@ function AposBot() {
 					}
 				});
 
-		var teams = [];
-
 		//cell merging
 		for (i = 0; i < mergeList.length; i++) {
 			for (var z = i + 1; z < mergeList.length; z++) {
 
 				var m1 = mergeList[i];
 				var m2 = mergeList[z];
-
-				m1.teamMate = null;
-
-				if (!teams[m1.name]) {
-					teams[m1.name] = m1;
-				}
-
-				if (teams[m2.name]) {
-					teams[m2.name].teamMate = m2;
-				}
 
 				if (this.isMerging(mergeList[i], mergeList[z])
 						&& (mergeList[i].mass + mergeList[z].mass) / player.smallestCell.mass > constants.enemyRatio) {
