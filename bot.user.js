@@ -90,7 +90,9 @@ var Classification = {
 	cluster : 9
 };
 
-function foodFilter(entity) {
+function foodFilter(key) {
+
+	var entity = this.entities[key];
 
 	return this.isType(entity, Classification.food) || this.isType(entity, Classification.splitTarget)
 			|| this.isType(entity, Classification.mergeTarget);
