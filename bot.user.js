@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1097
+// @version     3.1098
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1097;
+var aposBotVersion = 3.1098;
 
 var constants = {
 	splitRangeMin : 650,
@@ -298,9 +298,10 @@ function AposBot() {
 				var m1 = mergeList[i];
 				var m2 = mergeList[z];
 
+				m1.teamMate = null;
+
 				if (!teams[m1.name]) {
 					teams[m1.name] = m1;
-					m1.teamMate = null;
 				}
 				
 				if (teams[m2.name]) {
