@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1101
+// @version     3.1102
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1101;
+var aposBotVersion = 3.1102;
 
 var constants = {
 	splitRangeMin : 650,
@@ -345,7 +345,7 @@ function AposBot() {
 		Object.keys(this.teams).forEach(function(key) {
 			var team = that.teams[key];
 			if (team.cells.length == 1) {
-				that.teams[key] = null;
+				delete teams[key];
 			} else {
 				var circle = enclosingCircle(team.cells);
 				team.x = circle.x;
