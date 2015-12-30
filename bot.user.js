@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1105
+// @version     3.1106
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1105;
+var aposBotVersion = 3.1106;
 
 var constants = {
 	splitRangeMin : 650,
@@ -90,10 +90,10 @@ var Classification = {
 	cluster : 9
 };
 
-function foodFilter(entity, that) {
+function foodFilter(entity) {
 
-	return that.isType(entity, Classification.food) || that.isType(entity, Classification.splitTarget)
-			|| entity.isType(entity, Classification.mergeTarget);
+	return this.isType(entity, Classification.food) || this.isType(entity, Classification.splitTarget)
+			|| this.isType(entity, Classification.mergeTarget);
 }
 
 //TODO: Team mode
@@ -574,7 +574,7 @@ function AposBot() {
 		var i;
 		var that = this;
 
-		Object.keys(this.entities).filter(foodFilter).forEach(function(key) {
+		Object.keys(this.entities).filter(foodFilter, this).forEach(function(key) {
 
 			var food = that.entities[key];
 			// increase virus mass if food is within
