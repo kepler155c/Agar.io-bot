@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1110
+// @version     3.1111
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1110;
+var aposBotVersion = 3.1111;
 
 var constants = {
 	splitRangeMin : 650,
@@ -309,7 +309,7 @@ function AposBot() {
 
 			var entity = this.entities[key];
 			// if any largish enemies are within our split radius, dont allow split
-			if (!entity.isVirus() && entity.size > 14) {
+			if (!entity.isVirus() && entity.size > 14 && !this.isType(entity, Classification.player)) {
 
 				if (entity.closestCell.size * entity.closestCell.size / 2 < entity.size * entity.size * 1.265) {
 					if (entity.distance < 750 + entity.closestCell.size) {
