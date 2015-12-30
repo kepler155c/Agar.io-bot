@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1103
+// @version     3.1104
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1103;
+var aposBotVersion = 3.1104;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1148,7 +1148,7 @@ function AposBot() {
 
 			var team = teams[key];
 			
-			drawCircle(team.x, team.y, team.size, constants.red);
+			drawCircle(team.x, team.y, team.size, constants.cyan);
 		});
 		
 		for (i = 0; i < player.threats.length; i++) {
