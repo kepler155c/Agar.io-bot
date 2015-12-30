@@ -321,6 +321,8 @@ function AposBot() {
 						newThreat[prop] = mergeList[i][prop];
 					}
 
+					// TODO: remove from food list
+					
 					newThreat.x = (mergeList[i].x + mergeList[z].x) / 2;
 					newThreat.y = (mergeList[i].y + mergeList[z].y) / 2;
 					newThreat.mass = mergeList[i].mass + mergeList[z].mass;
