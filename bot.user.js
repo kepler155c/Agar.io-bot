@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1114
+// @version     3.1115
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1114;
+var aposBotVersion = 3.1115;
 
 var constants = {
 	splitRangeMin : 650,
@@ -60,18 +60,6 @@ var constants = {
 	cyan : 6,
 	gray : 7,
 	black : 8,
-};
-
-var ThreatClassification = {
-	none : 0,
-	smallThreat : 1,
-	largeThreat : 2
-};
-
-var FoodClassification = {
-	normal : 0,
-	mergeTarget : 1,
-	splitTarget : 2
 };
 
 var Classification = {
@@ -125,6 +113,7 @@ Player.prototype.setCells = function(cells) {
 	for (var i = 0; i < cells.length; i++) {
 		var cell = cells[i];
 
+		cell.classification = Classification.player;
 		cell.mass = cell.size * cell.size / 100;
 
 		this.mass = this.mass + cell.mass;
@@ -235,7 +224,7 @@ function AposBot() {
 					};
 					this.teams[entity.name] = team;
 				}
-				this.teams[entity.name].cells.push(entity);
+				team.cells.push(entity);
 			}
 		}, this);
 
@@ -1161,8 +1150,6 @@ function AposBot() {
 				function(key) {
 
 					var entity = this.entities[key];
-
-					drawPoint(entity.x, entity.y + 40, 1, "type: " + entity.classification);
 
 					switch (entity.classification) {
 					case Classification.player:
