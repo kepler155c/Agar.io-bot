@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1104
+// @version     3.1105
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1104;
+var aposBotVersion = 3.1105;
 
 var constants = {
 	splitRangeMin : 650,
@@ -62,18 +62,39 @@ var constants = {
 	black : 8,
 };
 
+var ThreatClassification = {
+	none : 0,
+	smallThreat : 1,
+	largeThreat : 2
+};
+
+var FoodClassification = {
+	normal : 0,
+	mergeTarget : 1,
+	splitTarget : 2
+};
+
 var Classification = {
 	unknown : 0,
 	virus : 1,
 	food : 2,
 	noThreat : 3,
+
 	smallThreat : 4,
 	largeThreat : 5,
+
 	mergeTarget : 6,
 	splitTarget : 7,
+
 	player : 8,
 	cluster : 9
 };
+
+function foodFilter(entity, that) {
+
+	return that.isType(entity, Classification.food) || that.isType(entity, Classification.splitTarget)
+			|| entity.isType(entity, Classification.mergeTarget);
+}
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -173,7 +194,6 @@ function AposBot() {
 		var closestInfo;
 
 		player.safeToSplit = player.cells.length == 1;
-		player.food = [];
 		player.threats = [];
 		player.viruses = [];
 
@@ -191,11 +211,13 @@ function AposBot() {
 					entity.teamMate = null;
 
 					if (entity.name.length > 0) {
-						
+
 						var team = that.teams[entity.name];
-						
+
 						if (!team) {
-							team = { cells: [] };
+							team = {
+								cells : []
+							};
 							that.teams[entity.name] = team;
 						}
 						that.teams[entity.name].cells.push(entity);
@@ -216,7 +238,6 @@ function AposBot() {
 
 						entity.isMovingTowards = that.isMovingTowards(player, entity);
 						entity.mass = that.calculateMass(entity);
-						entity.eatable = true;
 						closestInfo = that.closestCell(player, entity.x, entity.y);
 
 						entity.closestCell = closestInfo.cell;
@@ -227,7 +248,6 @@ function AposBot() {
 
 						if (that.isFood(player.smallestCell, entity)) {
 							//IT'S FOOD!
-							player.food.push(entity);
 							entity.classification = Classification.food;
 						} else if (entity.isVirus(entity)) {
 							//IT'S VIRUS!
@@ -253,7 +273,6 @@ function AposBot() {
 							//	threatIfSplitList.push()
 						} else if (!entity.hasMoved) {
 							entity.classification = Classification.food;
-							player.food.push(entity);
 							mergeList.push(entity);
 						} else if (entity.closestCell.mass > 36
 								&& that.canSplitKill(entity.closestCell, entity, constants.playerRatio)) {
@@ -266,18 +285,15 @@ function AposBot() {
 								entity.classification = Classification.food;
 							}
 
-							player.food.push(entity);
 							mergeList.push(entity);
 						} else if (that.canEat(player.smallestCell, entity, constants.playerRatio)) {
 
 							entity.classification = Classification.food;
 
-							player.food.push(entity);
 							mergeList.push(entity);
 
 						} else if (!that.canEat(entity, player.smallestCell, constants.enemeyRatio)) {
 							if (player.cells.length > 1 && player.mass / entity.mass < 10) { // ?? mass check ?
-								player.food.push(entity);
 								entity.classification = Classification.mergeTarget;
 							} else {
 								entity.classification = Classification.noThreat;
@@ -322,7 +338,7 @@ function AposBot() {
 					}
 
 					// TODO: remove from food list
-					
+
 					newThreat.x = (mergeList[i].x + mergeList[z].x) / 2;
 					newThreat.y = (mergeList[i].y + mergeList[z].y) / 2;
 					newThreat.mass = mergeList[i].mass + mergeList[z].mass;
@@ -423,56 +439,55 @@ function AposBot() {
 	this.clusterFood = function(player, blobSize) {
 		player.foodClusters = [];
 
-		for (var i = 0; i < player.food.length; i++) {
+		var that = this;
 
-			var food = player.food[i];
+		Object.keys(this.entities).filter(foodFilter, this).forEach(function(key) {
 
-			if (food.eatable) {
+			var food = that.entities[key];
 
-				var addedCluster = false;
+			var addedCluster = false;
 
-				if (food.hasMoved) {
+			if (food.hasMoved) {
 
-					this.predictPosition(food, constants.splitDuration);
+				that.predictPosition(food, constants.splitDuration);
 
-					// really should clone da
-					player.foodClusters.push({
-						x : food.px,
-						y : food.py,
-						size : food.size,
-						mass : food.mass,
-						cell : food,
-						classification : Classification.cluster
-					});
-				} else {
-					for (var j = 0; j < player.foodClusters.length; j++) {
-						var cluster = player.foodClusters[j];
+				// really should clone da
+				player.foodClusters.push({
+					x : food.px,
+					y : food.py,
+					size : food.size,
+					mass : food.mass,
+					cell : food,
+					classification : Classification.cluster
+				});
+			} else {
+				for (var j = 0; j < player.foodClusters.length; j++) {
+					var cluster = player.foodClusters[j];
 
-						if (!cluster.cell) {
-							if (this.computeInexpensiveDistance(food.x, food.y, cluster.x, cluster.y) < blobSize * 2) {
+					if (!cluster.cell) {
+						if (that.computeInexpensiveDistance(food.x, food.y, cluster.x, cluster.y) < blobSize * 2) {
 
-								cluster.x = (food.x + cluster.x) / 2;
-								cluster.y = (food.y + cluster.y) / 2;
-								cluster.mass += food.mass;
-								cluster.size = Math.sqrt(cluster.mass * 100);
-								addedCluster = true;
-								break;
-							}
+							cluster.x = (food.x + cluster.x) / 2;
+							cluster.y = (food.y + cluster.y) / 2;
+							cluster.mass += food.mass;
+							cluster.size = Math.sqrt(cluster.mass * 100);
+							addedCluster = true;
+							break;
 						}
 					}
-					if (!addedCluster) {
-						player.foodClusters.push({
-							x : food.x,
-							y : food.y,
-							size : food.size,
-							mass : food.mass,
-							cell : null,
-							classification : Classification.cluster
-						});
-					}
+				}
+				if (!addedCluster) {
+					player.foodClusters.push({
+						x : food.x,
+						y : food.y,
+						size : food.size,
+						mass : food.mass,
+						cell : null,
+						classification : Classification.cluster
+					});
 				}
 			}
-		}
+		});
 	};
 
 	this.getBestFood = function(player) {
@@ -557,11 +572,14 @@ function AposBot() {
 	this.calculateVirusMass = function(player) {
 
 		var i;
+		var that = this;
 
-		// increase virus mass if food is within
-		for (i = player.food.length - 1; i >= 0; i--) {
-			this.foodInVirus(player.food[i], player.viruses);
-		}
+		Object.keys(this.entities).filter(foodFilter).forEach(function(key) {
+
+			var food = that.entities[key];
+			// increase virus mass if food is within
+			that.foodInVirus(food, player.viruses);
+		});
 
 		for (i = 0; i < player.viruses.length; i++) {
 			var virus = player.viruses[i];
@@ -570,7 +588,7 @@ function AposBot() {
 				for (var j = 0; j < virus.foodList.length; j++) {
 					var food = virus.foodList[j];
 					if (!food.hasMoved) { // keep chasing cells in viruses - it's kinda funny
-						food.eatable = false;
+						food.classification = Classification.unknown;
 					}
 				}
 			}
@@ -1027,7 +1045,7 @@ function AposBot() {
 	 */
 	this.mainLoop = function(cells) {
 		var player = this.player;
-		var entities = getMemoryCells();
+		this.entities = getMemoryCells();
 		var i;
 
 		this.infoStrings = [];
@@ -1103,7 +1121,7 @@ function AposBot() {
 		//loop through everything that is on the screen and
 		//separate everything in it's own category.
 
-		this.separateListBasedOnFunction(player, entities);
+		this.separateListBasedOnFunction(player, this.entities);
 
 		/*player.threats.sort(function(a, b){
 		    return a.distance-b.distance;
@@ -1113,9 +1131,10 @@ function AposBot() {
 
 		var destinationChoices = this.determineBestDestination(player, tempPoint);
 
-		Object.keys(entities).forEach(function(key) {
+		var that = this;
+		Object.keys(this.entities).forEach(function(key) {
 
-			var entity = entities[key];
+			var entity = that.entities[key];
 
 			switch (entity.classification) {
 			case Classification.virus:
@@ -1149,10 +1168,10 @@ function AposBot() {
 		Object.keys(teams).forEach(function(key) {
 
 			var team = teams[key];
-			
+
 			drawCircle(team.x, team.y, team.size, constants.cyan);
 		});
-		
+
 		for (i = 0; i < player.threats.length; i++) {
 
 			var entity = player.threats[i];
