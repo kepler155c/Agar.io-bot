@@ -5,7 +5,7 @@
 /* global drawPoint, drawLine, drawCircle, drawArc, getModek, getMapStartX, getMapStartY */
 /* global getPointX, getPointY, getMapEndX, getMapEndY, getMouseX, getMouseY */
 /* global getZoomlessRatio, verticalDistance, getPlayer, screenToGameX, screenToGameY */
-/* global getX, getY, getMemoryCells, getCells, getMode, getLastUpdate */
+/* global getX, getY, getMemoryCells, getCells, getMode, getLastUpdate, isToggled */
 
 /*The MIT License (MIT)
 
@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1117
+// @version     3.1118
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1117;
+var aposBotVersion = 3.1118;
 
 var constants = {
 	splitRangeMin : 650,
@@ -207,8 +207,6 @@ function AposBot() {
 
 	this.determineTeams = function() {
 
-		this.teams = [];
-
 		Object.keys(this.entities).forEach(function(key) {
 
 			var entity = this.entities[key];
@@ -253,7 +251,7 @@ function AposBot() {
 			if (this.isType(entityA, Classification.player)) {
 				console.log('player??');
 			}
-			
+
 			for (var b = i + 1; b < keys.length; b++) {
 
 				var entityB = this.entities[keys[b]];
@@ -371,6 +369,11 @@ function AposBot() {
 						if (player.cells.length > 1 && player.mass / entity.mass < 10) { // ?? mass check ?
 							entity.classification = Classification.mergeTarget;
 						}
+					}
+
+					if (this.isType(entity, Classification.smallThreat)
+							|| this.isType(entity, Classification.largeThreat)) {
+						this.setMinimumDistance(player, entity, constants.largeThreatRatio);
 					}
 
 					if (entity.classification == Classification.unknown) {
@@ -741,12 +744,17 @@ function AposBot() {
 		return true;
 	};
 
-	this.getMinimumDistance = function(threat) {
+	this.setMinimumDistance = function(player, threat, largeThreatRatio) {
 
-		if (this.isType(threat, Classification.largeThreat)) {
-			return threat.size + constants.splitRangeMax;
+		if (threat.mass / player.mass > largeThreatRatio) {
+			threat.dangerZone = threat.size + threat.closestCell.size + threat.safeDistance;
+
+		} else if (this.isType(threat, Classification.largeThreat)) {
+			threat.dangerZone = threat.size + constants.splitRangeMax;
+
+		} else {
+			threat.dangerZone = threat.size + threat.closestCell.size + threat.safeDistance;
 		}
-		return threat.size + threat.closestCell.size + threat.safeDistance;
 	};
 
 	this.determineThreats = function(player, panicLevel, badAngles, obstacleAngles, obstacleList) {
@@ -768,7 +776,7 @@ function AposBot() {
 						}
 					}
 
-					threat.dangerZone = this.getMinimumDistance(threat);
+					this.setMinimumDistance(player, threat, constants.largeThreatRatio);
 
 					if (threat.distance < threat.dangerZone) {
 
@@ -1066,8 +1074,10 @@ function AposBot() {
 	this.mainLoop = function(cells) {
 
 		var player = this.player;
+		var destinationChoices = null;
 
 		this.infoStrings = [];
+		this.teams = [];
 		this.entities = getMemoryCells();
 
 		this.player.setCells(cells);
@@ -1138,64 +1148,68 @@ function AposBot() {
 		//separate everything in it's own category.
 
 		this.initializeEntities(player);
-		this.determineMerges();
-		this.separateListBasedOnFunction(player);
-		this.determineTeams();
-		this.isSafeToSplit(player);
-		this.calculateVirusMass(player);
+		if (isToggled()) {
+			this.determineMerges();
+		}
 
-		var destinationChoices = this.determineBestDestination(player, tempPoint);
+		this.separateListBasedOnFunction(player);
+
+		if (isToggled()) {
+			this.determineTeams();
+			this.isSafeToSplit(player);
+			this.calculateVirusMass(player);
+
+			destinationChoices = this.determineBestDestination(player, tempPoint);
+		}
 
 		if (player.safeToSplit) {
 			drawCircle(player.x, player.y, player.size + 16, constants.green);
 		}
 
-		Object.keys(this.entities).forEach(
-				function(key) {
+		Object.keys(this.entities).forEach(function(key) {
 
-					var entity = this.entities[key];
+			var entity = this.entities[key];
 
-					switch (entity.classification) {
-					case Classification.player:
-						drawPoint(entity.x, entity.y + 20, 1, "m:" + this.getMass(entity).toFixed(2) + " s:"
-								+ this.getSplitMass(entity).toFixed(2));
-						break;
-					case Classification.virus:
-						drawPoint(entity.x, entity.y, 1, entity.mass.toFixed(2));
+			switch (entity.classification) {
+			case Classification.player:
+				// drawPoint(entity.x, entity.y + 20, 1, "m:" + this.getMass(entity).toFixed(2));
+				break;
+			case Classification.virus:
+				//drawPoint(entity.x, entity.y, 1, entity.mass.toFixed(2));
 
-						if (player.largestCell.mass >= entity.mass) {
-							drawCircle(entity.x, entity.y, player.largestCell.size + 50, 3);
-						}
-						break;
-					case Classification.splitTarget:
-						drawCircle(entity.x, entity.y, entity.size + 20, constants.green);
-						break;
-					case Classification.mergeTarget:
-						drawCircle(entity.x, entity.y, entity.size + 20, constants.cyan);
-						break;
-					case Classification.food:
-						// drawPoint(entity.x, entity.y+20, 1, "m:" + entity.mass.toFixed(2));
-						if (entity.hasMoved) {
-							drawCircle(entity.x, entity.y, entity.size + 20, constants.gray);
-						} else if (entity.size > 14) {
-							drawCircle(entity.x, entity.y, entity.size + 20, constants.cyan);
-						}
-						break;
-					case Classification.unknown:
-						drawCircle(entity.x, entity.y, entity.size + 20, constants.cyan);
-						break;
-					case Classification.largeThreat:
-						drawCircle(entity.x, entity.y, entity.dangerZone, 0);
-						/* falls through */
-					case Classification.smallThreat:
-						drawPoint(entity.x, entity.y + 20, 1, parseInt(entity.distance - entity.size));
-						drawCircle(entity.x, entity.y, entity.size + 20, 0);
-						if (entity.isMovingTowards) {
-							drawCircle(entity.x, entity.y, entity.size + 40, 3);
-						}
-						break;
-					}
-				}, this);
+				if (player.largestCell.mass >= entity.mass) {
+					drawCircle(entity.x, entity.y, player.largestCell.size + 50, 3);
+				}
+				break;
+			case Classification.splitTarget:
+				drawCircle(entity.x, entity.y, entity.size + 20, constants.green);
+				break;
+			case Classification.mergeTarget:
+				drawCircle(entity.x, entity.y, entity.size + 20, constants.cyan);
+				break;
+			case Classification.food:
+				// drawPoint(entity.x, entity.y+20, 1, "m:" + entity.mass.toFixed(2));
+				if (entity.hasMoved) {
+					drawCircle(entity.x, entity.y, entity.size + 20, constants.gray);
+				} else if (entity.size > 14) {
+					drawCircle(entity.x, entity.y, entity.size + 20, constants.cyan);
+				}
+				break;
+			case Classification.unknown:
+				drawCircle(entity.x, entity.y, entity.size + 20, constants.cyan);
+				break;
+			case Classification.largeThreat:
+				drawCircle(entity.x, entity.y, entity.dangerZone, 0);
+				/* falls through */
+			case Classification.smallThreat:
+				//drawPoint(entity.x, entity.y + 20, 1, parseInt(entity.distance - entity.size));
+				drawCircle(entity.x, entity.y, entity.size + 20, 0);
+				if (entity.isMovingTowards) {
+					drawCircle(entity.x, entity.y, entity.size + 40, 3);
+				}
+				break;
+			}
+		}, this);
 
 		Object.keys(this.teams).forEach(function(key) {
 

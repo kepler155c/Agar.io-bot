@@ -20,11 +20,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.268
+// @version     4.269
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.268;
+var aposLauncherVersion = 4.269;
 
 var showAd = false;
 
@@ -1458,7 +1458,7 @@ console.log("Running Bot Launcher!");
                 Ha = !1,
                 R = 0,
                 ta = !0,
-                lb = false,
+                lb = true,
                 aa = s = ~~((pa + ra) / 2),
                 ba = t = ~~((qa + sa) / 2),
                 ca = 1,
@@ -1804,6 +1804,9 @@ console.log("Running Bot Launcher!");
                 d.connect = Ca;
 
                 //UPDATE
+                window.isToggled = function() {
+                    return toggle;
+                }
                 /**
                  * Tells you if the game is in Dark mode.
                  * @return Boolean for dark mode.
