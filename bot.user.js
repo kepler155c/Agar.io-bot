@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1128
+// @version     3.1129
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1128;
+var aposBotVersion = 3.1129;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1424,11 +1424,12 @@ function AposBot() {
 
 		if (approximate) {
 			
-			if (radiusSum * radiusSum - radiusSum < distanceX * distanceX + distanceY * distanceY) {
+			var r2 = radiusSum * radiusSum;
+			var distance = distanceX * distanceX + distanceY * distanceY;
+			if (r2 - radiusSum < distance) {
 
-				console.log(circle1);
-				console.log(circle2);
-				console.log('intersect: ' + ((radiusSum * radiusSum - radiusSum) - (distanceX * distanceX + distanceY * distanceY)));
+				console.log('radius: ' + r2 - radiusSum);
+				console.log('distance: ' + distance);
 				return true;
 			}
 			return false;
