@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1142
+// @version     3.1143
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1142;
+var aposBotVersion = 3.1143;
 
 var constants = {
 	splitRangeMin : 650,
@@ -748,7 +748,7 @@ function AposBot() {
 			threat.dangerZone = threat.size + threat.closestCell.size + threat.safeDistance;
 
 		} else if (this.isType(threat, Classification.largeThreat)) {
-			threat.dangerZone = threat.size + threat.closestCell.size + constants.splitRangeMax + threat.safeDistance;
+			threat.dangerZone = threat.size + threat.closestCell.size + constants.splitRangeMax + 20; // use constant instead of safe distance (bouncy)
 
 		} else {
 			threat.dangerZone = threat.size + threat.closestCell.size + threat.safeDistance;
@@ -821,14 +821,18 @@ function AposBot() {
 				var cell = player.cells[j];
 
 				if (virus.distance < cell.size + 750 && cell.mass + virus.foodMass >= virus.mass) {
-					tempOb = this.getAngleRange(cell, virus, i, cell.size);
+
+					var minDistance = cell.size - virus.size;
+
+					tempOb = this.getAngleRange(cell, virus, i, minDistance);
 					angle1 = tempOb[0];
 					angle2 = this.rangeToAngle(tempOb);
 					obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
 
 					virus.range = [ angle1, angle2 ];
-					if (virus.distance <= cell.size) {
-						badAngles.push(this.getAngleRange(cell, virus, 0, cell.size).concat(virus.distance));
+
+					if (virus.distance > minDistance) {
+						badAngles.push(this.getAngleRange(cell, virus, 0, minDistance).concat(virus.distance));
 					}
 				}
 			}
