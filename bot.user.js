@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1144
+// @version     3.1146
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1144;
+var aposBotVersion = 3.1146;
 
 var constants = {
 	splitRangeMin : 650,
@@ -822,7 +822,7 @@ function AposBot() {
 
 				if (virus.distance < cell.size + 750 && cell.mass + virus.foodMass >= virus.mass) {
 
-					var minDistance = cell.size - virus.size;
+					var minDistance = cell.size - 15;
 
 					tempOb = this.getAngleRange(cell, virus, i, minDistance);
 					angle1 = tempOb[0];
@@ -1148,6 +1148,10 @@ function AposBot() {
 
 			var entity = this.entities[key];
 
+			if (entity.isMovingTowards) {
+				drawCircle(entity.x, entity.y, entity.size + 40, 3);
+			}
+
 			switch (entity.classification) {
 			case Classification.player:
 				// drawPoint(entity.x, entity.y + 20, 1, "m:" + this.getMass(entity).toFixed(2));
@@ -1434,11 +1438,21 @@ function AposBot() {
 			return false;
 		}
 
+		/*
 		var oldx = b.getLastPos().x;
 		var oldy = b.getLastPos().y;
-
 		return this.computeInexpensiveDistance(b.x, b.y, a.x, a.y) < this.computeInexpensiveDistance(oldx, oldy, a.x,
 				a.y);
+		*/
+		
+        var offsetX = -getMapStartX();
+        var offsetY = -getMapStartY();
+
+        // m = slope, i = intercept
+		var m = (a.y - b.y) / (a.x - b.x);
+		var i = a.y + offsetY - m * (a.x + offsetX);
+		
+		return i < b.size;
 	};
 
 	this.getAngle = function(x1, y1, x2, y2) {
