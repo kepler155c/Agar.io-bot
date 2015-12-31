@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1119
+// @version     3.1120
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1119;
+var aposBotVersion = 3.1120;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1026,7 +1026,7 @@ function AposBot() {
 
 				var velocity = (this.getVelocity(threat) + threat.closestCell.velocity);
 				threat.safeDistance = threat.closestCell.mass < 50 ? velocity * 4 : velocity * 2;
-				this.setMinimumDistance(threat, this.isType(threat, Classification.largeThreat));
+				this.setMinimumDistance(player, threat, constants.largeThreatRatio);
 
 				if (this.circlesIntersect(cell, threat)) {
 					panicLevel = 2;
