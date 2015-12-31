@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1138
+// @version     3.1139
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1138;
+var aposBotVersion = 3.1139;
 
 var constants = {
 	splitRangeMin : 650,
@@ -778,13 +778,10 @@ function AposBot() {
 
 					if (threat.distance < threat.dangerZone) {
 
-						if (panicLevel == 2 && threat.closestCell.size > 300) {
+						if (panicLevel == 2 && threat.closestCell.mass > 200 && threat.intersects) {
 
-							if (threat.distance < threat.closestCell.size + threat.safeDistance) {
-
-								badAngles.push(this.getAngleRange(threat.closestCell, threat, i,
-										threat.closestCell.size + threat.safeDistance).concat(threat.distance));
-							}
+							badAngles.push(this.getAngleRange(threat.closestCell, threat, i,
+									threat.closestCell.size + threat.safeDistance).concat(threat.distance));
 						} else {
 
 							badAngles.push(this.getAngleRange(threat.closestCell, threat, i, threat.dangerZone).concat(
@@ -1033,13 +1030,14 @@ function AposBot() {
 				threat.safeDistance = threat.closestCell.mass < 50 ? velocity * 4 : velocity * 2;
 				this.setMinimumDistance(player, threat, constants.largeThreatRatio);
 
-				if (this.circlesIntersect(cell, threat)) {
+				//				threat.intersects = this.circlesIntersect(cell, threat);
+				threat, intersects = threat.distance < cell.size + threat.size + threat.safeDistance;
+				if (threat.intersects) {
 					panicLevel = 2;
-					return; // max panic level
 				}
 				if (threat.distance + threat.closestCell.size < threat.dangerZone) {
 					overlapCount++;
-					if (overlapCount > 1) {
+					if (overlapCount > 1 && panicLevel < 2) {
 						panicLevel = 1;
 						return;
 					}
@@ -1118,7 +1116,7 @@ function AposBot() {
 
 				drawCircle(player.splitLocation.x, player.splitLocation.y, 50, constants.green);
 				if (player.splitTarget) {
-					return [ player.splitLocation.x, player.splitLocation.y ];
+					return [ player.splitTarget.x, player.splitTarget.y ];
 				}
 				return [ getPointX(), getPointY() ];
 			}
