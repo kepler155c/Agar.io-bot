@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1143
+// @version     3.1144
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1143;
+var aposBotVersion = 3.1144;
 
 var constants = {
 	splitRangeMin : 650,
@@ -831,7 +831,7 @@ function AposBot() {
 
 					virus.range = [ angle1, angle2 ];
 
-					if (virus.distance > minDistance) {
+					if (virus.distance < minDistance) {
 						badAngles.push(this.getAngleRange(cell, virus, 0, minDistance).concat(virus.distance));
 					}
 				}
