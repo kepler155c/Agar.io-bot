@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1151
+// @version     3.1152
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1151;
+var aposBotVersion = 3.1152;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1039,7 +1039,7 @@ function AposBot() {
 		if (panicLevel < 1 && overlapCount > 1) {
 			panicLevel = 1;
 		}
-		
+
 		if (panicLevel == 1) {
 			drawCircle(player.x, player.y, player.size + 16, constants.orange);
 		} else if (panicLevel == 2) {
@@ -1172,20 +1172,21 @@ function AposBot() {
 				if (entity.hasMoved) {
 					drawCircle(entity.x, entity.y, entity.size + 20, constants.gray);
 				} else if (entity.size > 14) {
+					drawPoint(entity.x, entity.y + 20, 1, entity.size);
 					drawCircle(entity.x, entity.y, entity.size + 20, constants.cyan);
 				}
 				break;
 			case Classification.unknown:
-				drawCircle(entity.x, entity.y, entity.size + 20, constants.cyan);
+				drawCircle(entity.x, entity.y, entity.size + 20, constants.purple);
 				break;
 			case Classification.largeThreat:
-				drawCircle(entity.x, entity.y, entity.dangerZone, 0);
-				/* falls through */
 			case Classification.smallThreat:
 				//drawPoint(entity.x, entity.y + 20, 1, parseInt(entity.distance - entity.size));
-				drawCircle(entity.x, entity.y, entity.size + 20, 0);
-				if (entity.isMovingTowards) {
-					drawCircle(entity.x, entity.y, entity.size + 40, 3);
+				var color = entity.isMovingTowards ? constants.red : constants.orange;
+				drawCircle(entity.x, entity.y, entity.size + 20, color);
+
+				if (entity.isType(Classification.largeThreat)) {
+					drawCircle(entity.x, entity.y, entity.dangerZone, color);
 				}
 				break;
 			}
@@ -1437,14 +1438,14 @@ function AposBot() {
 		}
 
 		var a = b.getLastPos();
-		
+
 		var bAngle = this.getAngle(a.x, a.y, b.x, b.y);
 		var targetAngle = this.getAngle(b.x, b.y, target.x, target.y);
 		/*
 		return this.computeInexpensiveDistance(b.x, b.y, a.x, a.y) < this.computeInexpensiveDistance(oldx, oldy, a.x,
 				a.y);
 		*/
-		
+
 		return Math.abs(bAngle - targetAngle) < 20;
 	};
 
