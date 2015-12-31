@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1120
+// @version     3.1121
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1120;
+var aposBotVersion = 3.1121;
 
 var constants = {
 	splitRangeMin : 650,
@@ -181,11 +181,12 @@ function AposBot() {
 		return this.isType(entity, Classification.virus);
 	};
 
-	this.nonVirusFilter = function(key) {
+	this.mergeFilter = function(key) {
 
 		var entity = this.entities[key];
 
-		if (entity.isVirus() || this.isType(entity, Classification.player)) {
+		// added size in order to increase performance
+		if (entity.isVirus() || this.isType(entity, Classification.player) || entity.size <= 14) {
 			return false;
 		}
 		return true;
@@ -242,26 +243,24 @@ function AposBot() {
 
 	this.determineMerges = function() {
 
-		var keys = Object.keys(this.entities).filter(this.nonVirusFilter, this);
+		var keys = Object.keys(this.entities).filter(this.mergeFilter, this);
 
 		for (var i = 0; i < keys.length; i++) {
 
 			var entityA = this.entities[keys[i]];
 
-			if (this.isType(entityA, Classification.player)) {
-				console.log('player??');
-			}
-
 			for (var b = i + 1; b < keys.length; b++) {
 
 				var entityB = this.entities[keys[b]];
 
-				if (this.isMerging(entityA, entityB)) {
+				if (this.circlesIntersect(entityA, entityB)) {
 
 					var largerEntity = entityA.mass > entityB.mass ? entityA : entityB;
 
 					largerEntity.mass = entityA.mass + entityB.mass;
 					// newThreat.size = Math.sqrt(newThreat.mass * 100);
+					drawCircle(largerEntity.x, largerEntity.y, largerEntity.size + 60, constants.green);
+
 				}
 			}
 		}
@@ -730,8 +729,6 @@ function AposBot() {
 			destination[0] = player.splitLocation.x;
 			destination[1] = player.splitLocation.y;
 
-			player.splitDistance = 0;
-
 		} else {
 
 			doSplit = false;
@@ -1102,24 +1099,6 @@ function AposBot() {
 		drawLine(getX() + (1920 / 2) / getZoomlessRatio(), getY() - (1080 / 2) / getZoomlessRatio(), getX()
 				+ (1920 / 2) / getZoomlessRatio(), getY() + (1080 / 2) / getZoomlessRatio(), 7);
 
-		if (player.isSplitting && player.cells.length > 1) {
-			var distance = this.computeDistance(player.cells[0].x, player.cells[0].y, player.cells[1].x,
-					player.cells[1].y);
-			if (distance > player.splitDistance) {
-
-				var lastPos = player.cells[1].getLastPos();
-
-				var cellDistance = this.computeDistance(player.cells[1].x, player.cells[1].y, lastPos.x, lastPos.y);
-
-				player.splitDistance = distance;
-				var timeDiff = getLastUpdate() - this.previousUpdated;
-				player.splitVelocity = cellDistance / timeDiff;
-
-				//console.log([ player.splitVelocity, cellDistance, timeDiff, player.cells[1].x, player.cells[1].y, 
-				//				lastPos.x, lastPos.y ]);
-			}
-		}
-
 		if (player.isSplitting) {
 
 			if (player.size <= player.splitSize && (Date.now() - player.splitTimer > 200)) {
@@ -1131,7 +1110,7 @@ function AposBot() {
 
 				drawCircle(player.splitLocation.x, player.splitLocation.y, 50, constants.green);
 				if (player.splitTarget) {
-					return [ player.splitTarget.x, player.splitTarget.y ];
+					return [ player.splitLocation.x, player.splitLocation.y ];
 				}
 				return [ getPointX(), getPointY() ];
 			}
@@ -1313,10 +1292,8 @@ function AposBot() {
 	};
 
 	// Get a distance that is Inexpensive on the cpu for various purpaces
-	this.computeInexpensiveDistance = function(x1, y1, x2, y2, s1, s2) {
-		// Make sure there are no null optional params.
-		s1 = s1 || 0;
-		s2 = s2 || 0;
+	this.computeInexpensiveDistance = function(x1, y1, x2, y2) {
+
 		var xdis = x1 - x2;
 		var ydis = y1 - y2;
 		// Get abs quickly
