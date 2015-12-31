@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1155
+// @version     3.1156
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1155;
+var aposBotVersion = 3.1156;
 
 var constants = {
 	splitRangeMin : 650,
@@ -103,47 +103,68 @@ var Player = function() {
 	this.fuseTimer = null;
 };
 
-Player.prototype.setCells = function(cells) {
-	this.cells = cells;
-	this.isAlive = this.cells.length > 0;
-	this.mass = 0;
-	this.smallestCell = cells[0];
-	this.largestCell = cells[0];
+Player.prototype = {
 
-	for (var i = 0; i < cells.length; i++) {
-		var cell = cells[i];
-
-		cell.mass = cell.size * cell.size / 100;
-
-		this.mass = this.mass + cell.mass;
-
-		if (cell.size < this.smallestCell.size) {
-			this.smallestCell = cell;
-		}
-		if (cell.size > this.largestCell.size) {
-			this.largestCell = cell;
-		}
-
-		if (cells.length > 0) {
-			if (!cell.fuseTimer) {
-				cell.fuseTimer = Date.now() + (30 + cell.mass * 0.02) * 1000;
+	setCells: function(cells) {
+		this.cells = cells;
+		this.isAlive = this.cells.length > 0;
+		this.mass = 0;
+		this.smallestCell = cells[0];
+		this.largestCell = cells[0];
+	
+		for (var i = 0; i < cells.length; i++) {
+			var cell = cells[i];
+	
+			cell.mass = cell.size * cell.size / 100;
+	
+			this.mass = this.mass + cell.mass;
+	
+			if (cell.size < this.smallestCell.size) {
+				this.smallestCell = cell;
 			}
-		} else {
-			cell.fuseTimer = null;
+			if (cell.size > this.largestCell.size) {
+				this.largestCell = cell;
+			}
+	
+			if (cells.length > 0) {
+				if (!cell.fuseTimer) {
+					cell.fuseTimer = Date.now() + (30 + cell.mass * 0.02) * 1000;
+				}
+			} else {
+				cell.fuseTimer = null;
+			}
 		}
-	}
-
-	if (cells.length > 0) {
-
-		var enclosingCell = cells[0];
-
-		if (cells.length > 1) {
-			enclosingCell = enclosingCircle(cells);
+	
+		if (cells.length > 0) {
+	
+			var enclosingCell = cells[0];
+	
+			if (cells.length > 1) {
+				enclosingCell = enclosingCircle(cells);
+			}
+			this.size = enclosingCell.size;
+			this.x = enclosingCell.x;
+			this.y = enclosingCell.y;
 		}
-		this.size = enclosingCell.size;
-		this.x = enclosingCell.x;
-		this.y = enclosingCell.y;
-	}
+	},
+	isSafeToSplit: function(entities) {
+
+		this.safeToSplit = this.cells.length == 1;
+
+		Object.keys(entities).forEach(function(key) {
+
+			var entity = entities[key];
+			// if any largish enemies are within our split radius, dont allow split
+			if (!entity.isVirus() && entity.size > 14 && !entity.isType(Classification.player)) {
+
+				if (entity.closestCell.size * entity.closestCell.size / 2 < entity.size * entity.size * 1.265) {
+					if (entity.distance < 750 + entity.closestCell.size) {
+						this.safeToSplit = false;
+					}
+				}
+			}
+		}, this);
+	},
 };
 
 console.log("Apos Bot!");
@@ -296,25 +317,6 @@ function AposBot() {
 		for (var i = 0; i < player.cells.length; i++) {
 			player.cells[i].classification = Classification.player;
 		}
-	};
-
-	this.isSafeToSplit = function(player) {
-
-		player.safeToSplit = player.cells.length == 1;
-
-		Object.keys(this.entities).forEach(function(key) {
-
-			var entity = this.entities[key];
-			// if any largish enemies are within our split radius, dont allow split
-			if (!entity.isVirus() && entity.size > 14 && !entity.isType(Classification.player)) {
-
-				if (entity.closestCell.size * entity.closestCell.size / 2 < entity.size * entity.size * 1.265) {
-					if (entity.distance < 750 + entity.closestCell.size) {
-						player.safeToSplit = false;
-					}
-				}
-			}
-		}, this);
 	};
 
 	this.separateListBasedOnFunction = function(player) {
@@ -540,7 +542,7 @@ function AposBot() {
 				if (!cluster.cell.hasMoved) {
 					// easy food
 					weight = weight * 25;
-				} else if (player.safeToSplit && cluster.celll.isType(Classification.splitTarget)
+				} else if (player.safeToSplit && cluster.cell.isType(Classification.splitTarget)
 						&& this.inSplitRange(cluster.cell)) {
 					weight = weight * 3;
 					cluster.canSplitKill = true;
@@ -1145,7 +1147,7 @@ function AposBot() {
 
 		if (isToggled()) {
 			this.determineTeams();
-			this.isSafeToSplit(player);
+			player.isSafeToSplit(this.entities);
 			this.calculateVirusMass(player);
 
 			destinationChoices = this.determineBestDestination(player, tempPoint);
