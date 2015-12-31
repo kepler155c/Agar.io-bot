@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1133
+// @version     3.1134
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1133;
+var aposBotVersion = 3.1134;
 
 var constants = {
 	splitRangeMin : 650,
@@ -827,14 +827,14 @@ function AposBot() {
 						var cell = player.cells[j];
 
 						if (virus.distance < cell.size + 750 && cell.mass + virus.foodMass >= virus.mass) {
-							tempOb = this.getAngleRange(cell, virus, i, cell.size + virus.size); // was 50
+							tempOb = this.getAngleRange(cell, virus, i, cell.size + virus.size / 1.5); // was 50
 							angle1 = tempOb[0];
 							angle2 = this.rangeToAngle(tempOb);
 							obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
 
 							virus.range = [ angle1, angle2 ];
 							if (this.circlesIntersect(cell, virus)) {
-								badAngles.push(this.getAngleRange(cell, virus, 0, cell.size + virus.size / 2.1).concat(
+								badAngles.push(this.getAngleRange(cell, virus, 0, cell.size + virus.size / 1.5).concat(
 										virus.distance));
 							}
 						}
@@ -1116,13 +1116,13 @@ function AposBot() {
 			}
 		}
 
+		/*
 		if (player.cells.length > 1) {
 			drawCircle(player.x, player.y, player.size, 6);
 		}
+		*/
 
 		drawCircle(player.x, player.y, player.size + constants.enemySplitDistance, 5);
-
-		// drawLine(player.x, player.y, player.x, player.y + player.size + this.splitDistance, 7);
 
 		//loop through everything that is on the screen and
 		//separate everything in it's own category.
