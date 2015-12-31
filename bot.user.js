@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1154
+// @version     3.1155
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1154;
+var aposBotVersion = 3.1155;
 
 var constants = {
 	splitRangeMin : 650,
@@ -153,6 +153,7 @@ window.botList = window.botList || [];
 function AposBot() {
 	this.name = "AposBot " + aposBotVersion;
 
+	this.initialized = false;
 	this.toggleFollow = false;
 	this.infoStrings = [];
 	this.moreInfoStrings = [];
@@ -170,15 +171,15 @@ function AposBot() {
 
 		var entity = this.entities[key];
 
-		return this.isType(entity, Classification.food) || this.isType(entity, Classification.splitTarget)
-				|| this.isType(entity, Classification.mergeTarget);
+		return entity.isType(Classification.food) || entity.isType(Classification.splitTarget)
+				|| entity.isType(Classification.mergeTarget);
 	};
 
 	this.virusFilter = function(key) {
 
 		var entity = this.entities[key];
 
-		return this.isType(entity, Classification.virus);
+		return entity.isType(Classification.virus);
 	};
 
 	this.mergeFilter = function(key) {
@@ -186,7 +187,7 @@ function AposBot() {
 		var entity = this.entities[key];
 
 		// added size in order to increase performance
-		if (entity.isVirus() || this.isType(entity, Classification.player) || entity.size <= 14) {
+		if (entity.isVirus() || entity.isType(Classification.player) || entity.size <= 14) {
 			return false;
 		}
 		return true;
@@ -196,14 +197,14 @@ function AposBot() {
 
 		var entity = this.entities[key];
 
-		return this.isType(entity, Classification.largeThreat);
+		return entity.isType(Classification.largeThreat);
 	};
 
 	this.threatFilter = function(key) {
 
 		var entity = this.entities[key];
 
-		return this.isType(entity, Classification.largeThreat) || this.isType(entity, Classification.smallThreat);
+		return entity.isType(Classification.largeThreat) || entity.isType(Classification.smallThreat);
 	};
 
 	this.determineTeams = function() {
@@ -305,7 +306,7 @@ function AposBot() {
 
 			var entity = this.entities[key];
 			// if any largish enemies are within our split radius, dont allow split
-			if (!entity.isVirus() && entity.size > 14 && !this.isType(entity, Classification.player)) {
+			if (!entity.isVirus() && entity.size > 14 && !entity.isType(Classification.player)) {
 
 				if (entity.closestCell.size * entity.closestCell.size / 2 < entity.size * entity.size * 1.265) {
 					if (entity.distance < 750 + entity.closestCell.size) {
@@ -372,8 +373,8 @@ function AposBot() {
 						}
 					}
 
-					if (this.isType(entity, Classification.smallThreat)
-							|| this.isType(entity, Classification.largeThreat)) {
+					if (entity.isType(Classification.smallThreat)
+							|| entity.isType(Classification.largeThreat)) {
 						this.setMinimumDistance(player, entity, constants.largeThreatRatio);
 					}
 
@@ -528,18 +529,18 @@ function AposBot() {
 			var weight = cluster.size;
 			if (cluster.cell) {
 
-				if ((player.cells.length == 1) && this.isType(cluster.cell, Classification.splitTarget)) {
+				if ((player.cells.length == 1) && cluster.cell.isType(Classification.splitTarget)) {
 					weight = weight * 2.5;
 				}
 
-				if ((player.cells.length > 1) && this.isType(cluster.cell, Classification.mergeTarget)) {
+				if ((player.cells.length > 1) && cluster.cell.isType(Classification.mergeTarget)) {
 					weight = weight * 2.5;
 				}
 
 				if (!cluster.cell.hasMoved) {
 					// easy food
 					weight = weight * 25;
-				} else if (player.safeToSplit && this.isType(cluster.cell, Classification.splitTarget)
+				} else if (player.safeToSplit && cluster.celll.isType(Classification.splitTarget)
 						&& this.inSplitRange(cluster.cell)) {
 					weight = weight * 3;
 					cluster.canSplitKill = true;
@@ -700,7 +701,7 @@ function AposBot() {
 
 		// really bad condition logic - but check if it's a split target just outside of range
 		if (!doSplit && !player.isLuring && player.safeToSplit && cluster.cell && !shiftedAngle.shifted
-				&& this.isType(cluster.cell, Classification.splitTarget) && !cluster.cell.isMovingTowards
+				&& cluster.cell.isType(Classification.splitTarget) && !cluster.cell.isMovingTowards
 				&& cluster.distance < player.size + constants.lureDistance
 				&& cluster.distance > player.size + constants.splitRangeMin && // not already in range (might have been an enemy close)
 				player.mass > 250 && (player.mass - cluster.cell.mass > 25)) {
@@ -748,7 +749,7 @@ function AposBot() {
 		if (threat.mass / player.mass > largeThreatRatio) {
 			threat.dangerZone = threat.size + threat.closestCell.size + threat.safeDistance;
 
-		} else if (this.isType(threat, Classification.largeThreat)) {
+		} else if (threat.isType(Classification.largeThreat)) {
 			threat.dangerZone = threat.size + threat.closestCell.size + constants.splitRangeMax + 20; // use constant instead of safe distance (bouncy)
 
 		} else {
@@ -1074,7 +1075,13 @@ function AposBot() {
 		var player = this.player;
 		var destinationChoices = null;
 		
-		var da = window.getEntityPrototype();
+		if (!this.initialized) {
+			this.initialized = true;
+			var da = window.getEntityPrototype();
+			da.prototype.isType = function(classification) {
+				return this.classification == classification;
+			};
+		}
 
 		this.infoStrings = [];
 		this.teams = [];
@@ -1187,7 +1194,7 @@ function AposBot() {
 				var color = entity.isMovingTowards ? constants.red : constants.orange;
 				drawCircle(entity.x, entity.y, entity.size + 20, color);
 
-				if (this.isType(entity, Classification.largeThreat)) {
+				if (entity.isType(Classification.largeThreat)) {
 					drawCircle(entity.x, entity.y, entity.dangerZone, color);
 				}
 				break;
@@ -1231,10 +1238,6 @@ function AposBot() {
 		}
 
 		this.infoStrings.push("");
-	};
-
-	this.isType = function(entity, classification) {
-		return entity.classification == classification;
 	};
 
 	this.displayText = function() {
@@ -1841,11 +1844,11 @@ function AposBot() {
 		var lineRight = this.followAngle(rightAngle, blob1.x, blob1.y, safeDistance - index * 10);
 
 		var color = constants.orange;
-		if (this.isType(blob2, Classification.virus)) {
+		if (blob2.isType(Classification.virus)) {
 			color = constants.cyan;
-		} else if (this.isType(blob2, Classification.smallThreat) || this.isType(blob2, Classification.largeThreat)) { // (getCells().hasOwnProperty(blob2.id)) {
+		} else if (blob2.isType(Classification.smallThreat) || blob2.isType(Classification.largeThreat)) { // (getCells().hasOwnProperty(blob2.id)) {
 			color = constants.red;
-		} else if (this.isType(blob2, Classification.cluster)) {
+		} else if (blob2.isType(Classification.cluster)) {
 			color = constants.green;
 		}
 
