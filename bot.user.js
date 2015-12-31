@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1140
+// @version     3.1141
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1140;
+var aposBotVersion = 3.1141;
 
 var constants = {
 	splitRangeMin : 650,
@@ -394,7 +394,7 @@ function AposBot() {
 		var px = a * (cell.J - cell.s) + cell.x;
 		var py = a * (cell.K - cell.t) + cell.y;
 
-		return this.computeInexpensiveDistance(cell.x, cell.y, px, py);
+		return this.computeDistance(cell.x, cell.y, px, py);
 	};
 
 	this.predictPosition = function(cell, timeDiff) {
