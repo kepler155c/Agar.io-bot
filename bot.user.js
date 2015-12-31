@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1149
+// @version     3.1150
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1149;
+var aposBotVersion = 3.1150;
 
 var constants = {
 	splitRangeMin : 650,
@@ -214,13 +214,14 @@ function AposBot() {
 
 			if (entity.name.length > 0) {
 
-				var team = this.teams[entity.name];
+				var teamKey = entity.name + entity.color;
+				var team = this.teams[teamKey];
 
 				if (!team) {
 					team = {
 						cells : []
 					};
-					this.teams[entity.name] = team;
+					this.teams[teamKey] = team;
 				}
 				team.cells.push(entity);
 			}
@@ -1014,34 +1015,29 @@ function AposBot() {
 
 		Object.keys(this.entities).filter(this.threatFilter, this).forEach(function(key) {
 
+			var threat = this.entities[key];
+
+			var velocity = (this.getVelocity(threat) + threat.closestCell.velocity);
+			threat.safeDistance = threat.closestCell.mass < 50 ? velocity * 4 : velocity * 2;
+			this.setMinimumDistance(player, threat, constants.largeThreatRatio);
+
+			if (panicLevel < 1 && threat.distance < threat.dangerZone) {
+				panicLevel = 1;
+			}
+
 			for (j = 0; j < player.cells.length; j++) {
 
 				var cell = player.cells[j];
-
-				var threat = this.entities[key];
-
-				var velocity = (this.getVelocity(threat) + threat.closestCell.velocity);
-				threat.safeDistance = threat.closestCell.mass < 50 ? velocity * 4 : velocity * 2;
-				this.setMinimumDistance(player, threat, constants.largeThreatRatio);
-
 				//				threat.intersects = this.circlesIntersect(cell, threat);
 				threat.intersects = threat.distance < cell.size + threat.size + threat.safeDistance;
 				if (threat.intersects) {
 					panicLevel = 2;
 				}
-				if (threat.distance + threat.closestCell.size < threat.dangerZone) {
-					overlapCount++;
-					if (overlapCount > 1 && panicLevel < 2) {
-						panicLevel = 1;
-						return;
-					}
-					break;
-				}
 			}
 		}, this);
 
 		if (panicLevel == 1) {
-			drawCircle(player.x, player.y, player.size + 16, constants.green);
+			drawCircle(player.x, player.y, player.size + 16, constants.orange);
 		} else if (panicLevel == 2) {
 			drawCircle(player.x, player.y, player.size + 16, constants.red);
 		}
@@ -1149,10 +1145,6 @@ function AposBot() {
 		Object.keys(this.entities).forEach(function(key) {
 
 			var entity = this.entities[key];
-
-			if (entity.isMovingTowards) {
-				drawCircle(entity.x, entity.y, entity.size + 40, 3);
-			}
 
 			switch (entity.classification) {
 			case Classification.player:
