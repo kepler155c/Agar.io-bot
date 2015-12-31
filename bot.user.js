@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1156
+// @version     3.1157
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1156;
+var aposBotVersion = 3.1157;
 
 var constants = {
 	splitRangeMin : 650,
@@ -794,6 +794,8 @@ function AposBot() {
 							this.getAngleRange(threat.closestCell, threat, i, threat.dangerZone);
 						}
 
+					}
+					if (threat.distance < threat.dangerZone + 50) {
 						var tempOb = this.getAngleRange(threat.closestCell, threat, i, threat.dangerZone);
 						var angle1 = tempOb[0];
 						var angle2 = this.rangeToAngle(tempOb);
@@ -1232,7 +1234,7 @@ function AposBot() {
 		for (var i = 0; i < player.cells.length; i++) {
 
 			var cell = player.cells[i];
-			var cellInfo = "Cell " + i + " Mass: " + parseInt(cell.size, 10);
+			var cellInfo = "Cell " + i + " Mass: " + parseInt(cell.mass, 10);
 			if (cell.fuseTimer) {
 				cellInfo += "   Fuse: " + parseInt((cell.fuseTimer - Date.now()) / 1000, 10);
 			}
@@ -1311,13 +1313,6 @@ function AposBot() {
 		var distance = xdis + ydis;
 
 		return distance;
-	};
-
-	this.compareSize = function(player1, player2, ratio) {
-		if (player1.size * player1.size * ratio < player2.size * player2.size) {
-			return true;
-		}
-		return false;
 	};
 
 	this.isItMe = function(player, cell) {
@@ -1402,25 +1397,6 @@ function AposBot() {
 		return false;
 	};
 
-	/*
-	this.isVirus = function(blob, cell) {
-		if (blob === null) {
-			if (cell.isVirus()) {
-				return true;
-			} else {
-				return false;
-			}
-		}
-
-		if (cell.isVirus() && blob.size > cell.size) {
-			return true;
-		} else if (cell.isVirus() && cell.color.substring(3, 5).toLowerCase() != "ff") {
-			return true;
-		}
-		return false;
-	};
-	*/
-
 	this.getTimeToRemerge = function(mass) {
 		return ((mass * 0.02) + 30);
 	};
@@ -1448,10 +1424,6 @@ function AposBot() {
 
 		var bAngle = this.getAngle(a.x, a.y, b.x, b.y);
 		var targetAngle = this.getAngle(b.x, b.y, target.x, target.y);
-		/*
-		return this.computeInexpensiveDistance(b.x, b.y, a.x, a.y) < this.computeInexpensiveDistance(oldx, oldy, a.x,
-				a.y);
-		*/
 
 		return Math.abs(bAngle - targetAngle) < 20;
 	};
