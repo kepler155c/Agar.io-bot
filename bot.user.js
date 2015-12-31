@@ -748,7 +748,7 @@ function AposBot() {
 			threat.dangerZone = threat.size + threat.closestCell.size + threat.safeDistance;
 
 		} else if (this.isType(threat, Classification.largeThreat)) {
-			threat.dangerZone = threat.size + constants.splitRangeMax;
+			threat.dangerZone = threat.size + threat.closestCell.size + constants.splitRangeMax + threat.safeDistance;
 
 		} else {
 			threat.dangerZone = threat.size + threat.closestCell.size + threat.safeDistance;
@@ -778,18 +778,20 @@ function AposBot() {
 
 					if (threat.distance < threat.dangerZone) {
 
-						if (panicLevel == 2 && threat.closestCell.mass > 200 && threat.intersects) {
+//						if (panicLevel == 2 && threat.closestCell.mass > 200 && threat.intersects) {
 
+						if (threat.intersects) {
+							
 							badAngles.push(this.getAngleRange(threat.closestCell, threat, i,
-									threat.closestCell.size + threat.safeDistance).concat(threat.distance));
-						} else {
-
-							badAngles.push(this.getAngleRange(threat.closestCell, threat, i, threat.dangerZone).concat(
-									threat.distance));
+									threat.size + threat.safeDistance).concat(threat.distance));
 						}
+//						} else {
 
-						var tempOb = this.getAngleRange(threat.closestCell, threat, i, threat.dangerZone
-								+ threat.closestCell.size);
+//							badAngles.push(this.getAngleRange(threat.closestCell, threat, i, threat.dangerZone).concat(/
+//									threat.distance));
+//						}
+
+						var tempOb = this.getAngleRange(threat.closestCell, threat, i, threat.dangerZone);
 						var angle1 = tempOb[0];
 						var angle2 = this.rangeToAngle(tempOb);
 
