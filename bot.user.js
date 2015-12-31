@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1146
+// @version     3.1147
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1146;
+var aposBotVersion = 3.1147;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1432,15 +1432,14 @@ function AposBot() {
 		return distanceX * distanceX + distanceY * distanceY <= radiusSum * radiusSum;
 	};
 
-	this.isMovingTowards = function(a, b) {
+	this.isMovingTowards = function(target, b) {
 
 		if (!b.hasMoved) {
 			return false;
 		}
 
+		var a = b.getLastPos();
 		/*
-		var oldx = b.getLastPos().x;
-		var oldy = b.getLastPos().y;
 		return this.computeInexpensiveDistance(b.x, b.y, a.x, a.y) < this.computeInexpensiveDistance(oldx, oldy, a.x,
 				a.y);
 		*/
@@ -1449,10 +1448,10 @@ function AposBot() {
         var offsetY = -getMapStartY();
 
         // m = slope, i = intercept
-		var m = (a.y - b.y) / (a.x - b.x);
+		var m = ((a.y + offsetY) - (b.y + offsetY)) / ((a.x + offsetX) - (b.x + offsetY));
 		var i = a.y + offsetY - m * (a.x + offsetX);
 		
-		return i < b.size;
+		return Math.abs(i) < target.size;
 	};
 
 	this.getAngle = function(x1, y1, x2, y2) {
