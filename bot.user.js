@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1190
+// @version     3.1191
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1190;
+var aposBotVersion = 3.1191;
 
 var constants = {
 	splitRangeMin : 650,
@@ -777,29 +777,36 @@ function AposBot() {
 
 	this.calculateThreatWeight = function(player, t) {
 
-		if (t.mass / player.mass <= constants.largeThreatRatio) {
-			for (var i = 0; i < player.cells.length; i++) {
+		for (var i = 0; i < player.cells.length; i++) {
 
-				var cell = player.cells[i];
+			var cell = player.cells[i];
 
-				if (this.canSplitKill(t, cell, constants.enemyRatio)) {
+			var threat = {
+				size : t.size,
+				mass : t.mass,
+				distance : t.distance,
+				isMovingTowards : this.isMovingTowards(cell, t),
+				cell : t,
+				angle : Math.atan2(t.y - cell.y, t.x - cell.x),
+				threatLevel : 0,
+				isTheatening : false,
+				massLoss : cell.mass,
+				teamSize : t.teamSize
+			};
 
-					var threat = {
-						size : Math.sqrt(t.mass * 50),
-						mass : t.mass / 2,
-						distance : this.computeDistance(t.x, t.y, cell.x, cell.y),
-						isMovingTowards : this.isMovingTowards(cell, t),
-						cell : t
-					};
+			if (t.mass / player.mass > constants.largeThreatRatio) {
+				if (threat.distance < cell.size + threat.size + threat.safeDistance) {
+
+				} else if (this.canSplitKill(t, cell, constants.enemyRatio)) {
+
+					threat.mass = t.mass / 2;
+					threat.size = Math.sqrt(threat.mass * 100);
 
 					var distance = Math.min(t.size + constants.splitRangeMax, threat.distance);
 
-					var deltaX = t.x - cell.x;
-					var deltaY = t.y - cell.y;
-
-					threat.angle = Math.atan2(deltaY, deltaX); // In radians
 					threat.x = t.x - Math.cos(threat.angle) * distance;
 					threat.y = t.y - Math.sin(threat.angle) * distance;
+					threat.distance = this.computeDistance(threat.x, threat.y, cell.x, cell.y);
 
 					var color = constants.gray;
 					if (threat.distance < t.size + constants.splitRangeMax + cell.size) {
@@ -811,6 +818,26 @@ function AposBot() {
 					drawCircle(threat.x, threat.y, threat.size, color);
 					drawLine(t.x, t.y, threat.x, threat.y, threat.isMovingTowards ? constants.red : constants.gray);
 				}
+			}
+
+			threat.minDistance = threat.size - cell.size + t.safeDistance;
+			threat.safeDistance = cell.size + threat.size + t.safeDistance;
+			threat.threatenedDistance = cell.size * 1.5 + threat.size + t.safeDistance;
+
+			if (threat.isMovingTowards) {
+				t.isMovingTowards = true;
+			}
+
+			if (threat.distance < 750 + cell.size) {
+
+				if (threat.distance < threat.safeDistance) {
+					threat.isThreatening = true;
+				}
+			}
+			
+			if (threat.isThreatening) {
+				drawLine(threat.x, threat.y, cell.x, cell.y, threat.isMovingTowards ? constants.red : constants.gray);
+				drawCircle(threat.x, threat.y, threat.size, constants.red);
 			}
 		}
 		/*
@@ -855,7 +882,7 @@ function AposBot() {
 					if (panicLevel >= 2) {
 						threat.classification = Classification.smallThreat;
 					} else if (panicLevel >= 1) {
-						if (!threat.isMovingTowards) {
+						if (!threat.isMovingTowards || threat.teamSize > 1) {
 							threat.classification = Classification.smallThreat;
 						}
 					}
@@ -1125,6 +1152,7 @@ function AposBot() {
 				threat.intersects = threat.distance < cell.size + threat.size + threat.safeDistance;
 				if (threat.intersects) {
 					panicLevel = 2;
+					break;
 				}
 			}
 		}, this);
