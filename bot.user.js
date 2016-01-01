@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1168
+// @version     3.1169
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1168;
+var aposBotVersion = 3.1169;
 
 var constants = {
 	splitRangeMin : 650,
@@ -774,7 +774,12 @@ function AposBot() {
 
 		if (t.isType(Classification.largeThreat)) {
 
-			var distance = threat.distance < 750 ? 0 : threat.distance;
+			var distance = threat.distance - 750;
+			if (distance > 750) {
+				distance = 750;
+			} else if (distance < 0) {
+				distance = 0;
+			}
 
 			var angle = this.getAngle(threat.x, threat.y, t.closestCell.x, t.closestCell.y);
 			threat.x = distance * Math.sin(angle) + t.x;
