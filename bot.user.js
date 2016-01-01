@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1188
+// @version     3.1189
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1188;
+var aposBotVersion = 3.1189;
 
 var constants = {
 	splitRangeMin : 650,
@@ -783,28 +783,23 @@ function AposBot() {
 				var cell = player.cells[i];
 
 				if (this.canSplitKill(t, cell, constants.enemyRatio)) {
-					
-					var threat = {
-							x : t.x,
-							y : t.y,
-							size : t.size,
-							mass : t.mass,
-							distance : t.distance
-						};
 
-					threat.distance = this.computeDistance(t.x, t.y, cell.x, cell.y);
+					var threat = {
+						size : Math.sqrt(t.mass * 50),
+						mass : t.mass / 2,
+						distance : this.computeDistance(t.x, t.y, cell.x, cell.y),
+						isMovingTowards : this.isMovingTowards(cell, threat),
+						cell : t
+					};
 
 					var distance = Math.min(t.size + constants.splitRangeMax, threat.distance);
 
 					var deltaX = t.x - cell.x;
 					var deltaY = t.y - cell.y;
-					var angle = Math.atan2(deltaY, deltaX); // In radians
 
-					threat.x = t.x - Math.cos(angle) * distance;
-					threat.y = t.y - Math.sin(angle) * distance;
-
-					threat.mass = t.mass / 2;
-					threat.size = Math.sqrt(threat.mass * 100);
+					threat.angle = Math.atan2(deltaY, deltaX); // In radians
+					threat.x = t.x - Math.cos(threat.angle) * distance;
+					threat.y = t.y - Math.sin(threat.angle) * distance;
 
 					var color = constants.gray;
 					if (threat.distance < t.size + constants.splitRangeMax + cell.size) {
@@ -814,7 +809,7 @@ function AposBot() {
 						}
 					}
 					drawCircle(threat.x, threat.y, threat.size, color);
-					drawLine(t.x, t.y, threat.x, threat.y, t.isMovingTowards ? constants.red : constants.gray);
+					drawLine(t.x, t.y, threat.x, threat.y, threat.isMovingTowards ? constants.red : constants.gray);
 				}
 			}
 		}
@@ -856,8 +851,6 @@ function AposBot() {
 				function(key) {
 
 					var threat = this.entities[key];
-
-					this.calculateThreatWeight(player, threat);
 
 					if (panicLevel >= 2) {
 						threat.classification = Classification.smallThreat;
@@ -1118,6 +1111,8 @@ function AposBot() {
 			var velocity = (this.getVelocity(threat) + threat.closestCell.velocity);
 			threat.safeDistance = threat.closestCell.mass < 50 ? velocity * 4 : velocity * 2;
 			this.setMinimumDistance(player, threat, constants.largeThreatRatio);
+
+			this.calculateThreatWeight(player, threat);
 
 			if (panicLevel < 1 && threat.distance < threat.dangerZone) {
 				overlapCount++;
