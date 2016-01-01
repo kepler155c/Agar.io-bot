@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1163
+// @version     3.1164
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1163;
+var aposBotVersion = 3.1164;
 
 var constants = {
 	splitRangeMin : 650,
@@ -778,8 +778,8 @@ function AposBot() {
 			var distance = threat.distance < 750 ? threat.distance : 0;
 			
 			var slope = this.slope(threat.x, threat.y, t.closestCell.x, t.closestCell.y);
-			threat.x = slope * (t.x - distance) + t.x;
-			threat.y = slope * (t.y - distance) + t.y;
+			threat.x = slope * (t.x + distance) + t.x;
+			threat.y = slope * (t.y + distance) + t.y;
 
 			threat.mass = t.mass / 2;
 			threat.size = Math.sqrt(threat.mass * 100);
