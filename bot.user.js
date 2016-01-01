@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1212
+// @version     3.1213
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1212;
+var aposBotVersion = 3.1213;
 
 var constants = {
 	splitRangeMin : 650,
@@ -326,6 +326,7 @@ function AposBot() {
 			entity.originalMass = entity.mass; // save the original mass in case the merge logic changes it
 			entity.safeDistance = 0;
 			entity.teamSize = 1;
+			entity.teamMass = entity.mass;
 
 			var closestInfo = this.closestCell(player, entity.x, entity.y);
 			entity.closestCell = closestInfo.cell;
@@ -1267,7 +1268,7 @@ function AposBot() {
 		if (player.isSplitting) {
 
 			if (player.size <= player.splitSize && (Date.now() - player.splitTimer > 200)
-					|| player.mass < player.splitMass * 0.9 || player.mass > player.splitMass * 1.1) {
+					|| player.mass < player.splitMass * 0.8 || player.mass > player.splitMass * 1.2) {
 				// player size grows as long as we are splitting
 				player.isSplitting = false;
 				player.splitTarget = null;
