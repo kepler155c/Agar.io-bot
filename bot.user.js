@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1181
+// @version     3.1182
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1181;
+var aposBotVersion = 3.1182;
 
 var constants = {
 	splitRangeMin : 650,
@@ -756,7 +756,7 @@ function AposBot() {
 
 		} else if (threat.isType(Classification.largeThreat)) {
 			// find the smallest cell the threat can split kill
-			
+
 			/*
 			var inTroubleCell = threat.closestCell;
 			
@@ -767,7 +767,7 @@ function AposBot() {
 				}
 			}
 			*/
-			
+
 			threat.dangerZone = threat.size + threat.closestCell.size + constants.splitRangeMax + 20; // use constant instead of safe distance (bouncy)
 
 		} else {
@@ -785,33 +785,36 @@ function AposBot() {
 			distance : t.distance
 		};
 
-		for (var i = 0; i < player.cells.length; i++) {
+		if (t.mass / player.mass <= constants.largeThreatRatio) {
+			for (var i = 0; i < player.cells.length; i++) {
 
-			var cell = player.cells[i];
+				var cell = player.cells[i];
 
-			if (this.canSplitKill(t, cell, constants.enemyRatio)) {
+				if (this.canSplitKill(t, cell, constants.enemyRatio)) {
 
-				var distance = Math.min(threat.size + constants.splitRangeMax, threat.distance);
+					threat.distance = this.computeDistance(t.x, t.y, cell.x, cell.y);
 
-				var deltaX = threat.x - t.closestCell.x;
-				var deltaY = threat.y - t.closestCell.y;
-				var angle = Math.atan2(deltaY, deltaX); // In radians
+					var distance = Math.min(threat.size + constants.splitRangeMax, threat.distance);
 
-				threat.x = t.x - Math.cos(angle) * distance;
-				threat.y = t.y - Math.sin(angle) * distance;
+					var deltaX = threat.x - cell.x;
+					var deltaY = threat.y - cell.y;
+					var angle = Math.atan2(deltaY, deltaX); // In radians
 
-				threat.mass = t.mass / 2;
-				threat.size = Math.sqrt(threat.mass * 100);
+					threat.x = t.x - Math.cos(angle) * distance;
+					threat.y = t.y - Math.sin(angle) * distance;
 
-				var color = constants.orange;
-				if (t.isMovingTowards && t.teamSize == 1) {
-					color = constants.red;
+					threat.mass = t.mass / 2;
+					threat.size = Math.sqrt(threat.mass * 100);
+
+					var color = constants.orange;
+					if (t.isMovingTowards && t.teamSize == 1) {
+						color = constants.red;
+					}
+					drawCircle(threat.x, threat.y, threat.size, color);
+					drawLine(t.x, t.y, threat.x, threat.y, constants.orange);
 				}
-				drawCircle(threat.x, threat.y, threat.size, color);
-				drawLine(t.x, t.y, threat.x, threat.y, constants.orange);
 			}
 		}
-
 		/*
 
 		var distanceTilEaten = threat.distance - threat.size;
