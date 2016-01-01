@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1205
+// @version     3.1206
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1205;
+var aposBotVersion = 3.1206;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1160,7 +1160,7 @@ function AposBot() {
 
 			if (player.cells.length == 1) {
 				// this.predictPosition(threat, 200);
-				if (threat.distance < threat.size + player.largestCell.size * 0.75 && threat.velocity > 20) {
+				if (threat.distance < threat.size + player.largestCell.size && threat.velocity > 20) {
 					doSplit = true;
 				}
 			}
