@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1194
+// @version     3.1195
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1194;
+var aposBotVersion = 3.1195;
 
 var constants = {
 	splitRangeMin : 650,
@@ -806,23 +806,13 @@ function AposBot() {
 					threat.y = t.y - Math.sin(threat.angle) * distance;
 					threat.distance = this.computeDistance(threat.x, threat.y, cell.x, cell.y);
 
-					var color = constants.gray;
-					if (threat.distance < t.size + constants.splitRangeMax + cell.size) {
-						color = constants.purple;
-						if (t.teamSize == 1) {
-							color = constants.red;
-						}
-					}
-					drawCircle(threat.x, threat.y, threat.size, color);
+					drawCircle(threat.x, threat.y, threat.size, constants.gray);
 					drawLine(t.x, t.y, threat.x, threat.y, threat.isMovingTowards ? constants.red : constants.gray);
 				}
-			}
-
-			if (t.mass / player.mass <= constants.largeThreatRatio) {
 
 				threat.minDistance = threat.size - cell.size + t.safeDistance;
 				threat.safeDistance = cell.size + threat.size + t.safeDistance;
-				threat.threatenedDistance = cell.size * 1.5 + threat.size + t.safeDistance;
+				threat.threatenedDistance = (cell.size + threat.size + t.safeDistance) * 1.2;
 
 				if (threat.isMovingTowards) {
 					t.isMovingTowards = true;
@@ -836,12 +826,11 @@ function AposBot() {
 					if (threat.isMovingTowards && threat.distance < threat.threatenedDistance) {
 						threat.isThreatening = true;
 					}
+					if (threat.isThreatening) {
+						drawCircle(threat.x, threat.y, threat.threatenedDistance, constants.red);
+					}
+					drawLine(threat.x, threat.y, cell.x, cell.y, threat.isThreatening ? constants.red : constants.gray);
 				}
-
-				if (threat.isThreatening) {
-					drawCircle(threat.x, threat.y, threat.threatenedDistance, constants.red);
-				}
-				drawLine(threat.x, threat.y, cell.x, cell.y, threat.isThreatening ? constants.red : constants.gray);
 			}
 		}
 		/*
