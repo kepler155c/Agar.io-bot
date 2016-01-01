@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1204
+// @version     3.1205
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1204;
+var aposBotVersion = 3.1205;
 
 var constants = {
 	splitRangeMin : 650,
@@ -166,6 +166,7 @@ Player.prototype = {
 		}, this);
 	},
 	split : function(targetCell, x, y) {
+
 		this.isSplitting = true;
 		this.splitTarget = targetCell;
 		this.splitSize = this.size;
@@ -721,7 +722,7 @@ function AposBot() {
 				&& cluster.cell.isType(Classification.splitTarget) && !cluster.cell.isMovingTowards
 				&& cluster.distance < player.size + constants.lureDistance
 				&& cluster.distance > player.size + constants.splitRangeMin && // not already in range (might have been an enemy close)
-				player.mass > 250 && (player.mass - cluster.cell.mass > 25)) {
+				player.mass > 250 && ((player.mass - 19) / (cluster.cell.mass + 13.69) > constants.playerRatio)) { // 37 (size) per mass shot ?
 
 			// TODO: figure out lure amount
 			player.isLuring = true;
@@ -733,7 +734,7 @@ function AposBot() {
 
 		// are we avoiding obstacles ??
 		if (doSplit) {
-			
+
 			player.split(cluster.cell, cluster.x, cluster.y);
 
 			destination[0] = player.splitLocation.x;
@@ -1159,7 +1160,7 @@ function AposBot() {
 
 			if (player.cells.length == 1) {
 				// this.predictPosition(threat, 200);
-				if (threat.distance < threat.size + player.largestCell.size && threat.velocity > 20) {
+				if (threat.distance < threat.size + player.largestCell.size * 0.75 && threat.velocity > 20) {
 					doSplit = true;
 				}
 			}
