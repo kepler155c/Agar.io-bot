@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1199
+// @version     3.1200
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1199;
+var aposBotVersion = 3.1200;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1198,6 +1198,7 @@ function AposBot() {
 		}
 
 		if (doSplit) {
+			console.log('split attempt');
 			destinationChoices[2] = true;
 		}
 
