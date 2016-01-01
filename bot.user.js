@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1159
+// @version     3.1160
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1159;
+var aposBotVersion = 3.1160;
 
 var constants = {
 	splitRangeMin : 650,
@@ -260,6 +260,9 @@ function AposBot() {
 				team.x = circle.x;
 				team.y = circle.y;
 				team.size = circle.size;
+				for (var i = 0; i < team.cells.length; i++) {
+					team.cells[i].teamSize = team.cells.length;
+				}
 			}
 		}, this);
 	};
@@ -300,6 +303,7 @@ function AposBot() {
 			entity.isMovingTowards = this.isMovingTowards(player, entity);
 			entity.mass = this.calculateMass(entity);
 			entity.safeDistance = 0;
+			entity.teamSize = 1;
 
 			var closestInfo = this.closestCell(player, entity.x, entity.y);
 			entity.closestCell = closestInfo.cell;
@@ -758,6 +762,60 @@ function AposBot() {
 			threat.dangerZone = threat.size + threat.closestCell.size + threat.safeDistance;
 		}
 	};
+	
+	this.calculateThreatWeight = function(player, t) {
+		
+		var threat = {
+			x: t.x,
+			y: t.y,
+			size: t.size,
+			mass: t.mass,
+			distance: t.distance
+		};
+
+		if (threat.isType(Classification.largeThreat)) {
+
+			var distance = threat.distance < 750 ? threat.distance : 0;
+			
+			var slope = this.slope(threat.closestCell.x, threat.closestCell.y, threat.x, threat.y);
+			threat.x = slope * (t.x + distance) + t.x;
+			threat.y = slope * (t.y + distance) + t.y;
+
+			threat.mass = t.mass / 2;
+			threat.size = Math.sqrt(threat.mass * 100);
+
+			drawCircle(threat.x, threat.y, threat.size, constants.orange);
+		}
+		
+		/*
+
+		var distanceTilEaten = threat.distance - threat.size;
+		var distanceTilSafe = threat.size + threat.closestCell.size;
+		var mass = threat.closestCell.mass;  // mass we will lose
+		var weight = 1;
+
+		if (threat.isType(Classification.largeThreat)) {
+			
+			distance = Math.min(1, distance - constants.splitRangeMax);
+		}
+		
+		if (threat.distance < threat.size + threat.closestCell.size) { // overlapping
+		}
+
+		if (threat.teamCount > 1) {
+			weight = weight / 4;
+		}
+
+		if (threat.isMovingTowards) {
+			weight = weight * 2;
+		}
+
+		if (threat.teamSize == 1) {
+			weight = weight * 2;
+		}
+		*/
+
+	};
 
 	this.determineThreats = function(player, panicLevel, badAngles, obstacleAngles, obstacleList) {
 
@@ -767,6 +825,8 @@ function AposBot() {
 				function(key) {
 
 					var threat = this.entities[key];
+					
+					this.calculateThreatWeight(player, threat);
 
 					if (panicLevel >= 2) {
 						threat.classification = Classification.smallThreat;
