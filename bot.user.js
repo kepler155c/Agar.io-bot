@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1186
+// @version     3.1187
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1186;
+var aposBotVersion = 3.1187;
 
 var constants = {
 	splitRangeMin : 650,
@@ -777,24 +777,24 @@ function AposBot() {
 
 	this.calculateThreatWeight = function(player, t) {
 
-		var threat = {
-			x : t.x,
-			y : t.y,
-			size : t.size,
-			mass : t.mass,
-			distance : t.distance
-		};
-
 		if (t.mass / player.mass <= constants.largeThreatRatio) {
 			for (var i = 0; i < player.cells.length; i++) {
 
 				var cell = player.cells[i];
 
 				if (this.canSplitKill(t, cell, constants.enemyRatio)) {
+					
+					var threat = {
+							x : t.x,
+							y : t.y,
+							size : t.size,
+							mass : t.mass,
+							distance : t.distance
+						};
 
 					threat.distance = this.computeDistance(t.x, t.y, cell.x, cell.y);
 
-					var distance = Math.min(threat.size + constants.splitRangeMax, threat.distance);
+					var distance = Math.min(t.size + constants.splitRangeMax, threat.distance);
 
 					var deltaX = t.x - cell.x;
 					var deltaY = t.y - cell.y;
@@ -807,7 +807,7 @@ function AposBot() {
 					threat.size = Math.sqrt(threat.mass * 100);
 
 					var color = constants.gray;
-					if (threat.distance < threat.size + constants.splitRangeMax) {
+					if (threat.distance < t.size + constants.splitRangeMax) {
 						color = constants.purple;
 						if (t.teamSize == 1) {
 							color = constants.red;
