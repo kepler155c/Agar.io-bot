@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1203
+// @version     3.1204
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1203;
+var aposBotVersion = 3.1204;
 
 var constants = {
 	splitRangeMin : 650,
@@ -166,16 +166,16 @@ Player.prototype = {
 		}, this);
 	},
 	split : function(targetCell, x, y) {
-		player.isSplitting = true;
-		player.splitTarget = targetCell;
-		player.splitSize = player.size;
+		this.isSplitting = true;
+		this.splitTarget = targetCell;
+		this.splitSize = this.size;
 
-		player.splitTimer = Date.now();
-		player.splitLocation = {
-			x : player.largestCell.x + (x - player.largestCell.x) * 4,
-			y : player.largestCell.y + (y - player.largestCell.y) * 4,
-			startx : player.largestCell.x,
-			starty : player.largestCell.y
+		this.splitTimer = Date.now();
+		this.splitLocation = {
+			x : this.largestCell.x + (x - this.largestCell.x) * 4,
+			y : this.largestCell.y + (y - this.largestCell.y) * 4,
+			startx : this.largestCell.x,
+			starty : this.largestCell.y
 		};
 	}
 };
@@ -402,7 +402,6 @@ function AposBot() {
 					}
 
 				}, this);
-
 	};
 
 	this.getVelocity = function(cell) {
