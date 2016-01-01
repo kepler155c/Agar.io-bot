@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1195
+// @version     3.1196
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1195;
+var aposBotVersion = 3.1196;
 
 var constants = {
 	splitRangeMin : 650,
@@ -788,10 +788,11 @@ function AposBot() {
 				isMovingTowards : this.isMovingTowards(cell, t),
 				cell : t,
 				angle : Math.atan2(t.y - cell.y, t.x - cell.x),
-				threatLevel : 0,
+				threatLevel : 40,
 				isTheatening : false,
 				massLoss : cell.mass,
-				teamSize : t.teamSize
+				teamSize : t.teamSize,
+				mustSplit : false,
 			};
 
 			if (t.mass / player.mass <= constants.largeThreatRatio) {
@@ -813,6 +814,7 @@ function AposBot() {
 				threat.minDistance = threat.size - cell.size + t.safeDistance;
 				threat.safeDistance = cell.size + threat.size + t.safeDistance;
 				threat.threatenedDistance = (cell.size + threat.size + t.safeDistance) * 1.2;
+				threat.mustSplit = true;
 
 				if (threat.isMovingTowards) {
 					t.isMovingTowards = true;
@@ -821,14 +823,25 @@ function AposBot() {
 				if (threat.distance < 750 + cell.size) {
 
 					if (threat.distance < threat.safeDistance) {
-						threat.isThreatening = true;
+						threat.threatLevel += 15;
 					}
-					if (threat.isMovingTowards && threat.distance < threat.threatenedDistance) {
-						threat.isThreatening = true;
+					if (threat.isMovingTowards) {
+						threat.threatLevel += 15;
+						if (threat.distance < threat.threatenedDistance) {
+							threat.threatLevel += 5;
+						}
 					}
-					if (threat.isThreatening) {
-						drawCircle(threat.x, threat.y, threat.threatenedDistance, constants.red);
+					if (threat.mustSplit) {
+						if (threat.teamSize > 8) {
+							threat.threatLevel -= 40;
+						} else if (threat.teamSize > 4) {
+							threat.threatLevel -= 20;
+						} else if (threat.teamSize > 1) {
+							threat.threatLevel -= 10;
+						}
 					}
+
+					drawCircle(threat.x, threat.y, threat.threatenedDistance, parseInt(threat.threatLevel / 10));
 					drawLine(threat.x, threat.y, cell.x, cell.y, threat.isThreatening ? constants.red : constants.gray);
 				}
 			}
