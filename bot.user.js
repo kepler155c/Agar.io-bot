@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1202
+// @version     3.1203
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1202;
+var aposBotVersion = 3.1203;
 
 var constants = {
 	splitRangeMin : 650,
@@ -165,6 +165,19 @@ Player.prototype = {
 			}
 		}, this);
 	},
+	split : function(targetCell, x, y) {
+		player.isSplitting = true;
+		player.splitTarget = targetCell;
+		player.splitSize = player.size;
+
+		player.splitTimer = Date.now();
+		player.splitLocation = {
+			x : player.largestCell.x + (x - player.largestCell.x) * 4,
+			y : player.largestCell.y + (y - player.largestCell.y) * 4,
+			startx : player.largestCell.x,
+			starty : player.largestCell.y
+		};
+	}
 };
 
 console.log("Apos Bot!");
@@ -721,17 +734,8 @@ function AposBot() {
 
 		// are we avoiding obstacles ??
 		if (doSplit) {
-			player.isSplitting = true;
-			player.splitTarget = cluster.cell;
-			player.splitSize = player.size;
-
-			player.splitTimer = Date.now();
-			player.splitLocation = {
-				x : player.largestCell.x + (cluster.x - player.largestCell.x) * 4,
-				y : player.largestCell.y + (cluster.y - player.largestCell.y) * 4,
-				startx : player.largestCell.x,
-				starty : player.largestCell.y
-			};
+			
+			player.split(cluster.cell, cluster.x, cluster.y);
 
 			destination[0] = player.splitLocation.x;
 			destination[1] = player.splitLocation.y;
@@ -1200,6 +1204,7 @@ function AposBot() {
 		}
 
 		if (doSplit) {
+			player.split(null, 0, 0);
 			console.log('split attempt');
 			destinationChoices[2] = true;
 		}
