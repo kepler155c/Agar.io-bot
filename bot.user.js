@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1174
+// @version     3.1175
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1174;
+var aposBotVersion = 3.1175;
 
 var constants = {
 	splitRangeMin : 650,
@@ -794,6 +794,7 @@ function AposBot() {
 			threat.size = Math.sqrt(threat.mass * 100);
 
 			drawCircle(threat.x, threat.y, threat.size, constants.orange);
+			drawLine(t.x, t.y, threat.x, threat.y, constants.orange);
 		}
 
 		/*
@@ -1268,7 +1269,7 @@ function AposBot() {
 				drawCircle(entity.x, entity.y, entity.size + 20, color);
 
 				if (entity.isType(Classification.largeThreat)) {
-					drawCircle(entity.x, entity.y, entity.dangerZone, color);
+					//drawCircle(entity.x, entity.y, entity.dangerZone, color);
 				}
 				break;
 			}
