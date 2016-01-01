@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1167
+// @version     3.1168
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1167;
+var aposBotVersion = 3.1168;
 
 var constants = {
 	splitRangeMin : 650,
@@ -105,27 +105,27 @@ var Player = function() {
 
 Player.prototype = {
 
-	setCells: function(cells) {
+	setCells : function(cells) {
 		this.cells = cells;
 		this.isAlive = this.cells.length > 0;
 		this.mass = 0;
 		this.smallestCell = cells[0];
 		this.largestCell = cells[0];
-	
+
 		for (var i = 0; i < cells.length; i++) {
 			var cell = cells[i];
-	
+
 			cell.mass = cell.size * cell.size / 100;
-	
+
 			this.mass = this.mass + cell.mass;
-	
+
 			if (cell.size < this.smallestCell.size) {
 				this.smallestCell = cell;
 			}
 			if (cell.size > this.largestCell.size) {
 				this.largestCell = cell;
 			}
-	
+
 			if (cells.length > 0) {
 				if (!cell.fuseTimer) {
 					cell.fuseTimer = Date.now() + (30 + cell.mass * 0.02) * 1000;
@@ -134,11 +134,11 @@ Player.prototype = {
 				cell.fuseTimer = null;
 			}
 		}
-	
+
 		if (cells.length > 0) {
-	
+
 			var enclosingCell = cells[0];
-	
+
 			if (cells.length > 1) {
 				enclosingCell = enclosingCircle(cells);
 			}
@@ -147,7 +147,7 @@ Player.prototype = {
 			this.y = enclosingCell.y;
 		}
 	},
-	isSafeToSplit: function(entities) {
+	isSafeToSplit : function(entities) {
 
 		this.safeToSplit = this.cells.length == 1;
 
@@ -379,8 +379,7 @@ function AposBot() {
 						}
 					}
 
-					if (entity.isType(Classification.smallThreat)
-							|| entity.isType(Classification.largeThreat)) {
+					if (entity.isType(Classification.smallThreat) || entity.isType(Classification.largeThreat)) {
 						this.setMinimumDistance(player, entity, constants.largeThreatRatio);
 					}
 
@@ -762,21 +761,21 @@ function AposBot() {
 			threat.dangerZone = threat.size + threat.closestCell.size + threat.safeDistance;
 		}
 	};
-	
+
 	this.calculateThreatWeight = function(player, t) {
-		
+
 		var threat = {
-			x: t.x,
-			y: t.y,
-			size: t.size,
-			mass: t.mass,
-			distance: t.distance
+			x : t.x,
+			y : t.y,
+			size : t.size,
+			mass : t.mass,
+			distance : t.distance
 		};
 
 		if (t.isType(Classification.largeThreat)) {
 
-			var distance = threat.distance < 750 ? threat.distance : 1;
-			
+			var distance = threat.distance < 750 ? 0 : threat.distance;
+
 			var angle = this.getAngle(threat.x, threat.y, t.closestCell.x, t.closestCell.y);
 			threat.x = distance * Math.sin(angle) + t.x;
 			threat.y = distance * Math.cos(angle) + t.y;
@@ -786,7 +785,7 @@ function AposBot() {
 
 			drawCircle(threat.x, threat.y, threat.size, constants.orange);
 		}
-		
+
 		/*
 
 		var distanceTilEaten = threat.distance - threat.size;
@@ -825,7 +824,7 @@ function AposBot() {
 				function(key) {
 
 					var threat = this.entities[key];
-					
+
 					this.calculateThreatWeight(player, threat);
 
 					if (panicLevel >= 2) {
@@ -1138,7 +1137,7 @@ function AposBot() {
 
 		var player = this.player;
 		var destinationChoices = null;
-		
+
 		if (!this.initialized) {
 			this.initialized = true;
 			var da = window.getEntityPrototype();
