@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1192
+// @version     3.1193
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1192;
+var aposBotVersion = 3.1193;
 
 var constants = {
 	splitRangeMin : 650,
@@ -820,27 +820,30 @@ function AposBot() {
 				}
 			}
 
-			threat.minDistance = threat.size - cell.size + t.safeDistance;
-			threat.safeDistance = cell.size + threat.size + t.safeDistance;
-			threat.threatenedDistance = cell.size * 1.5 + threat.size + t.safeDistance;
+			if (t.mass / player.mass <= constants.largeThreatRatio) {
 
-			if (threat.isMovingTowards) {
-				t.isMovingTowards = true;
-			}
+				threat.minDistance = threat.size - cell.size + t.safeDistance;
+				threat.safeDistance = cell.size + threat.size + t.safeDistance;
+				threat.threatenedDistance = cell.size * 1.5 + threat.size + t.safeDistance;
 
-			if (threat.distance < 750 + cell.size) {
-
-				if (threat.distance < threat.safeDistance) {
-					threat.isThreatening = true;
+				if (threat.isMovingTowards) {
+					t.isMovingTowards = true;
 				}
-				if (threat.isMovingTowards && threat.distance < threat.threatenedDistance) {
-					threat.isThreatening = true;
+
+				if (threat.distance < 750 + cell.size) {
+
+					if (threat.distance < threat.safeDistance) {
+						threat.isThreatening = true;
+					}
+					if (threat.isMovingTowards && threat.distance < threat.threatenedDistance) {
+						threat.isThreatening = true;
+					}
 				}
-			}
-			
-			if (threat.isThreatening) {
-				drawLine(threat.x, threat.y, cell.x, cell.y, threat.isMovingTowards ? constants.red : constants.gray);
-				drawCircle(threat.x, threat.y, threat.size, constants.red);
+
+				if (threat.isThreatening) {
+					drawCircle(threat.x, threat.y, threat.threatenedDistance, constants.red);
+				}
+				drawLine(threat.x, threat.y, cell.x, cell.y, threat.isThreatening ? constants.red : constants.gray);
 			}
 		}
 		/*
