@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1198
+// @version     3.1199
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1198;
+var aposBotVersion = 3.1199;
 
 var constants = {
 	splitRangeMin : 650,
@@ -841,7 +841,8 @@ function AposBot() {
 						}
 					}
 
-					drawCircle(threat.x, threat.y, threat.threatenedDistance - cell.size + 40, parseInt(threat.threatLevel / 10));
+					drawCircle(threat.x, threat.y, threat.threatenedDistance - cell.size + 40,
+							parseInt(threat.threatLevel / 10));
 					drawLine(threat.x, threat.y, cell.x, cell.y, threat.isThreatening ? constants.red : constants.gray);
 				}
 			}
@@ -1130,6 +1131,7 @@ function AposBot() {
 		var i, j;
 		var panicLevel = 0;
 		var destinationChoices = [ getPointX(), getPointY() ];
+		var doSplit = false;
 
 		// panic levels:
 		// 2 = partially inside a threat
@@ -1149,6 +1151,12 @@ function AposBot() {
 
 			if (panicLevel < 1 && threat.distance < threat.dangerZone) {
 				overlapCount++;
+			}
+
+			if (player.cells.length == 1) {
+				if (threat.distance < threat.size - player.largestCell.size / 2) {
+					doSplit = true;
+				}
 			}
 
 			for (j = 0; j < player.cells.length; j++) {
@@ -1187,6 +1195,10 @@ function AposBot() {
 
 		if (panicLevel > 0) {
 			this.infoStrings.push("Panic Level: " + panicLevel);
+		}
+
+		if (doSplit) {
+			destinationChoices[2] = true;
 		}
 
 		return destinationChoices;
