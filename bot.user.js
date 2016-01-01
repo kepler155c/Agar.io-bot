@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1183
+// @version     3.1184
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1183;
+var aposBotVersion = 3.1184;
 
 var constants = {
 	splitRangeMin : 650,
@@ -806,12 +806,15 @@ function AposBot() {
 					threat.mass = t.mass / 2;
 					threat.size = Math.sqrt(threat.mass * 100);
 
-					var color = constants.orange;
-					if (t.isMovingTowards && t.teamSize == 1) {
-						color = constants.red;
+					var color = constants.gray;
+					if (distance < threat.size + constants.splitRangeMax) {
+						color = constants.purple;
+						if (t.teamSize == 1) {
+							color = constants.red;
+						}
 					}
 					drawCircle(threat.x, threat.y, threat.size, color);
-					drawLine(t.x, t.y, threat.x, threat.y, constants.orange);
+					drawLine(t.x, t.y, threat.x, threat.y, t.isMovingTowards ? constants.red : constants.gray);
 				}
 			}
 		}
