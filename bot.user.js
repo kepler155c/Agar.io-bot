@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1179
+// @version     3.1181
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1179;
+var aposBotVersion = 3.1181;
 
 var constants = {
 	splitRangeMin : 650,
@@ -755,6 +755,19 @@ function AposBot() {
 			threat.dangerZone = threat.size + threat.closestCell.size + threat.safeDistance;
 
 		} else if (threat.isType(Classification.largeThreat)) {
+			// find the smallest cell the threat can split kill
+			
+			/*
+			var inTroubleCell = threat.closestCell;
+			
+			for (var i = 0; i < player.cells.length; i++) {
+				var cell = player.cells[i];
+				if (cell.distance < inTroubleCell.distance && this.canSplitKill(threat, cell, constants.enemyRatio)) {
+					inTroubleCell = cell;
+				}
+			}
+			*/
+			
 			threat.dangerZone = threat.size + threat.closestCell.size + constants.splitRangeMax + 20; // use constant instead of safe distance (bouncy)
 
 		} else {
@@ -772,33 +785,31 @@ function AposBot() {
 			distance : t.distance
 		};
 
-		if (t.isType(Classification.largeThreat)) {
+		for (var i = 0; i < player.cells.length; i++) {
 
-			var distance = threat.distance - 750;
-			if (distance > 750) {
-				distance = 750;
-			} else if (distance < 0) {
-				distance = 0;
+			var cell = player.cells[i];
+
+			if (this.canSplitKill(t, cell, constants.enemyRatio)) {
+
+				var distance = Math.min(threat.size + constants.splitRangeMax, threat.distance);
+
+				var deltaX = threat.x - t.closestCell.x;
+				var deltaY = threat.y - t.closestCell.y;
+				var angle = Math.atan2(deltaY, deltaX); // In radians
+
+				threat.x = t.x - Math.cos(angle) * distance;
+				threat.y = t.y - Math.sin(angle) * distance;
+
+				threat.mass = t.mass / 2;
+				threat.size = Math.sqrt(threat.mass * 100);
+
+				var color = constants.orange;
+				if (t.isMovingTowards && t.teamSize == 1) {
+					color = constants.red;
+				}
+				drawCircle(threat.x, threat.y, threat.size, color);
+				drawLine(t.x, t.y, threat.x, threat.y, constants.orange);
 			}
-
-			distance = Math.min(threat.size + constants.splitRangeMax, threat.distance);
-
-			var deltaX = threat.x - t.closestCell.x;
-			var deltaY = threat.y - t.closestCell.y;
-			var angle = Math.atan2(deltaY, deltaX); // In radians
-
-			threat.x = t.x - Math.cos(angle) * distance;
-			threat.y = t.y - Math.sin(angle) * distance;
-
-			threat.mass = t.mass / 2;
-			threat.size = Math.sqrt(threat.mass * 100);
-
-			var color = constants.orange;
-			if (t.isMovingTowards && t.teamSize == 1) {
-				color = constants.red;
-			}
-			drawCircle(threat.x, threat.y, threat.size, color);
-			drawLine(t.x, t.y, threat.x, threat.y, constants.orange);
 		}
 
 		/*
@@ -852,7 +863,7 @@ function AposBot() {
 
 					this.setMinimumDistance(player, threat, constants.largeThreatRatio);
 
-					if (panicLevel == 0 && threat.isMovingTowards) {
+					if (panicLevel === 0 && threat.isMovingTowards) {
 						threat.dangerZone = threat.dangerZone * 1.2;
 					}
 
