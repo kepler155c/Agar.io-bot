@@ -807,7 +807,7 @@ function AposBot() {
 					threat.size = Math.sqrt(threat.mass * 100);
 
 					var color = constants.gray;
-					if (distance < threat.size + constants.splitRangeMax + cell.size) {
+					if (threat.distance < threat.size + constants.splitRangeMax) {
 						color = constants.purple;
 						if (t.teamSize == 1) {
 							color = constants.red;
