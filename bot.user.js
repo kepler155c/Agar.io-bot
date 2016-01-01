@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1211
+// @version     3.1212
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1211;
+var aposBotVersion = 3.1212;
 
 var constants = {
 	splitRangeMin : 650,
@@ -171,7 +171,8 @@ Player.prototype = {
 			this.isSplitting = true;
 			this.splitTarget = targetCell;
 			this.splitSize = this.size;
-	
+			this.splitMass = this.mass;
+
 			this.splitTimer = Date.now();
 			this.splitLocation = {
 				x : this.largestCell.x + (x - this.largestCell.x) * 4,
@@ -322,7 +323,7 @@ function AposBot() {
 			entity.hasMoved = entity.isMoving();
 			entity.isMovingTowards = this.isMovingTowards(player, entity);
 			entity.mass = this.calculateMass(entity);
-			entity.originalMass = entity.mass;  // save the original mass in case the merge logic changes it
+			entity.originalMass = entity.mass; // save the original mass in case the merge logic changes it
 			entity.safeDistance = 0;
 			entity.teamSize = 1;
 
@@ -1211,7 +1212,9 @@ function AposBot() {
 		}
 
 		if (doSplit) {
-			player.split(null, 0, 0);
+			if (!player.isSplitting) {
+				player.split(null, 0, 0);
+			}
 			console.log('split attempt');
 			destinationChoices[2] = true;
 		}
@@ -1263,7 +1266,8 @@ function AposBot() {
 
 		if (player.isSplitting) {
 
-			if (player.size <= player.splitSize && (Date.now() - player.splitTimer > 200)) {
+			if (player.size <= player.splitSize && (Date.now() - player.splitTimer > 200)
+					|| player.mass < player.splitMass * 0.9 || player.mass > player.splitMass * 1.1) {
 				// player size grows as long as we are splitting
 				player.isSplitting = false;
 				player.splitTarget = null;
@@ -1381,7 +1385,7 @@ function AposBot() {
 			this.infoStrings.push("Player Min:  " + parseInt(player.smallestCell.size, 10));
 			this.infoStrings.push("Player Max:  " + parseInt(player.largestCell.size, 10));
 		}
-*/
+		*/
 		this.infoStrings.push("");
 
 		for (var i = 0; i < player.cells.length; i++) {
