@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1208
+// @version     3.1209
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1208;
+var aposBotVersion = 3.1209;
 
 var constants = {
 	splitRangeMin : 650,
@@ -255,11 +255,13 @@ function AposBot() {
 
 				if (!team) {
 					team = {
-						cells : []
+						cells : [],
+						mass : 0
 					};
 					this.teams[teamKey] = team;
 				}
 				team.cells.push(entity);
+				team.mass += entity.originalMass;
 			}
 		}, this);
 
@@ -274,11 +276,10 @@ function AposBot() {
 				team.x = circle.x;
 				team.y = circle.y;
 				team.size = circle.size;
-				team.mass = 0;
 				for (var i = 0; i < team.cells.length; i++) {
 					var cell = team.cells[i];
 					cell.teamSize = team.cells.length;
-					team.mass += cell.mass;
+					cell.teamMass = team.mass;
 				}
 			}
 		}, this);
@@ -319,6 +320,7 @@ function AposBot() {
 			entity.hasMoved = entity.isMoving();
 			entity.isMovingTowards = this.isMovingTowards(player, entity);
 			entity.mass = this.calculateMass(entity);
+			entity.originalMass = entity.mass;  // save the original mass in case the merge logic changes it
 			entity.safeDistance = 0;
 			entity.teamSize = 1;
 
