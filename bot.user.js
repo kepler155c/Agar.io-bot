@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1222
+// @version     3.1223
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1222;
+var aposBotVersion = 3.1223;
 
 var constants = {
 	splitRangeMin : 650,
@@ -925,7 +925,7 @@ function AposBot() {
 
 	};
 
-	this.determineThreats = function(player, panicLevel, badAngles, obstacleAngles, obstacleList) {
+	this.determineThreats = function(player, panicLevel, badAngles, obstacleList) {
 
 		var i = 0;
 
@@ -975,7 +975,7 @@ function AposBot() {
 				}, this);
 	};
 
-	this.avoidViruses = function(player, obstacleList, badAngles) {
+	this.avoidViruses = function(player, badAngles, obstacleList) {
 
 		var i = 0;
 
@@ -1019,8 +1019,8 @@ function AposBot() {
 		var obstacleList = [];
 		var i, j, angle1, angle2, tempOb, line1, line2, diff, shiftedAngle, destination;
 
-		this.determineThreats(player, panicLevel, badAngles, obstacleAngles, obstacleList);
-		this.avoidViruses(player, badAngles, obstacleAngles);
+		this.determineThreats(player, panicLevel, badAngles, obstacleList);
+		this.avoidViruses(player, badAngles, obstacleList);
 
 		var stupidList = [];
 
