@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1243
+// @version     3.1244
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1243;
+var aposBotVersion = 3.1244;
 
 var constants = {
 	splitRangeMin : 650,
@@ -904,7 +904,7 @@ function AposBot() {
 			} else if (threat.distance < threat.threatededDistance) {
 				color = constants.pink;
 			}
-			drawCircle(threat.x, threat.y, threat.threatenedDistance - cell.size + 40, color);
+			//drawCircle(threat.x, threat.y, threat.threatenedDistance - cell.size + 40, color);
 			// parseInt(threat.threatLevel / 10));
 			drawPoint(threat.x, threat.y + 20, 2, parseInt(threat.distance, 10) + " "
 					+ parseInt(threat.threatenedDistance, 10));
@@ -926,24 +926,24 @@ function AposBot() {
 	this.pruneThreats = function(threats) {
 		for (var i = threats.length - 1; i >= 0; i--) {
 			var threat = threats[i];
-			
+
 			if (threat.distance < threat.dangerZone) {
 				drawCircle(threat.x, threat.y, threat.threatenedDistance - threat.cell.size + 40, constants.gray);
 				threats.splice(i, 1);
-				
+
 				if (threats.length <= 1) {
 					return true;
 				}
 			}
 		}
-		
+
 		return false;
 	};
-	
+
 	this.reduceThreats = function(player, threats) {
 
 		var i, threat;
-		
+
 		if (threats.length <= 1) {
 			return;
 		}
@@ -961,7 +961,7 @@ function AposBot() {
 		// remove any threats not moving towards us
 		for (i = threats.length - 1; i >= 0; i--) {
 			threat = threats[i];
-			
+
 			if (threat.distance > threat.safeDistance && !threat.isMovingTowards) {
 				drawCircle(threat.x, threat.y, threat.threatenedDistance - threat.cell.size + 40, constants.gray);
 				threats.splice(i, 1);
@@ -974,7 +974,7 @@ function AposBot() {
 		// remove any teams that must split to kill
 		for (i = threats.length - 1; i >= 0; i--) {
 			threat = threats[i];
-			
+
 			if (threat.teamSize > 1) {
 				if (threat.distance > threat.safeDistance) {
 					drawCircle(threat.x, threat.y, threat.threatenedDistance - threat.cell.size + 40, constants.gray);
@@ -985,7 +985,7 @@ function AposBot() {
 				}
 			}
 		}
-		
+
 		// reduce distance down to bare minimum
 		for (i = 0; i < threats.length; i++) {
 			threat = threats[i];
@@ -995,10 +995,10 @@ function AposBot() {
 		if (this.pruneThreats(threats)) {
 			return;
 		}
-		
+
 		// save the biggest cell
 		if (player.cells.length > 1) {
-			
+
 		}
 	};
 
@@ -1304,6 +1304,10 @@ function AposBot() {
 		var angle;
 		this.reduceThreats(player, threats);
 
+		for (i = 0; i < threats.length; i++) {
+			var threat = threats[i];
+			drawCircle(threat.x, threat.y, threat.threatenedDistance - threat.cell.size + 40, constants.red);
+		}
 		if (threats.length > 1) {
 			console.log('didnt reduce threats: ' + threats.length);
 		}
