@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1220
+// @version     3.1221
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1220;
+var aposBotVersion = 3.1221;
 
 var constants = {
 	splitRangeMin : 650,
@@ -975,6 +975,40 @@ function AposBot() {
 				}, this);
 	};
 
+	this.avoidViruses = function(player, obstacleList, badAngles) {
+
+		var i = 0;
+
+		Object.keys(this.entities).filter(this.virusFilter, this).forEach(function(key) {
+
+			var virus = this.entities[key];
+
+			virus.range = null;
+
+			for (var j = 0; j < player.cells.length; j++) {
+				var cell = player.cells[j];
+
+				if (virus.distance < cell.size + 750 && (cell.mass / (virus.mass + virus.foodMass)) > 1.2) {
+
+					var minDistance = cell.size + 1;
+
+					var tempOb = this.getAngleRange(cell, virus, i, minDistance);
+					var angle1 = tempOb[0];
+					var angle2 = this.rangeToAngle(tempOb);
+					obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
+
+					virus.range = [ angle1, angle2 ];
+
+					if (virus.distance < minDistance) {
+						badAngles.push(tempOb.concat(virus.distance));
+					}
+				}
+			}
+			i++;
+		}, this);
+
+	};
+
 	/**
 	 * The bot works by removing angles in which it is too
 	 * dangerous to travel towards to.
@@ -986,35 +1020,7 @@ function AposBot() {
 		var i, j, angle1, angle2, tempOb, line1, line2, diff, shiftedAngle, destination;
 
 		this.determineThreats(player, panicLevel, badAngles, obstacleAngles, obstacleList);
-
-		Object.keys(this.entities).filter(this.virusFilter, this).forEach(
-				function(key) {
-
-					var virus = this.entities[key];
-
-					virus.range = null;
-
-					for (j = 0; j < player.cells.length; j++) {
-						var cell = player.cells[j];
-
-						if (virus.distance < cell.size + 750
-								&& (cell.mass / (virus.mass + virus.foodMass)) > constants.playerRatio) {
-
-							var minDistance = cell.size + 1;
-
-							tempOb = this.getAngleRange(cell, virus, i, minDistance);
-							angle1 = tempOb[0];
-							angle2 = this.rangeToAngle(tempOb);
-							obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
-
-							virus.range = [ angle1, angle2 ];
-
-							if (virus.distance < minDistance) {
-								badAngles.push(this.getAngleRange(cell, virus, 0, minDistance).concat(virus.distance));
-							}
-						}
-					}
-				}, this);
+		this.avoidViruses(player, badAngles, obstacleAngles);
 
 		var stupidList = [];
 
