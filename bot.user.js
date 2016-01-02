@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1228
+// @version     3.1229
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1228;
+var aposBotVersion = 3.1229;
 
 var constants = {
 	splitRangeMin : 650,
@@ -845,13 +845,28 @@ function AposBot() {
 				mustSplit : false,
 			};
 
-			var deathDistance = Math.min(threat.size - cell.size, cell.size); // how much overlap until we are eaten ??
-			var notTouchingDistance = cell.size + threat.size;
-
 			// if the threat is moving towards any cell, mark this threat as moving towards us
 			if (threat.isMovingTowards) {
 				t.isMovingTowards = true;
 			}
+
+			if (this.canSplitKill(t, cell, constants.enemyRatio)) {
+				threat.mass = t.mass / 2;
+				threat.size = Math.sqrt(threat.mass * 100);
+
+				var distance = Math.min(t.size + constants.splitRangeMax, threat.distance);
+
+				threat.x = t.x - Math.cos(threat.angle) * distance;
+				threat.y = t.y - Math.sin(threat.angle) * distance;
+				threat.distance = Util.computeDistance(threat.x, threat.y, cell.x, cell.y);
+				threat.mustSplit = true;
+
+				drawCircle(threat.x, threat.y, threat.size, constants.gray);
+				drawLine(t.x, t.y, threat.x, threat.y, threat.isMovingTowards ? constants.red : constants.gray);
+			}
+
+			var deathDistance = Math.min(threat.size - cell.size, cell.size); // how much overlap until we are eaten ??
+			var notTouchingDistance = cell.size + threat.size;
 
 			// too big - not a threat
 			if (t.teamMass / player.mass > constants.largeThreatRatio) {
@@ -860,70 +875,55 @@ function AposBot() {
 				threat.safeDistance = notTouchingDistance + t.safeDistance;
 				threat.threatenedDistance = notTouchingDistance + t.safeDistance;
 
+			} else if (this.canSplitKill(t, cell, constants.enemyRatio)) {
+
+				threat.minDistance = 0;
+				threat.safeDistance = cell.size + t.safeDistance;
+				threat.threatenedDistance = (cell.size * 2) + t.safeDistance; // one radius distance - might be too much when large
+
 			} else {
 
-				if (this.canSplitKill(t, cell, constants.enemyRatio)) {
-
-					threat.mass = t.mass / 2;
-					threat.size = Math.sqrt(threat.mass * 100);
-
-					var distance = Math.min(t.size + constants.splitRangeMax, threat.distance);
-
-					threat.x = t.x - Math.cos(threat.angle) * distance;
-					threat.y = t.y - Math.sin(threat.angle) * distance;
-					threat.distance = Util.computeDistance(threat.x, threat.y, cell.x, cell.y);
-
-					drawCircle(threat.x, threat.y, threat.size, constants.gray);
-					drawLine(t.x, t.y, threat.x, threat.y, threat.isMovingTowards ? constants.red : constants.gray);
-
-					threat.minDistance = 0;
-					threat.safeDistance = cell.size + t.safeDistance;
-					threat.threatenedDistance = (cell.size * 2) + t.safeDistance; // one radius distance - might be too much when large
-
-				} else {
-
-					threat.minDistance = deathDistance + t.safeDistance;
-					threat.safeDistance = notTouchingDistance + t.safeDistance;
-					threat.threatenedDistance = notTouchingDistance + cell.size + t.safeDistance; // one radius distance
-				}
-
-				threat.mustSplit = true;
-
-				if (threat.distance < 750 + cell.size) {
-
-					if (threat.distance < threat.safeDistance) {
-						threat.threatLevel += 15;
-					}
-					if (threat.isMovingTowards) {
-						threat.threatLevel += 15;
-						if (threat.distance < threat.threatenedDistance) {
-							threat.threatLevel += 5;
-						}
-					}
-					if (threat.mustSplit) {
-						if (threat.teamSize > 8) {
-							threat.threatLevel -= 40;
-						} else if (threat.teamSize > 4) {
-							threat.threatLevel -= 20;
-						} else if (threat.teamSize > 1) {
-							threat.threatLevel -= 10;
-						}
-					}
-
-					// drawLine(threat.x, threat.y, cell.x, cell.y, threat.isThreatening ? constants.red : constants.gray);
-				}
-				var color = constants.green;
-				if (threat.distance <= threat.minDistance) {
-					color = constants.red;
-				}
-				if (threat.distance < threat.safeDistance) {
-					color = constants.orange;
-				} else if (threat.distance < threat.threatededDistance) {
-					color = constants.pink;
-				}
-				drawCircle(threat.x, threat.y, threat.threatenedDistance - cell.size + 40, color);
-				// parseInt(threat.threatLevel / 10));
+				threat.minDistance = deathDistance + t.safeDistance;
+				threat.safeDistance = notTouchingDistance + t.safeDistance;
+				threat.threatenedDistance = notTouchingDistance + cell.size + t.safeDistance; // one radius distance
 			}
+
+			if (threat.distance < 750 + cell.size) {
+
+				if (threat.distance < threat.safeDistance) {
+					threat.threatLevel += 15;
+				}
+				if (threat.isMovingTowards) {
+					threat.threatLevel += 15;
+					if (threat.distance < threat.threatenedDistance) {
+						threat.threatLevel += 5;
+					}
+				}
+				if (threat.mustSplit) {
+					if (threat.teamSize > 8) {
+						threat.threatLevel -= 40;
+					} else if (threat.teamSize > 4) {
+						threat.threatLevel -= 20;
+					} else if (threat.teamSize > 1) {
+						threat.threatLevel -= 10;
+					}
+				}
+
+				// drawLine(threat.x, threat.y, cell.x, cell.y, threat.isThreatening ? constants.red : constants.gray);
+			}
+			var color = constants.green;
+			if (threat.distance <= threat.minDistance) {
+				color = constants.red;
+			}
+			if (threat.distance < threat.safeDistance) {
+				color = constants.orange;
+			} else if (threat.distance < threat.threatededDistance) {
+				color = constants.pink;
+			}
+			drawCircle(threat.x, threat.y, threat.threatenedDistance - cell.size + 40, color);
+			// parseInt(threat.threatLevel / 10));
+			drawPoint(threat.x, threat.y + 20, 2, parseInt(threat.distance, 10) + " "
+					+ parseInt(threat.threatenedDistance, 10));
 		}
 		/*
 
