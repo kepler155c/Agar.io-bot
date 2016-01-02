@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1221
+// @version     3.1222
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1221;
+var aposBotVersion = 3.1222;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1545,7 +1545,7 @@ function AposBot() {
 	this.canSplitKill = function(eater, eatee, ratio) {
 
 		if (eater.mass > eatee.mass) {
-			return (eater / 2) / eatee.mass > ratio;
+			return (eater.mass / 2) / eatee.mass > ratio;
 		}
 		return false;
 	};
