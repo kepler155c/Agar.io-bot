@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1247
+// @version     3.1248
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1247;
+var aposBotVersion = 3.1248;
 
 var constants = {
 	splitRangeMin : 650,
@@ -943,6 +943,8 @@ function AposBot() {
 	this.reduceThreats = function(player, threats) {
 
 		var i, threat;
+		
+		return;
 		
 		if (threats.length <= 1) {
 			return;
