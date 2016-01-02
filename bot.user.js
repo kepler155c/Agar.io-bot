@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1248
+// @version     3.1249
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1248;
+var aposBotVersion = 3.1249;
 
 var constants = {
 	splitRangeMin : 650,
@@ -940,17 +940,27 @@ function AposBot() {
 		return false;
 	};
 
+	this.getUniqueThreats = function(threats) {
+		var uniqueThreats = [];
+
+		for (i = 0; i < threats.length; i++) {
+			uniqueThreats[threats[i].id] = threats[i];
+		}
+		return uniqueThreats.length;
+	};
+
 	this.reduceThreats = function(player, threats) {
 
 		var i, threat;
-		
-		return;
-		
-		if (threats.length <= 1) {
+
+		var uniqueThreats = this.getUniqueThreats(threats);
+
+		if (threats.length <= 1 || uniqueThreats.length <= 1) {
 			return;
 		}
 
 		// try reducing threatened distance
+		/*
 		for (i = 0; i < threats.length; i++) {
 			threat = threats[i];
 
@@ -960,6 +970,7 @@ function AposBot() {
 			console.log('reduced distance');
 			return;
 		}
+		*/
 
 		// remove any threats not moving towards us
 		for (i = threats.length - 1; i >= 0; i--) {
@@ -969,7 +980,7 @@ function AposBot() {
 				drawCircle(threat.x, threat.y, threat.threatenedDistance - threat.cell.size + 40, constants.gray);
 				threats.splice(i, 1);
 				console.log('not moving towards');
-				if (threats.length <= 1) {
+				if (threats.length <= 1 || this.getUniqueThreats(threats) <= 1) {
 					return;
 				}
 			}
@@ -984,7 +995,7 @@ function AposBot() {
 					drawCircle(threat.x, threat.y, threat.threatenedDistance - threat.cell.size + 40, constants.gray);
 					threats.splice(i, 1);
 					console.log('splitters');
-					if (threats.length <= 1) {
+					if (threats.length <= 1 || this.getUniqueThreats(threats) <= 1) {
 						return;
 					}
 				}
@@ -992,6 +1003,7 @@ function AposBot() {
 		}
 
 		// reduce distance down to bare minimum
+		/*
 		for (i = 0; i < threats.length; i++) {
 			threat = threats[i];
 
@@ -1001,6 +1013,7 @@ function AposBot() {
 			console.log('bare minimum');
 			return;
 		}
+		*/
 
 		// save the biggest cell
 		if (player.cells.length > 1) {
