@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1219
+// @version     3.1220
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1219;
+var aposBotVersion = 3.1220;
 
 var constants = {
 	splitRangeMin : 650,
@@ -218,10 +218,10 @@ function initializeEntity() {
 		return this.classification == classification;
 	};
 
-	da.prototype.predictPosition = function(timeDiff) {
+	da.prototype.predictPosition = function(timeDiff, previousUpdate) {
 		var lastPos = this.getLastPos();
 
-		var a = (getLastUpdate() - this.previousUpdated) / 120;
+		var a = (getLastUpdate() - previousUpdate) / 120;
 		a = 0 > a ? 0 : 1 < a ? 1 : a;
 
 		timeDiff = timeDiff / 60;
@@ -230,10 +230,10 @@ function initializeEntity() {
 		this.py = timeDiff * a * (this.K - this.t) + this.y;
 	};
 
-	da.prototype.getVelocity = function() {
+	da.prototype.getVelocity = function(previousUpdate) {
 		var lastPos = this.getLastPos();
 
-		var a = (getLastUpdate() - this.previousUpdated) / 120;
+		var a = (getLastUpdate() - previousUpdate) / 120;
 		a = 0 > a ? 0 : 1 < a ? 1 : a;
 
 		var px = a * (this.J - this.s) + this.x;
@@ -393,7 +393,7 @@ function AposBot() {
 
 			/*
 			if (entity.hasMoved) {
-				this.predictPosition(constants.splitDuration);
+				this.predictPosition(constants.splitDuration, this.previousUpdated);
 			}
 			*/
 
@@ -415,7 +415,7 @@ function AposBot() {
 					if (this.isItMe(player, entity)) {
 
 						entity.classification = Classification.player;
-						entity.velocity = entity.getVelocity();
+						entity.velocity = entity.getVelocity(this.previousUpdated);
 
 					} else if (this.isFood(player.smallestCell, entity)) {
 
@@ -523,7 +523,7 @@ function AposBot() {
 
 			if (food.hasMoved) {
 
-				food.predictPosition(constants.splitDuration);
+				food.predictPosition(constants.splitDuration, this.previousUpdated);
 
 				// really should clone da
 				player.foodClusters.push({
@@ -1193,7 +1193,7 @@ function AposBot() {
 
 			var threat = this.entities[key];
 
-			threat.velocity = threat.getVelocity();
+			threat.velocity = threat.getVelocity(this.previousUpdated);
 			var velocity = (threat.velocity + threat.closestCell.velocity);
 			threat.safeDistance = threat.closestCell.mass < 50 ? velocity * 4 : velocity * 2;
 			this.setMinimumDistance(player, threat, constants.largeThreatRatio);
