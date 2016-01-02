@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1240
+// @version     3.1241
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1240;
+var aposBotVersion = 3.1241;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1299,7 +1299,7 @@ function AposBot() {
 			panicLevel++;
 		}*/
 		var angle;
-		this.reduceThreats(threatList);
+		this.reduceThreats(player, threatList);
 
 		angle = this.avoidThreats(player, destinationChoices, threatList);
 
