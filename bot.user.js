@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1237
+// @version     3.1238
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1237;
+var aposBotVersion = 3.1238;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1177,14 +1177,11 @@ function AposBot() {
 			var perfectAngle = this.mod(bIndex[0] + bIndex[1] / 2, 360);
 			perfectAngle = this.shiftAngle(obstacleAngles, perfectAngle, bIndex);
 			console.log('angle is : ' + bIndex[0] + '-' + bIndex[1]);
-			if (isNaN(bIndex[0])) {
-				console.log('sigh');
-			}
 
 			line1 = this.followAngle(perfectAngle.angle, player.x, player.y, verticalDistance());
 
-			//destinationChoices[0] = line1[0];
-			//destinationChoices[1] = line1[1];
+			destinationChoices[0] = line1[0];
+			destinationChoices[1] = line1[1];
 
 			drawLine(player.x, player.y, line1[0], line1[1], constants.red);
 
@@ -1195,6 +1192,7 @@ function AposBot() {
 			return false;
 		}
 
+		this.determineFoodDestination(player, destinationChoices, obstacleAngles);
 		return true;
 	};
 
@@ -1393,7 +1391,6 @@ function AposBot() {
 			threat.safeDistance = threat.closestCell.mass < 50 ? velocity * 4 : velocity * 2;
 			this.setMinimumDistance(player, threat, constants.largeThreatRatio);
 
-			this.calculateThreatWeight(player, threatList, threat);
 
 			if (panicLevel < 1 && threat.distance < threat.dangerZone) {
 				overlapCount++;
@@ -1416,6 +1413,7 @@ function AposBot() {
 					break;
 				}
 			}
+			this.calculateThreatWeight(player, threatList, threat);
 		}, this);
 
 		var threatLevel = 0;
@@ -1446,12 +1444,13 @@ function AposBot() {
 		// circles intersect
 		// split enemy...
 		// largest previous distance - current distance is the cell chasing
+		/*
 		while (panicLevel < 3) {
 			if (this.determineDestination(player, destinationChoices, tempPoint, panicLevel)) {
 				break;
 			}
 			panicLevel++;
-		}
+		}*/
 
 		if (panicLevel > 0) {
 			this.infoStrings.push("Panic Level: " + panicLevel);
