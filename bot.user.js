@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1225
+// @version     3.1228
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1225;
+var aposBotVersion = 3.1228;
 
 var constants = {
 	splitRangeMin : 650,
@@ -151,19 +151,21 @@ Player.prototype = {
 
 		this.safeToSplit = this.cells.length == 1;
 
-		Object.keys(entities).forEach(function(key) {
+		Object.keys(entities).forEach(
+				function(key) {
 
-			var entity = entities[key];
-			// if any largish enemies are within our split radius, dont allow split
-			if (!entity.isVirus() && entity.size > 14 && !entity.isType(Classification.player)) {
+					var entity = entities[key];
+					// if any largish enemies are within our split radius, dont allow split
+					if (!entity.isVirus() && entity.size > 14 && !entity.isType(Classification.player)) {
 
-				if (entity.closestCell.size * entity.closestCell.size / 2 < entity.size * entity.size * constants.enemyRatio) {
-					if (entity.distance < 750 + entity.closestCell.size) {
-						this.safeToSplit = false;
+						if (entity.closestCell.size * entity.closestCell.size / 2 < entity.size * entity.size
+								* constants.enemyRatio) {
+							if (entity.distance < 750 + entity.closestCell.size) {
+								this.safeToSplit = false;
+							}
+						}
 					}
-				}
-			}
-		}, this);
+				}, this);
 	},
 	split : function(targetCell, x, y) {
 
@@ -660,9 +662,9 @@ function AposBot() {
 			if (virus.closestCell.mass + virus.foodMass >= virus.mass) {
 				for (var j = 0; j < virus.foodList.length; j++) {
 					var food = virus.foodList[j];
-					if (!food.hasMoved) { // keep chasing cells in viruses - it's kinda funny
-						food.classification = Classification.unknown;
-					}
+					//					if (!food.hasMoved) { // keep chasing cells in viruses - it's kinda funny
+					food.classification = Classification.unknown;
+					//					}
 				}
 			}
 		}, this);
@@ -843,7 +845,23 @@ function AposBot() {
 				mustSplit : false,
 			};
 
-			if (t.teamMass / player.mass <= constants.largeThreatRatio) {
+			var deathDistance = Math.min(threat.size - cell.size, cell.size); // how much overlap until we are eaten ??
+			var notTouchingDistance = cell.size + threat.size;
+
+			// if the threat is moving towards any cell, mark this threat as moving towards us
+			if (threat.isMovingTowards) {
+				t.isMovingTowards = true;
+			}
+
+			// too big - not a threat
+			if (t.teamMass / player.mass > constants.largeThreatRatio) {
+
+				threat.minDistance = deathDistance + t.safeDistance;
+				threat.safeDistance = notTouchingDistance + t.safeDistance;
+				threat.threatenedDistance = notTouchingDistance + t.safeDistance;
+
+			} else {
+
 				if (this.canSplitKill(t, cell, constants.enemyRatio)) {
 
 					threat.mass = t.mass / 2;
@@ -857,16 +875,19 @@ function AposBot() {
 
 					drawCircle(threat.x, threat.y, threat.size, constants.gray);
 					drawLine(t.x, t.y, threat.x, threat.y, threat.isMovingTowards ? constants.red : constants.gray);
+
+					threat.minDistance = 0;
+					threat.safeDistance = cell.size + t.safeDistance;
+					threat.threatenedDistance = (cell.size * 2) + t.safeDistance; // one radius distance - might be too much when large
+
+				} else {
+
+					threat.minDistance = deathDistance + t.safeDistance;
+					threat.safeDistance = notTouchingDistance + t.safeDistance;
+					threat.threatenedDistance = notTouchingDistance + cell.size + t.safeDistance; // one radius distance
 				}
 
-				threat.minDistance = threat.size - cell.size + t.safeDistance;
-				threat.safeDistance = cell.size + threat.size + t.safeDistance;
-				threat.threatenedDistance = (cell.size + threat.size + t.safeDistance) * 1.2;
 				threat.mustSplit = true;
-
-				if (threat.isMovingTowards) {
-					t.isMovingTowards = true;
-				}
 
 				if (threat.distance < 750 + cell.size) {
 
@@ -889,15 +910,24 @@ function AposBot() {
 						}
 					}
 
-					drawCircle(threat.x, threat.y, threat.threatenedDistance - cell.size + 40,
-							parseInt(threat.threatLevel / 10));
 					// drawLine(threat.x, threat.y, cell.x, cell.y, threat.isThreatening ? constants.red : constants.gray);
 				}
+				var color = constants.green;
+				if (threat.distance <= threat.minDistance) {
+					color = constants.red;
+				}
+				if (threat.distance < threat.safeDistance) {
+					color = constants.orange;
+				} else if (threat.distance < threat.threatededDistance) {
+					color = constants.pink;
+				}
+				drawCircle(threat.x, threat.y, threat.threatenedDistance - cell.size + 40, color);
+				// parseInt(threat.threatLevel / 10));
 			}
 		}
 		/*
 
-		var distanceTilEaten = threat.distance - threat.size;
+		var deathDistance = threat.distance - threat.size;
 		var distanceTilSafe = threat.size + threat.closestCell.size;
 		var mass = threat.closestCell.mass;  // mass we will lose
 		var weight = 1;
