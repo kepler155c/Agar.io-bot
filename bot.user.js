@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1244
+// @version     3.1245
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1244;
+var aposBotVersion = 3.1245;
 
 var constants = {
 	splitRangeMin : 650,
@@ -943,7 +943,7 @@ function AposBot() {
 	this.reduceThreats = function(player, threats) {
 
 		var i, threat;
-
+		
 		if (threats.length <= 1) {
 			return;
 		}
@@ -1302,7 +1302,11 @@ function AposBot() {
 			panicLevel++;
 		}*/
 		var angle;
+		var count = threats.length;
 		this.reduceThreats(player, threats);
+		if (threats.length < count) {
+			console.log("was: " + count + " now: " + threats.length);
+		}
 
 		for (i = 0; i < threats.length; i++) {
 			var threat = threats[i];
