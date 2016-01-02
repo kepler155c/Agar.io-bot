@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1231
+// @version     3.1232
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1231;
+var aposBotVersion = 3.1232;
 
 var constants = {
 	splitRangeMin : 650,
@@ -961,10 +961,6 @@ function AposBot() {
 		return true;
 	};
 
-	this.avoidThreats = function(player, threats) {
-
-	};
-
 	this.determineThreatsNew = function(player, threats, badAngles, obstacleList) {
 
 		for (var i = 0; i < threats.length; i++) {
@@ -1293,7 +1289,7 @@ console.log('angle is : ' + bIndex[0] + '-' + bIndex[1]);
 
 		for (i = 0; i < obstacleAngles.length; i++) {
 
-			this.drawAngle(player, obstacleAngles[i], 50, 6);
+			// this.drawAngle(player, obstacleAngles[i], 50, 6);
 		}
 
 		if (this.toggleFollow && goodAngles.length === 0) {
@@ -1505,8 +1501,8 @@ console.log('angle is : ' + bIndex[0] + '-' + bIndex[1]);
 
 		if (player.isSplitting) {
 
-			if (player.size <= player.splitSize && (Date.now() - player.splitTimer > 200)
-					|| player.mass < player.splitMass * 0.8 || player.mass > player.splitMass * 1.2) {
+			if (player.size <= player.splitSize && (Date.now() - player.splitTimer > 200)) {
+//					|| player.mass < player.splitMass * 0.8 || player.mass > player.splitMass * 1.2) {
 				// player size grows as long as we are splitting
 				player.isSplitting = false;
 				player.splitTarget = null;
@@ -2159,9 +2155,9 @@ console.log('angle is : ' + bIndex[0] + '-' + bIndex[1]);
 			color = constants.green;
 		}
 
-		drawLine(blob1.x, blob1.y, lineLeft[0], lineLeft[1], color);
-		drawLine(blob1.x, blob1.y, lineRight[0], lineRight[1], color);
-		drawArc(lineLeft[0], lineLeft[1], lineRight[0], lineRight[1], blob1.x, blob1.y, color);
+		//drawLine(blob1.x, blob1.y, lineLeft[0], lineLeft[1], color);
+		//drawLine(blob1.x, blob1.y, lineRight[0], lineRight[1], color);
+		//drawArc(lineLeft[0], lineLeft[1], lineRight[0], lineRight[1], blob1.x, blob1.y, color);
 
 		return [ leftAngle, difference ];
 	};
