@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1216
+// @version     3.1217
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1216;
+var aposBotVersion = 3.1217;
 
 var constants = {
 	splitRangeMin : 650,
@@ -196,10 +196,26 @@ Player.prototype = {
 	}
 };
 
+var Util = function() {
+};
+
+Util.prototype = {
+	computeDistance : function(x1, y1, x2, y2, s1, s2) {
+		// Make sure there are no null optional params.
+		s1 = s1 || 0;
+		s2 = s2 || 0;
+		var xdis = x1 - x2; // <--- FAKE AmS OF COURSE!
+		var ydis = y1 - y2;
+		var distance = Math.sqrt(xdis * xdis + ydis * ydis) - (s1 + s2);
+
+		return distance;
+	}
+};
+
 function initializeEntity() {
 
 	var da = window.getEntityPrototype();
-	
+
 	da.prototype.isType = function(classification) {
 		return this.classification == classification;
 	};
@@ -215,7 +231,7 @@ function initializeEntity() {
 		this.px = timeDiff * a * (this.J - this.s) + this.x;
 		this.py = timeDiff * a * (this.K - this.t) + this.y;
 	};
-	
+
 	da.prototype.getVelocity = function() {
 		var lastPos = this.getLastPos();
 
@@ -225,7 +241,7 @@ function initializeEntity() {
 		var px = a * (this.J - this.s) + this.x;
 		var py = a * (this.K - this.t) + this.y;
 
-		return this.computeDistance(this.x, this.y, px, py);
+		return Util.computeDistance(this.x, this.y, px, py);
 	};
 }
 
@@ -669,7 +685,7 @@ function AposBot() {
 					for (j = player.foodClusters.length - 1; j >= 0; j--) {
 						cluster = player.foodClusters[j];
 
-						if (this.computeDistance(threat.x, threat.y, cluster.x, cluster.y) < threat.size
+						if (Util.computeDistance(threat.x, threat.y, cluster.x, cluster.y) < threat.size
 								+ player.largestCell.size + constants.splitRangeMax) {
 							player.foodClusters.splice(j, 1);
 						}
@@ -839,7 +855,7 @@ function AposBot() {
 
 					threat.x = t.x - Math.cos(threat.angle) * distance;
 					threat.y = t.y - Math.sin(threat.angle) * distance;
-					threat.distance = this.computeDistance(threat.x, threat.y, cell.x, cell.y);
+					threat.distance = Util.computeDistance(threat.x, threat.y, cell.x, cell.y);
 
 					drawCircle(threat.x, threat.y, threat.size, constants.gray);
 					drawLine(t.x, t.y, threat.x, threat.y, threat.isMovingTowards ? constants.red : constants.gray);
@@ -1094,7 +1110,7 @@ function AposBot() {
 
 		if (this.toggleFollow && goodAngles.length === 0) {
 			//This is the follow the mouse mode
-			var distance = this.computeDistance(player.x, player.y, tempPoint[0], tempPoint[1]);
+			var distance = Util.computeDistance(player.x, player.y, tempPoint[0], tempPoint[1]);
 
 			shiftedAngle = this.shiftAngle(obstacleAngles, this
 					.getAngle(tempPoint[0], tempPoint[1], player.x, player.y), [ 0, 360 ]);
@@ -1138,7 +1154,7 @@ function AposBot() {
 			console.log("Failed");
 			/*var angleWeights = [] //Put weights on the angles according to enemy distance
 			for (var i = 0; i < player.threats.length; i++){
-			    var dist = this.computeDistance(player.x, player.y, player.threats[i].x, player.threats[i].y);
+			    var dist = Util.computeDistance(player.x, player.y, player.threats[i].x, player.threats[i].y);
 			    var angle = this.getAngle(player.threats[i].x, player.threats[i].y, player.x, player.y);
 			    angleWeights.push([angle,dist]);
 			}
@@ -1445,20 +1461,9 @@ function AposBot() {
 	};
 
 	this.isMerging = function(cell1, cell2) {
-		var dist = this.computeDistance(cell1.x, cell1.y, cell2.x, cell2.y, cell1.size, cell2.size);
+		var dist = Util.computeDistance(cell1.x, cell1.y, cell2.x, cell2.y, cell1.size, cell2.size);
 
 		return dist <= -5; // was -50
-	};
-
-	this.computeDistance = function(x1, y1, x2, y2, s1, s2) {
-		// Make sure there are no null optional params.
-		s1 = s1 || 0;
-		s2 = s2 || 0;
-		var xdis = x1 - x2; // <--- FAKE AmS OF COURSE!
-		var ydis = y1 - y2;
-		var distance = Math.sqrt(xdis * xdis + ydis * ydis) - (s1 + s2);
-
-		return distance;
 	};
 
 	// Get a distance that is Inexpensive on the cpu for various purpaces
@@ -1752,7 +1757,7 @@ function AposBot() {
 
 		var shouldInvert = false;
 
-		var tempRadius = this.computeDistance(px, py, cx, cy);
+		var tempRadius = Util.computeDistance(px, py, cx, cy);
 		if (tempRadius <= radius) {
 			radius = tempRadius - 5;
 			shouldInvert = true;
@@ -2026,7 +2031,7 @@ function AposBot() {
 		for (i = 0; i < player.cells.length; i++) {
 
 			var cell = player.cells[i];
-			var distance = this.computeDistance(cell.x, cell.y, x, y);
+			var distance = Util.computeDistance(cell.x, cell.y, x, y);
 
 			if (!info.distance || distance < info.distance) {
 				info.distance = distance;
