@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1245
+// @version     3.1246
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1245;
+var aposBotVersion = 3.1246;
 
 var constants = {
 	splitRangeMin : 650,
@@ -735,7 +735,7 @@ function AposBot() {
 		} else if (doSplit && !shiftedAngle.shifted) {
 
 			this.moreInfoStrings = [];
-			console.log('DUMPING');
+			// console.log('DUMPING');
 			var destinationAngle = this.getAngle(destinationPoint[0], destinationPoint[1], cluster.closestCell.x,
 					cluster.closestCell.y);
 			console.log(destinationAngle);
@@ -745,12 +745,12 @@ function AposBot() {
 				var virus = this.entities[key];
 
 				if (virus.range) {
-					console.log(virus.range);
+					// console.log(virus.range);
 
 					if (this.angleIsWithin(destinationAngle, virus.range)) {
 						// cannot split, there is a virus in the path
 						doSplit = false;
-						console.log('inrange');
+						// console.log('inrange');
 						color = constants.red;
 						return;
 					}
@@ -955,6 +955,7 @@ function AposBot() {
 			threat.dangerZone = threat.safeDistance;
 		}
 		if (this.pruneThreats(threats)) {
+			console.log('reduced distance');
 			return;
 		}
 
@@ -965,6 +966,7 @@ function AposBot() {
 			if (threat.distance > threat.safeDistance && !threat.isMovingTowards) {
 				drawCircle(threat.x, threat.y, threat.threatenedDistance - threat.cell.size + 40, constants.gray);
 				threats.splice(i, 1);
+				console.log('not moving towards');
 				if (threats.length <= 1) {
 					return;
 				}
@@ -979,6 +981,7 @@ function AposBot() {
 				if (threat.distance > threat.safeDistance) {
 					drawCircle(threat.x, threat.y, threat.threatenedDistance - threat.cell.size + 40, constants.gray);
 					threats.splice(i, 1);
+					console.log('splitters');
 					if (threats.length <= 1) {
 						return;
 					}
@@ -993,6 +996,7 @@ function AposBot() {
 			threat.dangerZone = threat.minDistance;
 		}
 		if (this.pruneThreats(threats)) {
+			console.log('bare minimum');
 			return;
 		}
 
