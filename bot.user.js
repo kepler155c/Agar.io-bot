@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1242
+// @version     3.1243
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1242;
+var aposBotVersion = 3.1243;
 
 var constants = {
 	splitRangeMin : 650,
@@ -825,7 +825,7 @@ function AposBot() {
 		}
 	};
 
-	this.calculateThreatWeight = function(player, threatList, t) {
+	this.calculateThreatWeight = function(player, threats, t) {
 
 		for (var i = 0; i < player.cells.length; i++) {
 
@@ -916,11 +916,11 @@ function AposBot() {
 			}
 
 			if (threat.distance <= threat.safeDistance) {
-				threatList.push(threat);
+				threats.push(threat);
 			}
 		}
 
-		return threatList;
+		return threats;
 	};
 
 	this.pruneThreats = function(threats) {
@@ -1244,7 +1244,7 @@ function AposBot() {
 		// 1 = in the split distance of a threat
 
 		var overlapCount = 0;
-		var threatList = [];
+		var threats = [];
 
 		Object.keys(this.entities).filter(this.threatFilter, this).forEach(function(key) {
 
@@ -1276,7 +1276,7 @@ function AposBot() {
 					break;
 				}
 			}
-			this.calculateThreatWeight(player, threatList, threat);
+			this.calculateThreatWeight(player, threats, threat);
 		}, this);
 
 		if (panicLevel < 1 && overlapCount > 1) {
@@ -1302,9 +1302,12 @@ function AposBot() {
 			panicLevel++;
 		}*/
 		var angle;
-		this.reduceThreats(player, threatList);
+		this.reduceThreats(player, threats);
 
-		angle = this.avoidThreats(player, destinationChoices, threatList);
+		if (threats.length > 1) {
+			console.log('didnt reduce threats: ' + threats.length);
+		}
+		angle = this.avoidThreats(player, destinationChoices, threats);
 
 		if (panicLevel > 0) {
 			this.infoStrings.push("Panic Level: " + panicLevel);
