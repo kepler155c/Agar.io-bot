@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1249
+// @version     3.1250
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1249;
+var aposBotVersion = 3.1250;
 
 var constants = {
 	splitRangeMin : 650,
@@ -943,7 +943,7 @@ function AposBot() {
 	this.getUniqueThreats = function(threats) {
 		var uniqueThreats = [];
 
-		for (i = 0; i < threats.length; i++) {
+		for (var i = 0; i < threats.length; i++) {
 			uniqueThreats[threats[i].id] = threats[i];
 		}
 		return uniqueThreats.length;
