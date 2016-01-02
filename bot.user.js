@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1223
+// @version     3.1224
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1223;
+var aposBotVersion = 3.1224;
 
 var constants = {
 	splitRangeMin : 650,
@@ -157,7 +157,7 @@ Player.prototype = {
 			// if any largish enemies are within our split radius, dont allow split
 			if (!entity.isVirus() && entity.size > 14 && !entity.isType(Classification.player)) {
 
-				if (entity.closestCell.size * entity.closestCell.size / 2 < entity.size * entity.size * 1.265) {
+				if (entity.closestCell.size * entity.closestCell.size / 2 < entity.size * entity.size * constants.enemyRatio) {
 					if (entity.distance < 750 + entity.closestCell.size) {
 						this.safeToSplit = false;
 					}
@@ -945,7 +945,7 @@ function AposBot() {
 					this.setMinimumDistance(player, threat, constants.largeThreatRatio);
 
 					if (panicLevel === 0 && threat.isMovingTowards) {
-						threat.dangerZone = threat.dangerZone * 1.2;
+						threat.dangerZone += threat.velocity * 2;
 					}
 
 					if (threat.distance < threat.dangerZone) {
@@ -991,7 +991,8 @@ function AposBot() {
 				if (virus.distance < cell.size + 750 && (cell.mass / (virus.mass + virus.foodMass)) > 1.2) {
 
 					var minDistance = cell.size + 1;
-
+var oldvirussize = virus.size;
+virus.size = virus.size / 2;
 					var tempOb = this.getAngleRange(cell, virus, i, minDistance);
 					var angle1 = tempOb[0];
 					var angle2 = this.rangeToAngle(tempOb);
@@ -1002,6 +1003,7 @@ function AposBot() {
 					if (virus.distance < minDistance) {
 						badAngles.push(tempOb.concat(virus.distance));
 					}
+virus.size = oldvirussize;
 				}
 			}
 			i++;
