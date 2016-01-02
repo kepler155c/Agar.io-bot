@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1238
+// @version     3.1239
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1238;
+var aposBotVersion = 3.1239;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1176,7 +1176,7 @@ function AposBot() {
 			}
 			var perfectAngle = this.mod(bIndex[0] + bIndex[1] / 2, 360);
 			perfectAngle = this.shiftAngle(obstacleAngles, perfectAngle, bIndex);
-			console.log('angle is : ' + bIndex[0] + '-' + bIndex[1]);
+			// console.log('angle is : ' + bIndex[0] + '-' + bIndex[1]);
 
 			line1 = this.followAngle(perfectAngle.angle, player.x, player.y, verticalDistance());
 
@@ -1425,6 +1425,7 @@ function AposBot() {
 				break;
 			}
 			if (!this.pruneThreats(threatList, threatLevel++)) {
+				console.log('could not determine angle');
 				break;
 			}
 		}
