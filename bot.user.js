@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1236
+// @version     3.1237
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1236;
+var aposBotVersion = 3.1237;
 
 var constants = {
 	splitRangeMin : 650,
@@ -854,19 +854,24 @@ function AposBot() {
 				t.isMovingTowards = true;
 			}
 
-			if (this.canSplitKill(t, cell, constants.enemyRatio) && t.teamMass / player.mass <= constants.largeThreatRatio) {
+			if (this.canSplitKill(t, cell, constants.enemyRatio)
+					&& t.teamMass / player.mass <= constants.largeThreatRatio) {
+
 				threat.mass = t.mass / 2;
 				threat.size = Math.sqrt(threat.mass * 100);
-
-				var distance = Math.min(t.size + constants.splitRangeMax, threat.distance);
-
-				threat.x = t.x - Math.cos(threat.angle) * distance;
-				threat.y = t.y - Math.sin(threat.angle) * distance;
-				threat.distance = Util.computeDistance(threat.x, threat.y, cell.x, cell.y);
 				threat.mustSplit = true;
 
-				drawCircle(threat.x, threat.y, threat.size, constants.gray);
-				drawLine(t.x, t.y, threat.x, threat.y, threat.isMovingTowards ? constants.red : constants.gray);
+				var shadowDistance = Math.min(t.size + constants.splitRangeMax, threat.distance);
+
+				var shadowThreat = {
+					x : t.x - Math.cos(threat.angle) * shadowDistance,
+					y : t.y - Math.sin(threat.angle) * shadowDistance,
+				};
+				// distance = Util.computeDistance(shadowThreat.x, shadowThreat.y, cell.x, cell.y);
+
+				drawCircle(shadowThreat.x, shadowThreat.y, threat.size, constants.gray);
+				drawLine(t.x, t.y, shadowThreat.x, shadowThreat.y, threat.isMovingTowards ? constants.red
+						: constants.gray);
 			}
 
 			var deathDistance = Math.min(threat.size - cell.size, cell.size); // how much overlap until we are eaten ??
@@ -881,9 +886,9 @@ function AposBot() {
 
 			} else if (this.canSplitKill(t, cell, constants.enemyRatio)) {
 
-				threat.minDistance = 0;
-				threat.safeDistance = cell.size + t.safeDistance;
-				threat.threatenedDistance = (cell.size * 2) + t.safeDistance; // one radius distance - might be too much when large
+				threat.minDistance = deathDistance + t.safeDistance + constants.splitRangeMax;
+				threat.safeDistance = notTouchingDistance + t.safeDistance + constants.splitRangeMax;
+				threat.threatenedDistance = notTouchingDistance + cell.size + t.safeDistance + constants.splitRangeMax; // one radius distance
 
 			} else {
 
@@ -982,8 +987,8 @@ function AposBot() {
 			}
 
 			if (threat.distance < threat.safeDistance) {
-				var tempOb = this.getAngleRange(threat.cell, threat, i, threat.safeDistance,
-						Classification.smallThreat);
+				var tempOb = this
+						.getAngleRange(threat.cell, threat, i, threat.safeDistance, Classification.smallThreat);
 				var angle1 = tempOb[0];
 				var angle2 = this.rangeToAngle(tempOb);
 
@@ -1171,10 +1176,10 @@ function AposBot() {
 			}
 			var perfectAngle = this.mod(bIndex[0] + bIndex[1] / 2, 360);
 			perfectAngle = this.shiftAngle(obstacleAngles, perfectAngle, bIndex);
-console.log('angle is : ' + bIndex[0] + '-' + bIndex[1]);
-if (isNaN(bIndex[0])) {
-	console.log('sigh');
-}
+			console.log('angle is : ' + bIndex[0] + '-' + bIndex[1]);
+			if (isNaN(bIndex[0])) {
+				console.log('sigh');
+			}
 
 			line1 = this.followAngle(perfectAngle.angle, player.x, player.y, verticalDistance());
 
@@ -1505,7 +1510,7 @@ if (isNaN(bIndex[0])) {
 		if (player.isSplitting) {
 
 			if (player.size <= player.splitSize && (Date.now() - player.splitTimer > 200)) {
-//					|| player.mass < player.splitMass * 0.8 || player.mass > player.splitMass * 1.2) {
+				//					|| player.mass < player.splitMass * 0.8 || player.mass > player.splitMass * 1.2) {
 				// player size grows as long as we are splitting
 				player.isSplitting = false;
 				player.splitTarget = null;
