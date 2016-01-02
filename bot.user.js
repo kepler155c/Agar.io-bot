@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1230
+// @version     3.1231
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1230;
+var aposBotVersion = 3.1231;
 
 var constants = {
 	splitRangeMin : 650,
@@ -825,7 +825,7 @@ function AposBot() {
 		}
 	};
 
-	this.calculateThreatWeight = function(player, t) {
+	this.calculateThreatWeight = function(player, threatList, t) {
 
 		for (var i = 0; i < player.cells.length; i++) {
 
@@ -838,13 +838,14 @@ function AposBot() {
 				mass : t.mass,
 				distance : t.distance,
 				isMovingTowards : this.isMovingTowards(cell, t),
-				cell : t,
+				cell : cell,
 				angle : Math.atan2(t.y - cell.y, t.x - cell.x),
 				threatLevel : 40,
 				isTheatening : false,
 				massLoss : cell.mass,
 				teamSize : t.teamSize,
 				mustSplit : false,
+				intersects : t.distance < cell.size + t.size + t.safeDistance
 			};
 
 			// if the threat is moving towards any cell, mark this threat as moving towards us
@@ -916,8 +917,7 @@ function AposBot() {
 			var color = constants.green;
 			if (threat.distance <= threat.minDistance) {
 				color = constants.red;
-			}
-			if (threat.distance < threat.safeDistance) {
+			} else if (threat.distance < threat.safeDistance) {
 				color = constants.orange;
 			} else if (threat.distance < threat.threatededDistance) {
 				color = constants.pink;
@@ -926,35 +926,73 @@ function AposBot() {
 			// parseInt(threat.threatLevel / 10));
 			drawPoint(threat.x, threat.y + 20, 2, parseInt(threat.distance, 10) + " "
 					+ parseInt(threat.threatenedDistance, 10));
-		}
-		/*
 
-		var deathDistance = threat.distance - threat.size;
-		var distanceTilSafe = threat.size + threat.closestCell.size;
-		var mass = threat.closestCell.mass;  // mass we will lose
-		var weight = 1;
+			if (threat.isMovingTowards) {
+				threat.dangerZone = threat.threatenedDistance;
+			} else {
+				threat.dangerZone = threat.safeDistance;
+			}
 
-		if (threat.isType(Classification.largeThreat)) {
-			
-			distance = Math.min(1, distance - constants.splitRangeMax);
-		}
-		
-		if (threat.distance < threat.size + threat.closestCell.size) { // overlapping
+			if (threat.distance <= threat.safeDistance) {
+				threatList.push(threat);
+			}
 		}
 
-		if (threat.teamCount > 1) {
-			weight = weight / 4;
-		}
+		return threatList;
+	};
 
-		if (threat.isMovingTowards) {
-			weight = weight * 2;
-		}
+	this.pruneThreats = function(player, threats, threatLevel) {
 
-		if (threat.teamSize == 1) {
-			weight = weight * 2;
-		}
-		*/
+		if (threatLevel === 0) {
 
+			for (var i = 0; i < threats.length; i++) {
+				threats[i].dangerZone = threats[i].safeDistance;
+			}
+
+		} else if (threatLevel == 1) {
+
+		} else if (threatLevel == 2) {
+
+		} else if (threatLevel == 3) {
+			// figure out which cell to save if split
+		} else {
+			return false; // no more threats to prune
+		}
+		return true;
+	};
+
+	this.avoidThreats = function(player, threats) {
+
+	};
+
+	this.determineThreatsNew = function(player, threats, badAngles, obstacleList) {
+
+		for (var i = 0; i < threats.length; i++) {
+
+			var threat = threats[i];
+
+			if (threat.distance < threat.dangerZone) {
+
+				if (threat.intersects) {
+
+					badAngles.push(this.getAngleRange(threat.cell, threat, i, threat.size + threat.safeDistance,
+							Classification.smallThreat).concat(threat.distance));
+				} else {
+
+					badAngles.push(this.getAngleRange(threat.cell, threat, i, threat.dangerZone,
+							Classification.smallThreat).concat(threat.distance));
+				}
+			}
+
+			if (threat.distance < threat.safeDistance) {
+				var tempOb = this.getAngleRange(threat.cell, threat, i, threat.safeDistance,
+						Classification.smallThreat);
+				var angle1 = tempOb[0];
+				var angle2 = this.rangeToAngle(tempOb);
+
+				obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
+			}
+		}
 	};
 
 	this.determineThreats = function(player, panicLevel, badAngles, obstacleList) {
@@ -985,18 +1023,18 @@ function AposBot() {
 						if (threat.intersects) {
 
 							badAngles.push(this.getAngleRange(threat.closestCell, threat, i,
-									threat.size + threat.safeDistance).concat(threat.distance));
-							this.getAngleRange(threat.closestCell, threat, i, threat.size + threat.safeDistance);
+									threat.size + threat.safeDistance, Classification.smallThreat).concat(
+									threat.distance));
 						} else {
 
-							badAngles.push(this.getAngleRange(threat.closestCell, threat, i, threat.dangerZone).concat(
-									threat.distance));
-							this.getAngleRange(threat.closestCell, threat, i, threat.dangerZone);
+							badAngles.push(this.getAngleRange(threat.closestCell, threat, i, threat.dangerZone,
+									Classification.smallThreat).concat(threat.distance));
 						}
 
 					}
 					if (threat.distance < threat.dangerZone + 50) {
-						var tempOb = this.getAngleRange(threat.closestCell, threat, i, threat.dangerZone + 50);
+						var tempOb = this.getAngleRange(threat.closestCell, threat, i, threat.dangerZone + 50,
+								Classification.smallThreat);
 						var angle1 = tempOb[0];
 						var angle2 = this.rangeToAngle(tempOb);
 
@@ -1024,7 +1062,7 @@ function AposBot() {
 
 					var minDistance = cell.size + 15;
 
-					var tempOb = this.getAngleRange(cell, virus, i, minDistance);
+					var tempOb = this.getAngleRange(cell, virus, i, minDistance, Classification.virus);
 					var angle1 = tempOb[0];
 					var angle2 = this.rangeToAngle(tempOb);
 					obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
@@ -1039,6 +1077,120 @@ function AposBot() {
 			i++;
 		}, this);
 
+	};
+
+	/**
+	 * The bot works by removing angles in which it is too
+	 * dangerous to travel towards to.
+	 */
+	this.avoidThreats = function(player, destinationChoices, threats) {
+
+		var badAngles = [];
+		var obstacleList = [];
+		var i, j, angle1, angle2, tempOb, line1, line2, diff, shiftedAngle, destination;
+
+		this.determineThreatsNew(player, threats, badAngles, obstacleList);
+		this.avoidViruses(player, badAngles, obstacleList);
+
+		var stupidList = [];
+
+		if (badAngles.length > 0) {
+			//NOTE: This is only bandaid wall code. It's not the best way to do it.
+			stupidList = this.addWall(stupidList, player);
+		}
+
+		for (i = 0; i < badAngles.length; i++) {
+			angle1 = badAngles[i][0];
+			angle2 = this.rangeToAngle(badAngles[i]);
+			stupidList.push([ [ angle1, true ], [ angle2, false ], badAngles[i][2] ]);
+		}
+
+		stupidList.sort(function(a, b) {
+			return a[2] - b[2];
+		});
+
+		var sortedInterList = [];
+		var sortedObList = [];
+
+		for (i = 0; i < stupidList.length; i++) {
+
+			var tempList = this.addAngle(sortedInterList, stupidList[i]);
+
+			if (tempList.length === 0) {
+
+				console.log("MAYDAY IT'S HAPPENING!");
+				// break;
+				return false;
+
+			} else {
+				sortedInterList = tempList;
+			}
+		}
+
+		for (i = 0; i < obstacleList.length; i++) {
+			sortedObList = this.addAngle(sortedObList, obstacleList[i]);
+
+			if (sortedObList.length === 0) {
+				break;
+			}
+		}
+
+		var offsetI = 0;
+		var obOffsetI = 1;
+
+		if (sortedInterList.length > 0 && sortedInterList[0][1]) {
+			offsetI = 1;
+		}
+		if (sortedObList.length > 0 && sortedObList[0][1]) {
+			obOffsetI = 0;
+		}
+
+		var goodAngles = [];
+		var obstacleAngles = [];
+
+		for (i = 0; i < sortedInterList.length; i += 2) {
+			angle1 = sortedInterList[this.mod(i + offsetI, sortedInterList.length)][0];
+			angle2 = sortedInterList[this.mod(i + 1 + offsetI, sortedInterList.length)][0];
+			diff = this.mod(angle2 - angle1, 360);
+			goodAngles.push([ angle1, diff ]);
+		}
+
+		for (i = 0; i < sortedObList.length; i += 2) {
+			angle1 = sortedObList[this.mod(i + obOffsetI, sortedObList.length)][0];
+			angle2 = sortedObList[this.mod(i + 1 + obOffsetI, sortedObList.length)][0];
+			diff = this.mod(angle2 - angle1, 360);
+			obstacleAngles.push([ angle1, diff ]);
+		}
+
+		if (goodAngles.length > 0) {
+			var bIndex = goodAngles[0];
+			var biggest = goodAngles[0][1];
+			for (i = 1; i < goodAngles.length; i++) {
+				var size = goodAngles[i][1];
+				if (size > biggest) {
+					biggest = size;
+					bIndex = goodAngles[i];
+				}
+			}
+			var perfectAngle = this.mod(bIndex[0] + bIndex[1] / 2, 360);
+console.log('angle is : ' + bIndex[0] + '-' + bIndex[1]);
+			perfectAngle = this.shiftAngle(obstacleAngles, perfectAngle, bIndex);
+
+			line1 = this.followAngle(perfectAngle.angle, player.x, player.y, verticalDistance());
+
+			//destinationChoices[0] = line1[0];
+			//destinationChoices[1] = line1[1];
+
+			drawLine(player.x, player.y, line1[0], line1[1], constants.red);
+
+			return true;
+
+		} else if (badAngles.length > 0 && goodAngles.length === 0) {
+
+			return false;
+		}
+
+		return true;
 	};
 
 	/**
@@ -1226,6 +1378,7 @@ function AposBot() {
 		// 1 = in the split distance of a threat
 
 		var overlapCount = 0;
+		var threatList = [];
 
 		Object.keys(this.entities).filter(this.threatFilter, this).forEach(function(key) {
 
@@ -1236,7 +1389,7 @@ function AposBot() {
 			threat.safeDistance = threat.closestCell.mass < 50 ? velocity * 4 : velocity * 2;
 			this.setMinimumDistance(player, threat, constants.largeThreatRatio);
 
-			this.calculateThreatWeight(player, threat);
+			this.calculateThreatWeight(player, threatList, threat);
 
 			if (panicLevel < 1 && threat.distance < threat.dangerZone) {
 				overlapCount++;
@@ -1260,6 +1413,19 @@ function AposBot() {
 				}
 			}
 		}, this);
+
+		var threatLevel = 0;
+		var angle;
+		while (true) {
+
+			angle = this.avoidThreats(player, destinationChoices, threatList);
+			if (angle) {
+				break;
+			}
+			if (!this.pruneThreats(threatList, threatLevel++)) {
+				break;
+			}
+		}
 
 		if (panicLevel < 1 && overlapCount > 1) {
 			panicLevel = 1;
@@ -1968,7 +2134,7 @@ function AposBot() {
 		return newListToUse;
 	};
 
-	this.getAngleRange = function(blob1, blob2, index, radius) {
+	this.getAngleRange = function(blob1, blob2, index, radius, classification) {
 		var angleStuff = this.getEdgeLinesFromPoint(blob1, blob2, radius);
 
 		var leftAngle = angleStuff[0];
@@ -1985,11 +2151,11 @@ function AposBot() {
 		var lineRight = this.followAngle(rightAngle, blob1.x, blob1.y, safeDistance - index * 10);
 
 		var color = constants.orange;
-		if (blob2.isType(Classification.virus)) {
+		if (classification == Classification.virus) {
 			color = constants.cyan;
-		} else if (blob2.isType(Classification.smallThreat) || blob2.isType(Classification.largeThreat)) { // (getCells().hasOwnProperty(blob2.id)) {
+		} else if (classification == Classification.smallThreat || classification == Classification.largeThreat) { // (getCells().hasOwnProperty(blob2.id)) {
 			color = constants.red;
-		} else if (blob2.isType(Classification.cluster)) {
+		} else if (classification == Classification.cluster) {
 			color = constants.green;
 		}
 
