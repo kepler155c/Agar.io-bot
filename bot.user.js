@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1215
+// @version     3.1216
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1215;
+var aposBotVersion = 3.1216;
 
 var constants = {
 	splitRangeMin : 650,
@@ -167,7 +167,7 @@ Player.prototype = {
 	},
 	split : function(targetCell, x, y) {
 
-		if (this.mass > 36) {
+		if (this.canSplit()) {
 			this.isSplitting = true;
 			this.splitTarget = targetCell;
 			this.splitSize = this.size;
@@ -181,8 +181,53 @@ Player.prototype = {
 				starty : this.largestCell.y
 			};
 		}
+	},
+	canSplit : function() {
+
+		if (this.cells.length < 16) {
+
+			for (var i = 0; i < this.cells.length; i++) {
+				if (this.cell[i].mass > 36) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 };
+
+function initializeEntity() {
+
+	var da = window.getEntityPrototype();
+	
+	da.prototype.isType = function(classification) {
+		return this.classification == classification;
+	};
+
+	da.prototype.predictPosition = function(timeDiff) {
+		var lastPos = this.getLastPos();
+
+		var a = (getLastUpdate() - this.previousUpdated) / 120;
+		a = 0 > a ? 0 : 1 < a ? 1 : a;
+
+		timeDiff = timeDiff / 60;
+
+		this.px = timeDiff * a * (this.J - this.s) + this.x;
+		this.py = timeDiff * a * (this.K - this.t) + this.y;
+	};
+	
+	da.prototype.getVelocity = function() {
+		var lastPos = this.getLastPos();
+
+		var a = (getLastUpdate() - this.previousUpdated) / 120;
+		a = 0 > a ? 0 : 1 < a ? 1 : a;
+
+		var px = a * (this.J - this.s) + this.x;
+		var py = a * (this.K - this.t) + this.y;
+
+		return this.computeDistance(this.x, this.y, px, py);
+	};
+}
 
 console.log("Apos Bot!");
 
@@ -322,7 +367,7 @@ function AposBot() {
 			entity.classification = Classification.unknown;
 			entity.hasMoved = entity.isMoving();
 			entity.isMovingTowards = this.isMovingTowards(player, entity);
-			entity.mass = this.calculateMass(entity);
+			entity.mass = entity.size * entity.size / 100;
 			entity.originalMass = entity.mass; // save the original mass in case the merge logic changes it
 			entity.safeDistance = 0;
 			entity.teamSize = 1;
@@ -334,7 +379,7 @@ function AposBot() {
 
 			/*
 			if (entity.hasMoved) {
-				this.predictPosition(entity, constants.splitDuration);
+				this.predictPosition(constants.splitDuration);
 			}
 			*/
 
@@ -356,7 +401,7 @@ function AposBot() {
 					if (this.isItMe(player, entity)) {
 
 						entity.classification = Classification.player;
-						entity.velocity = this.getVelocity(entity);
+						entity.velocity = entity.getVelocity();
 
 					} else if (this.isFood(player.smallestCell, entity)) {
 
@@ -414,30 +459,6 @@ function AposBot() {
 				}, this);
 	};
 
-	this.getVelocity = function(cell) {
-		var lastPos = cell.getLastPos();
-
-		var a = (getLastUpdate() - this.previousUpdated) / 120;
-		a = 0 > a ? 0 : 1 < a ? 1 : a;
-
-		var px = a * (cell.J - cell.s) + cell.x;
-		var py = a * (cell.K - cell.t) + cell.y;
-
-		return this.computeDistance(cell.x, cell.y, px, py);
-	};
-
-	this.predictPosition = function(cell, timeDiff) {
-		var lastPos = cell.getLastPos();
-
-		var a = (getLastUpdate() - this.previousUpdated) / 120;
-		a = 0 > a ? 0 : 1 < a ? 1 : a;
-
-		timeDiff = timeDiff / 60;
-
-		cell.px = timeDiff * a * (cell.J - cell.s) + cell.x;
-		cell.py = timeDiff * a * (cell.K - cell.t) + cell.y;
-	};
-
 	this.interceptPosition = function(player, enemy) {
 
 		var lastPos = enemy.getLastPos();
@@ -488,7 +509,7 @@ function AposBot() {
 
 			if (food.hasMoved) {
 
-				this.predictPosition(food, constants.splitDuration);
+				food.predictPosition(constants.splitDuration);
 
 				// really should clone da
 				player.foodClusters.push({
@@ -952,32 +973,34 @@ function AposBot() {
 
 		this.determineThreats(player, panicLevel, badAngles, obstacleAngles, obstacleList);
 
-		Object.keys(this.entities).filter(this.virusFilter, this).forEach(function(key) {
+		Object.keys(this.entities).filter(this.virusFilter, this).forEach(
+				function(key) {
 
-			var virus = this.entities[key];
+					var virus = this.entities[key];
 
-			virus.range = null;
+					virus.range = null;
 
-			for (j = 0; j < player.cells.length; j++) {
-				var cell = player.cells[j];
+					for (j = 0; j < player.cells.length; j++) {
+						var cell = player.cells[j];
 
-				if (virus.distance < cell.size + 750 && (cell.mass / (virus.mass + virus.foodMass)) > constants.playerRatio) {
+						if (virus.distance < cell.size + 750
+								&& (cell.mass / (virus.mass + virus.foodMass)) > constants.playerRatio) {
 
-					var minDistance = cell.size + 1;
+							var minDistance = cell.size + 1;
 
-					tempOb = this.getAngleRange(cell, virus, i, minDistance);
-					angle1 = tempOb[0];
-					angle2 = this.rangeToAngle(tempOb);
-					obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
+							tempOb = this.getAngleRange(cell, virus, i, minDistance);
+							angle1 = tempOb[0];
+							angle2 = this.rangeToAngle(tempOb);
+							obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
 
-					virus.range = [ angle1, angle2 ];
+							virus.range = [ angle1, angle2 ];
 
-					if (virus.distance < minDistance) {
-						badAngles.push(this.getAngleRange(cell, virus, 0, minDistance).concat(virus.distance));
+							if (virus.distance < minDistance) {
+								badAngles.push(this.getAngleRange(cell, virus, 0, minDistance).concat(virus.distance));
+							}
+						}
 					}
-				}
-			}
-		}, this);
+				}, this);
 
 		var stupidList = [];
 
@@ -1156,7 +1179,7 @@ function AposBot() {
 
 			var threat = this.entities[key];
 
-			threat.velocity = this.getVelocity(threat);
+			threat.velocity = threat.getVelocity();
 			var velocity = (threat.velocity + threat.closestCell.velocity);
 			threat.safeDistance = threat.closestCell.mass < 50 ? velocity * 4 : velocity * 2;
 			this.setMinimumDistance(player, threat, constants.largeThreatRatio);
@@ -1234,10 +1257,7 @@ function AposBot() {
 
 		if (!this.initialized) {
 			this.initialized = true;
-			var da = window.getEntityPrototype();
-			da.prototype.isType = function(classification) {
-				return this.classification == classification;
-			};
+			initializeEntity();
 		}
 
 		this.infoStrings = [];
@@ -1430,24 +1450,6 @@ function AposBot() {
 		return dist <= -5; // was -50
 	};
 
-	//Given an angle value that was gotten from valueAndleBased(),
-	//returns a new value that scales it appropriately.
-	this.paraAngleValue = function(angleValue, range) {
-		return (15 / (range[1])) * (angleValue * angleValue) - (range[1] / 6);
-	};
-
-	this.valueAngleBased = function(angle, range) {
-		var leftValue = this.mod(angle - range[0], 360);
-		var rightValue = this.mod(this.rangeToAngle(range) - angle, 360);
-
-		var bestValue = Math.min(leftValue, rightValue);
-
-		if (bestValue <= range[1]) {
-			return this.paraAngleValue(bestValue, range);
-		}
-		return -1;
-	};
-
 	this.computeDistance = function(x1, y1, x2, y2, s1, s2) {
 		// Make sure there are no null optional params.
 		s1 = s1 || 0;
@@ -1523,25 +1525,9 @@ function AposBot() {
 		return false;
 	};
 
-	this.calculateMass = function(cell) {
-		return cell.size * cell.size / 100;
-	};
-
-	this.getMass = function(cell) {
-		return cell.mass;
-	};
-
-	this.getSplitMass = function(cell) {
-		return cell.mass / 2;
-	};
-
-	this.getRatio = function(eater, eatee) {
-		return this.getMass(eater) / this.getMass(eatee);
-	};
-
 	this.canEat = function(eater, eatee, ratio) {
 		if (eater.mass > eatee.mass) {
-			return this.getMass(eater) / this.getMass(eatee) > ratio;
+			return eater.mass / eatee.mass > ratio;
 		}
 		return false;
 	};
@@ -1550,7 +1536,7 @@ function AposBot() {
 	this.canSplitKill = function(eater, eatee, ratio) {
 
 		if (eater.mass > eatee.mass) {
-			return this.getSplitMass(eater) / this.getMass(eatee) > ratio;
+			return (eater / 2) / eatee.mass > ratio;
 		}
 		return false;
 	};
@@ -1746,16 +1732,6 @@ function AposBot() {
 		//drawPoint(blob2.x, blob2.y, 3, "" + blob1Range);
 	};
 
-	/*
-	this.debugAngle = function(angle, text) {
-	    var player = getPlayer();
-	    var cell = player.cells[0];
-	    var line1 = this.followAngle(angle, cell.x, cell.y, 300);
-	    drawLine(cell.x, cell.y, line1[0], line1[1], 5);
-	    drawPoint(line1[0], line1[1], 5, "" + text);
-	};
-	*/
-
 	//TODO: Don't let this function do the radius math.
 	this.getEdgeLinesFromPoint = function(blob1, blob2, radius) {
 		var px = blob1.x;
@@ -1814,14 +1790,6 @@ function AposBot() {
 		return [ angleLeft, angleDistance, [ cx + tb.x, cy + tb.y ], [ cx + ta.x, cy + ta.y ] ];
 	};
 
-	/*
-	this.invertAngle = function(range) { // Where are you getting all of these vars from? (badAngles and angle)
-	    var angle1 = this.rangeToAngle(badAngles[i]);
-	    var angle2 = this.mod(badAngles[i][0] - angle, 360);
-	    return [angle1, angle2];
-	},
-	*/
-
 	this.addWall = function(listToUse, blob) {
 
 		var lineLeft, lineRight;
@@ -1829,8 +1797,8 @@ function AposBot() {
 		//var mapSizeY = Math.abs(f.getMapStartY - f.getMapEndY);
 		//var distanceFromWallX = mapSizeX/3;
 		//var distanceFromWallY = mapSizeY/3;
-		var distanceFromWallY = 1000; // originally 2000
-		var distanceFromWallX = 1000; // originally 2000
+		var distanceFromWallY = blob.size + 50; // originally 2000
+		var distanceFromWallX = blob.size + 50; // originally 2000
 		if (blob.x < getMapStartX() + distanceFromWallX) {
 			//LEFT
 			//console.log("Left");
