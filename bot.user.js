@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1234
+// @version     3.1235
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1234;
+var aposBotVersion = 3.1235;
 
 var constants = {
 	splitRangeMin : 650,
@@ -845,7 +845,8 @@ function AposBot() {
 				massLoss : cell.mass,
 				teamSize : t.teamSize,
 				mustSplit : false,
-				intersects : t.distance < cell.size + t.size + t.safeDistance
+				intersects : t.distance < cell.size + t.size + t.safeDistance,
+				safeDistance : t.safeDistance
 			};
 
 			// if the threat is moving towards any cell, mark this threat as moving towards us
@@ -1170,6 +1171,7 @@ function AposBot() {
 			}
 			var perfectAngle = this.mod(bIndex[0] + bIndex[1] / 2, 360);
 			perfectAngle = this.shiftAngle(obstacleAngles, perfectAngle, bIndex);
+console.log('angle is : ' + bIndex[0] + '-' + bIndex[1]);
 
 			line1 = this.followAngle(perfectAngle.angle, player.x, player.y, verticalDistance());
 
@@ -1318,8 +1320,6 @@ function AposBot() {
 				}
 			}
 			var perfectAngle = this.mod(bIndex[0] + bIndex[1] / 2, 360);
-	console.log('angle is : ' + bIndex[0] + '-' + bIndex[1]);
-
 			perfectAngle = this.shiftAngle(obstacleAngles, perfectAngle, bIndex);
 
 			line1 = this.followAngle(perfectAngle.angle, player.x, player.y, verticalDistance());
