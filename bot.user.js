@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1213
+// @version     3.1214
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1213;
+var aposBotVersion = 3.1214;
 
 var constants = {
 	splitRangeMin : 650,
@@ -961,9 +961,9 @@ function AposBot() {
 			for (j = 0; j < player.cells.length; j++) {
 				var cell = player.cells[j];
 
-				if (virus.distance < cell.size + 750 && cell.mass + virus.foodMass >= virus.mass) {
+				if (virus.distance < cell.size + 750 && (cell.mass /virus.foodMass) > constants.playerRatio) {
 
-					var minDistance = cell.size + 15;
+					var minDistance = cell.size + 1;
 
 					tempOb = this.getAngleRange(cell, virus, i, minDistance);
 					angle1 = tempOb[0];
