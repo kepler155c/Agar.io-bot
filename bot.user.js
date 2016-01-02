@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1217
+// @version     3.1218
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1217;
+var aposBotVersion = 3.1218;
 
 var constants = {
 	splitRangeMin : 650,
@@ -199,17 +199,15 @@ Player.prototype = {
 var Util = function() {
 };
 
-Util.prototype = {
-	computeDistance : function(x1, y1, x2, y2, s1, s2) {
-		// Make sure there are no null optional params.
-		s1 = s1 || 0;
-		s2 = s2 || 0;
-		var xdis = x1 - x2; // <--- FAKE AmS OF COURSE!
-		var ydis = y1 - y2;
-		var distance = Math.sqrt(xdis * xdis + ydis * ydis) - (s1 + s2);
+Util.computeDistance = function(x1, y1, x2, y2, s1, s2) {
+	// Make sure there are no null optional params.
+	s1 = s1 || 0;
+	s2 = s2 || 0;
+	var xdis = x1 - x2; // <--- FAKE AmS OF COURSE!
+	var ydis = y1 - y2;
+	var distance = Math.sqrt(xdis * xdis + ydis * ydis) - (s1 + s2);
 
-		return distance;
-	}
+	return distance;
 };
 
 function initializeEntity() {
