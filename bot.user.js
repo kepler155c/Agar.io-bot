@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1252
+// @version     3.1253
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1252;
+var aposBotVersion = 3.1253;
 
 var constants = {
 	splitRangeMin : 650,
@@ -896,7 +896,7 @@ function AposBot() {
 			}
 
 			var velocityPadding = (t.velocity + cell.velocity);
-			velocityPadding = threat.closestCell.mass < 50 ? velocityPadding * 4 : velocityPadding * 2;
+			velocityPadding = t.mass < 50 ? velocityPadding * 4 : velocityPadding * 2;
 
 			if (threat.isMovingTowards) {
 				velocityPadding += threat.velocity * 2;
