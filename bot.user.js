@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1255
+// @version     3.1256
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1255;
+var aposBotVersion = 3.1256;
 
 var constants = {
 	splitRangeMin : 650,
@@ -857,7 +857,7 @@ function AposBot() {
 
 			if (this.canSplitKill(t, cell, constants.enemyRatio)
 					&& t.teamMass / player.mass <= constants.largeThreatRatio) {
-				
+
 				// this should really be 2 threats - maybe
 
 				threat.mass = t.mass / 2;
@@ -879,6 +879,7 @@ function AposBot() {
 			}
 
 			threat.deathDistance = Math.min(threat.size - cell.size, threat.size); // how much overlap until we are eaten ??
+			threat.deathDistance = threat.size; // ...
 			threat.minDistance = threat.size + cell.size; // try just threat.size or death distance
 			var notTouchingDistance = cell.size + threat.size;
 
@@ -907,7 +908,7 @@ function AposBot() {
 			var color = constants.green;
 			if (threat.distance <= threat.minDistance) {
 				color = constants.red;
-			} else if (threat.distance < threat.safeDistance) {
+			} else if (threat.distance < threat.preferredDistance) {
 				color = constants.orange;
 			} else if (threat.distance < threat.threatededDistance) {
 				color = constants.pink;
@@ -1038,8 +1039,8 @@ function AposBot() {
 			if (threat.distance < threat.dangerZone) {
 
 				if (threat.intersects) {
-console.log('intersects');
-					badAngles.push(this.getAngleRange(threat.cell, threat, i, threat.minDistance,
+					console.log('intersects');
+					badAngles.push(this.getAngleRange(threat.cell, threat, i, threat.deathDistance,
 							Classification.smallThreat).concat(threat.distance));
 				} else {
 
@@ -1365,7 +1366,7 @@ console.log('intersects');
 			if (threat.dangerZone < threat.preferredDistance) {
 				color = constants.orange;
 			}
-			drawCircle(threat.x, threat.y, threat.dangerZone - threat.cell.size + 40, color);
+			drawCircle(threat.x, threat.y, threat.dangerZone + 40, color);
 		}
 		if (!this.avoidThreats(player, destinationChoices, threats) && panicLevel < 2) {
 			for (i = 0; i < threats.length; i++) {
