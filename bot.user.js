@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1269
+// @version     3.1270
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1269;
+var aposBotVersion = 3.1270;
 
 var constants = {
 	splitRangeMin : 650,
@@ -928,12 +928,6 @@ function AposBot() {
 				threat.dangerZone = threat.preferredDistance;
 			}
 			
-			if (isNaN(threat.threatenedDistance)) {
-console.log('nan');
-				console.log(threat);
-				console.log(t);
-			}
-
 			drawPoint(threat.x, threat.y + 20, 2, parseInt(threat.distance, 10) + " "
 					+ parseInt(threat.dangerZone, 10));
 
@@ -1047,21 +1041,11 @@ console.log('nan');
 
 			var threat = threats[i];
 
-			if (threat.intersects && threat.distance > threat.dangerZone) {
-				console.log('umm');
-				console.log(threat);
-			}
-			
 			if (threat.distance < threat.dangerZone) {
 
 				if (threat.intersects) {
-					console.log('intersects: ' + threat.size + threat.safeDistance);
-					console.log(threat);
-					console.log(threat.t);
-					console.log(threat.cell);
 					badAngles.push(this.getAngleRange(threat.cell, threat, i, threat.size + threat.safeDistance,
 							Classification.smallThreat).concat(threat.distance));
-					console.log(badAngles);
 				} else {
 
 					badAngles.push(this.getAngleRange(threat.cell, threat, i, threat.dangerZone,
@@ -1069,9 +1053,9 @@ console.log('nan');
 				}
 			}
 
-			if (threat.distance < threat.preferredDistance) {
+			if (threat.distance < threat.preferredDistance + 50) {
 				var tempOb = this
-						.getAngleRange(threat.cell, threat, i, threat.safeDistance, Classification.smallThreat);
+						.getAngleRange(threat.cell, threat, i, threat.preferredDistance, Classification.smallThreat);
 				var angle1 = tempOb[0];
 				var angle2 = this.rangeToAngle(tempOb);
 
@@ -1355,7 +1339,7 @@ console.log('nan');
 			}
 			panicLevel++;
 		}*/
-panicLevel = 0;
+
 		for (i = 0; i < threats.length; i++) {
 			threat = threats[i];
 
@@ -1366,11 +1350,6 @@ panicLevel = 0;
 					threat.dangerZone = threat.minDistance;
 				}
 			}
-			/*
-			if (panicLevel === 0 && threat.isMovingTowards) {
-				threat.dangerZone += player.velocity * 2;
-			}
-			*/
 		}
 
 		var angle;
