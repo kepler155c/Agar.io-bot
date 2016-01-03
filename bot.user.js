@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1267
+// @version     3.1268
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1267;
+var aposBotVersion = 3.1268;
 
 var constants = {
 	splitRangeMin : 650,
@@ -864,7 +864,7 @@ function AposBot() {
 
 				//threat.mass = t.mass / 2;
 				//threat.size = Math.sqrt(threat.mass * 100);
-				var tsize = Math.sqrt(threat.mass * 100);
+				var tsize = Math.sqrt(threat.mass / 2 * 100);
 				threat.mustSplit = true;
 
 				var shadowDistance = Math.min(t.size + constants.splitRangeMax, threat.distance);
@@ -921,14 +921,21 @@ function AposBot() {
 			}
 			//drawCircle(threat.x, threat.y, threat.threatenedDistance - cell.size + 40, color);
 			// parseInt(threat.threatLevel / 10));
-			drawPoint(threat.x, threat.y + 20, 2, parseInt(threat.distance, 10) + " "
-					+ parseInt(threat.threatenedDistance, 10));
 
 			if (threat.isMovingTowards) {
 				threat.dangerZone = threat.threatenedDistance;
 			} else {
 				threat.dangerZone = threat.preferredDistance;
 			}
+			
+			if (isNaN(threat.threatenedDistance)) {
+console.log('nan');
+				console.log(threat);
+				console.log(t);
+			}
+
+			drawPoint(threat.x, threat.y + 20, 2, parseInt(threat.distance, 10) + " "
+					+ parseInt(threat.dangerZone, 10));
 
 			//if (threat.distance <= threat.dangerZone) {
 				threats.push(threat);
