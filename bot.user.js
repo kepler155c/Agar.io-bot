@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1261
+// @version     3.1262
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1261;
+var aposBotVersion = 3.1262;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1038,10 +1038,11 @@ function AposBot() {
 			if (threat.distance < threat.dangerZone) {
 
 				if (threat.intersects) {
-					console.log('intersects: ');
+					console.log('intersects: ' + threat.size + threat.safeDistance);
 					console.log(threat);
-					badAngles.push(this.getAngleRange(threat.cell, threat, i, threat.preferredDistance,
+					badAngles.push(this.getAngleRange(threat.cell, threat, i, threat.size + threat.safeDistance,
 							Classification.smallThreat).concat(threat.distance));
+					console.log(badAngles);
 				} else {
 
 					badAngles.push(this.getAngleRange(threat.cell, threat, i, threat.dangerZone,
@@ -1226,6 +1227,11 @@ function AposBot() {
 			angle2 = sortedObList[this.mod(i + 1 + obOffsetI, sortedObList.length)][0];
 			diff = this.mod(angle2 - angle1, 360);
 			obstacleAngles.push([ angle1, diff ]);
+		}
+
+		for (i = 0; i < obstacleAngles.length; i++) {
+
+			this.drawAngle(player, obstacleAngles[i], 50, 6);
 		}
 
 		if (goodAngles.length > 0) {
@@ -2241,9 +2247,9 @@ function AposBot() {
 			color = constants.green;
 		}
 
-		//drawLine(blob1.x, blob1.y, lineLeft[0], lineLeft[1], color);
-		//drawLine(blob1.x, blob1.y, lineRight[0], lineRight[1], color);
-		//drawArc(lineLeft[0], lineLeft[1], lineRight[0], lineRight[1], blob1.x, blob1.y, color);
+		drawLine(blob1.x, blob1.y, lineLeft[0], lineLeft[1], color);
+		drawLine(blob1.x, blob1.y, lineRight[0], lineRight[1], color);
+		drawArc(lineLeft[0], lineLeft[1], lineRight[0], lineRight[1], blob1.x, blob1.y, color);
 
 		return [ leftAngle, difference ];
 	};
