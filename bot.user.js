@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1273
+// @version     3.1274
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1273;
+var aposBotVersion = 3.1274;
 
 var constants = {
 	splitRangeMin : 650,
@@ -311,22 +311,23 @@ function AposBot() {
 		Object.keys(this.entities).forEach(function(key) {
 
 			var entity = this.entities[key];
+			var name = entity.name.length > 0 ? entity.name : 'un-named';
 
-			if (entity.name.length > 0) {
+			//if (entity.name.length > 0) {
 
-				var teamKey = entity.name + entity.color;
-				var team = this.teams[teamKey];
+			var teamKey = name + ' - ' + entity.color;
+			var team = this.teams[teamKey];
 
-				if (!team) {
-					team = {
-						cells : [],
-						mass : 0
-					};
-					this.teams[teamKey] = team;
-				}
-				team.cells.push(entity);
-				team.mass += entity.originalMass;
+			if (!team) {
+				team = {
+					cells : [],
+					mass : 0
+				};
+				this.teams[teamKey] = team;
 			}
+			team.cells.push(entity);
+			team.mass += entity.originalMass;
+			//}
 		}, this);
 
 		Object.keys(this.teams).forEach(function(key) {
@@ -759,7 +760,8 @@ function AposBot() {
 		}
 
 		drawCircle(cluster.x, cluster.y, cluster.size + 40, color);
-		drawPoint(cluster.x, cluster.y + 20, 1, "m:" + cluster.mass.toFixed(1) + " w:" + cluster.clusterWeight.toFixed(1));
+		drawPoint(cluster.x, cluster.y + 20, 1, "m:" + cluster.mass.toFixed(1) + " w:"
+				+ cluster.clusterWeight.toFixed(1));
 
 		destination[0] = destinationPoint[0];
 		destination[1] = destinationPoint[1];
@@ -911,7 +913,7 @@ function AposBot() {
 			threat.minDistance += velocityPadding;
 			threat.preferredDistance += velocityPadding;
 			threat.threatenedDistance += velocityPadding;
-			
+
 			if (threat.preferredDistance < notTouchingDistance) {
 				console.log('what?');
 			}
@@ -932,9 +934,8 @@ function AposBot() {
 			} else {
 				threat.dangerZone = threat.preferredDistance;
 			}
-			
-			drawPoint(threat.x, threat.y + 20, 2, parseInt(threat.distance, 10) + " "
-					+ parseInt(threat.dangerZone, 10));
+
+			drawPoint(threat.x, threat.y + 20, 2, parseInt(threat.distance, 10) + " " + parseInt(threat.dangerZone, 10));
 
 			if (threat.distance <= threat.dangerZone) {
 				threats.push(threat);
@@ -1059,8 +1060,8 @@ function AposBot() {
 			}
 
 			if (threat.distance < threat.preferredDistance + 50) {
-				var tempOb = this
-						.getAngleRange(threat.cell, threat, i, threat.preferredDistance, Classification.smallThreat);
+				var tempOb = this.getAngleRange(threat.cell, threat, i, threat.preferredDistance,
+						Classification.smallThreat);
 				var angle1 = tempOb[0];
 				var angle2 = this.rangeToAngle(tempOb);
 
