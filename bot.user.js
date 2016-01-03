@@ -847,12 +847,13 @@ function AposBot() {
 				mustSplit : false,
 			};
 
-			threat.intersects = threat.distance < cell.size + t.size + t.safeDistance;
+			var velocityPadding = (t.velocity + cell.velocity);
+			velocityPadding = t.mass < 50 ? velocityPadding * 4 : velocityPadding * 2;
 
-			// if the threat is moving towards any cell, mark this threat as moving towards us
 			if (threat.isMovingTowards) {
-				t.isMovingTowards = true;
+				velocityPadding += threat.velocity * 2;
 			}
+			threat.intersects = threat.distance < cell.size + t.size + velocityPadding;
 
 			if (this.canSplitKill(t, cell, constants.enemyRatio)
 					&& t.teamMass / player.mass <= constants.largeThreatRatio) {
@@ -893,13 +894,6 @@ function AposBot() {
 
 				threat.preferredDistance = notTouchingDistance;
 				threat.threatenedDistance = notTouchingDistance + cell.size; // one radius distance
-			}
-
-			var velocityPadding = (t.velocity + cell.velocity);
-			velocityPadding = t.mass < 50 ? velocityPadding * 4 : velocityPadding * 2;
-
-			if (threat.isMovingTowards) {
-				velocityPadding += threat.velocity * 2;
 			}
 
 			threat.deathDistance += velocityPadding;
@@ -1041,7 +1035,7 @@ function AposBot() {
 			if (threat.distance < threat.dangerZone) {
 
 				if (threat.intersects) {
-
+console.log('intersects');
 					badAngles.push(this.getAngleRange(threat.cell, threat, i, threat.minDistance,
 							Classification.smallThreat).concat(threat.distance));
 				} else {
