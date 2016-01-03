@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1251
+// @version     3.1252
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1251;
+var aposBotVersion = 3.1252;
 
 var constants = {
 	splitRangeMin : 650,
@@ -590,7 +590,7 @@ function AposBot() {
 			}
 			// }
 
-			var weight = cluster.size;
+			var weight = cluster.size; // shouldn't this be cluster.mass ?
 			if (cluster.cell) {
 
 				if ((player.cells.length == 1) && cluster.cell.isType(Classification.splitTarget)) {
@@ -759,6 +759,7 @@ function AposBot() {
 		}
 
 		drawCircle(cluster.x, cluster.y, cluster.size + 40, color);
+		drawPoint(cluster.x, cluster.y + 20, 1, "m:" + cluster.mass.toFixed(2) + " w:" + cluster.weight);
 
 		destination[0] = destinationPoint[0];
 		destination[1] = destinationPoint[1];
@@ -844,9 +845,9 @@ function AposBot() {
 				massLoss : cell.mass,
 				teamSize : t.teamSize,
 				mustSplit : false,
-				intersects : t.distance < cell.size + t.size + t.safeDistance,
-				safeDistance : t.safeDistance
 			};
+
+			threat.intersects = threat.distance < cell.size + t.size + t.safeDistance;
 
 			// if the threat is moving towards any cell, mark this threat as moving towards us
 			if (threat.isMovingTowards) {
@@ -873,28 +874,38 @@ function AposBot() {
 						: constants.gray);
 			}
 
-			var deathDistance = Math.min(threat.size - cell.size, threat.size); // how much overlap until we are eaten ??
+			threat.deathDistance = Math.min(threat.size - cell.size, threat.size); // how much overlap until we are eaten ??
+			threat.minDistance = threat.size + cell.size; // try just threat.size or death distance
 			var notTouchingDistance = cell.size + threat.size;
 
 			// too big - not a threat
 			if (t.teamMass / player.mass > constants.largeThreatRatio) {
 
-				threat.minDistance = deathDistance + t.safeDistance;
-				threat.safeDistance = notTouchingDistance + t.safeDistance;
-				threat.threatenedDistance = notTouchingDistance + t.safeDistance;
+				threat.preferredDistance = notTouchingDistance;
+				threat.threatenedDistance = notTouchingDistance;
 
 			} else if (this.canSplitKill(t, cell, constants.enemyRatio)) {
 
-				threat.minDistance = deathDistance + t.safeDistance + constants.splitRangeMax;
-				threat.safeDistance = notTouchingDistance + t.safeDistance + constants.splitRangeMax;
-				threat.threatenedDistance = notTouchingDistance + cell.size + t.safeDistance + constants.splitRangeMax; // one radius distance
+				threat.preferredDistance = notTouchingDistance + constants.splitRangeMax;
+				threat.threatenedDistance = notTouchingDistance + cell.size + constants.splitRangeMax; // one radius distance
 
 			} else {
 
-				threat.minDistance = deathDistance + t.safeDistance;
-				threat.safeDistance = notTouchingDistance + t.safeDistance;
-				threat.threatenedDistance = notTouchingDistance + cell.size + t.safeDistance; // one radius distance
+				threat.preferredDistance = notTouchingDistance;
+				threat.threatenedDistance = notTouchingDistance + cell.size; // one radius distance
 			}
+
+			var velocityPadding = (t.velocity + cell.velocity);
+			velocityPadding = threat.closestCell.mass < 50 ? velocityPadding * 4 : velocityPadding * 2;
+
+			if (threat.isMovingTowards) {
+				velocityPadding += threat.velocity * 2;
+			}
+
+			threat.deathDistance += velocityPadding;
+			threat.minDistance += velocityPadding;
+			threat.preferredDistance += velocityPadding;
+			threat.threatenedDistance += velocityPadding;
 
 			var color = constants.green;
 			if (threat.distance <= threat.minDistance) {
@@ -912,10 +923,10 @@ function AposBot() {
 			if (threat.isMovingTowards) {
 				threat.dangerZone = threat.threatenedDistance;
 			} else {
-				threat.dangerZone = threat.safeDistance;
+				threat.dangerZone = threat.preferredDistance;
 			}
 
-			if (threat.distance <= threat.safeDistance) {
+			if (threat.distance <= threat.dangerZone) {
 				threats.push(threat);
 			}
 		}
@@ -1031,7 +1042,7 @@ function AposBot() {
 
 				if (threat.intersects) {
 
-					badAngles.push(this.getAngleRange(threat.cell, threat, i, threat.size + threat.safeDistance,
+					badAngles.push(this.getAngleRange(threat.cell, threat, i, threat.minDistance,
 							Classification.smallThreat).concat(threat.distance));
 				} else {
 
@@ -1040,7 +1051,7 @@ function AposBot() {
 				}
 			}
 
-			if (threat.distance < threat.safeDistance) {
+			if (threat.distance < threat.preferredDistance) {
 				var tempOb = this
 						.getAngleRange(threat.cell, threat, i, threat.safeDistance, Classification.smallThreat);
 				var angle1 = tempOb[0];
@@ -1273,11 +1284,9 @@ function AposBot() {
 			threat.velocity = threat.getVelocity(this.previousUpdated);
 			var velocity = (threat.velocity + threat.closestCell.velocity);
 			threat.safeDistance = threat.closestCell.mass < 50 ? velocity * 4 : velocity * 2;
-			this.setMinimumDistance(player, threat, constants.largeThreatRatio);
+			// this.setMinimumDistance(player, threat, constants.largeThreatRatio);
 
-			if (panicLevel < 1 && threat.distance < threat.dangerZone) {
-				overlapCount++;
-			}
+			this.calculateThreatWeight(player, threats, threat);
 
 			if (player.cells.length == 1) {
 				// this.predictPosition(threat, 200);
@@ -1286,18 +1295,20 @@ function AposBot() {
 				}
 			}
 
-			for (j = 0; j < player.cells.length; j++) {
-
-				var cell = player.cells[j];
-				//				threat.intersects = this.circlesIntersect(cell, threat);
-				threat.intersects = threat.distance < cell.size + threat.size + threat.safeDistance;
-				if (threat.intersects) {
-					panicLevel = 2;
-					break;
-				}
-			}
-			this.calculateThreatWeight(player, threats, threat);
 		}, this);
+
+		for (i = 0; i < threats.length; i++) {
+			threat = threats[i];
+
+			if (threat.distance < threat.dangerZone) {
+				overlapCount++;
+			}
+
+			if (threat.intersects) {
+				panicLevel = 2;
+				break;
+			}
+		}
 
 		if (panicLevel < 1 && overlapCount > 1) {
 			panicLevel = 1;
@@ -1323,35 +1334,48 @@ function AposBot() {
 		}*/
 
 		for (i = 0; i < threats.length; i++) {
-
 			threat = threats[i];
+			
 			if (panicLevel >= 2) {
-				threat.dangerZone = threat.safeDistance;
+				threat.dangerZone = threat.minDistance;
 			} else if (panicLevel >= 1) {
 				if (!threat.isMovingTowards || threat.teamSize > 1) {
-					threat.dangerZone = threat.safeDistance;
+					threat.dangerZone = threat.minDistance;
 				}
 			}
+			/*
 			if (panicLevel === 0 && threat.isMovingTowards) {
 				threat.dangerZone += player.velocity * 2;
 			}
+			*/
 		}
 
 		var angle;
-		var count = threats.length;
-		this.reduceThreats(player, threats);
-		if (threats.length < count) {
-			console.log("was: " + count + " now: " + threats.length);
+		//var count = threats.length;
+		//this.reduceThreats(player, threats);
+		//if (threats.length < count) {
+		//	console.log("was: " + count + " now: " + threats.length);
+		//}
+		/*
+		if (threats.length > 1) {
+			console.log('didnt reduce threats: ' + threats.length);
 		}
+		*/
 
 		for (i = 0; i < threats.length; i++) {
 			threat = threats[i];
 			drawCircle(threat.x, threat.y, threat.threatenedDistance - threat.cell.size + 40, constants.red);
 		}
-		if (threats.length > 1) {
-			console.log('didnt reduce threats: ' + threats.length);
+		if (!this.avoidThreats(player, destinationChoices, threats) && panicLevel < 2) {
+			for (i = 0; i < threats.length; i++) {
+				threat = threats[i];
+
+				threat.dangerZone = threat.minDistance;
+			}
+			if (!this.avoidThreats(player, destinationChoices, threats) && panicLevel < 2) {
+				console.log('could not determine destination');
+			}
 		}
-		angle = this.avoidThreats(player, destinationChoices, threats);
 
 		if (panicLevel > 0) {
 			this.infoStrings.push("Panic Level: " + panicLevel);
