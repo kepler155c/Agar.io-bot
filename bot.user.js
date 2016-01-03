@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1250
+// @version     3.1251
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1250;
+var aposBotVersion = 3.1251;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1257,6 +1257,7 @@ function AposBot() {
 		var panicLevel = 0;
 		var destinationChoices = [ getPointX(), getPointY() ];
 		var doSplit = false;
+		var threat;
 
 		// panic levels:
 		// 2 = partially inside a threat
@@ -1267,7 +1268,7 @@ function AposBot() {
 
 		Object.keys(this.entities).filter(this.threatFilter, this).forEach(function(key) {
 
-			var threat = this.entities[key];
+			threat = this.entities[key];
 
 			threat.velocity = threat.getVelocity(this.previousUpdated);
 			var velocity = (threat.velocity + threat.closestCell.velocity);
@@ -1320,6 +1321,22 @@ function AposBot() {
 			}
 			panicLevel++;
 		}*/
+
+		for (i = 0; i < threats.length; i++) {
+
+			threat = threats[i];
+			if (panicLevel >= 2) {
+				threat.dangerZone = threat.safeDistance;
+			} else if (panicLevel >= 1) {
+				if (!threat.isMovingTowards || threat.teamSize > 1) {
+					threat.dangerZone = threat.safeDistance;
+				}
+			}
+			if (panicLevel === 0 && threat.isMovingTowards) {
+				threat.dangerZone += player.velocity * 2;
+			}
+		}
+
 		var angle;
 		var count = threats.length;
 		this.reduceThreats(player, threats);
@@ -1328,7 +1345,7 @@ function AposBot() {
 		}
 
 		for (i = 0; i < threats.length; i++) {
-			var threat = threats[i];
+			threat = threats[i];
 			drawCircle(threat.x, threat.y, threat.threatenedDistance - threat.cell.size + 40, constants.red);
 		}
 		if (threats.length > 1) {
