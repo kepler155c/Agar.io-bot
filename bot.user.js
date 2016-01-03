@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1253
+// @version     3.1254
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1253;
+var aposBotVersion = 3.1254;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1335,7 +1335,7 @@ function AposBot() {
 
 		for (i = 0; i < threats.length; i++) {
 			threat = threats[i];
-			
+
 			if (panicLevel >= 2) {
 				threat.dangerZone = threat.minDistance;
 			} else if (panicLevel >= 1) {
@@ -1364,7 +1364,11 @@ function AposBot() {
 
 		for (i = 0; i < threats.length; i++) {
 			threat = threats[i];
-			drawCircle(threat.x, threat.y, threat.threatenedDistance - threat.cell.size + 40, constants.red);
+			var color = constants.red;
+			if (threat.dangerZone < threat.preferredDistance) {
+				color = constants.orange;
+			}
+			drawCircle(threat.x, threat.y, threat.dangerZone - threat.cell.size + 40, color);
 		}
 		if (!this.avoidThreats(player, destinationChoices, threats) && panicLevel < 2) {
 			for (i = 0; i < threats.length; i++) {
