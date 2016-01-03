@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1271
+// @version     3.1272
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1271;
+var aposBotVersion = 3.1272;
 
 var constants = {
 	splitRangeMin : 650,
@@ -738,7 +738,7 @@ function AposBot() {
 			// console.log('DUMPING');
 			var destinationAngle = this.getAngle(destinationPoint[0], destinationPoint[1], cluster.closestCell.x,
 					cluster.closestCell.y);
-			console.log(destinationAngle);
+			// console.log(destinationAngle);
 
 			Object.keys(this.entities).filter(this.virusFilter, this).forEach(function(key) {
 
@@ -759,7 +759,7 @@ function AposBot() {
 		}
 
 		drawCircle(cluster.x, cluster.y, cluster.size + 40, color);
-		drawPoint(cluster.x, cluster.y + 20, 1, "m:" + cluster.mass.toFixed(2) + " w:" + cluster.weight);
+		drawPoint(cluster.x, cluster.y + 20, 1, "m:" + cluster.mass.toFixed(2) + " w:" + cluster.clusterWeight);
 
 		destination[0] = destinationPoint[0];
 		destination[1] = destinationPoint[1];
@@ -848,6 +848,11 @@ function AposBot() {
 				t : t,
 				safeDistance : t.safeDistance
 			};
+
+			// if the threat is moving towards any cell, mark this threat as moving towards us
+			if (threat.isMovingTowards) {
+				t.isMovingTowards = true;
+			}
 
 			var velocityPadding = (t.velocity + cell.velocity);
 			velocityPadding = t.mass < 50 ? velocityPadding * 4 : velocityPadding * 2;
@@ -1297,8 +1302,8 @@ function AposBot() {
 
 			if (player.cells.length == 1) {
 				// this.predictPosition(threat, 200);
-				if (threat.distance < threat.size + player.largestCell.size && threat.velocity > 20) {
-					doSplit = true;
+				if (threat.distance < threat.size + player.largestCell.size * 0.75 && threat.velocity > 20) {
+					doSplit = player.canSplit();
 				}
 			}
 
