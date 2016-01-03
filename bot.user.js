@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1259
+// @version     3.1260
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1259;
+var aposBotVersion = 3.1260;
 
 var constants = {
 	splitRangeMin : 650,
@@ -845,6 +845,7 @@ function AposBot() {
 				massLoss : cell.mass,
 				teamSize : t.teamSize,
 				mustSplit : false,
+				t : t
 			};
 
 			var velocityPadding = (t.velocity + cell.velocity);
@@ -860,7 +861,7 @@ function AposBot() {
 
 				// this should really be 2 threats - maybe
 
-				threat.mass = t.mass / 2;
+				//threat.mass = t.mass / 2;
 				//threat.size = Math.sqrt(threat.mass * 100);
 				var tsize = Math.sqrt(threat.mass * 100);
 				threat.mustSplit = true;
@@ -928,8 +929,6 @@ function AposBot() {
 				threats.push(threat);
 			}
 		}
-
-		return threats;
 	};
 
 	this.pruneThreats = function(threats) {
