@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1272
+// @version     3.1273
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1272;
+var aposBotVersion = 3.1273;
 
 var constants = {
 	splitRangeMin : 650,
@@ -759,7 +759,7 @@ function AposBot() {
 		}
 
 		drawCircle(cluster.x, cluster.y, cluster.size + 40, color);
-		drawPoint(cluster.x, cluster.y + 20, 1, "m:" + cluster.mass.toFixed(2) + " w:" + cluster.clusterWeight);
+		drawPoint(cluster.x, cluster.y + 20, 1, "m:" + cluster.mass.toFixed(1) + " w:" + cluster.clusterWeight.toFixed(1));
 
 		destination[0] = destinationPoint[0];
 		destination[1] = destinationPoint[1];
