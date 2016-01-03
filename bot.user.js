@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1266
+// @version     3.1267
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1266;
+var aposBotVersion = 3.1267;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1050,6 +1050,8 @@ function AposBot() {
 				if (threat.intersects) {
 					console.log('intersects: ' + threat.size + threat.safeDistance);
 					console.log(threat);
+					console.log(threat.t);
+					console.log(threat.cell);
 					badAngles.push(this.getAngleRange(threat.cell, threat, i, threat.size + threat.safeDistance,
 							Classification.smallThreat).concat(threat.distance));
 					console.log(badAngles);
