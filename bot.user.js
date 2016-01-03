@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1254
+// @version     3.1255
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1254;
+var aposBotVersion = 3.1255;
 
 var constants = {
 	splitRangeMin : 650,
@@ -857,9 +857,12 @@ function AposBot() {
 
 			if (this.canSplitKill(t, cell, constants.enemyRatio)
 					&& t.teamMass / player.mass <= constants.largeThreatRatio) {
+				
+				// this should really be 2 threats - maybe
 
 				threat.mass = t.mass / 2;
-				threat.size = Math.sqrt(threat.mass * 100);
+				//threat.size = Math.sqrt(threat.mass * 100);
+				var tsize = Math.sqrt(threat.mass * 100);
 				threat.mustSplit = true;
 
 				var shadowDistance = Math.min(t.size + constants.splitRangeMax, threat.distance);
@@ -870,7 +873,7 @@ function AposBot() {
 				};
 				// distance = Util.computeDistance(shadowThreat.x, shadowThreat.y, cell.x, cell.y);
 
-				drawCircle(shadowThreat.x, shadowThreat.y, threat.size, constants.gray);
+				drawCircle(shadowThreat.x, shadowThreat.y, tsize, constants.gray);
 				drawLine(t.x, t.y, shadowThreat.x, shadowThreat.y, threat.isMovingTowards ? constants.red
 						: constants.gray);
 			}
