@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1262
+// @version     3.1263
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1262;
+var aposBotVersion = 3.1263;
 
 var constants = {
 	splitRangeMin : 650,
@@ -845,7 +845,8 @@ function AposBot() {
 				massLoss : cell.mass,
 				teamSize : t.teamSize,
 				mustSplit : false,
-				t : t
+				t : t,
+				safeDistance : t.safeDistance
 			};
 
 			var velocityPadding = (t.velocity + cell.velocity);
