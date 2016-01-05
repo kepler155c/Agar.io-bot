@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1281
+// @version     3.1282
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1281;
+var aposBotVersion = 3.1282;
 
 var constants = {
 	splitRangeMin : 650,
@@ -251,7 +251,7 @@ function initializeEntity() {
 
 	var da = window.getEntityPrototype();
 
-	da.prototype.intialize = function(player) {
+	da.prototype.initialize = function(player) {
 
 		this.classification = Classification.unknown;
 		this.hasMoved = this.isMoving();
