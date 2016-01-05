@@ -1090,7 +1090,7 @@ console.log("Running Bot Launcher!");
             var offsetX = -getMapStartX();
             var offsetY = -getMapStartY();
             //debugStrings.push("Location: " + Math.floor(getPlayer()[0].x + offsetX) + ", " + Math.floor(getPlayer()[0].y + offsetY));
-            debugStrings.push("Location: " + Math.floor(getPlayer()[0].x ) + ", " + Math.floor(getPlayer()[0].y ));
+            //debugStrings.push("Location: " + Math.floor(getPlayer()[0].x ) + ", " + Math.floor(getPlayer()[0].y ));
         }
 
         var offsetValue = 20;
