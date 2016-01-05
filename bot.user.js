@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1297
+// @version     3.1298
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1297;
+var aposBotVersion = 3.1298;
 
 var constants = {
 	splitRangeMin : 650,
@@ -60,6 +60,7 @@ var constants = {
 	cyan : "#008080",
 	gray : "#F2FBFF",
 	black : "#000000",
+	yellow : "#FFFF00"
 };
 
 var Classification = {
@@ -1494,7 +1495,7 @@ function AposBot() {
 			case Classification.food:
 				// drawPoint(entity.x, entity.y+20, 1, "m:" + entity.mass.toFixed(2));
 				if (entity.hasMoved) {
-					drawCircle(entity.x, entity.y, entity.size + 20, constants.gray);
+					drawCircle(entity.x, entity.y, entity.size + 20, constants.yellow);
 				} else if (entity.size > 14) {
 					drawPoint(entity.x, entity.y + 20, 1, entity.size);
 					drawCircle(entity.x, entity.y, entity.size + 20, constants.cyan);
