@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1289
+// @version     3.1290
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1289;
+var aposBotVersion = 3.1290;
 
 var constants = {
 	splitRangeMin : 650,
@@ -664,8 +664,8 @@ function AposBot() {
 			}
 			cluster.clusterWeight = closestInfo.distance / weight * multiplier;
 
-			drawPoint(cluster.x, cluster.y + 60, 1, "" + parseInt(cluster.clusterWeight, 10) + " "
-					+ parseInt(cluster.size, 10));
+			//drawPoint(cluster.x, cluster.y + 60, 1, "" + parseInt(cluster.clusterWeight, 10) + " "
+			//		+ parseInt(cluster.size, 10));
 		}
 
 		var bestFoodI = 0;
