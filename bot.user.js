@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1298
+// @version     3.1299
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1298;
+var aposBotVersion = 3.1299;
 
 var constants = {
 	splitRangeMin : 650,
@@ -804,7 +804,7 @@ function AposBot() {
 		}
 
 		drawCircle(cluster.x, cluster.y, cluster.size + 40, color);
-		drawPoint(cluster.x, cluster.y + 20, 1, "m:" + cluster.mass.toFixed(1) + " w:"
+		drawPoint(cluster.x, cluster.y + 20, constants.yellow, "m:" + cluster.mass.toFixed(1) + " w:"
 				+ cluster.clusterWeight.toFixed(1));
 
 		destination[0] = destinationPoint[0];
@@ -841,7 +841,7 @@ function AposBot() {
 		destination[2] = doSplit;
 		destination[3] = doLure;
 
-		drawLine(cluster.closestCell.x, cluster.closestCell.y, destination[0], destination[1], 1);
+		drawLine(cluster.closestCell.x, cluster.closestCell.y, destination[0], destination[1], colors.orange);
 
 		return true;
 	};
@@ -964,7 +964,7 @@ function AposBot() {
 				}
 
 				// drawPoint(threat.x, threat.y + 20, 2, parseInt(threat.distance, 10) + " " + parseInt(threat.dangerZone, 10));
-				drawPoint(threat.x, threat.y + 20 + threat.size / 15, 1, "/***" + "***\\ " + t.teamSize);
+				drawPoint(threat.x, threat.y + 20 + threat.size / 15, constants.yellow, "/***" + "***\\ " + t.teamSize);
 
 				if (threat.distance <= threat.dangerZone) {
 					threats.push(threat);
@@ -1219,7 +1219,7 @@ function AposBot() {
 
 		for (i = 0; i < obstacleAngles.length; i++) {
 
-			this.drawAngle(player, obstacleAngles[i], 50, 6);
+			this.drawAngle(player, obstacleAngles[i], 50, constants.cyan);
 		}
 
 		if (goodAngles.length > 0) {
@@ -1241,7 +1241,7 @@ function AposBot() {
 			destinationChoices[0] = line1[0];
 			destinationChoices[1] = line1[1];
 
-			drawLine(player.x, player.y, line1[0], line1[1], constants.red);
+			//drawLine(player.x, player.y, line1[0], line1[1], constants.red);
 
 			return true;
 
@@ -1415,13 +1415,13 @@ function AposBot() {
 		//The current destination that the cells were going towards.
 
 		drawLine(getX() - (1920 / 2) / getZoomlessRatio(), getY() - (1080 / 2) / getZoomlessRatio(), getX()
-				+ (1920 / 2) / getZoomlessRatio(), getY() - (1080 / 2) / getZoomlessRatio(), 7);
+				+ (1920 / 2) / getZoomlessRatio(), getY() - (1080 / 2) / getZoomlessRatio(), constants.gray);
 		drawLine(getX() - (1920 / 2) / getZoomlessRatio(), getY() + (1080 / 2) / getZoomlessRatio(), getX()
-				+ (1920 / 2) / getZoomlessRatio(), getY() + (1080 / 2) / getZoomlessRatio(), 7);
+				+ (1920 / 2) / getZoomlessRatio(), getY() + (1080 / 2) / getZoomlessRatio(), constants.gray);
 		drawLine(getX() - (1920 / 2) / getZoomlessRatio(), getY() - (1080 / 2) / getZoomlessRatio(), getX()
-				- (1920 / 2) / getZoomlessRatio(), getY() + (1080 / 2) / getZoomlessRatio(), 7);
+				- (1920 / 2) / getZoomlessRatio(), getY() + (1080 / 2) / getZoomlessRatio(), constants.gray);
 		drawLine(getX() + (1920 / 2) / getZoomlessRatio(), getY() - (1080 / 2) / getZoomlessRatio(), getX()
-				+ (1920 / 2) / getZoomlessRatio(), getY() + (1080 / 2) / getZoomlessRatio(), 7);
+				+ (1920 / 2) / getZoomlessRatio(), getY() + (1080 / 2) / getZoomlessRatio(), constants.gray);
 
 		if (player.isSplitting) {
 
@@ -1497,7 +1497,7 @@ function AposBot() {
 				if (entity.hasMoved) {
 					drawCircle(entity.x, entity.y, entity.size + 20, constants.yellow);
 				} else if (entity.size > 14) {
-					drawPoint(entity.x, entity.y + 20, 1, entity.size);
+					drawPoint(entity.x, entity.y + 20, constants.yellow, entity.size);
 					drawCircle(entity.x, entity.y, entity.size + 20, constants.cyan);
 				}
 				break;
@@ -1730,8 +1730,8 @@ function AposBot() {
 
 		//drawPoint(cell[0].x, cell[0].y, 2, "");
 
-		drawPoint(line1[0], line1[1], 0, parseInt(angle[0], 10));
-		drawPoint(line2[0], line2[1], 0, parseInt(angle[1], 10));
+		drawPoint(line1[0], line1[1], constants.black, parseInt(angle[0], 10));
+		drawPoint(line2[0], line2[1], constants.black, parseInt(angle[1], 10));
 	};
 
 	this.followAngle = function(angle, useX, useY, distance) {
@@ -1821,9 +1821,9 @@ function AposBot() {
 		//drawLine(blob2Left[0], blob2Left[1], tempLine[0], tempLine[1], 0);
 
 		if ((blob1Range / blob2Range) > 1) {
-			drawPoint(blob1Left[0], blob1Left[1], 3, "");
-			drawPoint(blob1Right[0], blob1Right[1], 3, "");
-			drawPoint(blob1.x, blob1.y, 3, "" + blob1Range + ", " + blob2Range + " R: "
+			drawPoint(blob1Left[0], blob1Left[1], constants.red, "");
+			drawPoint(blob1Right[0], blob1Right[1], constants.red, "");
+			drawPoint(blob1.x, blob1.y, constants.red, "" + blob1Range + ", " + blob2Range + " R: "
 					+ (Math.round((blob1Range / blob2Range) * 1000) / 1000));
 		}
 
@@ -1904,9 +1904,9 @@ function AposBot() {
 					this.computeInexpensiveDistance(getMapStartX(), blob.y, blob.x, blob.y) ]);
 			lineLeft = this.followAngle(115, blob.x, blob.y, 190 + blob.size);
 			lineRight = this.followAngle(245, blob.x, blob.y, 190 + blob.size);
-			drawLine(blob.x, blob.y, lineLeft[0], lineLeft[1], 5);
-			drawLine(blob.x, blob.y, lineRight[0], lineRight[1], 5);
-			drawArc(lineLeft[0], lineLeft[1], lineRight[0], lineRight[1], blob.x, blob.y, 5);
+			drawLine(blob.x, blob.y, lineLeft[0], lineLeft[1], constants.gray);
+			drawLine(blob.x, blob.y, lineRight[0], lineRight[1], constants.gray);
+			drawArc(lineLeft[0], lineLeft[1], lineRight[0], lineRight[1], blob.x, blob.y, constants.pink);
 		}
 		if (blob.y < getMapStartY() + distanceFromWallY) {
 			//TOP
@@ -1915,9 +1915,9 @@ function AposBot() {
 					this.computeInexpensiveDistance(blob.x, getMapStartY(), blob.x, blob.y) ]);
 			lineLeft = this.followAngle(205, blob.x, blob.y, 190 + blob.size);
 			lineRight = this.followAngle(335, blob.x, blob.y, 190 + blob.size);
-			drawLine(blob.x, blob.y, lineLeft[0], lineLeft[1], 5);
-			drawLine(blob.x, blob.y, lineRight[0], lineRight[1], 5);
-			drawArc(lineLeft[0], lineLeft[1], lineRight[0], lineRight[1], blob.x, blob.y, 5);
+			drawLine(blob.x, blob.y, lineLeft[0], lineLeft[1], constants.gray);
+			drawLine(blob.x, blob.y, lineRight[0], lineRight[1], constants.gray);
+			drawArc(lineLeft[0], lineLeft[1], lineRight[0], lineRight[1], blob.x, blob.y, constants.pink);
 		}
 		if (blob.x > getMapEndX() - distanceFromWallX) {
 			//RIGHT
@@ -1926,9 +1926,9 @@ function AposBot() {
 					this.computeInexpensiveDistance(getMapEndX(), blob.y, blob.x, blob.y) ]);
 			lineLeft = this.followAngle(295, blob.x, blob.y, 190 + blob.size);
 			lineRight = this.followAngle(65, blob.x, blob.y, 190 + blob.size);
-			drawLine(blob.x, blob.y, lineLeft[0], lineLeft[1], 5);
-			drawLine(blob.x, blob.y, lineRight[0], lineRight[1], 5);
-			drawArc(lineLeft[0], lineLeft[1], lineRight[0], lineRight[1], blob.x, blob.y, 5);
+			drawLine(blob.x, blob.y, lineLeft[0], lineLeft[1], constants.gray);
+			drawLine(blob.x, blob.y, lineRight[0], lineRight[1], constants.gray);
+			drawArc(lineLeft[0], lineLeft[1], lineRight[0], lineRight[1], blob.x, blob.y, constants.pink);
 		}
 		if (blob.y > getMapEndY() - distanceFromWallY) {
 			//BOTTOM
@@ -1937,9 +1937,9 @@ function AposBot() {
 					this.computeInexpensiveDistance(blob.x, getMapEndY(), blob.x, blob.y) ]);
 			lineLeft = this.followAngle(25, blob.x, blob.y, 190 + blob.size);
 			lineRight = this.followAngle(155, blob.x, blob.y, 190 + blob.size);
-			drawLine(blob.x, blob.y, lineLeft[0], lineLeft[1], 5);
-			drawLine(blob.x, blob.y, lineRight[0], lineRight[1], 5);
-			drawArc(lineLeft[0], lineLeft[1], lineRight[0], lineRight[1], blob.x, blob.y, 5);
+			drawLine(blob.x, blob.y, lineLeft[0], lineLeft[1], constants.gray);
+			drawLine(blob.x, blob.y, lineRight[0], lineRight[1], constants.gray);
+			drawArc(lineLeft[0], lineLeft[1], lineRight[0], lineRight[1], blob.x, blob.y, constants.pink);
 		}
 		return listToUse;
 	};
@@ -2033,8 +2033,8 @@ function AposBot() {
 		var difference = angleStuff[1];
 		var safeDistance = blob1.size + blob2.size;
 
-		drawPoint(angleStuff[2][0], angleStuff[2][1], 3, "");
-		drawPoint(angleStuff[3][0], angleStuff[3][1], 3, "");
+		drawPoint(angleStuff[2][0], angleStuff[2][1], constants.red, "");
+		drawPoint(angleStuff[3][0], angleStuff[3][1], constants.red, "");
 
 		//console.log("Adding badAngles: " + leftAngle + ", " + rightAngle + " diff: " + difference);
 
