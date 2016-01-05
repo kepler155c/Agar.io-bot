@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1283
+// @version     3.1284
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1283;
+var aposBotVersion = 3.1284;
 
 var constants = {
 	splitRangeMin : 650,
@@ -255,7 +255,7 @@ function initializeEntity() {
 
 		this.classification = Classification.unknown;
 		this.hasMoved = this.isMoving();
-		this.isMovingTowards = this.isMovingTowards(player);
+		this.isMovingTowards = this.getMovingTowards(player);
 		this.mass = this.size * this.size / 100;
 		this.originalMass = this.mass; // save the original mass in case the merge logic changes it
 		this.safeDistance = 0;
@@ -278,7 +278,7 @@ function initializeEntity() {
 		return this.classification == classification;
 	};
 
-	da.prototype.isMovingTowards = function(target) {
+	da.prototype.getMovingTowards = function(target) {
 
 		if (!this.hasMoved) {
 			return false;
@@ -859,7 +859,7 @@ function AposBot() {
 				size : t.size,
 				mass : t.mass,
 				distance : Util.computeDistance(t.x, t.y, cell.x, cell.y),
-				isMovingTowards : t.isMovingTowards(cell),
+				isMovingTowards : t.getMovingTowards(cell),
 				cell : cell,
 				angle : Math.atan2(t.y - cell.y, t.x - cell.x),
 				threatLevel : 40,
