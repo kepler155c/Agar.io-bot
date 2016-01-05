@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1282
+// @version     3.1283
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1282;
+var aposBotVersion = 3.1283;
 
 var constants = {
 	splitRangeMin : 650,
@@ -859,7 +859,7 @@ function AposBot() {
 				size : t.size,
 				mass : t.mass,
 				distance : Util.computeDistance(t.x, t.y, cell.x, cell.y),
-				isMovingTowards : this.isMovingTowards(cell, t),
+				isMovingTowards : t.isMovingTowards(cell),
 				cell : cell,
 				angle : Math.atan2(t.y - cell.y, t.x - cell.x),
 				threatLevel : 40,
