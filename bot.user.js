@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1293
+// @version     3.1295
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1293;
+var aposBotVersion = 3.1295;
 
 var constants = {
 	splitRangeMin : 650,
@@ -925,7 +925,7 @@ function AposBot() {
 					threat.preferredDistance = notTouchingDistance;
 					threat.threatenedDistance = notTouchingDistance;
 
-				} else if (this.canSplitKill(t, cell, constants.enemyRatio)) {
+				} else if (threat.isSplitThreat) {
 
 					threat.preferredDistance = notTouchingDistance + constants.splitRangeMax;
 					threat.threatenedDistance = notTouchingDistance + cell.size + constants.splitRangeMax; // one radius distance
@@ -963,7 +963,7 @@ function AposBot() {
 				}
 
 				// drawPoint(threat.x, threat.y + 20, 2, parseInt(threat.distance, 10) + " " + parseInt(threat.dangerZone, 10));
-				drawPoint(threat.x, threat.y + 20 + threat.size / 15, 1, "/***" + "***\\");
+				drawPoint(threat.x, threat.y + 20 + threat.size / 15, 1, "/***" + "***\\ " + t.teamSize);
 
 				if (threat.distance <= threat.dangerZone) {
 					threats.push(threat);
