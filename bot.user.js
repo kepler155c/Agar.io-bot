@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1295
+// @version     3.1296
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1295;
+var aposBotVersion = 3.1296;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1554,8 +1554,7 @@ function AposBot() {
 		}
 		var offsetX = -getMapStartX();
 		var offsetY = -getMapStartY();
-		//debugStrings.push("Location: " + Math.floor(getPlayer()[0].x + offsetX) + ", " + Math.floor(getPlayer()[0].y + offsetY));
-		this.infoStrings.push("Location: " + Math.floor(player.x) + ", " + Math.floor(player.y));
+		this.infoStrings.push("Location: " + Math.floor(player.x + offsetX) + ", " + Math.floor(player.y + offsetY));
 
 		this.infoStrings.push("");
 	};
