@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1296
+// @version     3.1297
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1296;
+var aposBotVersion = 3.1297;
 
 var constants = {
 	splitRangeMin : 650,
@@ -51,15 +51,15 @@ var constants = {
 	lureDistance : 1000,
 	largeThreatRatio : 10,
 
-	red : 0,
-	green : 1,
-	blue : 2,
-	orange : 3,
-	purple : 4,
-	pink : 5,
-	cyan : 6,
-	gray : 7,
-	black : 8,
+	red : "#FF0000",
+	green : "#00FF00",
+	blue : "#0000FF",
+	orange : "#FF8000",
+	purple : "#8A2BE2",
+	pink : "#FF69B4",
+	cyan : "#008080",
+	gray : "#F2FBFF",
+	black : "#000000",
 };
 
 var Classification = {
