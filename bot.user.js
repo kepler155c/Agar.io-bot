@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1288
+// @version     3.1289
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1288;
+var aposBotVersion = 3.1289;
 
 var constants = {
 	splitRangeMin : 650,
@@ -884,8 +884,7 @@ function AposBot() {
 			threat.intersects = threat.distance < cell.size + t.size + velocityPadding;
 
 			if (this.canSplitKill(t, cell, constants.enemyRatio)
-					&& t.teamMass / player.mass <= constants.largeThreatRatio &&
-					t.teamSize < 6) {
+					&& t.teamMass / player.mass <= constants.largeThreatRatio && t.teamSize < 6) {
 
 				// this should really be 2 threats - maybe
 
@@ -904,13 +903,13 @@ function AposBot() {
 				// distance = Util.computeDistance(shadowThreat.x, shadowThreat.y, cell.x, cell.y);
 
 				drawCircle(shadowThreat.x, shadowThreat.y, tsize, constants.gray);
-				
-				var shadowLineDistance = Math.min(constants.splitRangeMax, Math.max(1, threat.distance - tsize));
+
+				var shadowLineDistance = Math.min(t.size - tsize + constants.splitRangeMax, threat.distance);
 				var shadowThreatLine = {
-						x : t.x - Math.cos(threat.angle) * shadowLineDistance,
-						y : t.y - Math.sin(threat.angle) * shadowLineDistance,
-					};
-				
+					x : t.x - Math.cos(threat.angle) * shadowLineDistance,
+					y : t.y - Math.sin(threat.angle) * shadowLineDistance,
+				};
+
 				drawLine(t.x, t.y, shadowThreatLine.x, shadowThreatLine.y, threat.isMovingTowards ? constants.red
 						: constants.gray);
 			}
