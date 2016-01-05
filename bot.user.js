@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1302
+// @version     3.1303
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1302;
+var aposBotVersion = 3.1303;
 
 var constants = {
 	splitRangeMin : 650,
@@ -621,6 +621,7 @@ function AposBot() {
 
 			var cluster = player.foodClusters[i];
 			var multiplier = 3;
+			var weight = cluster.size; // shouldn't this be cluster.mass ?
 
 			var closestInfo = player.closestCell(cluster.x, cluster.y);
 			cluster.closestCell = closestInfo.cell;
@@ -634,12 +635,8 @@ function AposBot() {
 
 				// everything close to the wall will seem very far away
 				multiplier = 25;
-			}
-			// }
 
-			var weight = cluster.size; // shouldn't this be cluster.mass ?
-
-			if (cluster.cell) {
+			} else if (cluster.cell) {
 
 				if ((player.cells.length == 1) && cluster.cell.isType(Classification.splitTarget)) {
 					weight = weight * 1.5;
