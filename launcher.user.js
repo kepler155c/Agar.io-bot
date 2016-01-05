@@ -20,11 +20,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.274
+// @version     4.275
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.274;
+var aposLauncherVersion = 4.275;
 
 var showAd = false;
 
@@ -922,26 +922,6 @@ console.log("Running Bot Launcher!");
             d.beginPath();
 
             d.lineWidth = 2;
-
-            if (lines[i][4] == 0) {
-                d.strokeStyle = "#FF0000";
-            } else if (lines[i][4] == 1) {
-                d.strokeStyle = "#00FF00";
-            } else if (lines[i][4] == 2) {
-                d.strokeStyle = "#0000FF";
-            } else if (lines[i][4] == 3) {
-                d.strokeStyle = "#FF8000";
-            } else if (lines[i][4] == 4) {
-                d.strokeStyle = "#8A2BE2";
-            } else if (lines[i][4] == 5) {
-                d.strokeStyle = "#FF69B4";
-            } else if (lines[i][4] == 6) {
-                d.strokeStyle = "#008080";
-            } else if (lines[i][4] == 7) {
-                d.strokeStyle = (getDarkBool() ? '#F2FBFF' : '#111111');
-            } else {
-                d.strokeStyle = "#000000";
-            }
             d.strokeStyle = lines[i][4];
 
             d.moveTo(lines[i][0], lines[i][1]);
@@ -952,25 +932,7 @@ console.log("Running Bot Launcher!");
         d.restore();
         d.save();
         for (var i = 0; i < circles.length; i++) {
-            if (circles[i][3] == 0) {
-                d.strokeStyle = "#FF0000";
-            } else if (circles[i][3] == 1) {
-                d.strokeStyle = "#00FF00";
-            } else if (circles[i][3] == 2) {
-                d.strokeStyle = "#0000FF";
-            } else if (circles[i][3] == 3) {
-                d.strokeStyle = "#FF8000";
-            } else if (circles[i][3] == 4) {
-                d.strokeStyle = "#8A2BE2";
-            } else if (circles[i][3] == 5) {
-                d.strokeStyle = "#FF69B4";
-            } else if (circles[i][3] == 6) {
-                d.strokeStyle = "#008080";
-            } else if (circles[i][3] == 7) {
-                d.strokeStyle = (getDarkBool() ? '#F2FBFF' : '#111111');
-            } else {
-                d.strokeStyle = "#000000";
-            }
+            d.strokeStyle = circles[i][3];
             d.beginPath();
 
             d.lineWidth = 5;
@@ -986,28 +948,9 @@ console.log("Running Bot Launcher!");
         d.restore();
         d.save();
         for (var i = 0; i < dArc.length; i++) {
-            if (dArc[i][7] == 0) {
-                d.strokeStyle = "#FF0000";
-            } else if (dArc[i][7] == 1) {
-                d.strokeStyle = "#00FF00";
-            } else if (dArc[i][7] == 2) {
-                d.strokeStyle = "#0000FF";
-            } else if (dArc[i][7] == 3) {
-                d.strokeStyle = "#FF8000";
-            } else if (dArc[i][7] == 4) {
-                d.strokeStyle = "#8A2BE2";
-            } else if (dArc[i][7] == 5) {
-                d.strokeStyle = "#FF69B4";
-            } else if (dArc[i][7] == 6) {
-                d.strokeStyle = "#008080";
-            } else if (dArc[i][7] == 7) {
-                d.strokeStyle = (getDarkBool() ? '#F2FBFF' : '#111111');
-            } else {
-                d.strokeStyle = "#000000";
-            }
 
+        	d.strokeStyle = dArc[i][7];
             d.beginPath();
-
             d.lineWidth = 5;
 
             var ang1 = Math.atan2(dArc[i][1] - dArc[i][5], dArc[i][0] - dArc[i][4]);
@@ -1027,22 +970,7 @@ console.log("Running Bot Launcher!");
 
                 d.beginPath();
                 d.arc(dPoints[i][0], dPoints[i][1], radius, 0, 2 * Math.PI, false);
-
-                if (dPoints[i][2] == 0) {
-                    d.fillStyle = "black";
-                } else if (dPoints[i][2] == 1) {
-                    d.fillStyle = "yellow";
-                } else if (dPoints[i][2] == 2) {
-                    d.fillStyle = "blue";
-                } else if (dPoints[i][2] == 3) {
-                    d.fillStyle = "red";
-                } else if (dPoints[i][2] == 4) {
-                    d.fillStyle = "#008080";
-                } else if (dPoints[i][2] == 5) {
-                    d.fillStyle = "#FF69B4";
-                } else {
-                    d.fillStyle = "#000000";
-                }
+                d.strokeStyle = dPoints[i][2];
 
                 d.fill();
                 d.lineWidth = 2;
@@ -1082,17 +1010,9 @@ console.log("Running Bot Launcher!");
         debugStrings.push("R - Lines:   " + (!toggleDraw ? "On" : "Off"));
         debugStrings.push("Best Score: " + ~~(sessionScore / 100));
 
-//        debugStrings.push("Best Score: " + ~~(sessionScore / 100));
-//        debugStrings.push("Best Time: " + bestTime + " seconds");
+        // debugStrings.push("Best Time: " + bestTime + " seconds");
         debugStrings.push("");
 //        debugStrings.push(serverIP);
-
-        if (player.length > 0) {
-            var offsetX = -getMapStartX();
-            var offsetY = -getMapStartY();
-            //debugStrings.push("Location: " + Math.floor(getPlayer()[0].x + offsetX) + ", " + Math.floor(getPlayer()[0].y + offsetY));
-            //debugStrings.push("Location: " + Math.floor(getPlayer()[0].x ) + ", " + Math.floor(getPlayer()[0].y ));
-        }
 
         var offsetValue = 20;
         var text = new va(18, (getDarkBool() ? '#F2FBFF' : '#111111'));
