@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1287
+// @version     3.1288
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1287;
+var aposBotVersion = 3.1288;
 
 var constants = {
 	splitRangeMin : 650,
@@ -905,7 +905,7 @@ function AposBot() {
 
 				drawCircle(shadowThreat.x, shadowThreat.y, tsize, constants.gray);
 				
-				var shadowLineDistance = Math.min(constants.splitRangeMax, threat.distance - t.size);
+				var shadowLineDistance = Math.min(constants.splitRangeMax, Math.max(1, threat.distance - tsize));
 				var shadowThreatLine = {
 						x : t.x - Math.cos(threat.angle) * shadowLineDistance,
 						y : t.y - Math.sin(threat.angle) * shadowLineDistance,
