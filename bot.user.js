@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1299
+// @version     3.1300
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1299;
+var aposBotVersion = 3.1300;
 
 var constants = {
 	splitRangeMin : 650,
@@ -841,7 +841,7 @@ function AposBot() {
 		destination[2] = doSplit;
 		destination[3] = doLure;
 
-		drawLine(cluster.closestCell.x, cluster.closestCell.y, destination[0], destination[1], colors.orange);
+		drawLine(cluster.closestCell.x, cluster.closestCell.y, destination[0], destination[1], constants.orange);
 
 		return true;
 	};
