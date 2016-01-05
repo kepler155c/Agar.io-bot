@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1290
+// @version     3.1291
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1290;
+var aposBotVersion = 3.1291;
 
 var constants = {
 	splitRangeMin : 650,
@@ -853,122 +853,126 @@ function AposBot() {
 
 			var cell = player.cells[i];
 
-			var threat = {
-				x : t.x,
-				y : t.y,
-				size : t.size,
-				mass : t.mass,
-				distance : Util.computeDistance(t.x, t.y, cell.x, cell.y),
-				isMovingTowards : t.getMovingTowards(cell),
-				cell : cell,
-				angle : Math.atan2(t.y - cell.y, t.x - cell.x),
-				threatLevel : 40,
-				massLoss : cell.mass,
-				teamSize : t.teamSize,
-				isSplitThreat : false,
-				t : t,
-				safeDistance : t.safeDistance
-			};
+			if (this.canEat(t, cell, constants.playerRatio)) {
 
-			// if the threat is moving towards any cell, mark this threat as moving towards us
-			if (threat.isMovingTowards) {
-				t.isMovingTowards = true;
-			}
-
-			var velocityPadding = (t.velocity + cell.velocity);
-			velocityPadding = t.mass < 50 ? velocityPadding * 4 : velocityPadding * 2;
-
-			if (threat.isMovingTowards) {
-				velocityPadding += t.velocity * 2;
-			}
-			threat.intersects = threat.distance < cell.size + t.size + velocityPadding;
-
-			if (this.canSplitKill(t, cell, constants.enemyRatio)
-					&& t.teamMass / player.mass <= constants.largeThreatRatio && t.teamSize < 6) {
-
-				// this should really be 2 threats - maybe
-
-				//threat.mass = t.mass / 2;
-				//threat.size = Math.sqrt(threat.mass * 100);
-				var tsize = Math.sqrt(threat.mass / 2 * 100);
-				threat.isSplitThreat = true;
-				t.isSplitThreat = true;
-
-				var shadowDistance = Math.min(t.size + constants.splitRangeMax, threat.distance);
-
-				var shadowThreat = {
-					x : t.x - Math.cos(threat.angle) * shadowDistance,
-					y : t.y - Math.sin(threat.angle) * shadowDistance,
-				};
-				// distance = Util.computeDistance(shadowThreat.x, shadowThreat.y, cell.x, cell.y);
-
-				drawCircle(shadowThreat.x, shadowThreat.y, tsize, constants.gray);
-
-				var shadowLineDistance = Math.min(t.size - tsize + constants.splitRangeMax, threat.distance);
-				var shadowThreatLine = {
-					x : t.x - Math.cos(threat.angle) * shadowLineDistance,
-					y : t.y - Math.sin(threat.angle) * shadowLineDistance,
+				var threat = {
+					x : t.x,
+					y : t.y,
+					size : t.size,
+					mass : t.mass,
+					distance : Util.computeDistance(t.x, t.y, cell.x, cell.y),
+					isMovingTowards : t.getMovingTowards(cell),
+					cell : cell,
+					angle : Math.atan2(t.y - cell.y, t.x - cell.x),
+					threatLevel : 40,
+					massLoss : cell.mass,
+					teamSize : t.teamSize,
+					isSplitThreat : false,
+					t : t,
+					safeDistance : t.safeDistance
 				};
 
-				drawLine(t.x, t.y, shadowThreatLine.x, shadowThreatLine.y, threat.isMovingTowards ? constants.red
-						: constants.gray);
-			}
+				// if the threat is moving towards any cell, mark this threat as moving towards us
+				if (threat.isMovingTowards) {
+					t.isMovingTowards = true;
+				}
 
-			//threat.deathDistance = Math.min(threat.size - cell.size, threat.size); // how much overlap until we are eaten ??
-			threat.deathDistance = threat.size; // ...
-			threat.minDistance = threat.size + cell.size; // try just threat.size or death distance
-			var notTouchingDistance = cell.size + threat.size;
+				var velocityPadding = (t.velocity + cell.velocity);
+				velocityPadding = t.mass < 50 ? velocityPadding * 4 : velocityPadding * 2;
 
-			// too big - not a threat
-			if (t.teamMass / player.mass > constants.largeThreatRatio) {
+				if (threat.isMovingTowards) {
+					velocityPadding += t.velocity * 2;
+				}
+				threat.intersects = threat.distance < cell.size + t.size + velocityPadding;
 
-				threat.preferredDistance = notTouchingDistance;
-				threat.threatenedDistance = notTouchingDistance;
+				if (this.canSplitKill(t, cell, constants.enemyRatio)
+						&& t.teamMass / player.mass <= constants.largeThreatRatio && t.teamSize < 6) {
 
-			} else if (this.canSplitKill(t, cell, constants.enemyRatio)) {
+					// this should really be 2 threats - maybe
 
-				threat.preferredDistance = notTouchingDistance + constants.splitRangeMax;
-				threat.threatenedDistance = notTouchingDistance + cell.size + constants.splitRangeMax; // one radius distance
+					//threat.mass = t.mass / 2;
+					//threat.size = Math.sqrt(threat.mass * 100);
+					var tsize = Math.sqrt(threat.mass / 2 * 100);
+					threat.isSplitThreat = true;
+					t.isSplitThreat = true;
 
-			} else {
+					var shadowDistance = Math.min(t.size + constants.splitRangeMax, threat.distance);
 
-				threat.preferredDistance = notTouchingDistance;
-				threat.threatenedDistance = notTouchingDistance + cell.size; // one radius distance
-			}
+					var shadowThreat = {
+						x : t.x - Math.cos(threat.angle) * shadowDistance,
+						y : t.y - Math.sin(threat.angle) * shadowDistance,
+					};
+					// distance = Util.computeDistance(shadowThreat.x, shadowThreat.y, cell.x, cell.y);
 
-			threat.deathDistance += velocityPadding;
-			threat.minDistance += velocityPadding;
-			threat.preferredDistance += velocityPadding;
-			threat.threatenedDistance += velocityPadding;
+					drawCircle(shadowThreat.x, shadowThreat.y, tsize, constants.gray);
 
-			if (threat.preferredDistance < notTouchingDistance) {
-				console.log('what?');
-			}
+					var shadowLineDistance = Math.min(t.size - tsize + constants.splitRangeMax, threat.distance);
+					var shadowThreatLine = {
+						x : t.x - Math.cos(threat.angle) * shadowLineDistance,
+						y : t.y - Math.sin(threat.angle) * shadowLineDistance,
+					};
 
-			var color = constants.green;
-			if (threat.distance <= threat.minDistance) {
-				color = constants.red;
-			} else if (threat.distance < threat.preferredDistance) {
-				color = constants.orange;
-			} else if (threat.distance < threat.threatededDistance) {
-				color = constants.pink;
-			}
-			//drawCircle(threat.x, threat.y, threat.threatenedDistance - cell.size + 40, color);
-			// parseInt(threat.threatLevel / 10));
+					drawLine(t.x, t.y, shadowThreatLine.x, shadowThreatLine.y, threat.isMovingTowards ? constants.red
+							: constants.gray);
+				}
 
-			if (threat.isMovingTowards) {
-				threat.dangerZone = threat.threatenedDistance;
-			} else {
-				threat.dangerZone = threat.preferredDistance;
-			}
+				//threat.deathDistance = Math.min(threat.size - cell.size, threat.size); // how much overlap until we are eaten ??
+				threat.deathDistance = threat.size; // ...
+				threat.minDistance = threat.size + cell.size; // try just threat.size or death distance
+				var notTouchingDistance = cell.size + threat.size;
 
-			// drawPoint(threat.x, threat.y + 20, 2, parseInt(threat.distance, 10) + " " + parseInt(threat.dangerZone, 10));
-			drawPoint(threat.x, threat.y + 20 + threat.size / 15, 1, "/***" + "***\\");
+				// too big - not a threat
+				if (t.teamMass / player.mass > constants.largeThreatRatio) {
 
-			if (threat.distance <= threat.dangerZone) {
-				threats.push(threat);
+					threat.preferredDistance = notTouchingDistance;
+					threat.threatenedDistance = notTouchingDistance;
+
+				} else if (this.canSplitKill(t, cell, constants.enemyRatio)) {
+
+					threat.preferredDistance = notTouchingDistance + constants.splitRangeMax;
+					threat.threatenedDistance = notTouchingDistance + cell.size + constants.splitRangeMax; // one radius distance
+
+				} else {
+
+					threat.preferredDistance = notTouchingDistance;
+					threat.threatenedDistance = notTouchingDistance + cell.size; // one radius distance
+				}
+
+				threat.deathDistance += velocityPadding;
+				threat.minDistance += velocityPadding;
+				threat.preferredDistance += velocityPadding;
+				threat.threatenedDistance += velocityPadding;
+
+				if (threat.preferredDistance < notTouchingDistance) {
+					console.log('what?');
+				}
+
+				var color = constants.green;
+				if (threat.distance <= threat.minDistance) {
+					color = constants.red;
+				} else if (threat.distance < threat.preferredDistance) {
+					color = constants.orange;
+				} else if (threat.distance < threat.threatededDistance) {
+					color = constants.pink;
+				}
+				//drawCircle(threat.x, threat.y, threat.threatenedDistance - cell.size + 40, color);
+				// parseInt(threat.threatLevel / 10));
+
+				if (threat.isMovingTowards) {
+					threat.dangerZone = threat.threatenedDistance;
+				} else {
+					threat.dangerZone = threat.preferredDistance;
+				}
+
+				// drawPoint(threat.x, threat.y + 20, 2, parseInt(threat.distance, 10) + " " + parseInt(threat.dangerZone, 10));
+				drawPoint(threat.x, threat.y + 20 + threat.size / 15, 1, "/***" + "***\\");
+
+				if (threat.distance <= threat.dangerZone) {
+					threats.push(threat);
+				}
 			}
 		}
+
 	};
 
 	this.pruneThreats = function(threats) {
