@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1306
+// @version     3.1307
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1306;
+var aposBotVersion = 3.1307;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1494,7 +1494,7 @@ function AposBot() {
 				if (entity.hasMoved) {
 					drawCircle(entity.x, entity.y, entity.size + 20, constants.blue);
 				} else if (entity.size > 14) {
-					drawPoint(entity.x, entity.y + 20, constants.black, entity.size);
+					drawPoint(entity.x, entity.y + 20, constants.white, entity.size);
 					drawCircle(entity.x, entity.y, entity.size + 20, constants.cyan);
 				}
 				break;
@@ -1727,8 +1727,8 @@ function AposBot() {
 
 		//drawPoint(cell[0].x, cell[0].y, 2, "");
 
-		drawPoint(line1[0], line1[1], constants.black, parseInt(angle[0], 10));
-		drawPoint(line2[0], line2[1], constants.black, parseInt(angle[1], 10));
+		drawPoint(line1[0], line1[1], constants.red, parseInt(angle[0], 10));
+		drawPoint(line2[0], line2[1], constants.red, parseInt(angle[1], 10));
 	};
 
 	this.followAngle = function(angle, useX, useY, distance) {
