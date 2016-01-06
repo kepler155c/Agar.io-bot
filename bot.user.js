@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1311
+// @version     3.1312
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1311;
+var aposBotVersion = 3.1312;
 
 var constants = {
 	splitRangeMin : 650,
@@ -96,6 +96,7 @@ var Player = function() {
 	this.isAlive = true;
 	this.isReviving = false;
 	this.isLuring = false;
+	this.isMerging = false;
 
 	this.chasing = 0;
 	this.splitVelocity = 0;
@@ -218,6 +219,25 @@ Player.prototype = {
 
 		return info;
 	},
+	checkIfMerging : function() {
+
+		this.isMerging = false;
+		
+		for (var i = 0; i < this.cells.length; i++) {
+
+			var entityA = this.cells[i];
+
+			for (var b = i + 1; b < this.cells.length; b++) {
+
+				var entityB = this.cells[b];
+
+				if (Util.circlesIntersect(entityA, entityB, 0.8)) {
+
+					this.isMerging = true;
+				}
+			}
+		}
+	},
 	splitAction : function() {
 
 		if (this.size <= this.splitSize && (Date.now() - this.splitTimer > 200)) {
@@ -265,6 +285,19 @@ Util.getAngle = function(x1, y1, x2, y2) {
 	}
 
 	return (Math.round(Math.atan2(-(y1 - y2), -(x1 - x2)) / Math.PI * 180 + 180));
+};
+
+Util.circlesIntersect = function(circle1, circle2, percentage) {
+	var distanceX = circle1.x - circle2.x;
+	var distanceY = circle1.y - circle2.y;
+	var radiusSum = circle1.size + circle2.size;
+
+	if (percentage) {
+
+		return radiusSum * radiusSum - (radiusSum * percentage * 10) > distanceX * distanceX + distanceY * distanceY; // 10%
+	}
+
+	return distanceX * distanceX + distanceY * distanceY <= radiusSum * radiusSum;
 };
 
 function initializeEntity() {
@@ -463,7 +496,7 @@ function AposBot() {
 
 				var entityB = this.entities[keys[b]];
 
-				if (this.circlesIntersect(entityA, entityB, true)) {
+				if (Util.circlesIntersect(entityA, entityB, 0.1)) {
 
 					var largerEntity = entityA.mass > entityB.mass ? entityA : entityB;
 
@@ -702,7 +735,7 @@ function AposBot() {
 
 			var virus = this.entities[key];
 
-			if (this.circlesIntersect(food, virus)) {
+			if (Util.circlesIntersect(food, virus)) {
 				virus.foodMass += food.mass;
 				virus.foodList.push(food);
 			}
@@ -873,6 +906,8 @@ function AposBot() {
 
 			var virus = this.entities[key];
 
+			var numberOfShots = Math.floor((200 - virus.size) / 15);
+
 			if (virus.distance - virus.closestCell.size < 500) {
 
 				for (var i = 0; i < player.cells.length; i++) {
@@ -891,7 +926,7 @@ function AposBot() {
 				}
 			}
 
-			drawPoint(virus.x, virus.y, constants.black, virus.mass);
+			drawPoint(virus.x, virus.y, constants.black, virus.mass + " " + numberOfShots);
 
 		}, this);
 	};
@@ -1159,33 +1194,38 @@ function AposBot() {
 
 		var i = 0;
 
-		Object.keys(this.entities).filter(this.virusFilter, this).forEach(function(key) {
+		Object.keys(this.entities).filter(this.virusFilter, this).forEach(
+				function(key) {
 
-			var virus = this.entities[key];
+					var virus = this.entities[key];
 
-			virus.range = null;
+					virus.range = null;
 
-			for (var j = 0; j < player.cells.length; j++) {
-				var cell = player.cells[j];
+					for (var j = 0; j < player.cells.length; j++) {
+						var cell = player.cells[j];
 
-				if (virus.distance < cell.size + 750 && ((cell.mass + virus.foodMass) / virus.mass) > 1.2) {
+						if (virus.distance < cell.size + 750
+								&& ((cell.mass + virus.foodMass) / virus.mass > 1.2 || player.isMerging)) {
 
-					var minDistance = cell.size;
+							var minDistance = cell.size;
+							if (player.isMerging) {
+								minDistance += cell.size;
+							}
 
-					var tempOb = this.getAngleRange(cell, virus, i, minDistance, Classification.virus);
-					var angle1 = tempOb[0];
-					var angle2 = this.rangeToAngle(tempOb);
-					obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
+							var tempOb = this.getAngleRange(cell, virus, i, minDistance, Classification.virus);
+							var angle1 = tempOb[0];
+							var angle2 = this.rangeToAngle(tempOb);
+							obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
 
-					virus.range = [ angle1, angle2 ];
+							virus.range = [ angle1, angle2 ];
 
-					if (virus.distance < minDistance) {
-						badAngles.push(tempOb.concat(minDistance));
+							if (virus.distance < minDistance) {
+								badAngles.push(tempOb.concat(minDistance));
+							}
+						}
 					}
-				}
-			}
-			i++;
-		}, this);
+					i++;
+				}, this);
 	};
 
 	/**
@@ -1489,11 +1529,12 @@ function AposBot() {
 		}
 
 		this.separateListBasedOnFunction(player);
+		this.displayVirusTargets(player);
 
 		if (isToggled()) {
 			this.determineTeams();
-			this.displayVirusTargets(player);
 			player.isSafeToSplit(this.entities);
+			player.checkIfMerging();
 			this.calculateVirusMass(player);
 
 			destinationChoices = this.determineBestDestination(player, tempPoint);
@@ -1702,19 +1743,6 @@ function AposBot() {
 
 	this.getTimeToRemerge = function(mass) {
 		return ((mass * 0.02) + 30);
-	};
-
-	this.circlesIntersect = function(circle1, circle2, approximate) {
-		var distanceX = circle1.x - circle2.x;
-		var distanceY = circle1.y - circle2.y;
-		var radiusSum = circle1.size + circle2.size;
-
-		if (approximate) {
-
-			return radiusSum * radiusSum - radiusSum > distanceX * distanceX + distanceY * distanceY; // 10%
-		}
-
-		return distanceX * distanceX + distanceY * distanceY <= radiusSum * radiusSum;
 	};
 
 	this.slope = function(x1, y1, x2, y2) {
