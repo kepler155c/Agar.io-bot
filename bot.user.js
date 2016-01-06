@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1313
+// @version     3.1314
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1313;
+var aposBotVersion = 3.1314;
 
 var constants = {
 	splitRangeMin : 650,
@@ -254,13 +254,13 @@ Player.prototype = {
 			return [ getPointX(), getPointY() ];
 		}
 	},
-	shootVirus : function() {
+	shootVirus : function(entities) {
 
 		var closestVirus = null;
 
-		Object.keys(this.entities).filter(this.virusFilter, this).forEach(function(key) {
+		Object.keys(entities).filter(this.virusFilter, this).forEach(function(key) {
 
-			var virus = this.entities[key];
+			var virus = entities[key];
 
 			if (!closestVirus || virus.closestCell.distance < closestVirus.closestCell.distance) {
 				closestVirus = virus;
@@ -418,7 +418,6 @@ function AposBot() {
 
 	this.initialized = false;
 	this.toggleFollow = false;
-	this.shootVirus = false;
 	this.infoStrings = [];
 	this.moreInfoStrings = [];
 	this.previousUpdated = Date.now();
@@ -426,7 +425,7 @@ function AposBot() {
 		if (81 == key.keyCode) {
 			this.toggleFollow = !this.toggleFollow;
 		} else if (key.keyCode == 69) { // 'e'
-			this.player.shootVirus();
+			this.player.shootVirus(this.entities);
 		}
 	};
 
