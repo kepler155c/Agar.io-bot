@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1312
+// @version     3.1313
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1312;
+var aposBotVersion = 3.1313;
 
 var constants = {
 	splitRangeMin : 650,
@@ -222,7 +222,7 @@ Player.prototype = {
 	checkIfMerging : function() {
 
 		this.isMerging = false;
-		
+
 		for (var i = 0; i < this.cells.length; i++) {
 
 			var entityA = this.cells[i];
@@ -254,8 +254,47 @@ Player.prototype = {
 			return [ getPointX(), getPointY() ];
 		}
 	},
+	shootVirus : function() {
+
+		var closestVirus = null;
+
+		Object.keys(this.entities).filter(this.virusFilter, this).forEach(function(key) {
+
+			var virus = this.entities[key];
+
+			if (!closestVirus || virus.closestCell.distance < closestVirus.closestCell.distance) {
+				closestVirus = virus;
+			}
+
+		}, this);
+
+		if (closestVirus) {
+
+			this.action = this.shootVirusAction;
+			this.virusShootInfo = {
+				x : closestVirus.closestCell.x,
+				y : closestVirus.closestCell.y,
+				virus : closestVirus,
+			};
+		}
+	},
 	shootVirusAction : function() {
-	}
+
+		var virus = this.virusShootInfo.virus;
+
+		var angle = Math.atan2(virus.closestCell.y - virus.y, this.virusShootInfo.virus.closestCell.x - virus.x);
+
+		var distance = virus.distance + virus.closestCell.size + 500;
+
+		var virusRange = {
+			x : virus.closestCell.x - Math.cos(angle) * distance,
+			y : virus.closestCell.y - Math.sin(angle) * distance,
+		};
+
+		this.action = null;
+
+		return [ virusRange.x, virusRange.y, false, true ];
+	},
 };
 
 var Util = function() {
@@ -387,7 +426,7 @@ function AposBot() {
 		if (81 == key.keyCode) {
 			this.toggleFollow = !this.toggleFollow;
 		} else if (key.keyCode == 69) { // 'e'
-			this.shootVirus = true;
+			this.player.shootVirus();
 		}
 	};
 
@@ -900,29 +939,32 @@ function AposBot() {
 
 	this.displayVirusTargets = function(player) {
 
-		var minSize = 32 * player.cells.length;
-
 		Object.keys(this.entities).filter(this.virusFilter, this).forEach(function(key) {
 
 			var virus = this.entities[key];
 
-			var numberOfShots = Math.floor((200 - virus.size) / 15);
+			var numberOfShots = Math.floor((200 - virus.size) / 14);
+			var minSize = 32 * player.cells.length + numberOfShots * 19;
 
-			if (virus.distance - virus.closestCell.size < 500) {
+			// incorrectly assuming all cells can hit virus
+			if (player.mass > minSize) {
 
 				for (var i = 0; i < player.cells.length; i++) {
 					var cell = player.cells[i];
 
-					var angle = Math.atan2(cell.y - virus.y, cell.x - virus.x);
+					if (virus.distance - cell.size < 500) { // arbitrary distance for now
 
-					var distance = virus.distance + cell.size + 500;
+						var angle = Math.atan2(cell.y - virus.y, cell.x - virus.x);
 
-					var virusRange = {
-						x : cell.x - Math.cos(angle) * distance,
-						y : cell.y - Math.sin(angle) * distance,
-					};
+						var distance = virus.distance + cell.size + 500;
 
-					drawLine(cell.x, cell.y, virusRange.x, virusRange.y, constants.gray);
+						var virusRange = {
+							x : cell.x - Math.cos(angle) * distance,
+							y : cell.y - Math.sin(angle) * distance,
+						};
+
+						drawLine(cell.x, cell.y, virusRange.x, virusRange.y, constants.gray);
+					}
 				}
 			}
 
@@ -1513,13 +1555,6 @@ function AposBot() {
 
 		drawCircle(player.x, player.y, player.size + constants.enemySplitDistance, constants.pink);
 
-		if (player.action) {
-			destinationChoices = player.action();
-			if (destinationChoices) {
-				return destinationChoices;
-			}
-		}
-
 		//loop through everything that is on the screen and
 		//separate everything in it's own category.
 
@@ -1530,6 +1565,13 @@ function AposBot() {
 
 		this.separateListBasedOnFunction(player);
 		this.displayVirusTargets(player);
+
+		if (player.action) {
+			destinationChoices = player.action();
+			if (destinationChoices) {
+				return destinationChoices;
+			}
+		}
 
 		if (isToggled()) {
 			this.determineTeams();
