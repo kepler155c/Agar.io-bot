@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1307
+// @version     3.1309
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1307;
+var aposBotVersion = 3.1309;
 
 var constants = {
 	splitRangeMin : 650,
@@ -94,13 +94,13 @@ var Player = function() {
 	this.cells = [];
 	this.isAlive = true;
 	this.isReviving = false;
-	this.isSplitting = false;
 	this.isLuring = false;
 
 	this.chasing = 0;
 	this.splitVelocity = 0;
 	this.splitLocation = null;
 	this.fuseTimer = null;
+	this.action = null;
 };
 
 Player.prototype = {
@@ -170,7 +170,6 @@ Player.prototype = {
 	split : function(targetCell, x, y) {
 
 		if (this.canSplit()) {
-			this.isSplitting = true;
 			this.splitTarget = targetCell;
 			this.splitSize = this.size;
 			this.splitMass = this.mass;
@@ -182,6 +181,7 @@ Player.prototype = {
 				startx : this.largestCell.x,
 				starty : this.largestCell.y
 			};
+			this.action = this.splitAction;
 		}
 	},
 	canSplit : function() {
@@ -216,6 +216,24 @@ Player.prototype = {
 		}
 
 		return info;
+	},
+	splitAction : function() {
+
+		if (this.size <= this.splitSize && (Date.now() - this.splitTimer > 200)) {
+			//					|| this.mass < this.splitMass * 0.8 || this.mass > this.splitMass * 1.2) {
+			// player size grows as long as we are splitting
+			this.action = null;
+		} else {
+			this.splitSize = this.size;
+
+			drawCircle(this.splitLocation.x, this.splitLocation.y, 50, constants.green);
+			if (this.splitTarget) {
+				return [ this.splitTarget.x, this.splitTarget.y ];
+			}
+			return [ getPointX(), getPointY() ];
+		}
+	},
+	shootVirusAction : function() {
 	}
 };
 
@@ -327,13 +345,15 @@ function AposBot() {
 
 	this.initialized = false;
 	this.toggleFollow = false;
+	this.shootVirus = false;
 	this.infoStrings = [];
 	this.moreInfoStrings = [];
 	this.previousUpdated = Date.now();
 	this.keyAction = function(key) {
 		if (81 == key.keyCode) {
-			console.log("Toggle Follow Mouse!");
 			this.toggleFollow = !this.toggleFollow;
+		} else if (key.keyCode == 69) { // 'e'
+			this.shootVirus = true;
 		}
 	};
 
@@ -843,6 +863,33 @@ function AposBot() {
 		return true;
 	};
 
+	this.displayVirusTargets = function(player)
+	{
+
+		Object.keys(this.entities).filter(this.virusFilter, this).forEach(function(key) {
+
+			var virus = this.entities[key];
+
+			if (virus.distance - virus.closestCell.size < 500) {
+
+				for (var i = 0; i < player.cells.length; i++) {
+					var cell = player.cells[i];
+
+					var angle = Math.atan2(virus.y - cell.y, virus.x - cell.x);
+
+					var distance = virus.distance + cell.size + 500;
+
+					var virusRange = {
+						x : cell.x - Math.cos(angle) * distance,
+						y : cell.y - Math.sin(angle) * distance,
+					};
+
+					drawLine(cell.x, cell.y, virusRange.x, virusRange.y, constants.gray);
+				}
+			}
+		}, this);
+	};
+
 	this.calculateThreatWeight = function(player, threats, t) {
 
 		for (var i = 0; i < player.cells.length; i++) {
@@ -1078,23 +1125,27 @@ function AposBot() {
 			if (threat.distance < threat.dangerZone) {
 
 				if (threat.intersects) {
-					badAngles.push(this.getAngleRange(threat.cell, threat, i, threat.size + threat.safeDistance,
-							Classification.threat).concat(threat.distance));
+					//badAngles.push(this.getAngleRange(threat.cell, threat, i, threat.size + threat.safeDistance,
+					//		Classification.threat).concat(threat.distance));
+					badAngles.push(this.getAngleRange(threat.cell, threat, i,
+							threat.size - threat.cell.size + threat.safeDistance, Classification.threat).concat(
+							threat.distance));
 				} else {
 
 					badAngles.push(this.getAngleRange(threat.cell, threat, i, threat.dangerZone, Classification.threat)
 							.concat(threat.distance));
 				}
 			}
+			/*
+						if (threat.distance < threat.preferredDistance + 50) {
+							var tempOb = this
+									.getAngleRange(threat.cell, threat, i, threat.preferredDistance, Classification.threat);
+							var angle1 = tempOb[0];
+							var angle2 = this.rangeToAngle(tempOb);
 
-			if (threat.distance < threat.preferredDistance + 50) {
-				var tempOb = this
-						.getAngleRange(threat.cell, threat, i, threat.preferredDistance, Classification.threat);
-				var angle1 = tempOb[0];
-				var angle2 = this.rangeToAngle(tempOb);
-
-				obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
-			}
+							obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
+						}
+					*/
 		}
 	};
 
@@ -1283,7 +1334,7 @@ function AposBot() {
 				}
 			}
 
-			if (threat.distance < threat.size + threat.closestCell.size + threat.safeDistance) {
+			if (threat.distance + threat.safeDistance < threat.size + threat.closestCell.size) {
 				overlapCount++;
 			}
 
@@ -1371,9 +1422,7 @@ function AposBot() {
 		}
 
 		if (doSplit) {
-			if (!player.isSplitting) {
-				player.split(null, 0, 0);
-			}
+			player.split(null, 0, 0);
 			console.log('split attempt');
 			destinationChoices[2] = true;
 		}
@@ -1401,10 +1450,6 @@ function AposBot() {
 
 		this.player.setCells(cells);
 
-		if (player.cells.length > 1) {
-			//        	console.log('cell ' + player.cells[1].id);
-		}
-
 		var useMouseX = screenToGameX(getMouseX());
 		var useMouseY = screenToGameY(getMouseY());
 		var tempPoint = [ useMouseX, useMouseY, 1 ];
@@ -1420,31 +1465,14 @@ function AposBot() {
 		drawLine(getX() + (1920 / 2) / getZoomlessRatio(), getY() - (1080 / 2) / getZoomlessRatio(), getX()
 				+ (1920 / 2) / getZoomlessRatio(), getY() + (1080 / 2) / getZoomlessRatio(), constants.gray);
 
-		if (player.isSplitting) {
+		drawCircle(player.x, player.y, player.size + constants.enemySplitDistance, constants.pink);
 
-			if (player.size <= player.splitSize && (Date.now() - player.splitTimer > 200)) {
-				//					|| player.mass < player.splitMass * 0.8 || player.mass > player.splitMass * 1.2) {
-				// player size grows as long as we are splitting
-				player.isSplitting = false;
-				player.splitTarget = null;
-			} else {
-				player.splitSize = player.size;
-
-				drawCircle(player.splitLocation.x, player.splitLocation.y, 50, constants.green);
-				if (player.splitTarget) {
-					return [ player.splitTarget.x, player.splitTarget.y ];
-				}
-				return [ getPointX(), getPointY() ];
+		if (player.action) {
+			destinationChoices = player.action();
+			if (destinationChoices) {
+				return destinationChoices;
 			}
 		}
-
-		/*
-		if (player.cells.length > 1) {
-			drawCircle(player.x, player.y, player.size, 6);
-		}
-		*/
-
-		drawCircle(player.x, player.y, player.size + constants.enemySplitDistance, constants.pink);
 
 		//loop through everything that is on the screen and
 		//separate everything in it's own category.
@@ -1458,6 +1486,7 @@ function AposBot() {
 
 		if (isToggled()) {
 			this.determineTeams();
+			this.displayVirusTargets(player);
 			player.isSafeToSplit(this.entities);
 			this.calculateVirusMass(player);
 
