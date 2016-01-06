@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1314
+// @version     3.1315
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1314;
+var aposBotVersion = 3.1315;
 
 var constants = {
 	splitRangeMin : 650,
@@ -258,7 +258,7 @@ Player.prototype = {
 
 		var closestVirus = null;
 
-		Object.keys(entities).filter(this.virusFilter, this).forEach(function(key) {
+		Object.keys(entities).filter(AposBot.virusFilter, this).forEach(function(key) {
 
 			var virus = entities[key];
 
