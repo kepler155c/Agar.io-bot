@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1310
+// @version     3.1311
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1310;
+var aposBotVersion = 3.1311;
 
 var constants = {
 	splitRangeMin : 650,
@@ -46,6 +46,7 @@ var constants = {
 	playerRatio : 1.285,
 	enemyRatio : 1.27,
 	splitDuration : 1000, // 800 was pretty good
+	shotMassAmount : 19,
 
 	// adjustables
 	lureDistance : 1000,
@@ -832,7 +833,8 @@ function AposBot() {
 				&& cluster.cell.isType(Classification.splitTarget) && !cluster.cell.isMovingTowards
 				&& cluster.distance < player.size + constants.lureDistance
 				&& cluster.distance > player.size + constants.splitRangeMin && // not already in range (might have been an enemy close)
-				player.mass > 250 && ((player.mass - 19) / (cluster.cell.mass + 13.69) > constants.playerRatio)) { // 37 (size) per mass shot ?
+				player.mass > 250
+				&& ((player.mass - constants.shotMassAmount) / (cluster.cell.mass + 13.69) > constants.playerRatio)) { // 37 (size) per mass shot ?
 
 			// TODO: figure out lure amount
 			player.isLuring = true;
@@ -865,6 +867,8 @@ function AposBot() {
 
 	this.displayVirusTargets = function(player) {
 
+		var minSize = 32 * player.cells.length;
+
 		Object.keys(this.entities).filter(this.virusFilter, this).forEach(function(key) {
 
 			var virus = this.entities[key];
@@ -886,6 +890,9 @@ function AposBot() {
 					drawLine(cell.x, cell.y, virusRange.x, virusRange.y, constants.gray);
 				}
 			}
+
+			drawPoint(virus.x, virus.y, constants.black, virus.mass);
+
 		}, this);
 	};
 
