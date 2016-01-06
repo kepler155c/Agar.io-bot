@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1315
+// @version     3.1316
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1315;
+var aposBotVersion = 3.1316;
 
 var constants = {
 	splitRangeMin : 650,
@@ -254,30 +254,6 @@ Player.prototype = {
 			return [ getPointX(), getPointY() ];
 		}
 	},
-	shootVirus : function(entities) {
-
-		var closestVirus = null;
-
-		Object.keys(entities).filter(AposBot.virusFilter, this).forEach(function(key) {
-
-			var virus = entities[key];
-
-			if (!closestVirus || virus.closestCell.distance < closestVirus.closestCell.distance) {
-				closestVirus = virus;
-			}
-
-		}, this);
-
-		if (closestVirus) {
-
-			this.action = this.shootVirusAction;
-			this.virusShootInfo = {
-				x : closestVirus.closestCell.x,
-				y : closestVirus.closestCell.y,
-				virus : closestVirus,
-			};
-		}
-	},
 	shootVirusAction : function() {
 
 		var virus = this.virusShootInfo.virus;
@@ -425,7 +401,7 @@ function AposBot() {
 		if (81 == key.keyCode) {
 			this.toggleFollow = !this.toggleFollow;
 		} else if (key.keyCode == 69) { // 'e'
-			this.player.shootVirus(this.entities);
+			this.shootVirus(this.player);
 		}
 	};
 
@@ -934,6 +910,31 @@ function AposBot() {
 		drawLine(cluster.closestCell.x, cluster.closestCell.y, destination[0], destination[1], constants.orange);
 
 		return true;
+	};
+
+	this.shootVirus = function(player) {
+
+		var closestVirus = null;
+
+		Object.keys(this.entities).filter(this.virusFilter, this).forEach(function(key) {
+
+			var virus = entities[key];
+
+			if (!closestVirus || virus.closestCell.distance < closestVirus.closestCell.distance) {
+				closestVirus = virus;
+			}
+
+		}, this);
+
+		if (closestVirus) {
+
+			player.action = player.shootVirusAction;
+			player.virusShootInfo = {
+				x : closestVirus.closestCell.x,
+				y : closestVirus.closestCell.y,
+				virus : closestVirus,
+			};
+		}
 	};
 
 	this.displayVirusTargets = function(player) {
