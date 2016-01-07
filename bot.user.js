@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1322
+// @version     3.1323
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1322;
+var aposBotVersion = 3.1323;
 
 var constants = {
 	splitRangeMin : 650,
@@ -259,11 +259,8 @@ Player.prototype = {
 
 		var virus = this.virusShootInfo.virus;
 
-		var angle = Math.atan2(virus.closestCell.y - virus.y, virus.closestCell.x - virus.x);
-		var distance = virus.distance + virus.closestCell.size + 500;
-
-		destination.x = virus.closestCell.x - Math.cos(angle) * distance;
-		destination.y = virus.closestCell.y - Math.sin(angle) * distance;
+		destination.x = virus.x;
+		destination.y = virus.y;
 		destination.shoot = true;
 		
 		this.action = null;
