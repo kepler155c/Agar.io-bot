@@ -264,6 +264,8 @@ Player.prototype = {
 		destination.shoot = true;
 		
 		this.action = null;
+		
+		console.log('shooting');
 
 		return true;
 	}
