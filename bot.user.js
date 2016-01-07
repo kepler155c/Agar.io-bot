@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1327
+// @version     3.1328
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1327;
+var aposBotVersion = 3.1328;
 
 var constants = {
 	splitRangeMin : 650,
@@ -267,7 +267,7 @@ Player.prototype = {
 
 		if (virus.distance > virus.closestCell.size && this.canShoot(1)) {
 
-			if (virus.mass < this.virusShootInfo.startingMass - 1 && virus.distance < virus.closestCell.size + 500) {
+			if (virus.mass >= this.virusShootInfo.startingMass - 1 && virus.distance < virus.closestCell.size + 500) {
 
 				destination.x = virus.x;
 				destination.y = virus.y;
