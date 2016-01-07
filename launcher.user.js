@@ -20,15 +20,13 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.289
+// @version     4.290
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.289;
+var aposLauncherVersion = 4.290;
 
 var showAd = false;
-var doShoot = false;
-var doSplit = false;
 
 Number.prototype.mod = function(n) {
     return ((this % n) + n) % n;
@@ -716,29 +714,8 @@ console.log("Running Bot Launcher!");
         if (T()) {
             var a = fa - m / 2;
             var b = ga - r / 2;
-            if (doShoot) {
-//    			window.opCode(21);
-    			ia = doShoot.x;
-    			ja = doShoot.y;
-    			console.log(Date.now());
-    			console.log('shooting to ' + (64 > a * a + b * b));
-    			console.log(doShoot);
-    			doShoot = null;
-                64 > a * a + b * b || (eb = ia, fb = ja, a = N(13), a.setUint8(0, 16), a.setInt32(1, ia, !0), a.setInt32(5, ja, !0), a.setUint32(9, 0, !0), O(a))
-    			window.opCode(21);
-            } else {
-	            64 > a * a + b * b || .01 > Math.abs(eb - ia) &&
-	                .01 > Math.abs(fb - ja) || (eb = ia, fb = ja, a = N(13), a.setUint8(0, 16), a.setInt32(1, ia, !0), a.setInt32(5, ja, !0), a.setUint32(9, 0, !0), O(a))
-            }
-        }
-
-        if (doSplit) {
-			doSplit = false;
-			window.opCode(17);
-        }
-        if (doShoot) {
-//			doShoot = false;
-//			window.opCode(21);
+            64 > a * a + b * b || .01 > Math.abs(eb - ia) &&
+                .01 > Math.abs(fb - ja) || (eb = ia, fb = ja, a = N(13), a.setUint8(0, 16), a.setInt32(1, ia, !0), a.setInt32(5, ja, !0), a.setUint32(9, 0, !0), O(a))
         }
     }
 
@@ -878,29 +855,19 @@ console.log("Running Bot Launcher!");
         if (getPlayer() && getPlayer().length > 0) {
             var moveLoc = window.botList[botIndex].mainLoop(k);
             
-            doSplit = moveLoc.split;
-            doShoot = moveLoc.shoot ? { x: moveLoc.x, y: moveLoc.y } : null;
-            
             if (!toggle) {
 
             	setPoint(moveLoc.x, moveLoc.y);
             	
-            	if (doShoot) {
-            		console.log('yet another attempt');
+            	if (moveLoc.shot) {
+            		console.log('shooting');
             		V(), H(21);
-            		doShoot = null;
             	}
-
-            	/*
-                if (moveLoc.shoot) {
-	                var a = N(14);
-	
-	            	a.setUint8(0, 16), a.setInt32(1, moveLoc.x, !0), a.setInt32(5, moveLoc.y, !0), a.setUint32(9, 0, !0);
-	                a.setUint8(13, a);
-	
-	            	O(a);
-                }
-                */
+            	
+            	if (moveLoc.split) {
+            		console.log('splitting');
+            		V(), H(17);
+            	}
 
                 /*
                 if (moveLoc.split) {
