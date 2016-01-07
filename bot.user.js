@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1319
+// @version     3.1320
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1319;
+var aposBotVersion = 3.1320;
 
 var constants = {
 	splitRangeMin : 650,
@@ -257,27 +257,15 @@ Player.prototype = {
 	},
 	shootVirusAction : function(destination) {
 
-		var info = this.virusShootInfo;
-		
-		if (Date.now() - info.timer > 200) {
+		var virus = this.virusShootInfo.virus;
 
-			this.action = null;
-			return false;
+		var angle = Math.atan2(virus.closestCell.y - virus.y, virus.closestCell.x - virus.x);
+		var distance = virus.distance + virus.closestCell.size + 500;
 
-		}
-		if (!info.hasShot) {
+		destination.x = virus.closestCell.x - Math.cos(angle) * distance;
+		destination.y = virus.closestCell.y - Math.sin(angle) * distance;
+		destination.shoot = true;
 
-			var virus = info.virus;
-
-			var angle = Math.atan2(virus.closestCell.y - virus.y, virus.closestCell.x - virus.x);
-			var distance = virus.distance + virus.closestCell.size + 500;
-
-			destination.x = virus.closestCell.x - Math.cos(angle) * distance;
-			destination.y = virus.closestCell.y - Math.sin(angle) * distance;
-			destination.shoot = true;
-			
-			info.hasShot = true;
-		}
 		return true;
 	}
 };
@@ -942,9 +930,7 @@ function AposBot() {
 				x : closestVirus.closestCell.x,
 				y : closestVirus.closestCell.y,
 				virus : closestVirus,
-				timer : Date.now(),
-				mass : player.mass,
-				hasShot : false
+				mass : player.mass
 			};
 		}
 	};
