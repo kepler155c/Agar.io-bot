@@ -20,11 +20,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.288
+// @version     4.289
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.288;
+var aposLauncherVersion = 4.289;
 
 var showAd = false;
 var doShoot = false;
@@ -721,9 +721,11 @@ console.log("Running Bot Launcher!");
     			ia = doShoot.x;
     			ja = doShoot.y;
     			console.log(Date.now());
-    			console.log('shooting to ' + doShoot);
+    			console.log('shooting to ' + (64 > a * a + b * b));
+    			console.log(doShoot);
     			doShoot = null;
-                64 > a * a + b * b || (eb = ia, fb = ja, a = N(14), a.setUint8(0, 16), a.setInt32(1, ia, !0), a.setInt32(5, ja, !0), a.setUint32(9, 0, !0), a.setUint8(13, a), O(a))
+                64 > a * a + b * b || (eb = ia, fb = ja, a = N(13), a.setUint8(0, 16), a.setInt32(1, ia, !0), a.setInt32(5, ja, !0), a.setUint32(9, 0, !0), O(a))
+    			window.opCode(21);
             } else {
 	            64 > a * a + b * b || .01 > Math.abs(eb - ia) &&
 	                .01 > Math.abs(fb - ja) || (eb = ia, fb = ja, a = N(13), a.setUint8(0, 16), a.setInt32(1, ia, !0), a.setInt32(5, ja, !0), a.setUint32(9, 0, !0), O(a))
@@ -882,6 +884,12 @@ console.log("Running Bot Launcher!");
             if (!toggle) {
 
             	setPoint(moveLoc.x, moveLoc.y);
+            	
+            	if (doShoot) {
+            		console.log('yet another attempt');
+            		V(), H(21);
+            		doShoot = null;
+            	}
 
             	/*
                 if (moveLoc.shoot) {
