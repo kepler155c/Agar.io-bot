@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1318
+// @version     3.1319
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1318;
+var aposBotVersion = 3.1319;
 
 var constants = {
 	splitRangeMin : 650,
@@ -905,8 +905,8 @@ function AposBot() {
 
 			player.split(cluster.cell, cluster.x, cluster.y);
 
-			destination[0] = player.splitLocation.x;
-			destination[1] = player.splitLocation.y;
+			destination.x = player.splitLocation.x;
+			destination.y = player.splitLocation.y;
 
 		} else {
 
@@ -916,7 +916,7 @@ function AposBot() {
 		destination.split = doSplit;
 		destination.shoot = doLure;
 
-		drawLine(cluster.closestCell.x, cluster.closestCell.y, destination[0], destination[1], constants.orange);
+		drawLine(cluster.closestCell.x, cluster.closestCell.y, destination.x, destination.y, constants.orange);
 
 		return true;
 	};
