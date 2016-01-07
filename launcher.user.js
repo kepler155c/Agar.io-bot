@@ -20,11 +20,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.286
+// @version     4.287
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.286;
+var aposLauncherVersion = 4.287;
 
 var showAd = false;
 var doShoot = false;
@@ -717,10 +717,10 @@ console.log("Running Bot Launcher!");
             var a = fa - m / 2;
             var b = ga - r / 2;
             if (doShoot) {
-    			doShoot = null;
 //    			window.opCode(21);
     			ia = doShoot.x;
     			ja = doShoot.y;
+    			doShoot = null;
     			console.log(Date.now());
     			console.log('shooting to ' + doShoot);
                 64 > a * a + b * b || .01 > Math.abs(eb - ia) &&
