@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1325
+// @version     3.1326
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1325;
+var aposBotVersion = 3.1326;
 
 var constants = {
 	splitRangeMin : 650,
@@ -255,19 +255,32 @@ Player.prototype = {
 			return true;
 		}
 	},
+	canShoot : function(numberOfShots) {
+
+		var minSize = 32 * this.cells.length + numberOfShots * 19;
+
+		return this.mass > minSize;
+	},
 	shootVirusAction : function(destination) {
 
 		var virus = this.virusShootInfo.virus;
 
-		destination.x = virus.x;
-		destination.y = virus.y;
-		destination.shoot = true;
+		if (virus.distance > virus.closestCell.size && this.canShoot(1)) {
 
+			if (virus.mass < virus.virusShootInfo.startingMass - 1 && virus.distance < virus.closestCell.size + 500) {
+
+				destination.x = virus.x;
+				destination.y = virus.y;
+				destination.shoot = true;
+
+				console.log('shooting ' + Date.now());
+
+				return true;
+			}
+		}
 		this.action = null;
 
-		console.log('shooting ' + Date.now());
-
-		return true;
+		return false;
 	}
 };
 
@@ -934,7 +947,8 @@ function AposBot() {
 				x : player.closestVirus.closestCell.x,
 				y : player.closestVirus.closestCell.y,
 				virus : player.closestVirus,
-				mass : player.mass
+				mass : player.mass,
+				startingMass : player.closestVirus.mass
 			};
 		}
 	};
@@ -945,10 +959,9 @@ function AposBot() {
 
 			var virus = player.closestVirus;
 			var numberOfShots = Math.floor((200 - virus.size) / 14);
-			var minSize = 32 * player.cells.length + numberOfShots * 19;
 
 			// incorrectly assuming all cells can hit virus
-			if (player.mass > minSize) {
+			if (player.canShoot(numberOfShots)) {
 
 				for (var i = 0; i < player.cells.length; i++) {
 					var cell = player.cells[i];
