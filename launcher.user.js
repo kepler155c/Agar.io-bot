@@ -20,11 +20,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.284
+// @version     4.286
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.284;
+var aposLauncherVersion = 4.286;
 
 var showAd = false;
 var doShoot = false;
@@ -716,8 +716,19 @@ console.log("Running Bot Launcher!");
         if (T()) {
             var a = fa - m / 2;
             var b = ga - r / 2;
-            64 > a * a + b * b || .01 > Math.abs(eb - ia) &&
-                .01 > Math.abs(fb - ja) || (eb = ia, fb = ja, a = N(13), a.setUint8(0, 16), a.setInt32(1, ia, !0), a.setInt32(5, ja, !0), a.setUint32(9, 0, !0), O(a))
+            if (doShoot) {
+    			doShoot = null;
+//    			window.opCode(21);
+    			ia = doShoot.x;
+    			ja = doShoot.y;
+    			console.log(Date.now());
+    			console.log('shooting to ' + doShoot);
+                64 > a * a + b * b || .01 > Math.abs(eb - ia) &&
+                .01 > Math.abs(fb - ja) || (eb = ia, fb = ja, a = N(14), a.setUint8(0, 16), a.setInt32(1, ia, !0), a.setInt32(5, ja, !0), a.setUint32(9, 0, !0), a.setUint8(13, a), O(a))
+            } else {
+	            64 > a * a + b * b || .01 > Math.abs(eb - ia) &&
+	                .01 > Math.abs(fb - ja) || (eb = ia, fb = ja, a = N(13), a.setUint8(0, 16), a.setInt32(1, ia, !0), a.setInt32(5, ja, !0), a.setUint32(9, 0, !0), O(a))
+            }
         }
 
         if (doSplit) {
@@ -725,7 +736,7 @@ console.log("Running Bot Launcher!");
 			window.opCode(17);
         }
         if (doShoot) {
-			doShoot = false;
+//			doShoot = false;
 //			window.opCode(21);
         }
     }
@@ -867,12 +878,13 @@ console.log("Running Bot Launcher!");
             var moveLoc = window.botList[botIndex].mainLoop(k);
             
             doSplit = moveLoc.split;
-            doShoot = moveLoc.shoot;
+            doShoot = moveLoc.shoot ? { x: moveLoc.x, y: moveLoc.y } : null;
             
             if (!toggle) {
 
             	setPoint(moveLoc.x, moveLoc.y);
 
+            	/*
                 if (moveLoc.shoot) {
 	                var a = N(14);
 	
@@ -881,6 +893,8 @@ console.log("Running Bot Launcher!");
 	
 	            	O(a);
                 }
+                */
+
                 /*
                 if (moveLoc.split) {
                     $("body").trigger(splitdown);
