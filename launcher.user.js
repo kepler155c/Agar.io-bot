@@ -20,13 +20,15 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.278
+// @version     4.279
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.278;
+var aposLauncherVersion = 4.279;
 
 var showAd = false;
+var doShoot = false;
+var doSplit = false;
 
 Number.prototype.mod = function(n) {
     return ((this % n) + n) % n;
@@ -716,6 +718,15 @@ console.log("Running Bot Launcher!");
             var b = ga - r / 2;
             64 > a * a + b * b || .01 > Math.abs(eb - ia) &&
                 .01 > Math.abs(fb - ja) || (eb = ia, fb = ja, a = N(13), a.setUint8(0, 16), a.setInt32(1, ia, !0), a.setInt32(5, ja, !0), a.setUint32(9, 0, !0), O(a))
+
+            if (doShoot) {
+            	doShoot = false;
+            	a.setUint8(0, 17);
+            }
+            if (doSplit) {
+            	doSplit = false;
+            	a.setUint8(0, 21);
+            }
         }
     }
 
@@ -854,8 +865,13 @@ console.log("Running Bot Launcher!");
 
         if (getPlayer() && getPlayer().length > 0) {
             var moveLoc = window.botList[botIndex].mainLoop(k);
-            if (!toggle || moveLoc.shoot) {
+            
+            doSplit = moveLoc.split;
+            doShoot = moveLoc.shoot;
+            
+            if (!toggle) {
                 setPoint(moveLoc.x, moveLoc.y);
+                /*
                 if (moveLoc.split) {
                     $("body").trigger(splitdown);
                     $("body").trigger(splitup);
@@ -866,6 +882,7 @@ console.log("Running Bot Launcher!");
                     //$("body").trigger(fireup);
                     window.opCode(21);
                 }
+                */
             }
         }
         customRender(f);
