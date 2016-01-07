@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1321
+// @version     3.1322
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1321;
+var aposBotVersion = 3.1322;
 
 var constants = {
 	splitRangeMin : 650,
@@ -919,7 +919,7 @@ function AposBot() {
 
 			var virus = this.entities[key];
 
-			if (!closestVirus || virus.closestCell.distance < closestVirus.closestCell.distance) {
+			if (!closestVirus || virus.distance < closestVirus.distance) {
 				closestVirus = virus;
 			}
 
