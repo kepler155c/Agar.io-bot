@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1324
+// @version     3.1325
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1324;
+var aposBotVersion = 3.1325;
 
 var constants = {
 	splitRangeMin : 650,
@@ -262,9 +262,9 @@ Player.prototype = {
 		destination.x = virus.x;
 		destination.y = virus.y;
 		destination.shoot = true;
-		
+
 		this.action = null;
-		
+
 		console.log('shooting ' + Date.now());
 
 		return true;
@@ -910,27 +910,30 @@ function AposBot() {
 		return true;
 	};
 
-	this.shootVirus = function(player) {
+	this.setClosestVirus = function(player) {
 
-		var closestVirus = null;
+		player.closestVirus = null;
 
 		Object.keys(this.entities).filter(this.virusFilter, this).forEach(function(key) {
 
 			var virus = this.entities[key];
 
-			if (!closestVirus || virus.distance < closestVirus.distance) {
-				closestVirus = virus;
+			if (!player.closestVirus || virus.distance < player.closestVirus.distance) {
+				player.closestVirus = virus;
 			}
 
 		}, this);
+	};
 
-		if (closestVirus) {
+	this.shootVirus = function(player) {
+
+		if (player.closestVirus) {
 
 			player.action = player.shootVirusAction;
 			player.virusShootInfo = {
-				x : closestVirus.closestCell.x,
-				y : closestVirus.closestCell.y,
-				virus : closestVirus,
+				x : player.closestVirus.closestCell.x,
+				y : player.closestVirus.closestCell.y,
+				virus : player.closestVirus,
 				mass : player.mass
 			};
 		}
@@ -938,10 +941,9 @@ function AposBot() {
 
 	this.displayVirusTargets = function(player) {
 
-		Object.keys(this.entities).filter(this.virusFilter, this).forEach(function(key) {
+		if (player.closestVirus) {
 
-			var virus = this.entities[key];
-
+			var virus = player.closestVirus;
 			var numberOfShots = Math.floor((200 - virus.size) / 14);
 			var minSize = 32 * player.cells.length + numberOfShots * 19;
 
@@ -966,10 +968,8 @@ function AposBot() {
 					}
 				}
 			}
-
 			drawPoint(virus.x, virus.y, constants.black, virus.mass + " " + numberOfShots);
-
-		}, this);
+		}
 	};
 
 	this.calculateThreatWeight = function(player, threats, t) {
@@ -1565,6 +1565,7 @@ function AposBot() {
 		}
 
 		this.separateListBasedOnFunction(player);
+		this.setClosestVirus(player);
 		this.displayVirusTargets(player);
 
 		if (player.action && player.action(destination)) {
