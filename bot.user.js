@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1332
+// @version     3.1333
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1332;
+var aposBotVersion = 3.1333;
 
 var constants = {
 	splitRangeMin : 650,
@@ -272,7 +272,7 @@ Player.prototype = {
 			// the distance is still in range
 			// we haven't lost too much mass (shooting wildly)
 			if (virus.mass >= info.startingMass - 1 && virus.distance < virus.closestCell.size + 500
-					&& info.mass - this.mass > 150) {
+					&& info.mass - this.mass < 150) {
 
 				destination.x = virus.x;
 				destination.y = virus.y;
