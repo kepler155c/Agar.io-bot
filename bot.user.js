@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1361
+// @version     3.1362
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1361;
+var aposBotVersion = 3.1362;
 
 var constants = {
 	splitRangeMin : 650,
@@ -712,10 +712,11 @@ function AposBot() {
 			threat.t.futurePosition();
 			threat.x = threat.t.px;
 			threat.y = threat.t.py;
-			
-			drawCircle(threat.x, threat.y, threat.size + 2, constants.yellow);
-			
-			var tempOb = this.getAngleRange(threat.cell, threat, i, threat.preferredDistance, Classification.threat);
+
+			drawCircle(threat.x, threat.y, threat.preferredDistance + threat.t.velocity, constants.yellow);
+
+			var tempOb = this.getAngleRange(threat.cell, threat, i, threat.preferredDistance + threat.t.velocity,
+					Classification.unknown);
 			var angle1 = tempOb[0];
 			var angle2 = this.rangeToAngle(tempOb);
 
@@ -1576,12 +1577,12 @@ function AposBot() {
 		Object.keys(this.entities).forEach(function(key) {
 
 			var entity = this.entities[key];
-			
+
 			entity.lastX = entity.x;
 			entity.lastY = entity.y;
 
 		}, this);
-		
+
 		return destination;
 	};
 
@@ -2188,27 +2189,29 @@ function AposBot() {
 		var difference = angleStuff[1];
 		var safeDistance = blob1.size + blob2.size;
 
-		drawPoint(angleStuff[2][0], angleStuff[2][1], constants.red, "");
-		drawPoint(angleStuff[3][0], angleStuff[3][1], constants.red, "");
+		if (classification != Classification.unknown) {
 
-		//console.log("Adding badAngles: " + leftAngle + ", " + rightAngle + " diff: " + difference);
+			drawPoint(angleStuff[2][0], angleStuff[2][1], constants.red, "");
+			drawPoint(angleStuff[3][0], angleStuff[3][1], constants.red, "");
 
-		var lineLeft = this.followAngle(leftAngle, blob1.x, blob1.y, safeDistance - index * 10);
-		var lineRight = this.followAngle(rightAngle, blob1.x, blob1.y, safeDistance - index * 10);
+			//console.log("Adding badAngles: " + leftAngle + ", " + rightAngle + " diff: " + difference);
 
-		var color = constants.orange;
-		if (classification == Classification.virus) {
-			color = constants.cyan;
-		} else if (classification == Classification.threat) { // (getCells().hasOwnProperty(blob2.id)) {
-			color = constants.red;
-		} else if (classification == Classification.cluster) {
-			color = constants.green;
+			var lineLeft = this.followAngle(leftAngle, blob1.x, blob1.y, safeDistance - index * 10);
+			var lineRight = this.followAngle(rightAngle, blob1.x, blob1.y, safeDistance - index * 10);
+
+			var color = constants.orange;
+			if (classification == Classification.virus) {
+				color = constants.cyan;
+			} else if (classification == Classification.threat) { // (getCells().hasOwnProperty(blob2.id)) {
+				color = constants.red;
+			} else if (classification == Classification.cluster) {
+				color = constants.green;
+			}
+
+			drawLine(blob1.x, blob1.y, lineLeft.x, lineLeft.y, color);
+			drawLine(blob1.x, blob1.y, lineRight.x, lineRight.y, color);
+			drawArc(lineLeft.x, lineLeft.y, lineRight.x, lineRight.y, blob1.x, blob1.y, color);
 		}
-
-		drawLine(blob1.x, blob1.y, lineLeft.x, lineLeft.y, color);
-		drawLine(blob1.x, blob1.y, lineRight.x, lineRight.y, color);
-		drawArc(lineLeft.x, lineLeft.y, lineRight.x, lineRight.y, blob1.x, blob1.y, color);
-
 		return [ leftAngle, difference ];
 	};
 
