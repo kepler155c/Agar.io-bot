@@ -573,6 +573,9 @@ console.log("Running Bot Launcher!");
                 var q = ddd(),  // what is d()
                 n = null;
 
+                E[d].lastX = E[d].x;
+                E[d].lastY = E[d].y;
+
                 E.hasOwnProperty(d) ? (n = E[d], n.P(), n.s = n.x, n.t = n.y, n.r = n.size, n.color = h) :
                     (n = new da(d, p, g, f, h, q), v.push(n), E[d] = n, n.ua = p, n.va = g);
                 n.h = m;
@@ -2227,8 +2230,6 @@ console.log("Running Bot Launcher!");
                         if (this.G && 1 <= b) {
                             var c = Q.indexOf(this); - 1 != c && Q.splice(c, 1)
                         }
-                        this.lastX = this.x;
-                        this.lastY = this.y;
                         this.x =
                             a * (this.J - this.s) + this.s;
                         this.y = a * (this.K - this.t) + this.t;
