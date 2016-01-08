@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1341
+// @version     3.1342
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1341;
+var aposBotVersion = 3.1342;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1565,7 +1565,10 @@ function AposBot() {
 		this.teams = [];
 		this.entities = getMemoryCells();
 
+		this.infoStrings.push("Time diff: " + getLastUpdate());
+		this.infoStrings.push("Time diff: " + this.previousUpdated);
 		this.infoStrings.push("Time diff: " + this.previousUpdated - getLastUpdate());
+		this.infoStrings.push("Time diff: " + (this.previousUpdated - getLastUpdate()));
 
 		this.player.setCells(cells);
 
