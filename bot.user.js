@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1343
+// @version     3.1344
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1343;
+var aposBotVersion = 3.1344;
 
 var constants = {
 	splitRangeMin : 650,
@@ -109,6 +109,7 @@ var Player = function() {
 	this.splitLocation = null;
 	this.fuseTimer = null;
 	this.action = null;
+	this.lastPoint = null;
 };
 
 Player.prototype = {
@@ -1550,20 +1551,28 @@ function AposBot() {
 	 */
 	this.mainLoop = function(cells) {
 
+		var player = this.player;
+
 		this.infoStrings = [];
 
-		this.infoStrings.push("Time diff: " + getLastUpdate());
-		this.infoStrings.push("Time diff: " + this.previousUpdated);
-		this.infoStrings.push("Time diff: " + this.previousUpdated - getLastUpdate());
-		this.infoStrings.push("Time diff: " + (this.previousUpdated - getLastUpdate()));
+		var timeDiff = (getLastUpdate() - player.cells[0].Q);
+		this.infoStrings.push("Time diff: " + timeDiff);
 
 		var destination = this.update(cells);
-		
+
 		var everything = getEverything();
-		
+
 		this.updateInfo(this.player);
 
 		this.previousUpdated = getLastUpdate();
+
+		if (player.lastPoint) {
+			var distance = Util.computeDistance(player.lastPoint.x, player.lastPoint.y, player.cells[0].x,
+					player.cells[0].y);
+			this.infoStrings.push("distance: " + distance);
+		}
+
+		player.lastPoint = new Point(player.cells[0].x, player.cells[0].y);
 
 		return destination;
 	};
