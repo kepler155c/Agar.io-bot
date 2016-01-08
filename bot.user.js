@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1374
+// @version     3.1375
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1374;
+var aposBotVersion = 3.1375;
 
 var constants = {
 	splitRangeMin : 650,
@@ -709,11 +709,7 @@ function AposBot() {
 
 			var threat = threats[i];
 
-			threat.t.futurePosition();
-			threat.x = threat.t.px;
-			threat.y = threat.t.py;
-
-			var distance = threat.size + threat.cell.size;
+			var distance = threat.size + threat.cell.size + threat.safeDistance;
 			drawCircle(threat.x, threat.y, distance, constants.yellow);
 
 			var tempOb = this.getAngleRange(threat.cell, threat, i, distance, Classification.unknown);
@@ -1034,7 +1030,7 @@ function AposBot() {
 				var threat = {
 					x : t.x,
 					y : t.y,
-					size : t.size + t.velocity * 2,
+					size : t.size,
 					mass : t.mass,
 					distance : Util.computeDistance(t.x, t.y, cell.x, cell.y),
 					isMovingTowards : t.getMovingTowards(cell),
@@ -1264,7 +1260,10 @@ function AposBot() {
 			var threat = threats[i];
 
 			if (threat.distance < threat.dangerZone) {
+				badAngles.push(this.getAngleRange(threat.cell, threat, i, threat.dangerZone, Classification.threat)
+						.concat(threat.distance));
 
+				/*
 				if (threat.intersects) {
 					//badAngles.push(this.getAngleRange(threat.cell, threat, i, threat.size + threat.safeDistance,
 					//		Classification.threat).concat(threat.distance));
@@ -1276,6 +1275,7 @@ function AposBot() {
 					badAngles.push(this.getAngleRange(threat.cell, threat, i, threat.dangerZone, Classification.threat)
 							.concat(threat.distance));
 				}
+				*/
 			}
 		}
 	};
@@ -1297,7 +1297,7 @@ function AposBot() {
 						if (virus.distance < cell.size + 750
 								&& ((cell.mass + virus.foodMass) / virus.mass > 1.2 || player.isMerging)) {
 
-							var minDistance = cell.size;
+							var minDistance = cell.size + cell.velocity;
 							if (player.isMerging) {
 								minDistance += cell.size;
 							}
