@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1372
+// @version     3.1373
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1372;
+var aposBotVersion = 3.1373;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1047,6 +1047,15 @@ function AposBot() {
 					t : t,
 					safeDistance : t.safeDistance
 				};
+				
+				t.futurePosition();
+				var futureDistance = Util.computeDistance(t.px, t.py, cell.x, cell.y);
+
+				if (futureDistance < distance) {
+					threat.x = t.px;
+					threat.y = t.py;
+					threat.distance = futureDistance;
+				}
 
 				// if the threat is moving towards any cell, mark this threat as moving towards us
 				if (threat.isMovingTowards) {
