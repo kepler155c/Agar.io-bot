@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1359
+// @version     3.1360
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1359;
+var aposBotVersion = 3.1360;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1560,7 +1560,7 @@ function AposBot() {
 		this.updateInfo(this.player);
 		this.previousUpdated = getLastUpdate();
 
-		Object.keys(this.entities).filter(this.virusFilter, this).forEach(function(key) {
+		Object.keys(this.entities).forEach(function(key) {
 
 			var entity = this.entities[key];
 			
