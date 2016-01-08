@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1334
+// @version     3.1335
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1334;
+var aposBotVersion = 3.1335;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1551,8 +1551,7 @@ function AposBot() {
 
 		var player = this.player;
 		var destination = {
-			x : getPointX(),
-			y : getPointY(),
+			point : new Point(getPointX(), getPointY()),
 			split : false,
 			shoot : false
 		};
