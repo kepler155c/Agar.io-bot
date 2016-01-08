@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1350
+// @version     3.1351
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1350;
+var aposBotVersion = 3.1351;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1571,12 +1571,10 @@ function AposBot() {
 
 		this.updateInfo(this.player);
 
-		this.previousUpdated = getLastUpdate();
-
 		if (player.lastPoint) {
 			
             var a;
-            a = (getLastUpdate() - player.cells[0].Q) / 120;
+            a = (getLastUpdate() - this.previousUpdated) / 120;
             a = 0 > a ? 0 : 1 < a ? 1 : a;
 
             var xdis = (player.cells[0].x - player.lastPoint.x) * a;
@@ -1587,6 +1585,8 @@ function AposBot() {
 		}
 
 		player.lastPoint = new Point(player.cells[0].x, player.cells[0].y);
+
+		this.previousUpdated = getLastUpdate();
 
 		return destination;
 	};
