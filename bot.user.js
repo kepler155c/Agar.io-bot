@@ -6,6 +6,7 @@
 /* global getPointX, getPointY, getMapEndX, getMapEndY, getMouseX, getMouseY */
 /* global getZoomlessRatio, verticalDistance, getPlayer, screenToGameX, screenToGameY */
 /* global getX, getY, getMemoryCells, getCells, getMode, getLastUpdate, isToggled */
+/* global getEverything */
 
 /*The MIT License (MIT)
 
@@ -33,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1342
+// @version     3.1343
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1342;
+var aposBotVersion = 3.1343;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1549,6 +1550,26 @@ function AposBot() {
 	 */
 	this.mainLoop = function(cells) {
 
+		this.infoStrings = [];
+
+		this.infoStrings.push("Time diff: " + getLastUpdate());
+		this.infoStrings.push("Time diff: " + this.previousUpdated);
+		this.infoStrings.push("Time diff: " + this.previousUpdated - getLastUpdate());
+		this.infoStrings.push("Time diff: " + (this.previousUpdated - getLastUpdate()));
+
+		var destination = this.update(cells);
+		
+		var everything = getEverything();
+		
+		this.updateInfo(this.player);
+
+		this.previousUpdated = getLastUpdate();
+
+		return destination;
+	};
+
+	this.update = function(cells) {
+
 		var player = this.player;
 		var destination = {
 			point : new Point(getPointX(), getPointY()),
@@ -1561,14 +1582,8 @@ function AposBot() {
 			initializeEntity();
 		}
 
-		this.infoStrings = [];
 		this.teams = [];
 		this.entities = getMemoryCells();
-
-		this.infoStrings.push("Time diff: " + getLastUpdate());
-		this.infoStrings.push("Time diff: " + this.previousUpdated);
-		this.infoStrings.push("Time diff: " + this.previousUpdated - getLastUpdate());
-		this.infoStrings.push("Time diff: " + (this.previousUpdated - getLastUpdate()));
 
 		this.player.setCells(cells);
 
@@ -1670,10 +1685,6 @@ function AposBot() {
 
 		// cursor
 		// drawPoint(tempPoint[0], tempPoint[1], tempPoint[2], "");
-
-		this.updateInfo(player);
-
-		this.previousUpdated = getLastUpdate();
 
 		return destination;
 	};
