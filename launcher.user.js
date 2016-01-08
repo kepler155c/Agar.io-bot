@@ -20,11 +20,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.294
+// @version     4.295
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.294;
+var aposLauncherVersion = 4.295;
 
 var showAd = false;
 
@@ -857,7 +857,7 @@ console.log("Running Bot Launcher!");
             
             if (!toggle || moveLoc.shoot) {
 
-            	setPoint(moveLoc.x, moveLoc.y);
+            	setPoint(moveLoc.point.x, moveLoc.point.y);
             	
             	if (moveLoc.shoot) {
             		console.log('shooting');
