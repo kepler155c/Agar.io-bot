@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1358
+// @version     3.1359
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1358;
+var aposBotVersion = 3.1359;
 
 var constants = {
 	splitRangeMin : 650,
@@ -396,7 +396,7 @@ function initializeEntity() {
 	da.prototype.getVelocity = function(previousUpdate) {
 		var lastPos = this.getLastPos();
 
-		return Util.computeDistance(this.x, this.y, this.lastX, this.lastY);
+		return Util.computeDistance(this.x, this.y, lastPos.x, lastPos.y);
 	};
 }
 
@@ -1560,6 +1560,15 @@ function AposBot() {
 		this.updateInfo(this.player);
 		this.previousUpdated = getLastUpdate();
 
+		Object.keys(this.entities).filter(this.virusFilter, this).forEach(function(key) {
+
+			var entity = this.entities[key];
+			
+			entity.lastX = entity.x;
+			entity.lastY = entity.y;
+
+		}, this);
+		
 		return destination;
 	};
 
