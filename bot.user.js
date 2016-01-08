@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1360
+// @version     3.1361
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1360;
+var aposBotVersion = 3.1361;
 
 var constants = {
 	splitRangeMin : 650,
@@ -382,7 +382,6 @@ function initializeEntity() {
 	};
 
 	da.prototype.predictPosition = function(timeDiff, previousUpdate) {
-		var lastPos = this.getLastPos();
 
 		var a = (getLastUpdate() - previousUpdate) / 120;
 		a = 0 > a ? 0 : 1 < a ? 1 : a;
@@ -391,6 +390,14 @@ function initializeEntity() {
 
 		this.px = timeDiff * a * (this.J - this.s) + this.x;
 		this.py = timeDiff * a * (this.K - this.t) + this.y;
+	};
+
+	// predicted position on next update
+	da.prototype.futurePosition = function() {
+		var lastPos = this.getLastPos();
+
+		this.px = (this.x - lastPos.x) + this.x;
+		this.py = (this.y - lastPos.y) + this.y;
 	};
 
 	da.prototype.getVelocity = function(previousUpdate) {
@@ -702,6 +709,12 @@ function AposBot() {
 
 			var threat = threats[i];
 
+			threat.t.futurePosition();
+			threat.x = threat.t.px;
+			threat.y = threat.t.py;
+			
+			drawCircle(threat.x, threat.y, threat.size + 2, constants.yellow);
+			
 			var tempOb = this.getAngleRange(threat.cell, threat, i, threat.preferredDistance, Classification.threat);
 			var angle1 = tempOb[0];
 			var angle2 = this.rangeToAngle(tempOb);
@@ -1666,7 +1679,7 @@ function AposBot() {
 			case Classification.threat:
 				//drawPoint(entity.x, entity.y + 20, 1, parseInt(entity.distance - entity.size));
 				var color = entity.isMovingTowards ? constants.red : constants.orange;
-				drawCircle(entity.x, entity.y, entity.size + 20, color);
+				//drawCircle(entity.x, entity.y, entity.size + 20, color);
 
 				//drawCircle(entity.x, entity.y, entity.dangerZone, color);
 				break;
