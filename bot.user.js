@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1356
+// @version     3.1357
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1356;
+var aposBotVersion = 3.1357;
 
 var constants = {
 	splitRangeMin : 650,
@@ -396,13 +396,7 @@ function initializeEntity() {
 	da.prototype.getVelocity = function(previousUpdate) {
 		var lastPos = this.getLastPos();
 
-		var a = (getLastUpdate() - previousUpdate) / 120;
-		a = 0 > a ? 0 : 1 < a ? 1 : a;
-
-		var px = a * (this.J - this.s) + this.x;
-		var py = a * (this.K - this.t) + this.y;
-
-		return Util.computeDistance(this.x, this.y, px, py);
+		return Util.computeDistance(this.x, this.y, this.lastX, this.lastY);
 	};
 }
 
@@ -1046,7 +1040,7 @@ function AposBot() {
 				}
 
 				var velocityPadding = (t.velocity + cell.velocity);
-				velocityPadding = t.mass < 50 ? velocityPadding * 4 : velocityPadding * 2;
+				velocityPadding = velocityPadding;
 
 				if (threat.isMovingTowards) {
 					velocityPadding += t.velocity * 2;
@@ -1440,7 +1434,7 @@ function AposBot() {
 
 			threat.velocity = threat.getVelocity(this.previousUpdated);
 			var velocity = (threat.velocity + threat.closestCell.velocity);
-			threat.safeDistance = threat.closestCell.mass < 50 ? velocity * 4 : velocity * 2;
+			threat.safeDistance = velocity;
 
 			this.calculateThreatWeight(player, threats, threat);
 
@@ -1559,31 +1553,11 @@ function AposBot() {
 		this.infoStrings = [];
 
 		var player = this.player;
-
 		this.player.setCells(cells);
-
-		var timeDiff = (getLastUpdate() - player.cells[0].Q);
-		this.infoStrings.push("Time diff: " + timeDiff);
 
 		var destination = this.update(cells);
 
-		var everything = getEverything();
-
 		this.updateInfo(this.player);
-
-		if (player.lastPoint) {
-
-			var a = (getLastUpdate() - this.previousUpdated);
-
-			var xdis = (player.cells[0].x - player.lastPoint.x);
-			var ydis = (player.cells[0].y - player.lastPoint.y);
-			var distance = Math.sqrt(xdis * xdis + ydis * ydis);
-
-			this.infoStrings.push("distance: " + (distance / a) + ' xdis: ' + xdis + ' distance: ' + distance);
-		}
-
-		player.lastPoint = new Point(player.cells[0].x, player.cells[0].y);
-
 		this.previousUpdated = getLastUpdate();
 
 		return destination;
