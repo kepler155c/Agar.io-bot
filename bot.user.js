@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1375
+// @version     3.1376
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1375;
+var aposBotVersion = 3.1376;
 
 var constants = {
 	splitRangeMin : 650,
@@ -709,7 +709,8 @@ function AposBot() {
 
 			var threat = threats[i];
 
-			var distance = threat.size + threat.cell.size + threat.safeDistance;
+			// var distance = threat.size + threat.cell.size + threat.safeDistance;
+			var distance = threat.size + threat.safeDistance;
 			drawCircle(threat.x, threat.y, distance, constants.yellow);
 
 			var tempOb = this.getAngleRange(threat.cell, threat, i, distance, Classification.unknown);
