@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1344
+// @version     3.1345
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1344;
+var aposBotVersion = 3.1345;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1551,9 +1551,16 @@ function AposBot() {
 	 */
 	this.mainLoop = function(cells) {
 
-		var player = this.player;
+		if (!this.initialized) {
+			this.initialized = true;
+			initializeEntity();
+		}
 
 		this.infoStrings = [];
+
+		var player = this.player;
+
+		this.player.setCells(cells);
 
 		var timeDiff = (getLastUpdate() - player.cells[0].Q);
 		this.infoStrings.push("Time diff: " + timeDiff);
@@ -1586,15 +1593,8 @@ function AposBot() {
 			shoot : false
 		};
 
-		if (!this.initialized) {
-			this.initialized = true;
-			initializeEntity();
-		}
-
 		this.teams = [];
 		this.entities = getMemoryCells();
-
-		this.player.setCells(cells);
 
 		var useMouseX = screenToGameX(getMouseX());
 		var useMouseY = screenToGameY(getMouseY());
