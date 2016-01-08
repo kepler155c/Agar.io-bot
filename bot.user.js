@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1335
+// @version     3.1336
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1335;
+var aposBotVersion = 3.1336;
 
 var constants = {
 	splitRangeMin : 650,
@@ -2155,7 +2155,14 @@ function AposBot() {
 	};
 
 	this.getAngleRange = function(blob1, blob2, index, radius, classification) {
-		var angleStuff = this.getEdgeLinesFromPoint(blob1, blob2, radius);
+
+		var angleStuff;
+		try {
+			angleStuff = this.getEdgeLinesFromPoint(blob1, blob2, radius);
+			
+		} catch (e) {
+			console.log('what?');
+		}
 
 		var leftAngle = angleStuff[0];
 		var rightAngle = this.rangeToAngle(angleStuff);
