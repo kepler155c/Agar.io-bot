@@ -33,11 +33,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1336
+// @version     3.1337
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1336;
+var aposBotVersion = 3.1337;
 
 var constants = {
 	splitRangeMin : 650,
@@ -821,7 +821,7 @@ function AposBot() {
 		var obstacleAngles = [];
 
 		this.addVirusAngles(player, badAngles, obstacleList);
-		this.addFoodObstacles(player, obstacleList);
+		this.addFoodObstacles(player, threats, obstacleList);
 		this.combineAngles(player, badAngles, obstacleList, goodAngles, obstacleAngles);
 
 		this.clusterFood(player, player.largestCell.size);
@@ -2156,14 +2156,7 @@ function AposBot() {
 
 	this.getAngleRange = function(blob1, blob2, index, radius, classification) {
 
-		var angleStuff;
-		try {
-			angleStuff = this.getEdgeLinesFromPoint(blob1, blob2, radius);
-			
-		} catch (e) {
-			console.log('what?');
-		}
-
+		var angleStuff = this.getEdgeLinesFromPoint(blob1, blob2, radius);
 		var leftAngle = angleStuff[0];
 		var rightAngle = this.rangeToAngle(angleStuff);
 		var difference = angleStuff[1];
