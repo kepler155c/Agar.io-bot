@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1373
+// @version     3.1374
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1373;
+var aposBotVersion = 3.1374;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1051,7 +1051,7 @@ function AposBot() {
 				t.futurePosition();
 				var futureDistance = Util.computeDistance(t.px, t.py, cell.x, cell.y);
 
-				if (futureDistance < distance) {
+				if (futureDistance < threat.distance) {
 					threat.x = t.px;
 					threat.y = t.py;
 					threat.distance = futureDistance;
