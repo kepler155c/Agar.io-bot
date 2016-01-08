@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1351
+// @version     3.1352
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1351;
+var aposBotVersion = 3.1352;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1574,12 +1574,11 @@ function AposBot() {
 		if (player.lastPoint) {
 			
             var a;
-            a = (getLastUpdate() - this.previousUpdated) / 120;
-            a = 0 > a ? 0 : 1 < a ? 1 : a;
+            a = (getLastUpdate() - this.previousUpdated) ;
 
-            var xdis = (player.cells[0].x - player.lastPoint.x) * a;
-        	var ydis = (player.cells[0].y - player.lastPoint.y) * a;
-        	var distance = Math.sqrt(xdis * xdis + ydis * ydis);
+            var xdis = (player.cells[0].x - player.lastPoint.x);
+        	var ydis = (player.cells[0].y - player.lastPoint.y);
+        	var distance = Math.sqrt(xdis * xdis + ydis * ydis) / a;
 
 			this.infoStrings.push("distance: " + distance);
 		}
