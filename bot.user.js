@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1377
+// @version     3.1378
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1377;
+var aposBotVersion = 3.1378;
 
 var constants = {
 	splitRangeMin : 650,
@@ -292,13 +292,13 @@ Player.prototype = {
 
 		return false;
 	},
-	eachCellThreat : function(fn) {
+	eachCellThreat : function(fn, thisp) {
 
 		for (var i = 0; i < this.cells.length; i++) {
 			var cell = this.cells[i];
 
 			for (var j = 0; j < cell.threats.length; j++) {
-				fn(cell, cell.threats[j]);
+				fn.call(thisp, cell, cell.threats[j], this);
 			}
 		}
 	}
@@ -728,7 +728,7 @@ function AposBot() {
 			var angle2 = this.rangeToAngle(tempOb);
 
 			obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
-		});
+		}, this);
 	};
 
 	this.getBestFood = function(player) {
@@ -1268,7 +1268,7 @@ function AposBot() {
 				}
 				*/
 			}
-		});
+		}, this);
 	};
 
 	this.addVirusAngles = function(player, badAngles, obstacleList) {
@@ -1468,7 +1468,7 @@ function AposBot() {
 			if (threat.intersects) {
 				panicLevel = 2;
 			}
-		});
+		}, this);
 
 		if (panicLevel < 1 && overlapCount > 1) {
 			panicLevel = 1;
@@ -1505,7 +1505,7 @@ function AposBot() {
 					threat.isSplitThreat = false;
 				}
 			}
-		});
+		}, this);
 
 		var angle;
 		//var count = threats.length;
@@ -1715,7 +1715,7 @@ function AposBot() {
 				drawLine(threat.t.x, threat.t.y, shadowThreatLine.x, shadowThreatLine.y,
 						threat.isMovingTowards ? constants.red : constants.gray);
 			}
-		});
+		}, this);
 
 		Object.keys(this.teams).forEach(function(key) {
 
