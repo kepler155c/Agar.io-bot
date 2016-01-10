@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1408
+// @version     3.1409
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1408;
+var aposBotVersion = 3.1409;
 
 var constants = {
 	splitRangeMin : 650,
@@ -180,7 +180,7 @@ Player.prototype = {
 
 		if (this.canSplit()) {
 			this.splitTarget = targetCell;
-			this.splitSize = this.size;
+			this.splitSize = Math.floor(this.size);
 			this.splitMass = this.mass;
 
 			this.splitTimer = Date.now();
@@ -243,13 +243,13 @@ Player.prototype = {
 	},
 	splitAction : function(destination) {
 
-		console.log([ this.size, this.splitSize, (Date.now() - this.splitTimer > 200) ]);
-		if (this.size <= this.splitSize && (Date.now() - this.splitTimer > 200)) {
+		console.log([ Math.floor(this.size), this.splitSize, (Date.now() - this.splitTimer > 200) ]);
+		if (Math.floor(this.size) <= this.splitSize && (Date.now() - this.splitTimer > 200)) {
 			//					|| this.mass < this.splitMass * 0.8 || this.mass > this.splitMass * 1.2) {
 			// player size grows as long as we are splitting
 			this.action = null;
 		} else {
-			this.splitSize = this.size;
+			this.splitSize = Math.floor(this.size);
 
 			drawCircle(this.splitLocation.x, this.splitLocation.y, 50, constants.green);
 			if (this.splitTarget) {
