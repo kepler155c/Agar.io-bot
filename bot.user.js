@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1398
+// @version     3.1399
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1398;
+var aposBotVersion = 3.1399;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1500,7 +1500,6 @@ function AposBot() {
 		// 2 = partially inside a threat
 		// 1 = in the split distance of a threat
 
-		var overlapCount = 0;
 		player.allThreats = [];
 
 		Object.keys(this.entities).filter(this.entities.threatFilter, this.entities).forEach(function(key) {
@@ -1522,10 +1521,6 @@ function AposBot() {
 						destination.split = true;
 					}
 				}
-			}
-
-			if (threat.distance + threat.safeDistance < threat.size + threat.closestCell.size) {
-				overlapCount++;
 			}
 
 		}, this);
@@ -1555,7 +1550,7 @@ function AposBot() {
 
 		if (intersectCount > 0) {
 			evasionStrategy = player.intersectEvasionStrategy;
-		} else if (imminentThreatCount == 1) {
+		} else if (imminentThreatCount >= 1 && imminentThreatCount <= 2) {
 			evasionStrategy = player.singleThreatEvasionStrategy;
 		} else if (imminentThreatCount > 1) {
 			evasionStrategy = player.multiThreatEvasionStrategy;
