@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1397
+// @version     3.1398
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1397;
+var aposBotVersion = 3.1398;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1532,11 +1532,18 @@ function AposBot() {
 
 		var imminentThreatCount = 0;
 		var intersectCount = 0;
+		var overlappedBy = null;
 
 		player.eachCellThreat(function(cell, threat) {
 
 			if (threat.distance < threat.dangerZone) {
-				imminentThreatCount++;
+				// only increment if it is a different threat (not the same threat for 2 different cells)
+				if (!overlappedBy) {
+					overlappedBy = threat;
+					imminentThreatCount++;
+				} else if (threat.t != overlappedBy.t) {
+					imminentThreatCount++;
+				}
 			}
 
 			if (threat.intersects) {
