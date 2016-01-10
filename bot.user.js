@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1389
+// @version     3.1390
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1389;
+var aposBotVersion = 3.1390;
 
 var constants = {
 	splitRangeMin : 650,
@@ -303,7 +303,7 @@ Player.prototype = {
 		}
 	},
 	sortThreats : function() {
-		
+
 		this.allThreats.sort(function(a, b) {
 			return a.distance - b.distance;
 		});
@@ -315,11 +315,11 @@ Player.prototype = {
 		if (this.allThreats.length <= 1) {
 			console.log('only 1 threat');
 		} else {
-			
+
 			this.sortThreats();
-			
+
 			var nextClosestThreat = this.allThreats[1];
-			
+
 			if (nextClosestThreat.distance - nextClosestThreat.size > 750) {
 				console.log('next threat too far away');
 			} else {
@@ -1476,6 +1476,7 @@ function AposBot() {
 			return false;
 		}
 
+		this.determineFoodDestination(player, destination);
 		return true;
 	};
 
@@ -1568,20 +1569,18 @@ function AposBot() {
 		if (evasionStrategy) {
 
 			evasionStrategy.call(player);
+		}
 
+		if (!this.avoidThreats(player, destination)) {
+
+			player.eachCellThreat(function(cell, threat) {
+				threat.dangerZone = threat.minDistance;
+			});
+
+			console.log('trying again to determine destination');
 			if (!this.avoidThreats(player, destination)) {
-
-				player.eachCellThreat(function(cell, threat) {
-					threat.dangerZone = threat.minDistance;
-				});
-
-				console.log('trying again to determine destination');
-				if (!this.avoidThreats(player, destination)) {
-					console.log('could not determine destination');
-				}
+				console.log('could not determine destination');
 			}
-		} else {
-			this.determineFoodDestination(player, destination);
 		}
 	};
 
