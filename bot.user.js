@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1384
+// @version     3.1385
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1384;
+var aposBotVersion = 3.1385;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1568,7 +1568,7 @@ function AposBot() {
 		*/
 		if (evasionStrategy) {
 
-			player.evasionStrategy();
+			evasionStrategy.call(player);
 
 			if (!this.avoidThreats(player, destination)) {
 
