@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1406
+// @version     3.1407
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1406;
+var aposBotVersion = 3.1407;
 
 var constants = {
 	splitRangeMin : 650,
@@ -243,6 +243,7 @@ Player.prototype = {
 	},
 	splitAction : function(destination) {
 
+		console.log([ this.size, this.splitSize, (Date.now() - this.splitTimer > 200) ]);
 		if (this.size <= this.splitSize && (Date.now() - this.splitTimer > 200)) {
 			//					|| this.mass < this.splitMass * 0.8 || this.mass > this.splitMass * 1.2) {
 			// player size grows as long as we are splitting
@@ -731,7 +732,7 @@ function AposBot() {
 		};
 
 		drawCircle(destination.x, destination.y, target.size, constants.green);
-		
+
 		return destination;
 	};
 
@@ -838,8 +839,7 @@ function AposBot() {
 					weight = weight * 1.5;
 				}
 
-				if (player.safeToSplit && cluster.cell.isType(Classification.splitTarget)
-						&& this.inSplitRange(cluster)) {
+				if (player.safeToSplit && cluster.cell.isType(Classification.splitTarget) && this.inSplitRange(cluster)) {
 					// weight = weight * 3;
 					cluster.canSplitKill = true;
 				}
