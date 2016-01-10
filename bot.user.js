@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1379
+// @version     3.1380
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1379;
+var aposBotVersion = 3.1380;
 
 var constants = {
 	splitRangeMin : 650,
@@ -302,15 +302,55 @@ Player.prototype = {
 			}
 		}
 	},
-	getSortedThreats : function() {
-		var points = [ 40, 100, 1, 5, 25, 10 ];
-		points.sort(function(a, b) {
-			return a - b;
+	sortedThreats : function() {
+		
+		this.allThreats.sort(function(a, b) {
+			return a.distance - b.distance;
 		});
 	},
 	singleThreatEvasionStrategy : function() {
 
-	}
+		drawCircle(this.x, this.y, this.size + 16, constants.pink);
+
+		if (this.allThreats.length <= 1) {
+			console.log('only 1 threat');
+		} else {
+			
+			this.sortThreats();
+			
+			var nextClosestThreat = this.allThreats[1];
+			
+			if (nextClosestThreat.distance > 750) {
+				console.log('next threat too far away');
+			} else {
+				nextClosestThreat.dangerZone = nextClosestThreat.distance + 1;
+				drawCircle(nextClosestThreat.x, nextClosestThreat.y, nextClosestThreat.size - 16, constants.red);
+			}
+		}
+	},
+	multiThreatEvasionStrategy : function() {
+
+		drawCircle(this.x, this.y, this.size + 16, constants.orange);
+
+		this.eachCellThreat(function(cell, threat) {
+
+			if (!threat.isMovingTowards || threat.teamSize > 1) {
+				threat.dangerZone = threat.minDistance;
+				threat.isSplitThreat = false;
+			}
+		}, this);
+	},
+	intersectEvasionStrategy : function() {
+
+		drawCircle(this.x, this.y, this.size + 16, constants.red);
+
+		this.eachCellThreat(function(cell, threat) {
+
+			threat.dangerZone = threat.minDistance;
+			threat.isSplitThreat = false;
+
+		}, this);
+	},
 };
 
 var Util = function() {
@@ -426,7 +466,7 @@ function initializeEntity() {
 	};
 
 	var entitiesPrototype = Object.getPrototypeOf(getMemoryCells());
-	
+
 	entitiesPrototype.foodFilter = function(key) {
 
 		var entity = this[key];
@@ -1152,6 +1192,7 @@ function AposBot() {
 
 				//if (threat.distance <= threat.dangerZone) {
 				cell.threats.push(threat);
+				player.allThreats.push();
 				//}
 			}
 		}
@@ -1443,14 +1484,15 @@ function AposBot() {
 
 		var i, j;
 		var panicLevel = 0;
-		var doSplit = false;
 		var threat;
+		var allThreats = [];
 
 		// panic levels:
 		// 2 = partially inside a threat
 		// 1 = in the split distance of a threat
 
 		var overlapCount = 0;
+		player.allThreats = [];
 
 		Object.keys(this.entities).filter(this.entities.threatFilter, this).forEach(function(key) {
 
@@ -1465,7 +1507,11 @@ function AposBot() {
 			if (player.cells.length == 1) {
 				// this.predictPosition(threat, 200);
 				if (threat.distance < threat.size + player.largestCell.size * 0.75 && threat.velocity > 20) {
-					doSplit = player.canSplit();
+					if (player.canSplit()) {
+						player.split(null, 0, 0);
+						console.log('split attempt');
+						destination.split = true;
+					}
 				}
 			}
 
@@ -1475,51 +1521,31 @@ function AposBot() {
 
 		}, this);
 
+		var imminentThreatCount = 0;
+		var intersectCount = 0;
+
 		player.eachCellThreat(function(cell, threat) {
+
+			if (threat.distance < threat.dangerZone) {
+				imminentThreatCount++;
+			}
 
 			if (threat.intersects) {
-				panicLevel = 2;
+				intersectCount++;
 			}
 		}, this);
 
-		if (panicLevel < 1 && overlapCount > 1) {
-			panicLevel = 1;
+		var evasionStrategy = null;
+
+		if (intersectCount > 0) {
+			evasionStrategy = player.intersectEvasionStrategy;
+		} else if (imminentThreatCount == 1) {
+			evasionStrategy = player.singleThreatEvasionStrategy;
+		} else if (imminentThreatCount > 1) {
+			evasionStrategy = player.multiThreatEvasionStrategy;
 		}
 
-		if (panicLevel == 1) {
-			drawCircle(player.x, player.y, player.size + 16, constants.orange);
-		} else if (panicLevel == 2) {
-			drawCircle(player.x, player.y, player.size + 16, constants.red);
-		}
-
-		// is moving towards (panic level 1)
-		// reduce large threat ratio
-		// circles intersect
-		// split enemy...
-		// largest previous distance - current distance is the cell chasing
-		/*
-		while (panicLevel < 3) {
-			if (this.determineDestination(player, destinationChoices, tempPoint, panicLevel)) {
-				break;
-			}
-			panicLevel++;
-		}*/
-
-		player.eachCellThreat(function(cell, threat) {
-
-			if (panicLevel >= 2) {
-				threat.dangerZone = threat.minDistance;
-				threat.isSplitThreat = false;
-
-			} else if (panicLevel >= 1) {
-				if (!threat.isMovingTowards || threat.teamSize > 1) {
-					threat.dangerZone = threat.minDistance;
-					threat.isSplitThreat = false;
-				}
-			}
-		}, this);
-
-		var angle;
+		//var angle;
 		//var count = threats.length;
 		//this.reduceThreats(player, threats);
 		//if (threats.length < count) {
@@ -1541,25 +1567,21 @@ function AposBot() {
 			drawCircle(threat.x, threat.y, threat.dangerZone, color);
 		}
 		*/
-		if (!this.avoidThreats(player, destination) && panicLevel < 2) {
+		if (evasionStrategy) {
 
-			player.eachCellThreat(function(cell, threat) {
-				threat.dangerZone = threat.minDistance;
-			});
+			evasionStrategy();
 
-			if (!this.avoidThreats(player, destination) && panicLevel < 2) {
-				console.log('could not determine destination');
+			if (!this.avoidThreats(player, destination)) {
+
+				player.eachCellThreat(function(cell, threat) {
+					threat.dangerZone = threat.minDistance;
+				});
+
+				console.log('trying again to determine destination');
+				if (!this.avoidThreats(player, destination)) {
+					console.log('could not determine destination');
+				}
 			}
-		}
-
-		if (panicLevel > 0) {
-			this.infoStrings.push("Panic Level: " + panicLevel);
-		}
-
-		if (doSplit) {
-			player.split(null, 0, 0);
-			console.log('split attempt');
-			destination.split = true;
 		}
 	};
 
