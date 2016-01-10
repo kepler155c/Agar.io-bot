@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1381
+// @version     3.1382
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1381;
+var aposBotVersion = 3.1382;
 
 var constants = {
 	splitRangeMin : 650,
@@ -584,7 +584,7 @@ function AposBot() {
 
 	this.determineMerges = function() {
 
-		var keys = Object.keys(this.entities).filter(this.entities.mergeFilter);
+		var keys = Object.keys(this.entities).filter(this.entities.mergeFilter, this.entities);
 
 		for (var i = 0; i < keys.length; i++) {
 
