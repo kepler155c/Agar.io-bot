@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1393
+// @version     3.1394
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1393;
+var aposBotVersion = 3.1394;
 
 var constants = {
 	splitRangeMin : 650,
@@ -305,7 +305,7 @@ Player.prototype = {
 	sortThreats : function() {
 
 		this.allThreats.sort(function(a, b) {
-			return a.distance - b.distance;
+			return a.dangerZone - b.dangerZone;
 		});
 	},
 	singleThreatEvasionStrategy : function() {
@@ -326,7 +326,7 @@ Player.prototype = {
 
 					var splitDistance = 0;
 					if (threat.isSplitThreat) {
-						splitDistance = constants.enemySplitDistance;
+						splitDistance = 500;
 					}
 
 					if (threat.distance - threat.size > 750 + splitDistance) {
