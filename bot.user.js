@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1388
+// @version     3.1389
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1388;
+var aposBotVersion = 3.1389;
 
 var constants = {
 	splitRangeMin : 650,
@@ -320,7 +320,7 @@ Player.prototype = {
 			
 			var nextClosestThreat = this.allThreats[1];
 			
-			if (nextClosestThreat.distance > 750) {
+			if (nextClosestThreat.distance - nextClosestThreat.size > 750) {
 				console.log('next threat too far away');
 			} else {
 				nextClosestThreat.dangerZone = nextClosestThreat.distance + 1;
