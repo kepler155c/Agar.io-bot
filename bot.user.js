@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1385
+// @version     3.1386
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1385;
+var aposBotVersion = 3.1386;
 
 var constants = {
 	splitRangeMin : 650,
@@ -312,6 +312,7 @@ Player.prototype = {
 
 		drawCircle(this.x, this.y, this.size + 16, constants.pink);
 
+		console.log(this.allThreats.length);
 		if (this.allThreats.length <= 1) {
 			console.log('only 1 threat');
 		} else {
@@ -324,7 +325,7 @@ Player.prototype = {
 				console.log('next threat too far away');
 			} else {
 				nextClosestThreat.dangerZone = nextClosestThreat.distance + 1;
-				drawCircle(nextClosestThreat.x, nextClosestThreat.y, nextClosestThreat.size - 16, constants.red);
+				drawCircle(nextClosestThreat.x, nextClosestThreat.y, nextClosestThreat.dangerZone, constants.red);
 			}
 		}
 	},
@@ -1484,7 +1485,6 @@ function AposBot() {
 		var i, j;
 		var panicLevel = 0;
 		var threat;
-		var allThreats = [];
 
 		// panic levels:
 		// 2 = partially inside a threat
