@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1402
+// @version     3.1403
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1402;
+var aposBotVersion = 3.1403;
 
 var constants = {
 	splitRangeMin : 650,
@@ -731,6 +731,8 @@ function AposBot() {
 		};
 
 		drawCircle(destination.x, destination.y, target.size, constants.green);
+		
+		return destination;
 	};
 
 	this.clusterFood = function(player, blobSize) {
