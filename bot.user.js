@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1399
+// @version     3.1400
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1399;
+var aposBotVersion = 3.1400;
 
 var constants = {
 	splitRangeMin : 650,
@@ -684,8 +684,58 @@ function AposBot() {
 				}, this);
 	};
 
-	this.interceptPosition = function(player, enemy) {
+	this.interceptPosition = function(source, target) {
 
+		// http://stackoverflow.com/questions/2248876/2d-game-fire-at-a-moving-target-by-predicting-intersection-of-projectile-and-u
+		
+		function sqr(a) {
+			return a * a;
+		}
+
+		var lastPos = target.getLastPos();
+
+		target.velocityX = (lastPos.x - target.x);
+		target.velocityY = (lastPos.y - target.y);
+
+		var a = sqr(target.velocityX) + sqr(target.velocityY) - sqr(source.velocity * 4);
+
+		var b = 2 * (target.velocityX * (target.x - source.x)
+		          + target.velocityY * (target.y - source.y));
+		
+		var c = sqr(target.x - source.x) + sqr(target.y - source.y);
+		
+		// Now we can look at the discriminant to determine if we have a possible solution.
+
+		var disc = sqr(b) - 4 * a * c;
+		
+		// If the discriminant is less than 0, forget about hitting your target -- your projectile can never get there in time. Otherwise, look at two candidate solutions:
+
+		if (disc < 0) {
+			return null;
+		}
+		
+		var t1 = (-b + Math.sqrt(disc)) / (2 * a);
+		var t2 = (-b - Math.sqrt(disc)) / (2 * a);
+		
+		// Note that if disc == 0 then t1 and t2 are equal.
+
+		// If there are no other considerations such as intervening obstacles, simply choose the smaller positive value. 
+		// (Negative t values would require firing backward in time to use!)
+
+		// Substitute the chosen t value back into the target's position equations to get the coordinates of the leading 
+		// point you should be aiming at:
+
+		var t = Math.max(t1, t2);
+		
+		var destination = {
+			x : t * target.velocityX + target.x,
+			y : t * target.velocityY + target.y
+		};
+		
+		drawCircle(destination.x, destination.y, target.size, constants.green);
+
+		/*
+		
 		var lastPos = enemy.getLastPos();
 
 		var timeDiff = getLastUpdate() - this.previousUpdated;
@@ -697,10 +747,8 @@ function AposBot() {
 		var vx = Math.sqrt(xdis * xdis) / timeDiff;
 		var vy = Math.sqrt(ydis * ydis) / timeDiff;
 
-		/* Relative player position */
 		var dx = player.x - enemy.x;
 		var dy = player.y - enemy.y;
-		/* Relative player velocity */
 
 		var a = vx * vx + vy * vy - bulletSpeed * bulletSpeed;
 		var b = 2 * (vx * dx + vy * dy);
@@ -710,17 +758,18 @@ function AposBot() {
 		if (disc >= 0) {
 			var t0 = (-b - Math.sqrt(disc)) / (2 * a);
 			var t1 = (-b + Math.sqrt(disc)) / (2 * a);
-			/* If t0 is negative, or t1 is a better solution, use t1 */
+			// If t0 is negative, or t1 is a better solution, use t1
 			if (t0 < 0 || (t1 < t0 && t1 >= 0))
 				t0 = t1;
 			if (t0 >= 0) {
-				/* Compute the ship's heading */
+				// Compute the ship's heading
 				var shootx = vx + dx / t0;
 				var shooty = vy + dy / t0;
 				return [ enemy.x - shootx, enemy.y - shooty ];
 			}
 		}
 		return [];
+		*/
 	};
 
 	this.clusterFood = function(player, blobSize) {
@@ -940,6 +989,9 @@ function AposBot() {
 		}
 
 		if (cluster.cell) {
+
+			this.interceptPosition(cluster.cell.closestCell, cluster.cell);
+
 			this.moreInfoStrings = [];
 			this.moreInfoStrings.push("");
 			this.moreInfoStrings.push("Target ===");
