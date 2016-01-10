@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1403
+// @version     3.1404
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1403;
+var aposBotVersion = 3.1404;
 
 var constants = {
 	splitRangeMin : 650,
@@ -2357,7 +2357,7 @@ function AposBot() {
 		}
 		var range = constants.splitRangeMin;
 
-		if (target.isMovingTowards) {
+		if (cluster.cell.isMovingTowards) {
 			range = constants.splitRangeMax;
 		}
 
