@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1413
+// @version     3.1414
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1413;
+var aposBotVersion = 3.1414;
 
 var constants = {
 	splitRangeMin : 650,
@@ -177,9 +177,9 @@ Player.prototype = {
 				}, this);
 	},
 	merge : function() {
-		
+
 		console.log('merge pressed');
-		
+
 		if (this.cells.length > 1) {
 			console.log('setting action');
 			this.mergeInfo = {
@@ -187,6 +187,19 @@ Player.prototype = {
 			};
 			this.action = this.mergeAction;
 		}
+	},
+	mergeAction : function(destination) {
+		console.log([ this.cells.length, this.mergeInfo.cellCount ]);
+		if (this.cells.length >= this.mergeInfo.cellCount) {
+
+			destination.x = this.largestCell.x;
+			destination.y = this.largestCell.y;
+			console.log(destination);
+			return true;
+		}
+		console.log('done');
+		this.action = null;
+		return false;
 	},
 	split : function(targetCell, x, y) {
 
@@ -253,19 +266,6 @@ Player.prototype = {
 				}
 			}
 		}
-	},
-	mergeAction : function(destination) {
-console.log([this.cells.length ,this.mergeInfo.length]);
-		if (this.cells.length >= this.mergeInfo.length) {
-
-			destination.x = this.largestCell.x;
-			destination.y = this.largestCell.y;
-console.log(destination);			
-			return true;
-		}
-		console.log('done');
-		this.action = null;
-		return false;
 	},
 	splitAction : function(destination) {
 
