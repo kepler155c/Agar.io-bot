@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1412
+// @version     3.1413
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1412;
+var aposBotVersion = 3.1413;
 
 var constants = {
 	splitRangeMin : 650,
@@ -177,7 +177,11 @@ Player.prototype = {
 				}, this);
 	},
 	merge : function() {
+		
+		console.log('merge pressed');
+		
 		if (this.cells.length > 1) {
+			console.log('setting action');
 			this.mergeInfo = {
 				cellCount : this.cells.length
 			};
@@ -251,14 +255,15 @@ Player.prototype = {
 		}
 	},
 	mergeAction : function(destination) {
-
+console.log([this.cells.length ,this.mergeInfo.length]);
 		if (this.cells.length >= this.mergeInfo.length) {
 
 			destination.x = this.largestCell.x;
 			destination.y = this.largestCell.y;
-			
+console.log(destination);			
 			return true;
 		}
+		console.log('done');
 		this.action = null;
 		return false;
 	},
