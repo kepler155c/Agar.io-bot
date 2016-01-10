@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1378
+// @version     3.1379
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1378;
+var aposBotVersion = 3.1379;
 
 var constants = {
 	splitRangeMin : 650,
@@ -301,6 +301,15 @@ Player.prototype = {
 				fn.call(thisp, cell, cell.threats[j], this);
 			}
 		}
+	},
+	getSortedThreats : function() {
+		var points = [ 40, 100, 1, 5, 25, 10 ];
+		points.sort(function(a, b) {
+			return a - b;
+		});
+	},
+	singleThreatEvasionStrategy : function() {
+
 	}
 };
 
@@ -415,6 +424,56 @@ function initializeEntity() {
 
 		return Util.computeDistance(this.x, this.y, lastPos.x, lastPos.y);
 	};
+
+	var entitiesPrototype = Object.getPrototypeOf(getMemoryCells());
+	
+	entitiesPrototype.foodFilter = function(key) {
+
+		var entity = this[key];
+
+		return entity.isType(Classification.food) || entity.isType(Classification.splitTarget)
+				|| entity.isType(Classification.mergeTarget);
+	};
+
+	entitiesPrototype.virusFilter = function(key) {
+
+		var entity = this[key];
+
+		return entity.isType(Classification.virus);
+	};
+
+	entitiesPrototype.movingFilter = function(key) {
+
+		var entity = this[key];
+
+		return entity.hasMoved;
+	};
+
+	entitiesPrototype.mergeFilter = function(key) {
+
+		var entity = this[key];
+
+		// added size in order to increase performance
+		if (entity.isVirus() || entity.isType(Classification.player) || entity.size <= 14) {
+			return false;
+		}
+		return true;
+	};
+
+	entitiesPrototype.splitThreatFilter = function(key) {
+
+		var entity = this[key];
+
+		return entity.isType(Classification.threat) && entity.isSplitThreat;
+	};
+
+	entitiesPrototype.threatFilter = function(key) {
+
+		var entity = this[key];
+
+		return entity.isType(Classification.threat);
+	};
+
 }
 
 console.log("Apos Bot!");
@@ -439,56 +498,9 @@ function AposBot() {
 
 	this.player = new Player();
 
-	this.foodFilter = function(key) {
-
-		var entity = this.entities[key];
-
-		return entity.isType(Classification.food) || entity.isType(Classification.splitTarget)
-				|| entity.isType(Classification.mergeTarget);
-	};
-
-	this.virusFilter = function(key) {
-
-		var entity = this.entities[key];
-
-		return entity.isType(Classification.virus);
-	};
-
-	this.movingFilter = function(key) {
-
-		var entity = this.entities[key];
-
-		return entity.hasMoved;
-	};
-
-	this.mergeFilter = function(key) {
-
-		var entity = this.entities[key];
-
-		// added size in order to increase performance
-		if (entity.isVirus() || entity.isType(Classification.player) || entity.size <= 14) {
-			return false;
-		}
-		return true;
-	};
-
-	this.splitThreatFilter = function(key) {
-
-		var entity = this.entities[key];
-
-		return entity.isType(Classification.threat) && entity.isSplitThreat;
-	};
-
-	this.threatFilter = function(key) {
-
-		var entity = this.entities[key];
-
-		return entity.isType(Classification.threat);
-	};
-
 	this.determineTeams = function() {
 
-		Object.keys(this.entities).filter(this.movingFilter, this).forEach(function(key) {
+		Object.keys(this.entities).filter(this.entities.movingFilter, this).forEach(function(key) {
 
 			var entity = this.entities[key];
 			var name = entity.name.length > 0 ? entity.name : 'un-named';
@@ -532,7 +544,7 @@ function AposBot() {
 
 	this.determineMerges = function() {
 
-		var keys = Object.keys(this.entities).filter(this.mergeFilter, this);
+		var keys = Object.keys(this.entities).filter(this.entities.mergeFilter, this);
 
 		for (var i = 0; i < keys.length; i++) {
 
@@ -664,7 +676,7 @@ function AposBot() {
 	this.clusterFood = function(player, blobSize) {
 		player.foodClusters = [];
 
-		Object.keys(this.entities).filter(this.foodFilter, this).forEach(function(key) {
+		Object.keys(this.entities).filter(this.entities.foodFilter, this).forEach(function(key) {
 
 			var food = this.entities[key];
 
@@ -795,7 +807,7 @@ function AposBot() {
 
 	this.foodInVirus = function(food) {
 
-		Object.keys(this.entities).filter(this.virusFilter, this).forEach(function(key) {
+		Object.keys(this.entities).filter(this.entities.virusFilter, this).forEach(function(key) {
 
 			var virus = this.entities[key];
 
@@ -808,14 +820,14 @@ function AposBot() {
 
 	this.calculateVirusMass = function(player) {
 
-		Object.keys(this.entities).filter(this.foodFilter, this).forEach(function(key) {
+		Object.keys(this.entities).filter(this.entities.foodFilter, this).forEach(function(key) {
 
 			var food = this.entities[key];
 			// increase virus mass if food is within
 			this.foodInVirus(food);
 		}, this);
 
-		Object.keys(this.entities).filter(this.virusFilter, this).forEach(function(key) {
+		Object.keys(this.entities).filter(this.entities.virusFilter, this).forEach(function(key) {
 
 			var virus = this.entities[key];
 
@@ -846,7 +858,7 @@ function AposBot() {
 		var i, j, cluster;
 
 		// remove clusters within enemy split distance
-		Object.keys(this.entities).filter(this.splitThreatFilter, this).forEach(
+		Object.keys(this.entities).filter(this.entities.splitThreatFilter, this).forEach(
 				function(key) {
 
 					var threat = this.entities[key];
@@ -909,7 +921,7 @@ function AposBot() {
 					cluster.closestCell.y);
 			// console.log(destinationAngle);
 
-			Object.keys(this.entities).filter(this.virusFilter, this).forEach(function(key) {
+			Object.keys(this.entities).filter(this.entities.virusFilter, this).forEach(function(key) {
 
 				var virus = this.entities[key];
 
@@ -972,7 +984,7 @@ function AposBot() {
 
 		player.closestVirus = null;
 
-		Object.keys(this.entities).filter(this.virusFilter, this).forEach(function(key) {
+		Object.keys(this.entities).filter(this.entities.virusFilter, this).forEach(function(key) {
 
 			var virus = this.entities[key];
 
@@ -1247,7 +1259,7 @@ function AposBot() {
 	this.addThreatAngles = function(player, badAngles) {
 
 		var i = 0;
-		
+
 		player.eachCellThreat(function(cell, threat) {
 
 			if (threat.distance < threat.dangerZone) {
@@ -1275,7 +1287,7 @@ function AposBot() {
 
 		var i = 0;
 
-		Object.keys(this.entities).filter(this.virusFilter, this).forEach(
+		Object.keys(this.entities).filter(this.entities.virusFilter, this).forEach(
 				function(key) {
 
 					var virus = this.entities[key];
@@ -1440,7 +1452,7 @@ function AposBot() {
 
 		var overlapCount = 0;
 
-		Object.keys(this.entities).filter(this.threatFilter, this).forEach(function(key) {
+		Object.keys(this.entities).filter(this.entities.threatFilter, this).forEach(function(key) {
 
 			threat = this.entities[key];
 
