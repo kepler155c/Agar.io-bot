@@ -184,8 +184,7 @@ Player.prototype = {
 			this.splitMass = this.mass;
 
 			this.splitTimer = Date.now();
-			this.splitLocation = new Point(this.largestCell.x + (x - this.largestCell.x) * 4, this.largestCell.y
-					+ (y - this.largestCell.y) * 4);
+			this.splitLocation = new Point(x, y);
 
 			this.action = this.splitAction;
 		}
