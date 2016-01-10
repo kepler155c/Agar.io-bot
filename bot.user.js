@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1382
+// @version     3.1383
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1382;
+var aposBotVersion = 3.1383;
 
 var constants = {
 	splitRangeMin : 650,
@@ -540,7 +540,7 @@ function AposBot() {
 
 	this.determineTeams = function() {
 
-		Object.keys(this.entities).filter(this.entities.movingFilter, this).forEach(function(key) {
+		Object.keys(this.entities).filter(this.entities.movingFilter, this.entities).forEach(function(key) {
 
 			var entity = this.entities[key];
 			var name = entity.name.length > 0 ? entity.name : 'un-named';
@@ -716,7 +716,7 @@ function AposBot() {
 	this.clusterFood = function(player, blobSize) {
 		player.foodClusters = [];
 
-		Object.keys(this.entities).filter(this.entities.foodFilter, this).forEach(function(key) {
+		Object.keys(this.entities).filter(this.entities.foodFilter, this.entities).forEach(function(key) {
 
 			var food = this.entities[key];
 
@@ -847,7 +847,7 @@ function AposBot() {
 
 	this.foodInVirus = function(food) {
 
-		Object.keys(this.entities).filter(this.entities.virusFilter, this).forEach(function(key) {
+		Object.keys(this.entities).filter(this.entities.virusFilter, this.entities).forEach(function(key) {
 
 			var virus = this.entities[key];
 
@@ -860,14 +860,14 @@ function AposBot() {
 
 	this.calculateVirusMass = function(player) {
 
-		Object.keys(this.entities).filter(this.entities.foodFilter, this).forEach(function(key) {
+		Object.keys(this.entities).filter(this.entities.foodFilter, this.entities).forEach(function(key) {
 
 			var food = this.entities[key];
 			// increase virus mass if food is within
 			this.foodInVirus(food);
 		}, this);
 
-		Object.keys(this.entities).filter(this.entities.virusFilter, this).forEach(function(key) {
+		Object.keys(this.entities).filter(this.entities.virusFilter, this.entities).forEach(function(key) {
 
 			var virus = this.entities[key];
 
@@ -898,7 +898,7 @@ function AposBot() {
 		var i, j, cluster;
 
 		// remove clusters within enemy split distance
-		Object.keys(this.entities).filter(this.entities.splitThreatFilter, this).forEach(
+		Object.keys(this.entities).filter(this.entities.splitThreatFilter, this.entities).forEach(
 				function(key) {
 
 					var threat = this.entities[key];
@@ -961,7 +961,7 @@ function AposBot() {
 					cluster.closestCell.y);
 			// console.log(destinationAngle);
 
-			Object.keys(this.entities).filter(this.entities.virusFilter, this).forEach(function(key) {
+			Object.keys(this.entities).filter(this.entities.virusFilter, this.entities).forEach(function(key) {
 
 				var virus = this.entities[key];
 
@@ -1024,7 +1024,7 @@ function AposBot() {
 
 		player.closestVirus = null;
 
-		Object.keys(this.entities).filter(this.entities.virusFilter, this).forEach(function(key) {
+		Object.keys(this.entities).filter(this.entities.virusFilter, this.entities).forEach(function(key) {
 
 			var virus = this.entities[key];
 
@@ -1328,7 +1328,7 @@ function AposBot() {
 
 		var i = 0;
 
-		Object.keys(this.entities).filter(this.entities.virusFilter, this).forEach(
+		Object.keys(this.entities).filter(this.entities.virusFilter, this.entities).forEach(
 				function(key) {
 
 					var virus = this.entities[key];
@@ -1494,7 +1494,7 @@ function AposBot() {
 		var overlapCount = 0;
 		player.allThreats = [];
 
-		Object.keys(this.entities).filter(this.entities.threatFilter, this).forEach(function(key) {
+		Object.keys(this.entities).filter(this.entities.threatFilter, this.entities).forEach(function(key) {
 
 			threat = this.entities[key];
 
