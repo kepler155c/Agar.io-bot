@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1390
+// @version     3.1392
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1390;
+var aposBotVersion = 3.1392;
 
 var constants = {
 	splitRangeMin : 650,
@@ -309,6 +309,7 @@ Player.prototype = {
 		});
 	},
 	singleThreatEvasionStrategy : function() {
+		// angle away from the closest threat and the next closest threat (if within range)
 
 		drawCircle(this.x, this.y, this.size + 16, constants.pink);
 
@@ -318,14 +319,26 @@ Player.prototype = {
 
 			this.sortThreats();
 
-			var nextClosestThreat = this.allThreats[1];
+			for (var i = 1; i < this.allThreats.length; i++) {
+				var threat = this.allThreats[i];
 
-			if (nextClosestThreat.distance - nextClosestThreat.size > 750) {
-				console.log('next threat too far away');
-			} else {
-				nextClosestThreat.dangerZone = nextClosestThreat.distance + 1;
-				drawCircle(nextClosestThreat.x, nextClosestThreat.y, nextClosestThreat.dangerZone, constants.red);
+				if (threat.t != this.allThreats[0].t) {
+
+					var splitDistance = 0;
+					if (threat.isSplitThreat) {
+						splitDistance = constants.enemySplitDistance;
+					}
+
+					if (threat.distance + splitDistance - threat.size > 750) {
+						console.log('next threat too far away');
+					} else {
+						threat.dangerZone = threat.distance + 1;
+						drawCircle(threat.x, threat.y, threat.dangerZone, constants.red);
+					}
+					break;
+				}
 			}
+
 		}
 	},
 	multiThreatEvasionStrategy : function() {
