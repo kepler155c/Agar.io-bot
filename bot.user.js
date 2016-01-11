@@ -5,8 +5,8 @@
 /* global drawPoint, drawLine, drawCircle, drawArc, getModek, getMapStartX, getMapStartY */
 /* global getPointX, getPointY, getMapEndX, getMapEndY, getMouseX, getMouseY */
 /* global getZoomlessRatio, verticalDistance, getPlayer, screenToGameX, screenToGameY */
-/* global getX, getY, getMemoryCells, getCells, getMode, getLastUpdate, isToggled */
-/* global getEverything */
+/* global getX, getY, getMemoryCells, getCells, getMode, getLastUpdate, isHumanControlled */
+/* global setHumanControlled, getEverything */
 
 /*The MIT License (MIT)
 
@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1439
+// @version     3.1440
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1439;
+var aposBotVersion = 3.1440;
 
 var constants = {
 	splitRangeMin : 650,
@@ -297,6 +297,8 @@ Player.prototype = {
 
 		if (this.closestVirus) {
 
+			setHumanControlled(false);
+
 			this.action = this.shootVirusAction;
 			this.virusShootInfo = {
 				x : this.closestVirus.closestCell.x,
@@ -386,8 +388,6 @@ Player.prototype = {
 		if (this.allThreats.length > 1) {
 
 			this.sortThreats();
-
-			drawCircle(this.allThreats[0].x, this.allThreats[0].y, this.allThreats[0].size + 32, constants.red);
 
 			for (var i = 1; i < this.allThreats.length; i++) {
 				var threat = this.allThreats[i];
@@ -1251,17 +1251,6 @@ function AposBot() {
 					console.log('what?');
 				}
 
-				var color = constants.green;
-				if (threat.distance <= threat.minDistance) {
-					color = constants.red;
-				} else if (threat.distance < threat.preferredDistance) {
-					color = constants.orange;
-				} else if (threat.distance < threat.threatededDistance) {
-					color = constants.pink;
-				}
-				//drawCircle(threat.x, threat.y, threat.threatenedDistance - cell.size + 40, color);
-				// parseInt(threat.threatLevel / 10));
-
 				if (threat.isMovingTowards) {
 					threat.dangerZone = threat.threatenedDistance;
 				} else {
@@ -1271,10 +1260,8 @@ function AposBot() {
 				// drawPoint(threat.x, threat.y + 20, 2, parseInt(threat.distance, 10) + " " + parseInt(threat.dangerZone, 10));
 				drawPoint(threat.x, threat.y + 20 + threat.size / 15, constants.yellow, "/***" + "***\\ " + t.teamSize);
 
-				//if (threat.distance <= threat.dangerZone) {
 				cell.threats.push(threat);
 				player.allThreats.push(threat);
-				//}
 			}
 		}
 
@@ -1740,7 +1727,7 @@ function AposBot() {
 		//separate everything in it's own category.
 
 		this.initializeEntities(player);
-		if (isToggled()) {
+		if (!isHumanControlled()) {
 			this.determineMerges();
 		}
 
@@ -1752,7 +1739,7 @@ function AposBot() {
 			return destination;
 		}
 
-		if (isToggled()) {
+		if (!isHumanControlled()) {
 			this.determineTeams();
 			player.isSafeToSplit(this.entities);
 			player.checkIfMerging();
@@ -1801,7 +1788,7 @@ function AposBot() {
 			case Classification.threat:
 				//drawPoint(entity.x, entity.y + 20, 1, parseInt(entity.distance - entity.size));
 				var color = entity.isMovingTowards ? constants.red : constants.orange;
-				//drawCircle(entity.x, entity.y, entity.size + 20, color);
+				drawCircle(entity.x, entity.y, entity.size + 20, color);
 
 				//drawCircle(entity.x, entity.y, entity.dangerZone, color);
 				break;

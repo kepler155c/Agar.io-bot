@@ -20,11 +20,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.303
+// @version     4.304
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.303;
+var aposLauncherVersion = 4.304;
 
 var showAd = false;
 var moveLoc = null;
@@ -109,9 +109,9 @@ console.log("Running Bot Launcher!");
     function keyAction(e) {
         if (84 == e.keyCode) {
             console.log("Toggle");
-            toggle = !toggle;
+            humanControlled = !humanControlled;
             
-            if (toggle) {
+            if (humanControlled) {
             	if (moveLoc && !moveLoc.override) {
             		moveLoc = null;
             	}
@@ -260,7 +260,7 @@ console.log("Running Bot Launcher!");
 
     function Aa() {
         //UPDATE
-        if (toggle || window.botList[botIndex].name == "Human") {
+        if (humanControlled || window.botList[botIndex].name == "Human") {
         	if (!moveLoc || !moveLoc.override) {
         		setPoint(((fa - m / 2) / h + s), ((ga - r / 2) / h + t));
         	}
@@ -864,7 +864,7 @@ console.log("Running Bot Launcher!");
         if (getPlayer() && getPlayer().length > 0) {
             moveLoc = window.botList[botIndex].mainLoop(k);
             
-            if (!toggle || moveLoc.override) {
+            if (!humanControlled || moveLoc.override) {
 
             	setPoint(moveLoc.point.x, moveLoc.point.y);
             	
@@ -1030,7 +1030,7 @@ console.log("Running Bot Launcher!");
             debugStrings.push(botString[i]);
         }
 
-        debugStrings.push("T - Bot:     " + (!toggle ? "On" : "Off"));
+        debugStrings.push("T - Bot:     " + (!humanControlled ? "On" : "Off"));
         debugStrings.push("R - Lines:   " + (!toggleDraw ? "On" : "Off"));
         debugStrings.push("Best Score: " + ~~(sessionScore / 100));
 
@@ -1345,7 +1345,7 @@ console.log("Running Bot Launcher!");
             var za, f, G, m, r, X = null,
 
                 //UPDATE
-                toggle = false,
+                humanControlled = false,
                 toggleDraw = false,
                 shootTime = 0,
                 splitTime = 0,
@@ -1749,8 +1749,11 @@ console.log("Running Bot Launcher!");
                 d.connect = Ca;
 
                 //UPDATE
-                window.isToggled = function() {
-                    return !toggle;
+                window.isHumanControlled = function() {
+                    return humanControlled;
+                }
+                window.setHumanControlled = function(value) {
+                    humanControlled = value;
                 }
                 /**
                  * Tells you if the game is in Dark mode.
@@ -2027,7 +2030,7 @@ console.log("Running Bot Launcher!");
                 }
                 
                 window.shoot = function() {
-                    if (!toggle && shootTime + shootCooldown < new Date().getTime()) {
+                    if (!humanControlled && shootTime + shootCooldown < new Date().getTime()) {
                         shootTime = new Date().getTime();
                         opCode(21);
                     }
@@ -2035,7 +2038,7 @@ console.log("Running Bot Launcher!");
             
                 window.split = function() {
             
-                    if (!toggle && splitTime + splitCooldown < new Date().getTime()) {
+                    if (!humanControlled && splitTime + splitCooldown < new Date().getTime()) {
                         splitTime = new Date().getTime();
                         opCode(17);
                     }
