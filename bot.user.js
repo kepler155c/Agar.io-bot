@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1437
+// @version     3.1438
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1437;
+var aposBotVersion = 3.1438;
 
 var constants = {
 	splitRangeMin : 650,
@@ -344,7 +344,7 @@ Player.prototype = {
 					return false;
 				}
 
-			} else if (virus.distance > virus.size + cell.size + 50) { // too close - back up
+			} else if (virus.distance < virus.size + cell.size + 50) { // too close - back up
 				console.log('backing up');
 				destination.point.x = Math.floor(cell.x + Math.cos(angle) * (distance / 2));
 				destination.point.y = Math.floor(cell.y + Math.sin(angle) * (distance / 2));
