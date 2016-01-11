@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1431
+// @version     3.1432
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1431;
+var aposBotVersion = 3.1432;
 
 var constants = {
 	splitRangeMin : 650,
@@ -190,8 +190,8 @@ Player.prototype = {
 
 		if (this.cells.length >= this.mergeInfo.cellCount) {
 
-			destination.x = this.mergeInfo.x;
-			destination.y = this.mergeInfo.y;
+			destination.point.x = this.mergeInfo.x;
+			destination.point.y = this.mergeInfo.y;
 			return true;
 		}
 		this.action = null;
@@ -281,8 +281,8 @@ Player.prototype = {
 
 			drawCircle(this.splitInfo.location.x, this.splitInfo.location.y, 50, constants.green);
 			if (this.splitInfo.target) {
-				destination.x = this.splitInfo.target.x;
-				destination.y = this.splitInfo.target.y;
+				destination.point.x = this.splitInfo.target.x;
+				destination.point.y = this.splitInfo.target.y;
 			}
 			return true;
 		}
@@ -335,8 +335,8 @@ Player.prototype = {
 					if (virus.mass >= info.startingMass - 1 && virus.distance < virus.closestCell.size + 500
 							&& info.mass - this.mass < 150) {
 
-						destination.x = virus.x;
-						destination.y = virus.y;
+						destination.point.x = virus.x;
+						destination.point.y = virus.y;
 						destination.shoot = true;
 
 						console.log('shooting ' + Date.now());
@@ -344,13 +344,13 @@ Player.prototype = {
 
 				} else { // back up
 					console.log('backing up');
-					destination.x = Math.floor(cell.x + Math.cos(angle) * (distance / 4));
-					destination.y = Math.floor(cell.y + Math.sin(angle) * (distance / 4));
+					destination.point.x = Math.floor(cell.x + Math.cos(angle) * (distance / 4));
+					destination.point.y = Math.floor(cell.y + Math.sin(angle) * (distance / 4));
 				}
 			} else {
 				console.log('moving forward');
-				destination.x = Math.floor(cell.x - Math.cos(angle) * (distance / 4));
-				destination.y = Math.floor(cell.y - Math.sin(angle) * (distance / 4));
+				destination.point.x = Math.floor(cell.x - Math.cos(angle) * (distance / 4));
+				destination.point.y = Math.floor(cell.y - Math.sin(angle) * (distance / 4));
 			}
 			drawLine(cell.x, cell.y, destination.x, destination.y, constants.red);
 console.log([cell.x, cell.y, destination.x, destination.y]);
