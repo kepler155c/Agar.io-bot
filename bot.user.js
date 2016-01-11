@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1444
+// @version     3.1445
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1444;
+var aposBotVersion = 3.1445;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1491,6 +1491,31 @@ function AposBot() {
 		}
 	};
 
+	this.adjustDestination = function(player, destination) {
+
+		var angle = Math.atan2(player.cells[0].x, player.cells[0].y, destination.point.x, destination.point.y);
+
+		player.eachCellThreat(function(cell, threat) {
+
+			var circle = {
+				x : cell.x - Math.cos(angle) * cell.velocity,
+				y : cell.y - Math.sin(angle) * cell.velocity,
+				size : cell.size
+			};
+			
+			if (Util.circlesIntersect(circle, threat)) {
+
+				destination.point.x = cell.x - Math.cos(angle) * cell.velocity / 2;
+				destination.point.y = cell.y - Math.sin(angle) * cell.velocity / 2;
+				
+				console.log('adjusted destination');
+				console.log(destination);
+				return;
+			}
+
+		}, this);
+	};
+
 	/**
 	 * The bot works by removing angles in which it is too
 	 * dangerous to travel towards to.
@@ -1526,16 +1551,8 @@ function AposBot() {
 
 			destination.point = this.followAngle(perfectAngle.angle, player.x, player.y, verticalDistance());
 
-			var angle = Math.atan2(player.cells[0].x, player.cells[0].y, destination.point.x, destination.point.y);
-			var newPoint = {
-				x : player.cells[0].x - Math.cos(angle) * player.cells[0].velocity,
-				y : player.cells[0].y - Math.sin(angle) * player.cells[0].velocity,
-			};
+			this.adjustDestination(player, destination);
 
-			console.log('next point');
-			console.log(destination.point);
-			console.log(newPoint);
-			
 			return true;
 
 		} else if (badAngles.length > 0 && goodAngles.length === 0) {
