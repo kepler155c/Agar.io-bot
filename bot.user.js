@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1428
+// @version     3.1429
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1428;
+var aposBotVersion = 3.1429;
 
 var constants = {
 	splitRangeMin : 650,
@@ -320,6 +320,8 @@ Player.prototype = {
 			var virusAngle = Util.getAngle(cell.x, cell.y, virus.x, virus.y);
 			var movementAngle = cell.getMovementAngle();
 
+			var angle = Math.atan2(cell.y - virus.y, cell.x - virus.x);
+
 			console.log([ virusAngle, movementAngle ]);
 
 			if (Math.abs(virusAngle - movementAngle) < 30) {
@@ -344,14 +346,17 @@ Player.prototype = {
 
 				} else { // back up
 					console.log('backing up');
-					destination.x = cell.x + Math.cos(virusAngle) * (distance / 4);
-					destination.y = cell.y + Math.sin(virusAngle) * (distance / 4);
+					destination.x = cell.x + Math.cos(angle) * (distance / 4);
+					destination.y = cell.y + Math.sin(angle) * (distance / 4);
+					drawLine(cell.x, cell.y, destination.x, destination.y, constants.red);
 				}
 			} else {
 				console.log('moving forward');
-				destination.x = cell.x - Math.cos(virusAngle) * (distance / 4);
-				destination.y = cell.y - Math.sin(virusAngle) * (distance / 4);
+				destination.x = cell.x - Math.cos(angle) * (distance / 4);
+				destination.y = cell.y - Math.sin(angle) * (distance / 4);
+				drawLine(cell.x, cell.y, destination.x, destination.y, constants.red);
 			}
+console.log([cell.x, cell.y, destination.x, destination.y]);
 			destination.override = true;
 			return true;
 		}
@@ -608,11 +613,11 @@ function AposBot() {
 	this.moreInfoStrings = [];
 	this.previousUpdated = Date.now();
 	this.keyAction = function(key) {
-		if (81 == key.keyCode) {
+		if (81 == key.keyCode) { // 'q'
 			this.toggleFollow = !this.toggleFollow;
 		} else if (key.keyCode == 69) { // 'e'
 			this.player.shootVirus();
-		} else if (key.keyCode == 77) { // 'e'
+		} else if (key.keyCode == 77) { // 'm'
 			this.player.merge();
 		}
 	};
