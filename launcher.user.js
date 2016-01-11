@@ -252,9 +252,47 @@ console.log("Running Bot Launcher!");
     }
 
     function Aa() {
-        //UPDATE
-        if (toggle || window.botList[botIndex].name == "Human") {
-            setPoint(((fa - m / 2) / h + s), ((ga - r / 2) / h + t));
+    	
+    	var  useHuman = true;
+
+    	//UPDATE
+//        if (toggle || window.botList[botIndex].name == "Human") {
+//        }
+        
+        if (getPlayer() && getPlayer().length > 0) {
+            var moveLoc = window.botList[botIndex].mainLoop(k);
+            
+            if (!toggle || moveLoc.override) {
+
+            	setPoint(moveLoc.point.x, moveLoc.point.y);
+            	
+            	if (moveLoc.shoot) {
+            		console.log('shooting');
+            		V(), H(21);
+            	}
+            	
+            	if (moveLoc.split) {
+            		console.log('splitting');
+            		V(), H(17);
+            	}
+
+            	useHuman = false;
+                /*
+                if (moveLoc.split) {
+                    $("body").trigger(splitdown);
+                    $("body").trigger(splitup);
+					//window.opCode(17);
+                }
+                if (moveLoc.shoot) {
+                    //$("body").trigger(firedown);
+                    //$("body").trigger(fireup);
+                    window.opCode(21);
+                }
+                */
+            }
+        }
+        if (useHuman) {
+        	setPoint(((fa - m / 2) / h + s), ((ga - r / 2) / h + t));
         }
     }
 
@@ -852,37 +890,6 @@ console.log("Running Bot Launcher!");
         for (d = 0; d < Q.length; d++) Q[d].w(f);
         //UPDATE
 
-        if (getPlayer() && getPlayer().length > 0) {
-            var moveLoc = window.botList[botIndex].mainLoop(k);
-            
-            if (!toggle || moveLoc.override) {
-
-            	setPoint(moveLoc.point.x, moveLoc.point.y);
-            	
-            	if (moveLoc.shoot) {
-            		console.log('shooting');
-            		V(), H(21);
-            	}
-            	
-            	if (moveLoc.split) {
-            		console.log('splitting');
-            		V(), H(17);
-            	}
-
-                /*
-                if (moveLoc.split) {
-                    $("body").trigger(splitdown);
-                    $("body").trigger(splitup);
-					//window.opCode(17);
-                }
-                if (moveLoc.shoot) {
-                    //$("body").trigger(firedown);
-                    //$("body").trigger(fireup);
-                    window.opCode(21);
-                }
-                */
-            }
-        }
         customRender(f);
         if (Ga) {
             na = (3 * na + Ea) / 4;
