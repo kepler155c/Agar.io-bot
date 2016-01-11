@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1448
+// @version     3.1449
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1448;
+var aposBotVersion = 3.1449;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1498,15 +1498,15 @@ function AposBot() {
 		player.eachCellThreat(function(cell, threat) {
 
 			var circle = {
-				x : cell.x - Math.cos(angle) * cell.velocity,
-				y : cell.y - Math.sin(angle) * cell.velocity,
+				x : cell.x - Math.cos(angle) * (cell.velocity + player.size),
+				y : cell.y - Math.sin(angle) * (cell.velocity + player.size),
 				size : cell.size
 			};
 
 			if (Util.circlesIntersect(circle, threat)) {
 
-				destination.point.x = cell.x - Math.cos(angle) * cell.velocity / 4;
-				destination.point.y = cell.y - Math.sin(angle) * cell.velocity / 4;
+				destination.point.x = cell.x - Math.cos(angle) * (cell.velocity + player.size / 2);
+				destination.point.y = cell.y - Math.sin(angle) * (cell.velocity + player.size / 2);
 
 				console.log('angle ' + angle + ' '
 						+ Math.atan2(player.cells[0].x, player.cells[0].y, destination.point.x, destination.point.y));
