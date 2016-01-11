@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1423
+// @version     3.1424
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1423;
+var aposBotVersion = 3.1424;
 
 var constants = {
 	splitRangeMin : 650,
@@ -293,6 +293,20 @@ Player.prototype = {
 
 		return this.mass > minSize;
 	},
+	shootVirus : function() {
+
+		if (this.closestVirus) {
+
+			this.action = this.shootVirusAction;
+			this.virusShootInfo = {
+				x : this.closestVirus.closestCell.x,
+				y : this.closestVirus.closestCell.y,
+				virus : this.closestVirus,
+				mass : this.mass,
+				startingMass : this.closestVirus.mass
+			};
+		}
+	},
 	shootVirusAction : function(destination) {
 
 		var info = this.virusShootInfo;
@@ -300,20 +314,44 @@ Player.prototype = {
 
 		if (virus.distance > virus.closestCell.size && this.canShoot(1)) {
 
-			// the virus has reduced in size (split hopefully)
-			// the distance is still in range
-			// we haven't lost too much mass (shooting wildly)
-			if (virus.mass >= info.startingMass - 1 && virus.distance < virus.closestCell.size + 500
-					&& info.mass - this.mass < 150) {
+			var cell = virus.closestCell;
+			var distance = virus.distance;
 
-				destination.x = virus.x;
-				destination.y = virus.y;
-				destination.shoot = true;
+			var virusAngle = Math.atan2(cell.y - virus.y, cell.x - virus.x);
+			var movementAngle = cell.getMovementAngle();
 
-				console.log('shooting ' + Date.now());
-				drawLine(virus.closestCell.x, virus.closestCell.y, destination.x, destination.y, constants.orange);
+			if (Math.abs(virusAngle - movementAngle) < 30) {
+				// we are moving towards
 
-				return true;
+				if (virus.distance > virus.size + 50) {
+					// the virus has reduced in size (split hopefully)
+					// the distance is still in range
+					// we haven't lost too much mass (shooting wildly)
+					console.log('in range');
+					if (virus.mass >= info.startingMass - 1 && virus.distance < virus.closestCell.size + 500
+							&& info.mass - this.mass < 150) {
+
+						destination.x = virus.x;
+						destination.y = virus.y;
+						destination.shoot = true;
+
+						console.log('shooting ' + Date.now());
+						drawLine(virus.closestCell.x, virus.closestCell.y, destination.x, destination.y,
+								constants.orange);
+
+						return true;
+					}
+
+				} else { // back up
+					console.log('backing up');
+					destination.x = cell.x + Math.cos(virusAngle) * (distance / 4);
+					destination.y = cell.y + Math.sin(virusAngle) * (distance / 4);
+				}
+			} else {
+				console.log('moving forward');
+				destination.x = cell.x - Math.cos(virusAngle) * (distance / 4);
+				destination.y = cell.y - Math.sin(virusAngle) * (distance / 4);
+
 			}
 		}
 		this.action = null;
@@ -499,6 +537,13 @@ function initializeEntity() {
 		return Util.computeDistance(this.x, this.y, lastPos.x, lastPos.y);
 	};
 
+	da.prototype.getMovementAngle = function() {
+
+		var lastPos = this.getLastPos();
+
+		return Math.atan2(this.y - lastPos.y, this.x - lastPos.x);
+	};
+
 	var entitiesPrototype = Object.getPrototypeOf(getMemoryCells());
 
 	entitiesPrototype.foodFilter = function(key) {
@@ -547,7 +592,6 @@ function initializeEntity() {
 
 		return entity.isType(Classification.threat);
 	};
-
 }
 
 console.log("Apos Bot!");
@@ -566,7 +610,7 @@ function AposBot() {
 		if (81 == key.keyCode) {
 			this.toggleFollow = !this.toggleFollow;
 		} else if (key.keyCode == 69) { // 'e'
-			this.shootVirus(this.player);
+			this.player.shootVirus();
 		} else if (key.keyCode == 77) { // 'e'
 			this.player.merge();
 		}
@@ -1081,21 +1125,6 @@ function AposBot() {
 			}
 
 		}, this);
-	};
-
-	this.shootVirus = function(player) {
-
-		if (player.closestVirus) {
-
-			player.action = player.shootVirusAction;
-			player.virusShootInfo = {
-				x : player.closestVirus.closestCell.x,
-				y : player.closestVirus.closestCell.y,
-				virus : player.closestVirus,
-				mass : player.mass,
-				startingMass : player.closestVirus.mass
-			};
-		}
 	};
 
 	this.displayVirusTargets = function(player) {
