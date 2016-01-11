@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1440
+// @version     3.1441
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1440;
+var aposBotVersion = 3.1441;
 
 var constants = {
 	splitRangeMin : 650,
@@ -267,10 +267,6 @@ Player.prototype = {
 	},
 	splitAction : function(destination) {
 
-		console.log(this.splitInfo);
-		console.log([ Math.floor(this.size), this.splitInfo.size, (Date.now() - this.splitInfo.timer > 100),
-				this.cells[0].size, this.splitInfo.initialSize ]);
-
 		if (Math.floor(this.size) <= this.splitInfo.size && (Date.now() - this.splitInfo.timer > 100)
 				&& this.cells[0].size < this.splitInfo.initialSize) {
 
@@ -324,22 +320,19 @@ Player.prototype = {
 
 			var angle = Math.atan2(cell.y - virus.y, cell.x - virus.x);
 
-			console.log([ virusAngle, movementAngle ]);
-
 			// moving forward and not too close
 			if (Math.abs(virusAngle - movementAngle) < 30 && virus.distance > virus.size + cell.size
 					&& virus.distance < virus.size + cell.size + 150) {
 				// the virus has reduced in size (split hopefully)
 				// the distance is still in range
 				// we haven't lost too much mass (shooting wildly)
-				console.log('in range');
+
 				if (virus.mass >= info.startingMass - 1 && info.mass - this.mass < 150) {
 
 					destination.point.x = virus.x;
 					destination.point.y = virus.y;
 					destination.shoot = true;
 
-					console.log('shooting ' + Date.now());
 				} else {
 
 					this.action = null;
@@ -347,16 +340,17 @@ Player.prototype = {
 				}
 
 			} else if (virus.distance < virus.size + cell.size + 50) { // too close - back up
-				console.log('backing up');
+
 				destination.point.x = Math.floor(cell.x + Math.cos(angle) * (distance / 2));
 				destination.point.y = Math.floor(cell.y + Math.sin(angle) * (distance / 2));
+
 			} else {
-				console.log('moving forward');
+
 				destination.point.x = Math.floor(cell.x - Math.cos(angle) * (distance / 2));
 				destination.point.y = Math.floor(cell.y - Math.sin(angle) * (distance / 2));
 			}
 			drawLine(cell.x, cell.y, destination.point.x, destination.point.y, constants.red);
-			console.log([ cell.x, cell.y, destination.point.x, destination.point.y, virus.x, virus.y ]);
+
 			destination.override = true;
 			return true;
 		}
@@ -1247,10 +1241,6 @@ function AposBot() {
 				threat.preferredDistance += velocityPadding;
 				threat.threatenedDistance += velocityPadding;
 
-				if (threat.preferredDistance < notTouchingDistance) {
-					console.log('what?');
-				}
-
 				if (threat.isMovingTowards) {
 					threat.dangerZone = threat.threatenedDistance;
 				} else {
@@ -1533,7 +1523,7 @@ function AposBot() {
 			}
 			var perfectAngle = this.mod(bIndex[0] + bIndex[1] / 2, 360);
 			perfectAngle = this.shiftAngle(obstacleAngles, perfectAngle, bIndex);
-			// console.log('angle is : ' + bIndex[0] + '-' + bIndex[1]);
+			console.log(perfectAngle.angle);
 
 			destination.point = this.followAngle(perfectAngle.angle, player.x, player.y, verticalDistance());
 
