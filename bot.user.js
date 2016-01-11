@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1424
+// @version     3.1425
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1424;
+var aposBotVersion = 3.1425;
 
 var constants = {
 	splitRangeMin : 650,
@@ -317,9 +317,11 @@ Player.prototype = {
 			var cell = virus.closestCell;
 			var distance = virus.distance;
 
-			var virusAngle = Math.atan2(cell.y - virus.y, cell.x - virus.x);
+			var virusAngle = Math.atan2(virus.y - cell.y, virus.x - cell.x);
 			var movementAngle = cell.getMovementAngle();
-
+			
+			console.log([ virusAngle, movementAngle ]);
+			
 			if (Math.abs(virusAngle - movementAngle) < 30) {
 				// we are moving towards
 
