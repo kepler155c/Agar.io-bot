@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1425
+// @version     3.1426
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1425;
+var aposBotVersion = 3.1426;
 
 var constants = {
 	splitRangeMin : 650,
@@ -317,7 +317,7 @@ Player.prototype = {
 			var cell = virus.closestCell;
 			var distance = virus.distance;
 
-			var virusAngle = Math.atan2(virus.y - cell.y, virus.x - cell.x);
+			var virusAngle = Util.getAngle(cell.x, cell.y, virus.x ,virus.x);
 			var movementAngle = cell.getMovementAngle();
 			
 			console.log([ virusAngle, movementAngle ]);
@@ -543,7 +543,7 @@ function initializeEntity() {
 
 		var lastPos = this.getLastPos();
 
-		return Math.atan2(this.y - lastPos.y, this.x - lastPos.x);
+		return Util.getAngle(lastPos.x, lastPos.y, this.x, this.y);
 	};
 
 	var entitiesPrototype = Object.getPrototypeOf(getMemoryCells());
