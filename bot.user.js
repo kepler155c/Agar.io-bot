@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1438
+// @version     3.1439
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1438;
+var aposBotVersion = 3.1439;
 
 var constants = {
 	splitRangeMin : 650,
@@ -325,13 +325,13 @@ Player.prototype = {
 			console.log([ virusAngle, movementAngle ]);
 
 			// moving forward and not too close
-			if (Math.abs(virusAngle - movementAngle) < 30 && virus.distance > virus.size + cell.size) {
+			if (Math.abs(virusAngle - movementAngle) < 30 && virus.distance > virus.size + cell.size
+					&& virus.distance < virus.size + cell.size + 150) {
 				// the virus has reduced in size (split hopefully)
 				// the distance is still in range
 				// we haven't lost too much mass (shooting wildly)
 				console.log('in range');
-				if (virus.mass >= info.startingMass - 1 && virus.distance < virus.closestCell.size + 500
-						&& info.mass - this.mass < 150) {
+				if (virus.mass >= info.startingMass - 1 && info.mass - this.mass < 150) {
 
 					destination.point.x = virus.x;
 					destination.point.y = virus.y;
