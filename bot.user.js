@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1426
+// @version     3.1427
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1426;
+var aposBotVersion = 3.1427;
 
 var constants = {
 	splitRangeMin : 650,
@@ -317,11 +317,11 @@ Player.prototype = {
 			var cell = virus.closestCell;
 			var distance = virus.distance;
 
-			var virusAngle = Util.getAngle(cell.x, cell.y, virus.x ,virus.x);
+			var virusAngle = Util.getAngle(cell.x, cell.y, virus.x, virus.y);
 			var movementAngle = cell.getMovementAngle();
-			
+
 			console.log([ virusAngle, movementAngle ]);
-			
+
 			if (Math.abs(virusAngle - movementAngle) < 30) {
 				// we are moving towards
 
@@ -340,8 +340,6 @@ Player.prototype = {
 						console.log('shooting ' + Date.now());
 						drawLine(virus.closestCell.x, virus.closestCell.y, destination.x, destination.y,
 								constants.orange);
-
-						return true;
 					}
 
 				} else { // back up
@@ -355,6 +353,7 @@ Player.prototype = {
 				destination.y = cell.y - Math.sin(virusAngle) * (distance / 4);
 
 			}
+			return true;
 		}
 		this.action = null;
 
@@ -1849,6 +1848,7 @@ function AposBot() {
 		this.infoStrings.push("Player Mass: " + parseInt(player.mass, 10));
 		this.infoStrings.push("Player Size: " + parseInt(player.size, 10));
 		this.infoStrings.push("Player Velocity: " + parseInt(player.smallestCell.velocity, 10));
+		this.infoStrings.push("Player Angle: " + player.cells[0].getMovementAngle());
 		/*
 		if (player.cells.length > 1) {
 			this.infoStrings.push("Player Min:  " + parseInt(player.smallestCell.size, 10));
