@@ -20,13 +20,14 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.300
+// @version     4.301
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.300;
+var aposLauncherVersion = 4.301;
 
 var showAd = false;
+var moveLoc = null;
 
 Number.prototype.mod = function(n) {
     return ((this % n) + n) % n;
@@ -109,6 +110,12 @@ console.log("Running Bot Launcher!");
         if (84 == e.keyCode) {
             console.log("Toggle");
             toggle = !toggle;
+            
+            if (toggle) {
+            	if (moveLoc && !moveLoc.override) {
+            		moveLoc = null;
+            	}
+            }
         }
         if (82 == e.keyCode) {
             console.log("ToggleDraw");
@@ -258,10 +265,8 @@ console.log("Running Bot Launcher!");
     	//UPDATE
 //        if (toggle || window.botList[botIndex].name == "Human") {
 //        }
-        
-        if (getPlayer() && getPlayer().length > 0) {
-            var moveLoc = window.botList[botIndex].mainLoop(k);
-            
+        if (moveLoc) {
+        	
             if (!toggle || moveLoc.override) {
 
             	setPoint(moveLoc.point.x, moveLoc.point.y);
@@ -452,6 +457,10 @@ console.log("Running Bot Launcher!");
 
     function ub(a) {
         wb(new DataView(a.data))
+        
+        if (getPlayer() && getPlayer().length > 0) {
+            moveLoc = window.botList[botIndex].mainLoop(k);
+        }
     }
 
     function wb(a) {
