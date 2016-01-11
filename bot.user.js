@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1435
+// @version     3.1436
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1435;
+var aposBotVersion = 3.1436;
 
 var constants = {
 	splitRangeMin : 650,
@@ -348,16 +348,16 @@ Player.prototype = {
 
 				} else { // back up
 					console.log('backing up');
-					destination.point.x = Math.floor(cell.x + Math.cos(angle) * (distance / 4));
-					destination.point.y = Math.floor(cell.y + Math.sin(angle) * (distance / 4));
+					destination.point.x = Math.floor(cell.x + Math.cos(angle) * (distance / 2));
+					destination.point.y = Math.floor(cell.y + Math.sin(angle) * (distance / 2));
 				}
 			} else {
 				console.log('moving forward');
-				destination.point.x = Math.floor(cell.x - Math.cos(angle) * (distance / 4));
-				destination.point.y = Math.floor(cell.y - Math.sin(angle) * (distance / 4));
+				destination.point.x = Math.floor(cell.x - Math.cos(angle) * (distance / 2));
+				destination.point.y = Math.floor(cell.y - Math.sin(angle) * (distance / 2));
 			}
-			drawLine(cell.x, cell.y, destination.x, destination.y, constants.red);
-console.log([cell.x, cell.y, destination.x, destination.y]);
+			drawLine(cell.x, cell.y, destination.point.x, destination.point.y, constants.red);
+console.log([cell.x, cell.y, destination.point.x, destination.point.y, virus.x, virus.y]);
 			destination.override = true;
 			return true;
 		}
