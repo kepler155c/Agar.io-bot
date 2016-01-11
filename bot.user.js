@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1419
+// @version     3.1421
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1419;
+var aposBotVersion = 3.1421;
 
 var constants = {
 	splitRangeMin : 650,
@@ -105,8 +105,6 @@ var Player = function() {
 	this.isMerging = false;
 
 	this.chasing = 0;
-	this.splitVelocity = 0;
-	this.splitLocation = null;
 	this.fuseTimer = null;
 	this.action = null;
 	this.lastPoint = null;
@@ -199,20 +197,6 @@ Player.prototype = {
 		this.action = null;
 		return false;
 	},
-	split : function(targetCell, x, y) {
-
-		if (this.canSplit()) {
-			this.splitTarget = targetCell;
-			this.splitSize = Math.floor(this.size);
-			this.splitMass = this.mass;
-
-			this.splitTimer = Date.now();
-			this.splitLocation = new Point(this.largestCell.x + (x - this.largestCell.x) * 4, this.largestCell.y
-					+ (y - this.largestCell.y) * 4);
-
-			this.action = this.splitAction;
-		}
-	},
 	canSplit : function() {
 
 		if (this.cells.length < 16) {
@@ -265,20 +249,36 @@ Player.prototype = {
 			}
 		}
 	},
+	split : function(targetCell, x, y) {
+
+		if (this.canSplit()) {
+
+			this.splitInfo = {
+				target : targetCell,
+				size : Math.floor(this.size),
+				timer : Date.now(),
+				initializeSize : Math.floor(this.size * 0.9),
+				location : new Point(this.largestCell.x + (x - this.largestCell.x) * 4, this.largestCell.y
+						+ (y - this.largestCell.y) * 4)
+			};
+
+			this.action = this.splitAction;
+		}
+	},
 	splitAction : function(destination) {
 
-		console.log([ Math.floor(this.size), this.splitSize, (Date.now() - this.splitTimer > 100) ]);
-		if (Math.floor(this.size) <= this.splitSize && (Date.now() - this.splitTimer > 100)) {
-			//					|| this.mass < this.splitMass * 0.8 || this.mass > this.splitMass * 1.2) {
+		if (Math.floor(this.size) <= this.splitInfo.size && (Date.now() - this.splitInfo.timer > 100)
+				&& this.cells[0].size < this.splitInfo.initialSize) {
+
 			// player size grows as long as we are splitting
 			this.action = null;
 		} else {
-			this.splitSize = Math.floor(this.size);
+			this.splitInfo.size = Math.floor(this.size);
 
-			drawCircle(this.splitLocation.x, this.splitLocation.y, 50, constants.green);
-			if (this.splitTarget) {
-				destination.x = this.splitTarget.x;
-				destination.y = this.splitTarget.y;
+			drawCircle(this.splitInfo.location.x, this.splitInfo.location.y, 50, constants.green);
+			if (this.splitInfo.target) {
+				destination.x = this.splitInfo.target.x;
+				destination.y = this.splitInfo.target.y;
 			}
 			return true;
 		}
@@ -895,7 +895,7 @@ function AposBot() {
 
 			var virus = this.entities[key];
 
-			if (this.computeInexpensiveDistance(food.x, food.y, virus.x, virus.y) < virus.size) { // Util.circlesIntersect(food, virus)) {
+			if (Util.circlesIntersect(food, virus)) {
 				virus.foodMass += food.mass;
 				virus.foodList.push(food);
 			}
@@ -1048,7 +1048,7 @@ function AposBot() {
 
 			player.split(cluster.cell, cluster.x, cluster.y);
 
-			destination.point = player.splitLocation;
+			destination.point = player.splitInfo.location;
 
 		} else {
 
