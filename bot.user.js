@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1443
+// @version     3.1444
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1443;
+var aposBotVersion = 3.1444;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1526,10 +1526,10 @@ function AposBot() {
 
 			destination.point = this.followAngle(perfectAngle.angle, player.x, player.y, verticalDistance());
 
-			var angle = Math.atan2(player.x, player.y, destination.point.x, destination.point.y);
+			var angle = Math.atan2(player.cells[0].x, player.cells[0].y, destination.point.x, destination.point.y);
 			var newPoint = {
-				x : player.x - Math.cos(angle) * player.cells[0].velocity,
-				y : player.y - Math.sin(angle) * player.cells[0].velocity,
+				x : player.cells[0].x - Math.cos(angle) * player.cells[0].velocity,
+				y : player.cells[0].y - Math.sin(angle) * player.cells[0].velocity,
 			};
 
 			console.log('next point');
