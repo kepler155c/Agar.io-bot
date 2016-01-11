@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1422
+// @version     3.1423
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1422;
+var aposBotVersion = 3.1423;
 
 var constants = {
 	splitRangeMin : 650,
@@ -257,7 +257,7 @@ Player.prototype = {
 				target : targetCell,
 				size : Math.floor(this.size),
 				timer : Date.now(),
-				initializeSize : Math.floor(this.cells[0].size * 0.9),
+				initialSize : Math.floor(this.cells[0].size * 0.9),
 				location : new Point(this.largestCell.x + (x - this.largestCell.x) * 4, this.largestCell.y
 						+ (y - this.largestCell.y) * 4)
 			};
