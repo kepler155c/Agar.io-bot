@@ -20,11 +20,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.302
+// @version     4.303
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.302;
+var aposLauncherVersion = 4.303;
 
 var showAd = false;
 var moveLoc = null;
@@ -259,46 +259,11 @@ console.log("Running Bot Launcher!");
     }
 
     function Aa() {
-    	
-    	var  useHuman = true;
-
-    	//UPDATE
-//        if (toggle || window.botList[botIndex].name == "Human") {
-//        }
-        if (moveLoc) {
-        	
-            if (!toggle || moveLoc.override) {
-
-            	setPoint(moveLoc.point.x, moveLoc.point.y);
-            	
-            	if (moveLoc.shoot) {
-            		console.log('shooting');
-            		V(), H(21);
-            	}
-            	
-            	if (moveLoc.split) {
-            		console.log('splitting');
-            		V(), H(17);
-            	}
-
-            	useHuman = false;
-                /*
-                if (moveLoc.split) {
-                    $("body").trigger(splitdown);
-                    $("body").trigger(splitup);
-					//window.opCode(17);
-                }
-                if (moveLoc.shoot) {
-                    //$("body").trigger(firedown);
-                    //$("body").trigger(fireup);
-                    window.opCode(21);
-                }
-                */
-            }
-        }
-        if (useHuman) {
-        	console.log('using human');
-        	setPoint(((fa - m / 2) / h + s), ((ga - r / 2) / h + t));
+        //UPDATE
+        if (toggle || window.botList[botIndex].name == "Human") {
+        	if (!moveLoc || !moveLoc.override) {
+        		setPoint(((fa - m / 2) / h + s), ((ga - r / 2) / h + t));
+        	}
         }
     }
 
@@ -457,15 +422,6 @@ console.log("Running Bot Launcher!");
 
     function ub(a) {
         wb(new DataView(a.data))
-        
-        if (getPlayer() && getPlayer().length > 0) {
-            dPoints = [];
-            circles = [];
-            dArc = [];
-            dText = [];
-            lines = [];
-            moveLoc = window.botList[botIndex].mainLoop(k);
-        }
     }
 
     function wb(a) {
@@ -847,6 +803,11 @@ console.log("Running Bot Launcher!");
 
     function gb() {
         //UPDATE
+        dPoints = [];
+        circles = [];
+        dArc = [];
+        dText = [];
+        lines = [];
     	var splitdown = $.Event("keydown", { keyCode: 32}); //space button
         var splitup = $.Event("keyup", { keyCode: 32}); //space button
 
@@ -900,6 +861,37 @@ console.log("Running Bot Launcher!");
         for (d = 0; d < Q.length; d++) Q[d].w(f);
         //UPDATE
 
+        if (getPlayer() && getPlayer().length > 0) {
+            moveLoc = window.botList[botIndex].mainLoop(k);
+            
+            if (!toggle || moveLoc.override) {
+
+            	setPoint(moveLoc.point.x, moveLoc.point.y);
+            	
+            	if (moveLoc.shoot) {
+            		console.log('shooting');
+            		V(), H(21);
+            	}
+            	
+            	if (moveLoc.split) {
+            		console.log('splitting');
+            		V(), H(17);
+            	}
+
+                /*
+                if (moveLoc.split) {
+                    $("body").trigger(splitdown);
+                    $("body").trigger(splitup);
+					//window.opCode(17);
+                }
+                if (moveLoc.shoot) {
+                    //$("body").trigger(firedown);
+                    //$("body").trigger(fireup);
+                    window.opCode(21);
+                }
+                */
+            }
+        }
         customRender(f);
         if (Ga) {
             na = (3 * na + Ea) / 4;
