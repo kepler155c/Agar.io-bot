@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1427
+// @version     3.1428
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1427;
+var aposBotVersion = 3.1428;
 
 var constants = {
 	splitRangeMin : 650,
@@ -351,8 +351,8 @@ Player.prototype = {
 				console.log('moving forward');
 				destination.x = cell.x - Math.cos(virusAngle) * (distance / 4);
 				destination.y = cell.y - Math.sin(virusAngle) * (distance / 4);
-
 			}
+			destination.override = true;
 			return true;
 		}
 		this.action = null;
@@ -1709,7 +1709,8 @@ function AposBot() {
 		var destination = {
 			point : new Point(getPointX(), getPointY()),
 			split : false,
-			shoot : false
+			shoot : false,
+			override : false
 		};
 
 		this.teams = [];
