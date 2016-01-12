@@ -34,19 +34,33 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1462
+// @version     3.1463
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1462;
+var aposBotVersion = 3.1463;
 
-var constants = {
+var Constants = {
 	splitRangeMin : 650,
 	splitRangeMax : 700, // 674.5,
 	enemySplitDistance : 710,
 	playerRatio : 1.285,
 	enemyRatio : 1.27,
 	splitDuration : 1000, // 800 was pretty good
+	
+	virusShotDistance : 800, // distance a virus travels when shot
+	virusFeedAmount : 7, // Amount of times you need to feed a virus to shoot it
+	ejectMass : 13.7, // was 12, // Mass of ejected cells
+	ejectMassCooldown : 200, // Time until a player can eject mass again
+	ejectMassLoss : 19, // was 16, // Mass lost when ejecting cells
+	ejectSpeed : 160, // Base speed of ejected cells
+	playerMinMassEject : 32, // Mass required to eject a cell
+	playerMinMassSplit : 36, // Mass required to split
+	playerMaxCells : 16, // Max cells the player is allowed to have
+	playerRecombineTime : 30, // Base amount of seconds before a cell is allowed to recombine
+	playerMassDecayRate : 0.002, // Amount of mass lost per second
+	playerMinMassDecay : 9, // Minimum mass for decay to occur
+	playerSpeed : 30, // Player base speed
 
 	// adjustables
 	lureDistance : 1000,
@@ -61,22 +75,7 @@ var constants = {
 	cyan : "#008080",
 	gray : "#F2FBFF",
 	black : "#000000",
-	yellow : "#FFFF00"
-};
-
-var Config = { // Border - Right: X increases, Down: Y increases (as of 2015-05-20)
-	virusFeedAmount : 7, // Amount of times you need to feed a virus to shoot it
-	ejectMass : 13.7, // was 12, // Mass of ejected cells
-	ejectMassCooldown : 200, // Time until a player can eject mass again
-	ejectMassLoss : 19, // was 16, // Mass lost when ejecting cells
-	ejectSpeed : 160, // Base speed of ejected cells
-	playerMinMassEject : 32, // Mass required to eject a cell
-	playerMinMassSplit : 36, // Mass required to split
-	playerMaxCells : 16, // Max cells the player is allowed to have
-	playerRecombineTime : 30, // Base amount of seconds before a cell is allowed to recombine
-	playerMassDecayRate : 0.002, // Amount of mass lost per second
-	playerMinMassDecay : 9, // Minimum mass for decay to occur
-	playerSpeed : 30, // Player base speed
+	yellow : "#FFFF00",
 };
 
 var Classification = {
@@ -182,7 +181,7 @@ Player.prototype = {
 					if (!entity.isVirus() && entity.size > 14 && !entity.isType(Classification.player)) {
 
 						if (entity.closestCell.size * entity.closestCell.size / 2 < entity.size * entity.size
-								* constants.enemyRatio) {
+								* Constants.enemyRatio) {
 							if (entity.distance < 750 + entity.closestCell.size) {
 								this.safeToSplit = false;
 							}
@@ -288,14 +287,14 @@ Player.prototype = {
 	splitAction : function(destination) {
 
 		if (Math.floor(this.size) <= this.splitInfo.size && (Date.now() - this.splitInfo.timer > 100)
-				&& this.cells[0].size < this.splitInfo.initialSize) {
+				&& this.cells[0].size < this.splitInfo.initialSize || (Date.now() - this.splitInfo.timer > 1000)) {
 
 			// player size grows as long as we are splitting
 			this.action = null;
 		} else {
 			this.splitInfo.size = Math.floor(this.size);
 
-			drawCircle(this.splitInfo.location.x, this.splitInfo.location.y, 50, constants.green);
+			drawCircle(this.splitInfo.location.x, this.splitInfo.location.y, 50, Constants.green);
 			if (this.splitInfo.target) {
 				destination.point.x = this.splitInfo.target.x;
 				destination.point.y = this.splitInfo.target.y;
@@ -367,7 +366,7 @@ Player.prototype = {
 				destination.point.x = Math.floor(cell.x - Math.cos(angle) * (distance / 2));
 				destination.point.y = Math.floor(cell.y - Math.sin(angle) * (distance / 2));
 			}
-			drawLine(cell.x, cell.y, destination.point.x, destination.point.y, constants.red);
+			drawLine(cell.x, cell.y, destination.point.x, destination.point.y, Constants.red);
 
 			destination.override = true;
 			return true;
@@ -383,10 +382,10 @@ Player.prototype = {
 				&& cluster.cell
 				&& cluster.cell.isType(Classification.splitTarget)
 				&& !cluster.cell.isMovingTowards
-				&& cluster.distance < this.size + constants.lureDistance
-				&& cluster.distance > this.size + constants.splitRangeMax
+				&& cluster.distance < this.size + Constants.lureDistance
+				&& cluster.distance > this.size + Constants.splitRangeMax
 				&& this.mass > 250
-				&& ((this.mass - Config.ejectMassLoss) / (cluster.cell.mass + Config.ejectMass) > constants.playerRatio)) {
+				&& ((this.mass - Constants.ejectMassLoss) / (cluster.cell.mass + Constants.ejectMass) > Constants.playerRatio)) {
 
 			// TODO: figure out lure amount
 			this.lureTimer = Date.now();
@@ -412,7 +411,7 @@ Player.prototype = {
 	singleThreatEvasionStrategy : function() {
 		// angle away from the closest threat and the next closest threat (if within range)
 
-		drawCircle(this.x, this.y, this.size + 16, constants.pink);
+		drawCircle(this.x, this.y, this.size + 16, Constants.pink);
 
 		if (this.allThreats.length > 1) {
 
@@ -425,7 +424,7 @@ Player.prototype = {
 
 					if (threat.distance - threat.dangerZone < 750) {
 						threat.dangerZone = threat.distance + 1;
-						drawCircle(threat.x, threat.y, threat.dangerZone, constants.red);
+						drawCircle(threat.x, threat.y, threat.dangerZone, Constants.red);
 					}
 					break;
 				}
@@ -435,7 +434,7 @@ Player.prototype = {
 	},
 	multiThreatEvasionStrategy : function() {
 
-		drawCircle(this.x, this.y, this.size + 16, constants.orange);
+		drawCircle(this.x, this.y, this.size + 16, Constants.orange);
 
 		this.eachCellThreat(function(cell, threat) {
 
@@ -447,7 +446,7 @@ Player.prototype = {
 	},
 	intersectEvasionStrategy : function() {
 
-		drawCircle(this.x, this.y, this.size + 16, constants.red);
+		drawCircle(this.x, this.y, this.size + 16, Constants.red);
 
 		this.eachCellThreat(function(cell, threat) {
 
@@ -522,7 +521,7 @@ function initializeEntity() {
 
 		/*
 		if (entity.hasMoved) {
-			this.predictPosition(constants.splitDuration, this.previousUpdated);
+			this.predictPosition(Constants.splitDuration, this.previousUpdated);
 		}
 		*/
 	};
@@ -713,7 +712,7 @@ function AposBot() {
 
 					largerEntity.mass = entityA.mass + entityB.mass;
 					// newThreat.size = Math.sqrt(newThreat.mass * 100);
-					drawCircle(largerEntity.x, largerEntity.y, largerEntity.size + 60, constants.green);
+					drawCircle(largerEntity.x, largerEntity.y, largerEntity.size + 60, Constants.green);
 
 				}
 			}
@@ -758,20 +757,20 @@ function AposBot() {
 						entity.foodList = [];
 						entity.foodMass = 0;
 
-					} else if (this.canEat(entity, player.smallestCell, constants.enemyRatio)) {
+					} else if (this.canEat(entity, player.smallestCell, Constants.enemyRatio)) {
 
 						entity.classification = Classification.threat;
 
 					} else if (entity.closestCell.mass > 36
-							&& this.canSplitKill(entity.closestCell, entity, constants.playerRatio)) {
+							&& this.canSplitKill(entity.closestCell, entity, Constants.playerRatio)) {
 
 						entity.classification = Classification.food;
-						if (player.cells.length == 1 && player.mass / entity.mass < constants.largeThreatRatio) {
+						if (player.cells.length == 1 && player.mass / entity.mass < Constants.largeThreatRatio) {
 							// split worthy
 							entity.classification = Classification.splitTarget;
 						}
 
-					} else if (this.canEat(player.smallestCell, entity, constants.playerRatio)) {
+					} else if (this.canEat(player.smallestCell, entity, Constants.playerRatio)) {
 
 						entity.classification = Classification.food;
 
@@ -834,7 +833,7 @@ function AposBot() {
 			y : t * target.velocityY + target.y
 		};
 
-		drawCircle(destination.x, destination.y, target.size, constants.green);
+		drawCircle(destination.x, destination.y, target.size, Constants.green);
 
 		return destination;
 	};
@@ -850,7 +849,7 @@ function AposBot() {
 
 			if (food.hasMoved) {
 
-				food.predictPosition(constants.splitDuration, this.previousUpdated);
+				food.predictPosition(Constants.splitDuration, this.previousUpdated);
 
 				// really should clone da
 				player.foodClusters.push({
@@ -899,7 +898,7 @@ function AposBot() {
 
 			// var distance = threat.size + threat.cell.size + threat.safeDistance;
 			var distance = threat.size + threat.safeDistance;
-			//drawCircle(threat.x, threat.y, distance, constants.yellow);
+			//drawCircle(threat.x, threat.y, distance, Constants.yellow);
 
 			var tempOb = this.getAngleRange(cell, threat, i++, distance, Classification.unknown);
 			var angle1 = tempOb[0];
@@ -1032,7 +1031,7 @@ function AposBot() {
 						cluster = player.foodClusters[j];
 
 						if (Util.computeDistance(threat.x, threat.y, cluster.x, cluster.y) < threat.size
-								+ player.largestCell.size + constants.splitRangeMax) {
+								+ player.largestCell.size + Constants.splitRangeMax) {
 							player.foodClusters.splice(j, 1);
 						}
 					}
@@ -1060,6 +1059,7 @@ function AposBot() {
 			this.moreInfoStrings.push("Target ===");
 
 			this.moreInfoStrings.push("Mass: " + parseInt(cluster.mass, 10));
+			this.moreInfoStrings.push("Moving: " + cluster.cell.isMoving ? "True" : "False");
 
 			this.moreInfoStrings.push("");
 		}
@@ -1073,10 +1073,10 @@ function AposBot() {
 		destination.point = this.followAngle(shiftedAngle.angle, cluster.closestCell.x, cluster.closestCell.y,
 				cluster.distance);
 
-		var color = constants.orange;
+		var color = Constants.orange;
 
 		if (doSplit && shiftedAngle.shifted) {
-			color = constants.red; // cannot split, our angle was shifted from target
+			color = Constants.red; // cannot split, our angle was shifted from target
 			doSplit = false;
 		} else if (doSplit && !shiftedAngle.shifted) {
 
@@ -1096,7 +1096,7 @@ function AposBot() {
 						// cannot split, there is a virus in the path
 						doSplit = false;
 						// console.log('inrange');
-						color = constants.red;
+						color = Constants.red;
 						return;
 					}
 				}
@@ -1104,7 +1104,7 @@ function AposBot() {
 		}
 
 		drawCircle(cluster.x, cluster.y, cluster.size + 40, color);
-		drawPoint(cluster.x, cluster.y + 20, constants.yellow, "m:" + cluster.mass.toFixed(1) + " w:"
+		drawPoint(cluster.x, cluster.y + 20, Constants.yellow, "m:" + cluster.mass.toFixed(1) + " w:"
 				+ cluster.clusterWeight.toFixed(1));
 
 		if (!doSplit && !shiftedAngle.shifted) {
@@ -1117,7 +1117,7 @@ function AposBot() {
 		}
 
 		drawLine(cluster.closestCell.x, cluster.closestCell.y, destination.point.x, destination.point.y,
-				constants.orange);
+				Constants.orange);
 
 		return true;
 	};
@@ -1161,7 +1161,8 @@ function AposBot() {
 							y : cell.y - Math.sin(angle) * distance,
 						};
 
-						drawLine(cell.x, cell.y, virusRange.x, virusRange.y, constants.gray);
+						drawLine(cell.x, cell.y, virusRange.x, virusRange.y, Constants.gray);
+						drawCircle(virus.x, virus.y, Constants.virusShotDistance, Constants.orange);
 					}
 				}
 			}
@@ -1174,7 +1175,7 @@ function AposBot() {
 
 			var cell = player.cells[i];
 
-			if (this.canEat(t, cell, constants.playerRatio)) {
+			if (this.canEat(t, cell, Constants.playerRatio)) {
 
 				var threat = {
 					x : t.x,
@@ -1214,8 +1215,8 @@ function AposBot() {
 				}
 				threat.intersects = threat.distance < cell.size + t.size + velocityPadding;
 
-				if (this.canSplitKill(t, cell, constants.enemyRatio)
-						&& t.teamMass / player.mass <= constants.largeThreatRatio && t.teamSize < 6) {
+				if (this.canSplitKill(t, cell, Constants.enemyRatio)
+						&& t.teamMass / player.mass <= Constants.largeThreatRatio && t.teamSize < 6) {
 
 					// this should really be 2 threats - maybe
 
@@ -1231,15 +1232,15 @@ function AposBot() {
 				var notTouchingDistance = cell.size + threat.size;
 
 				// too big - not a threat
-				if (t.teamMass / player.mass > constants.largeThreatRatio) {
+				if (t.teamMass / player.mass > Constants.largeThreatRatio) {
 
 					threat.preferredDistance = notTouchingDistance;
 					threat.threatenedDistance = notTouchingDistance;
 
 				} else if (threat.isSplitThreat) {
 
-					threat.preferredDistance = notTouchingDistance + constants.splitRangeMax;
-					threat.threatenedDistance = notTouchingDistance + cell.size + constants.splitRangeMax; // one radius distance
+					threat.preferredDistance = notTouchingDistance + Constants.splitRangeMax;
+					threat.threatenedDistance = notTouchingDistance + cell.size + Constants.splitRangeMax; // one radius distance
 
 				} else {
 
@@ -1259,7 +1260,7 @@ function AposBot() {
 				}
 
 				// drawPoint(threat.x, threat.y + 20, 2, parseInt(threat.distance, 10) + " " + parseInt(threat.dangerZone, 10));
-				drawPoint(threat.x, threat.y + 20 + threat.size / 15, constants.yellow, "/***" + "***\\ " + t.mass);
+				drawPoint(threat.x, threat.y + 20 + threat.size / 15, Constants.yellow, "/***" + "***\\ " + parseInt(t.mass));
 
 				cell.threats.push(threat);
 				player.allThreats.push(threat);
@@ -1273,7 +1274,7 @@ function AposBot() {
 			var threat = threats[i];
 
 			if (threat.distance < threat.dangerZone) {
-				drawCircle(threat.x, threat.y, threat.threatenedDistance - threat.cell.size + 40, constants.gray);
+				drawCircle(threat.x, threat.y, threat.threatenedDistance - threat.cell.size + 40, Constants.gray);
 				threats.splice(i, 1);
 
 				if (threats.length <= 1) {
@@ -1322,7 +1323,7 @@ function AposBot() {
 			threat = threats[i];
 
 			if (threat.distance > threat.safeDistance && !threat.isMovingTowards) {
-				drawCircle(threat.x, threat.y, threat.threatenedDistance - threat.cell.size + 40, constants.gray);
+				drawCircle(threat.x, threat.y, threat.threatenedDistance - threat.cell.size + 40, Constants.gray);
 				threats.splice(i, 1);
 				console.log('not moving towards');
 				if (threats.length <= 1 || this.getUniqueThreats(threats) <= 1) {
@@ -1337,7 +1338,7 @@ function AposBot() {
 
 			if (threat.teamSize > 1) {
 				if (threat.distance > threat.safeDistance) {
-					drawCircle(threat.x, threat.y, threat.threatenedDistance - threat.cell.size + 40, constants.gray);
+					drawCircle(threat.x, threat.y, threat.threatenedDistance - threat.cell.size + 40, Constants.gray);
 					threats.splice(i, 1);
 					console.log('splitters');
 					if (threats.length <= 1 || this.getUniqueThreats(threats) <= 1) {
@@ -1547,7 +1548,7 @@ function AposBot() {
 
 		for (var i = 0; i < obstacleAngles.length; i++) {
 
-			this.drawAngle(player, obstacleAngles[i], 50, constants.cyan);
+			this.drawAngle(player, obstacleAngles[i], 50, Constants.cyan);
 		}
 
 		if (goodAngles.length > 0) {
@@ -1655,9 +1656,9 @@ function AposBot() {
 		/*
 		for (i = 0; i < threats.length; i++) {
 			threat = threats[i];
-			var color = constants.red;
+			var color = Constants.red;
 			if (threat.dangerZone < threat.preferredDistance) {
-				color = constants.orange;
+				color = Constants.orange;
 			}
 			drawCircle(threat.x, threat.y, threat.dangerZone, color);
 		}
@@ -1739,15 +1740,15 @@ function AposBot() {
 		//The current destination that the cells were going towards.
 
 		drawLine(getX() - (1920 / 2) / getZoomlessRatio(), getY() - (1080 / 2) / getZoomlessRatio(), getX()
-				+ (1920 / 2) / getZoomlessRatio(), getY() - (1080 / 2) / getZoomlessRatio(), constants.gray);
+				+ (1920 / 2) / getZoomlessRatio(), getY() - (1080 / 2) / getZoomlessRatio(), Constants.gray);
 		drawLine(getX() - (1920 / 2) / getZoomlessRatio(), getY() + (1080 / 2) / getZoomlessRatio(), getX()
-				+ (1920 / 2) / getZoomlessRatio(), getY() + (1080 / 2) / getZoomlessRatio(), constants.gray);
+				+ (1920 / 2) / getZoomlessRatio(), getY() + (1080 / 2) / getZoomlessRatio(), Constants.gray);
 		drawLine(getX() - (1920 / 2) / getZoomlessRatio(), getY() - (1080 / 2) / getZoomlessRatio(), getX()
-				- (1920 / 2) / getZoomlessRatio(), getY() + (1080 / 2) / getZoomlessRatio(), constants.gray);
+				- (1920 / 2) / getZoomlessRatio(), getY() + (1080 / 2) / getZoomlessRatio(), Constants.gray);
 		drawLine(getX() + (1920 / 2) / getZoomlessRatio(), getY() - (1080 / 2) / getZoomlessRatio(), getX()
-				+ (1920 / 2) / getZoomlessRatio(), getY() + (1080 / 2) / getZoomlessRatio(), constants.gray);
+				+ (1920 / 2) / getZoomlessRatio(), getY() + (1080 / 2) / getZoomlessRatio(), Constants.gray);
 
-		drawCircle(player.x, player.y, player.size + constants.enemySplitDistance, constants.pink);
+		drawCircle(player.x, player.y, player.size + Constants.enemySplitDistance, Constants.pink);
 
 		//loop through everything that is on the screen and
 		//separate everything in it's own category.
@@ -1775,7 +1776,7 @@ function AposBot() {
 		}
 
 		if (player.safeToSplit) {
-			drawCircle(player.x, player.y, player.size + 16, constants.green);
+			drawCircle(player.x, player.y, player.size + 16, Constants.green);
 		}
 
 		Object.keys(this.entities).forEach(function(key) {
@@ -1788,32 +1789,28 @@ function AposBot() {
 				break;
 			case Classification.virus:
 				drawPoint(entity.x, entity.y, 1, entity.mass.toFixed(2));
-
-				if (player.largestCell.mass >= entity.mass) {
-					drawCircle(entity.x, entity.y, 800, constants.orange);
-				}
 				break;
 			case Classification.splitTarget:
-				drawCircle(entity.x, entity.y, entity.size + 20, constants.green);
+				drawCircle(entity.x, entity.y, entity.size + 20, Constants.green);
 				break;
 			case Classification.mergeTarget:
-				drawCircle(entity.x, entity.y, entity.size + 20, constants.cyan);
+				drawCircle(entity.x, entity.y, entity.size + 20, Constants.cyan);
 				break;
 			case Classification.food:
 				// drawPoint(entity.x, entity.y+20, 1, entity.mass.toFixed(2));
 				if (entity.hasMoved) {
-					drawCircle(entity.x, entity.y, entity.size + 20, constants.blue);
+					drawCircle(entity.x, entity.y, entity.size + 20, Constants.blue);
 				} else if (entity.size > 14) {
-					drawPoint(entity.x, entity.y + 20, constants.white, entity.size);
-					drawCircle(entity.x, entity.y, entity.size + 20, constants.cyan);
+					drawPoint(entity.x, entity.y + 20, Constants.white, entity.size);
+					drawCircle(entity.x, entity.y, entity.size + 20, Constants.cyan);
 				}
 				break;
 			case Classification.unknown:
-				drawCircle(entity.x, entity.y, entity.size + 20, constants.purple);
+				drawCircle(entity.x, entity.y, entity.size + 20, Constants.purple);
 				break;
 			case Classification.threat:
 				//drawPoint(entity.x, entity.y + 20, 1, parseInt(entity.distance - entity.size));
-				var color = entity.isMovingTowards ? constants.red : constants.orange;
+				var color = entity.isMovingTowards ? Constants.red : Constants.orange;
 				drawCircle(entity.x, entity.y, entity.size + 20, color);
 
 				//drawCircle(entity.x, entity.y, entity.dangerZone, color);
@@ -1826,7 +1823,7 @@ function AposBot() {
 			if (threat.isSplitThreat) {
 
 				var tsize = Math.sqrt(threat.mass / 2 * 100);
-				var shadowDistance = Math.min(threat.t.size + constants.splitRangeMax, threat.distance);
+				var shadowDistance = Math.min(threat.t.size + Constants.splitRangeMax, threat.distance);
 
 				var shadowThreat = {
 					x : threat.t.x - Math.cos(threat.angle) * shadowDistance,
@@ -1834,16 +1831,16 @@ function AposBot() {
 				};
 				// distance = Util.computeDistance(shadowThreat.x, shadowThreat.y, cell.x, cell.y);
 
-				drawCircle(shadowThreat.x, shadowThreat.y, tsize, constants.gray);
+				drawCircle(shadowThreat.x, shadowThreat.y, tsize, Constants.gray);
 
-				var shadowLineDistance = Math.min(threat.t.size - tsize + constants.splitRangeMax, threat.distance);
+				var shadowLineDistance = Math.min(threat.t.size - tsize + Constants.splitRangeMax, threat.distance);
 				var shadowThreatLine = {
 					x : threat.t.x - Math.cos(threat.angle) * shadowLineDistance,
 					y : threat.t.y - Math.sin(threat.angle) * shadowLineDistance,
 				};
 
 				drawLine(threat.t.x, threat.t.y, shadowThreatLine.x, shadowThreatLine.y,
-						threat.isMovingTowards ? constants.red : constants.gray);
+						threat.isMovingTowards ? Constants.red : Constants.gray);
 			}
 		}, this);
 
@@ -1851,7 +1848,7 @@ function AposBot() {
 
 			var team = this.teams[key];
 
-			drawCircle(team.x, team.y, team.size, constants.cyan);
+			drawCircle(team.x, team.y, team.size, Constants.cyan);
 		}, this);
 
 		// cursor
@@ -1976,7 +1973,7 @@ function AposBot() {
 
 	this.isFood = function(blob, cell) {
 
-		if (!cell.isMoving() && !cell.isVirus() && this.canEat(blob, cell, constants.playerRatio)) {
+		if (!cell.isMoving() && !cell.isVirus() && this.canEat(blob, cell, Constants.playerRatio)) {
 			return true;
 		}
 		return false;
@@ -2047,8 +2044,8 @@ function AposBot() {
 
 		//drawPoint(cell[0].x, cell[0].y, 2, "");
 
-		drawPoint(line1.x, line1.y, constants.red, parseInt(angle[0], 10));
-		drawPoint(line2.x, line2.y, constants.red, parseInt(angle[1], 10));
+		drawPoint(line1.x, line1.y, Constants.red, parseInt(angle[0], 10));
+		drawPoint(line2.x, line2.y, Constants.red, parseInt(angle[1], 10));
 	};
 
 	this.followAngle = function(angle, useX, useY, distance) {
@@ -2138,9 +2135,9 @@ function AposBot() {
 		//drawLine(blob2Left[0], blob2Left[1], tempLine[0], tempLine[1], 0);
 
 		if ((blob1Range / blob2Range) > 1) {
-			drawPoint(blob1Left.x, blob1Left.y, constants.red, "");
-			drawPoint(blob1Right.x, blob1Right.y, constants.red, "");
-			drawPoint(blob1.x, blob1.y, constants.red, "" + blob1Range + ", " + blob2Range + " R: "
+			drawPoint(blob1Left.x, blob1Left.y, Constants.red, "");
+			drawPoint(blob1Right.x, blob1Right.y, Constants.red, "");
+			drawPoint(blob1.x, blob1.y, Constants.red, "" + blob1Range + ", " + blob2Range + " R: "
 					+ (Math.round((blob1Range / blob2Range) * 1000) / 1000));
 		}
 
@@ -2222,9 +2219,9 @@ function AposBot() {
 					this.computeInexpensiveDistance(getMapStartX(), blob.y, blob.x, blob.y) ]);
 			lineLeft = this.followAngle(115, blob.x, blob.y, 190 + blob.size);
 			lineRight = this.followAngle(245, blob.x, blob.y, 190 + blob.size);
-			drawLine(blob.x, blob.y, lineLeft.x, lineLeft.y, constants.gray);
-			drawLine(blob.x, blob.y, lineRight.x, lineRight.y, constants.gray);
-			drawArc(lineLeft.x, lineLeft.y, lineRight.x, lineRight.y, blob.x, blob.y, constants.pink);
+			drawLine(blob.x, blob.y, lineLeft.x, lineLeft.y, Constants.gray);
+			drawLine(blob.x, blob.y, lineRight.x, lineRight.y, Constants.gray);
+			drawArc(lineLeft.x, lineLeft.y, lineRight.x, lineRight.y, blob.x, blob.y, Constants.pink);
 		}
 		if (blob.y < getMapStartY() + distanceFromWallY) {
 			//TOP
@@ -2233,9 +2230,9 @@ function AposBot() {
 					this.computeInexpensiveDistance(blob.x, getMapStartY(), blob.x, blob.y) ]);
 			lineLeft = this.followAngle(205, blob.x, blob.y, 190 + blob.size);
 			lineRight = this.followAngle(335, blob.x, blob.y, 190 + blob.size);
-			drawLine(blob.x, blob.y, lineLeft.x, lineLeft.y, constants.gray);
-			drawLine(blob.x, blob.y, lineRight.x, lineRight.y, constants.gray);
-			drawArc(lineLeft.x, lineLeft[1], lineRight.x, lineRight.y, blob.x, blob.y, constants.pink);
+			drawLine(blob.x, blob.y, lineLeft.x, lineLeft.y, Constants.gray);
+			drawLine(blob.x, blob.y, lineRight.x, lineRight.y, Constants.gray);
+			drawArc(lineLeft.x, lineLeft[1], lineRight.x, lineRight.y, blob.x, blob.y, Constants.pink);
 		}
 		if (blob.x > getMapEndX() - distanceFromWallX) {
 			//RIGHT
@@ -2244,9 +2241,9 @@ function AposBot() {
 					this.computeInexpensiveDistance(getMapEndX(), blob.y, blob.x, blob.y) ]);
 			lineLeft = this.followAngle(295, blob.x, blob.y, 190 + blob.size);
 			lineRight = this.followAngle(65, blob.x, blob.y, 190 + blob.size);
-			drawLine(blob.x, blob.y, lineLeft.x, lineLeft.y, constants.gray);
-			drawLine(blob.x, blob.y, lineRight.x, lineRight.y, constants.gray);
-			drawArc(lineLeft.x, lineLeft.y, lineRight.x, lineRight.y, blob.x, blob.y, constants.pink);
+			drawLine(blob.x, blob.y, lineLeft.x, lineLeft.y, Constants.gray);
+			drawLine(blob.x, blob.y, lineRight.x, lineRight.y, Constants.gray);
+			drawArc(lineLeft.x, lineLeft.y, lineRight.x, lineRight.y, blob.x, blob.y, Constants.pink);
 		}
 		if (blob.y > getMapEndY() - distanceFromWallY) {
 			//BOTTOM
@@ -2255,9 +2252,9 @@ function AposBot() {
 					this.computeInexpensiveDistance(blob.x, getMapEndY(), blob.x, blob.y) ]);
 			lineLeft = this.followAngle(25, blob.x, blob.y, 190 + blob.size);
 			lineRight = this.followAngle(155, blob.x, blob.y, 190 + blob.size);
-			drawLine(blob.x, blob.y, lineLeft.x, lineLeft.y, constants.gray);
-			drawLine(blob.x, blob.y, lineRight.x, lineRight.y, constants.gray);
-			drawArc(lineLeft.x, lineLeft.y, lineRight.x, lineRight.y, blob.x, blob.y, constants.pink);
+			drawLine(blob.x, blob.y, lineLeft.x, lineLeft.y, Constants.gray);
+			drawLine(blob.x, blob.y, lineRight.x, lineRight.y, Constants.gray);
+			drawArc(lineLeft.x, lineLeft.y, lineRight.x, lineRight.y, blob.x, blob.y, Constants.pink);
 		}
 		return listToUse;
 	};
@@ -2353,21 +2350,21 @@ function AposBot() {
 
 		if (classification != Classification.unknown) {
 
-			drawPoint(angleStuff[2][0], angleStuff[2][1], constants.red, "");
-			drawPoint(angleStuff[3][0], angleStuff[3][1], constants.red, "");
+			drawPoint(angleStuff[2][0], angleStuff[2][1], Constants.red, "");
+			drawPoint(angleStuff[3][0], angleStuff[3][1], Constants.red, "");
 
 			//console.log("Adding badAngles: " + leftAngle + ", " + rightAngle + " diff: " + difference);
 
 			var lineLeft = this.followAngle(leftAngle, blob1.x, blob1.y, safeDistance - index * 10);
 			var lineRight = this.followAngle(rightAngle, blob1.x, blob1.y, safeDistance - index * 10);
 
-			var color = constants.orange;
+			var color = Constants.orange;
 			if (classification == Classification.virus) {
-				color = constants.cyan;
+				color = Constants.cyan;
 			} else if (classification == Classification.threat) { // (getCells().hasOwnProperty(blob2.id)) {
-				color = constants.red;
+				color = Constants.red;
 			} else if (classification == Classification.cluster) {
-				color = constants.green;
+				color = Constants.green;
 			}
 
 			drawLine(blob1.x, blob1.y, lineLeft.x, lineLeft.y, color);
@@ -2429,10 +2426,10 @@ function AposBot() {
 		if (!interceptPoint) {
 			return false;
 		}
-		var range = constants.splitRangeMin;
+		var range = Constants.splitRangeMin;
 
 		if (cluster.cell.isMovingTowards) {
-			range = constants.splitRangeMax;
+			range = Constants.splitRangeMax;
 		}
 
 		var distance = Util.computeDistance(cluster.cell.closestCell.x, cluster.cell.closestCell.y, interceptPoint.x,
