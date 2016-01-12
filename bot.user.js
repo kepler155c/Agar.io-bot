@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1456
+// @version     3.1457
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1456;
+var aposBotVersion = 3.1457;
 
 var constants = {
 	splitRangeMin : 650,
@@ -67,7 +67,7 @@ var constants = {
 
 var Config = { // Border - Right: X increases, Down: Y increases (as of 2015-05-20)
 	virusFeedAmount : 7, // Amount of times you need to feed a virus to shoot it
-	ejectMass : 12, // Mass of ejected cells
+	ejectMass : 13.7, // was 12, // Mass of ejected cells
 	ejectMassCooldown : 200, // Time until a player can eject mass again
 	ejectMassLoss : 19, // was 16, // Mass lost when ejecting cells
 	ejectSpeed : 160, // Base speed of ejected cells
@@ -1168,7 +1168,6 @@ function AposBot() {
 					}
 				}
 			}
-			drawPoint(virus.x, virus.y, constants.black, virus.mass + " " + numberOfShots);
 		}
 	};
 
@@ -1804,7 +1803,7 @@ function AposBot() {
 				drawCircle(entity.x, entity.y, entity.size + 20, constants.cyan);
 				break;
 			case Classification.food:
-				// drawPoint(entity.x, entity.y+20, 1, "m:" + entity.mass.toFixed(2));
+				drawPoint(entity.x, entity.y+20, 1, entity.mass.toFixed(2));
 				if (entity.hasMoved) {
 					drawCircle(entity.x, entity.y, entity.size + 20, constants.blue);
 				} else if (entity.size > 14) {
