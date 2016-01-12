@@ -20,11 +20,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.304
+// @version     4.305
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.304;
+var aposLauncherVersion = 4.305;
 
 var showAd = false;
 var moveLoc = null;
@@ -537,98 +537,89 @@ console.log("Running Bot Launcher!");
             return dzz
         }
 
-//        try {
-            var clone = interNodes.slice(0);
-            
-            lastC = C;
-            bb = C = Date.now();
-            bo || (bo = !0, e("#connecting").hide(), cb(), L && (L(), L = null));
-            var c = Math.random();
-            Ha = !1;
-            var d = a.getUint16(b, !0);
-            b += 2;
-            for (var u = 0; u < d; ++u) {
-                var p = E[a.getUint32(b, !0)],
-                    g = E[a.getUint32(b + 4, !0)];
-                b += 8;
-                p && g && (g.X(), g.s = g.x, g.t = g.y, g.r = g.size, g.J = p.x, g.K = p.y, g.q = g.size, g.Q =
-                    C)
-            }
-            for (u = 0;;) {
-                d = a.getUint32(b, !0);
-                b += 4;
-                if (0 == d) break;
-                ++u;
-                var f, p;
-                p = a.getInt32(b, !0);
-                b += 4;
-                g = a.getInt32(b, !0);
-                b += 4;
-                f = a.getInt16(b, !0);
-                b += 2;
-                
-                var n = a.getUint8(b++),
-                h = a.getUint8(b++),
-                w = a.getUint8(b++),
-                h = nccc(n << 16 | h << 8 | w),
-                w = a.getUint8(b++),
-                m = !!(w & 1),
-                r = !!(w & 16),
-                rrr = null;
-
-                w & 2 && (b += 4 + a.getUint32(b, !0));
-                w & 4 && (rrr = uuu());    // what is u()
-                
-                var q = ddd(),  // what is d()
-                n = null;
-
-                E.hasOwnProperty(d) ? (n = E[d], n.P(), n.s = n.x, n.t = n.y, n.r = n.size, n.color = h) :
-                    (n = new da(d, p, g, f, h, q), v.push(n), E[d] = n, n.ua = p, n.va = g);
-                n.h = m;
-                n.n = r;
-                n.J = p;
-                n.K = g;
-                n.q = f;
-                n.sa = c;
-                n.Q = C;
-                n.ba = w;
-                // rrr && (n.C = rrr);    // what is m.C
-                // rrr && console.log(rrr);
-                q && n.B(q); - 1 != M.indexOf(d) && -1 == k.indexOf(n) && (document.getElementById("overlays").style.display = "none", k.push(n), n.birth = getLastUpdate(), n.birthMass = (n.size * n.size / 100), 1 == k.length && (s = n.x, t = n.y, db()))
-                clone[d] = window.getCells()[d];
-            }
-
-            //UPDATE
-            Object.keys(clone).forEach(function(element, index) {
-                //console.log("start: " + interNodes[element].updateTime + " current: " + D + " life: " + (D - interNodes[element].updateTime));
-                var isRemoved = !window.getCells().hasOwnProperty(element);
-    
-                //console.log("Time not updated: " + (window.getLastUpdate() - interNodes[element].getUptimeTime()));
-                if (isRemoved && (window.getLastUpdate() - clone[element].getUptimeTime()) > 1500) {
-                    delete clone[element];
-                } else {
-                    if (isRemoved &&
-                        clone[element].x > (getX() - (1920 / 2) / getZoomlessRatio()) &&
-                        clone[element].x < (getX() + (1920 / 2) / getZoomlessRatio()) &&
-                        clone[element].y > getY() - (1080 / 2) / getZoomlessRatio() &&
-                        clone[element].y < getY() + (1080 / 2) / getZoomlessRatio()) {
-    
-                        delete clone[element];
-                    } else {
-                    	clone[element].continueMoving();
-                    }
-                }
-            });
-    
-            c = a.getUint32(b, !0);
+        lastC = C;
+        bb = C = Date.now();
+        bo || (bo = !0, e("#connecting").hide(), cb(), L && (L(), L = null));
+        var c = Math.random();
+        Ha = !1;
+        var d = a.getUint16(b, !0);
+        b += 2;
+        for (var u = 0; u < d; ++u) {
+            var p = E[a.getUint32(b, !0)],
+                g = E[a.getUint32(b + 4, !0)];
+            b += 8;
+            p && g && (g.X(), g.s = g.x, g.t = g.y, g.r = g.size, g.J = p.x, g.K = p.y, g.q = g.size, g.Q =
+                C)
+        }
+        for (u = 0;;) {
+            d = a.getUint32(b, !0);
             b += 4;
-            for (u = 0; u < c; u++) d = a.getUint32(b, !0), b += 4, n = E[d], null != n && n.X();
+            if (0 == d) break;
+            ++u;
+            var f, p;
+            p = a.getInt32(b, !0);
+            b += 4;
+            g = a.getInt32(b, !0);
+            b += 4;
+            f = a.getInt16(b, !0);
+            b += 2;
             
-            // console.log('replacing with clone ' + clone.length + ' ' + interNodes.length);
-            interNodes = clone;
-//        } catch (ex) {
-//            console.log('caught11 ' + b);
-//        }
+            var n = a.getUint8(b++),
+            h = a.getUint8(b++),
+            w = a.getUint8(b++),
+            h = nccc(n << 16 | h << 8 | w),
+            w = a.getUint8(b++),
+            m = !!(w & 1),
+            r = !!(w & 16),
+            rrr = null;
+
+            w & 2 && (b += 4 + a.getUint32(b, !0));
+            w & 4 && (rrr = uuu());    // what is u()
+            
+            var q = ddd(),  // what is d()
+            n = null;
+
+            E.hasOwnProperty(d) ? (n = E[d], n.P(), n.s = n.x, n.t = n.y, n.r = n.size, n.color = h) :
+                (n = new da(d, p, g, f, h, q), v.push(n), E[d] = n, n.ua = p, n.va = g);
+            n.h = m;
+            n.n = r;
+            n.J = p;
+            n.K = g;
+            n.q = f;
+            n.sa = c;
+            n.Q = C;
+            n.ba = w;
+            // rrr && (n.C = rrr);    // what is m.C
+            // rrr && console.log(rrr);
+            q && n.B(q); - 1 != M.indexOf(d) && -1 == k.indexOf(n) && (document.getElementById("overlays").style.display = "none", k.push(n), n.birth = getLastUpdate(), n.birthMass = (n.size * n.size / 100), 1 == k.length && (s = n.x, t = n.y, db()))
+            interNodes[d] = window.getCells()[d];
+        }
+
+        //UPDATE
+        Object.keys(interNodes).forEach(function(element, index) {
+            //console.log("start: " + interNodes[element].updateTime + " current: " + D + " life: " + (D - interNodes[element].updateTime));
+            var isRemoved = !window.getCells().hasOwnProperty(element);
+
+            //console.log("Time not updated: " + (window.getLastUpdate() - interNodes[element].getUptimeTime()));
+            if (isRemoved && (window.getLastUpdate() - interNodes[element].getUptimeTime()) > 1500) {
+                delete interNodes[element];
+            } else {
+                if (isRemoved &&
+                    interNodes[element].x > (getX() - (1920 / 2) / getZoomlessRatio()) &&
+                    interNodes[element].x < (getX() + (1920 / 2) / getZoomlessRatio()) &&
+                    interNodes[element].y > getY() - (1080 / 2) / getZoomlessRatio() &&
+                    interNodes[element].y < getY() + (1080 / 2) / getZoomlessRatio()) {
+
+                    delete interNodes[element];
+                } else {
+                	interNodes[element].continueMoving();
+                }
+            }
+        });
+
+        c = a.getUint32(b, !0);
+        b += 4;
+        for (u = 0; u < c; u++) d = a.getUint32(b, !0), b += 4, n = E[d], null != n && n.X();
         //UPDATE
         //Ha && 0 == k.length && Sa(!1)
     }
@@ -808,11 +799,7 @@ console.log("Running Bot Launcher!");
         dArc = [];
         dText = [];
         lines = [];
-    	var splitdown = $.Event("keydown", { keyCode: 32}); //space button
-        var splitup = $.Event("keyup", { keyCode: 32}); //space button
 
-    	var firedown = $.Event("keydown", { keyCode: 87}); //w button
-        var fireup = $.Event("keyup", { keyCode: 87}); // w button
 
         var a, b = Date.now();
         ++zb;
@@ -877,19 +864,6 @@ console.log("Running Bot Launcher!");
             		console.log('splitting');
             		V(), H(17);
             	}
-
-                /*
-                if (moveLoc.split) {
-                    $("body").trigger(splitdown);
-                    $("body").trigger(splitup);
-					//window.opCode(17);
-                }
-                if (moveLoc.shoot) {
-                    //$("body").trigger(firedown);
-                    //$("body").trigger(fireup);
-                    window.opCode(21);
-                }
-                */
             }
         }
         customRender(f);

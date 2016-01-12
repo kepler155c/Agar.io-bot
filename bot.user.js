@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1460
+// @version     3.1461
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1460;
+var aposBotVersion = 3.1461;
 
 var constants = {
 	splitRangeMin : 650,
@@ -317,8 +317,6 @@ Player.prototype = {
 
 			this.action = this.shootVirusAction;
 			this.virusShootInfo = {
-				x : this.closestVirus.closestCell.x,
-				y : this.closestVirus.closestCell.y,
 				virus : this.closestVirus,
 				mass : this.mass,
 				startingMass : this.closestVirus.mass
@@ -1082,17 +1080,17 @@ function AposBot() {
 			doSplit = false;
 		} else if (doSplit && !shiftedAngle.shifted) {
 
-			// console.log('DUMPING');
+			console.log('DUMPING');
 			var destinationAngle = Util.getAngle(destination.point.x, destination.point.y, cluster.closestCell.x,
 					cluster.closestCell.y);
-			// console.log(destinationAngle);
+			console.log(destinationAngle);
 
 			Object.keys(this.entities).filter(this.entities.virusFilter, this.entities).forEach(function(key) {
 
 				var virus = this.entities[key];
 
 				if (virus.range) {
-					// console.log(virus.range);
+					console.log(virus.range);
 
 					if (this.angleIsWithin(destinationAngle, virus.range)) {
 						// cannot split, there is a virus in the path
