@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1453
+// @version     3.1454
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1453;
+var aposBotVersion = 3.1454;
 
 var constants = {
 	splitRangeMin : 650,
@@ -63,6 +63,21 @@ var constants = {
 	gray : "#F2FBFF",
 	black : "#000000",
 	yellow : "#FFFF00"
+};
+
+var Config = { // Border - Right: X increases, Down: Y increases (as of 2015-05-20)
+	virusFeedAmount : 7, // Amount of times you need to feed a virus to shoot it
+	ejectMass : 12, // Mass of ejected cells
+	ejectMassCooldown : 200, // Time until a player can eject mass again
+	ejectMassLoss : 19, // was 16, // Mass lost when ejecting cells
+	ejectSpeed : 160, // Base speed of ejected cells
+	playerMinMassEject : 32, // Mass required to eject a cell
+	playerMinMassSplit : 36, // Mass required to split
+	playerMaxCells : 16, // Max cells the player is allowed to have
+	playerRecombineTime : 30, // Base amount of seconds before a cell is allowed to recombine
+	playerMassDecayRate : 0.002, // Amount of mass lost per second
+	playerMinMassDecay : 9, // Minimum mass for decay to occur
+	playerSpeed : 30, // Player base speed
 };
 
 var Classification = {
@@ -108,6 +123,8 @@ var Player = function() {
 	this.fuseTimer = null;
 	this.action = null;
 	this.lastPoint = null;
+
+	this.lureTimer = Date.now();
 };
 
 Player.prototype = {
@@ -135,7 +152,7 @@ Player.prototype = {
 
 			if (cells.length > 0) {
 				if (!cell.fuseTimer) {
-					cell.fuseTimer = Date.now() + (30 + cell.mass * 0.02) * 1000;
+					cell.fuseTimer = Date.now() + (30 + cell.mass * 0.0233) * 1000;
 				}
 			} else {
 				cell.fuseTimer = null;
@@ -249,7 +266,7 @@ Player.prototype = {
 			}
 		}
 	},
-	split : function(targetCell, x, y) {
+	split : function(targetCell, x, y, destination) {
 
 		if (this.canSplit()) {
 
@@ -263,6 +280,10 @@ Player.prototype = {
 			};
 
 			this.action = this.splitAction;
+			destination.split = true;
+			if (targetCell) {
+				destination.point = this.splitInfo.location;
+			}
 		}
 	},
 	splitAction : function(destination) {
@@ -357,6 +378,23 @@ Player.prototype = {
 
 		this.action = null;
 		return false;
+	},
+	lure : function(cluster, destination) {
+		// really bad condition logic - but check if it's a split target just outside of range
+		if ((Date.now() - this.lureTimer > 5000)
+				&& this.safeToSplit
+				&& cluster.cell
+				&& cluster.cell.isType(Classification.splitTarget)
+				&& !cluster.cell.isMovingTowards
+				&& cluster.distance < this.size + constants.lureDistance
+				&& cluster.distance > this.size + constants.splitRangeMin
+				&& this.mass > 250
+				&& ((this.mass - Config.ejectMassLoss) / (cluster.cell.mass + Config.ejectMass) > constants.playerRatio)) { // 37 (size) per mass shot ?
+
+			// TODO: figure out lure amount
+			this.lureTimer = Date.now();
+			destination.shoot = true;
+		}
 	},
 	eachCellThreat : function(fn, thisp) {
 
@@ -1009,7 +1047,6 @@ function AposBot() {
 
 		var doSplit = (player.largestCell.mass >= 36 && player.mass <= 50 && player.cells.length == 1 && player.safeToSplit);
 		//				|| (player.largestCell.mass >= 900 && player.cells.length < 16);
-		var doLure = false;
 
 		cluster = this.getBestFood(player);
 
@@ -1073,36 +1110,14 @@ function AposBot() {
 		drawPoint(cluster.x, cluster.y + 20, constants.yellow, "m:" + cluster.mass.toFixed(1) + " w:"
 				+ cluster.clusterWeight.toFixed(1));
 
-		// really bad condition logic - but check if it's a split target just outside of range
-		if (!doSplit && !player.isLuring && player.safeToSplit && cluster.cell && !shiftedAngle.shifted
-				&& cluster.cell.isType(Classification.splitTarget) && !cluster.cell.isMovingTowards
-				&& cluster.distance < player.size + constants.lureDistance
-				&& cluster.distance > player.size + constants.splitRangeMin && // not already in range (might have been an enemy close)
-				player.mass > 250
-				&& ((player.mass - constants.shotMassAmount) / (cluster.cell.mass + 13.69) > constants.playerRatio)) { // 37 (size) per mass shot ?
-
-			// TODO: figure out lure amount
-			player.isLuring = true;
-			doLure = true;
-			setTimeout(function() {
-				player.isLuring = false;
-			}, 5000);
+		if (!doSplit && !shiftedAngle.shifted) {
+			player.lure(cluster, destination);
 		}
 
 		// are we avoiding obstacles ??
 		if (doSplit) {
-
-			player.split(cluster.cell, cluster.x, cluster.y);
-
-			destination.point = player.splitInfo.location;
-
-		} else {
-
-			doSplit = false;
+			player.split(cluster.cell, cluster.x, cluster.y, destination);
 		}
-
-		destination.split = doSplit;
-		destination.shoot = doLure;
 
 		drawLine(cluster.closestCell.x, cluster.closestCell.y, destination.point.x, destination.point.y,
 				constants.orange);
@@ -1248,7 +1263,7 @@ function AposBot() {
 				}
 
 				// drawPoint(threat.x, threat.y + 20, 2, parseInt(threat.distance, 10) + " " + parseInt(threat.dangerZone, 10));
-				drawPoint(threat.x, threat.y + 20 + threat.size / 15, constants.yellow, "/***" + "***\\ " + t.teamSize);
+				drawPoint(threat.x, threat.y + 20 + threat.size / 15, constants.yellow, "/***" + "***\\ " + t.mass);
 
 				cell.threats.push(threat);
 				player.allThreats.push(threat);
@@ -1592,11 +1607,7 @@ function AposBot() {
 			if (player.cells.length == 1) {
 				// this.predictPosition(threat, 200);
 				if (threat.distance < threat.size + player.largestCell.size * 0.75 && threat.velocity > 20) {
-					if (player.canSplit()) {
-						player.split(null, 0, 0);
-						console.log('split attempt');
-						destination.split = true;
-					}
+						player.split(null, 0, 0, destination);
 				}
 			}
 
@@ -1777,7 +1788,7 @@ function AposBot() {
 
 			switch (entity.classification) {
 			case Classification.player:
-				// drawPoint(entity.x, entity.y + 20, 1, "m:" + this.getMass(entity).toFixed(2));
+				drawPoint(entity.x, entity.y + 20, 1, this.getMass(entity).toFixed(2));
 				break;
 			case Classification.virus:
 				//drawPoint(entity.x, entity.y, 1, entity.mass.toFixed(2));
