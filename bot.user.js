@@ -34,20 +34,19 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1458
+// @version     3.1459
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1458;
+var aposBotVersion = 3.1459;
 
 var constants = {
 	splitRangeMin : 650,
-	splitRangeMax : 674.5,
+	splitRangeMax : 700, // 674.5,
 	enemySplitDistance : 710,
 	playerRatio : 1.285,
 	enemyRatio : 1.27,
 	splitDuration : 1000, // 800 was pretty good
-	shotMassAmount : 19,
 
 	// adjustables
 	lureDistance : 1000,
@@ -342,7 +341,7 @@ Player.prototype = {
 			var angle = Math.atan2(cell.y - virus.y, cell.x - virus.x);
 
 			// moving forward and not too close
-			if (Math.abs(virusAngle - movementAngle) < 30 && virus.distance > virus.size + cell.size
+			if (Math.abs(virusAngle - movementAngle) < 30 && virus.distance > (virus.size / 2) + cell.size
 					&& virus.distance < virus.size + cell.size + 150) {
 				// the virus has reduced in size (split hopefully)
 				// the distance is still in range
@@ -387,9 +386,9 @@ Player.prototype = {
 				&& cluster.cell.isType(Classification.splitTarget)
 				&& !cluster.cell.isMovingTowards
 				&& cluster.distance < this.size + constants.lureDistance
-				&& cluster.distance > this.size + constants.splitRangeMin
+				&& cluster.distance > this.size + constants.splitRangeMax
 				&& this.mass > 250
-				&& ((this.mass - Config.ejectMassLoss) / (cluster.cell.mass + Config.ejectMass) > constants.playerRatio)) { // 37 (size) per mass shot ?
+				&& ((this.mass - Config.ejectMassLoss) / (cluster.cell.mass + Config.ejectMass) > constants.playerRatio)) {
 
 			// TODO: figure out lure amount
 			this.lureTimer = Date.now();
@@ -1067,11 +1066,6 @@ function AposBot() {
 			this.moreInfoStrings.push("");
 		}
 
-		if (!cluster.canSplitKill && cluster.cell) {
-			cluster.x = cluster.closestCell.x + (cluster.x - cluster.closestCell.x) / 2;
-			cluster.y = cluster.closestCell.y + (cluster.y - cluster.closestCell.y) / 2;
-		}
-		
 		// angle of food
 		var angle = Util.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
 
@@ -1611,7 +1605,7 @@ function AposBot() {
 			if (player.cells.length == 1) {
 				// this.predictPosition(threat, 200);
 				if (threat.distance < threat.size + player.largestCell.size * 0.75 && threat.velocity > 20) {
-						player.split(null, 0, 0, destination);
+					player.split(null, 0, 0, destination);
 				}
 			}
 
@@ -1798,7 +1792,7 @@ function AposBot() {
 				drawPoint(entity.x, entity.y, 1, entity.mass.toFixed(2));
 
 				if (player.largestCell.mass >= entity.mass) {
-					drawCircle(entity.x, entity.y, player.largestCell.size + 50, constants.orange);
+					drawCircle(entity.x, entity.y, 700, constants.orange);
 				}
 				break;
 			case Classification.splitTarget:
@@ -1808,7 +1802,7 @@ function AposBot() {
 				drawCircle(entity.x, entity.y, entity.size + 20, constants.cyan);
 				break;
 			case Classification.food:
-				drawPoint(entity.x, entity.y+20, 1, entity.mass.toFixed(2));
+				// drawPoint(entity.x, entity.y+20, 1, entity.mass.toFixed(2));
 				if (entity.hasMoved) {
 					drawCircle(entity.x, entity.y, entity.size + 20, constants.blue);
 				} else if (entity.size > 14) {
