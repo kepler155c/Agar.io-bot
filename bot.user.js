@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1459
+// @version     3.1460
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1459;
+var aposBotVersion = 3.1460;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1792,7 +1792,7 @@ function AposBot() {
 				drawPoint(entity.x, entity.y, 1, entity.mass.toFixed(2));
 
 				if (player.largestCell.mass >= entity.mass) {
-					drawCircle(entity.x, entity.y, 700, constants.orange);
+					drawCircle(entity.x, entity.y, 800, constants.orange);
 				}
 				break;
 			case Classification.splitTarget:
