@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1455
+// @version     3.1456
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1455;
+var aposBotVersion = 3.1456;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1788,10 +1788,10 @@ function AposBot() {
 
 			switch (entity.classification) {
 			case Classification.player:
-				drawPoint(entity.x, entity.y + 20, 1, entity.mass.toFixed(2));
+				// drawPoint(entity.x, entity.y + 20, 1, entity.mass.toFixed(2));
 				break;
 			case Classification.virus:
-				//drawPoint(entity.x, entity.y, 1, entity.mass.toFixed(2));
+				drawPoint(entity.x, entity.y, 1, entity.mass.toFixed(2));
 
 				if (player.largestCell.mass >= entity.mass) {
 					drawCircle(entity.x, entity.y, player.largestCell.size + 50, constants.orange);
