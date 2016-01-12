@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1461
+// @version     3.1462
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1461;
+var aposBotVersion = 3.1462;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1092,7 +1092,7 @@ function AposBot() {
 				if (virus.range) {
 					console.log(virus.range);
 
-					if (this.angleIsWithin(destinationAngle, virus.range)) {
+					if (destinationAngle >= virus.range[0] && destinationAngle <= virus.range[1]) {
 						// cannot split, there is a virus in the path
 						doSplit = false;
 						// console.log('inrange');
