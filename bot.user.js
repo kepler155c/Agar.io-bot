@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1457
+// @version     3.1458
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1457;
+var aposBotVersion = 3.1458;
 
 var constants = {
 	splitRangeMin : 650,
@@ -1067,6 +1067,11 @@ function AposBot() {
 			this.moreInfoStrings.push("");
 		}
 
+		if (!cluster.canSplitKill && cluster.cell) {
+			cluster.x = cluster.closestCell.x + (cluster.x - cluster.closestCell.x) / 2;
+			cluster.y = cluster.closestCell.y + (cluster.y - cluster.closestCell.y) / 2;
+		}
+		
 		// angle of food
 		var angle = Util.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
 
