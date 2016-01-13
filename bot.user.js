@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1488
+// @version     3.1489
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1488;
+var aposBotVersion = 3.1489;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1601,7 +1601,7 @@ function AposBot() {
 				finalAngle += angle;
 				finalCount++;
 
-				this.drawAngledLine(cell.x, cell.y, angle, 500, Constants.yellow);
+				//this.drawAngledLine(cell.x, cell.y, angle, 500, Constants.yellow);
 
 			}
 		}
@@ -1616,17 +1616,29 @@ function AposBot() {
 
 			var virus = this.entities[key];
 
-			//for (var j = 0; j < player.cells.length; j++) {
+			for (var j = 0; j < player.cells.length; j++) {
 				var cell = player.cells[0];
 
 				var minDistance = cell.size + cell.velocity;
-//				if (virus.distance < cell.size * 2) {
+				if (virus.distance < cell.size * 2) {
 					angle = Math.atan2(virus.y - cell.y, virus.x - cell.x);
-					this.drawAngledLine(player.x, player.y, (angle - (Math.PI / 2)) % Math.PI, 500, Constants.cyan);
-					this.drawAngledLine(player.x, player.y, (angle + (Math.PI / 2)) % Math.PI, 500, Constants.cyan);
-					return;
-//				}
-			//}
+					var angleLeft = (angle - (Math.PI / 2)) % Math.PI;
+					var angleRight = (angle + (Math.PI / 2)) % Math.PI;
+					//this.drawAngledLine(player.x, player.y, angleLeft, 500, Constants.cyan);
+					//this.drawAngledLine(player.x, player.y, angleRight, 500, Constants.cyan);
+
+					if (finalAngle > angleLeft && finalAngle < angleRight) {
+						var angleDiffLeft = finalAngle - angleLeft;
+						var angleDiffRight = angleRight - finalAngle;
+console.log('adjusting');
+						finalAngle = angleDiffLeft;
+						if (angleDiffLeft > angleDiffRight) {
+							finalAngle = angleDiffRight;
+						}
+						this.drawAngledLine(player.x, player.y, finalAngle, 500, Constants.yellow);
+					}
+				}
+			}
 		}, this);
 	};
 
