@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1479
+// @version     3.1480
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1479;
+var aposBotVersion = 3.1480;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -308,7 +308,19 @@ Player.prototype = {
 
 		return this.mass > minSize;
 	},
-	shootVirus : function() {
+	shootVirus : function(virus, destination) {
+
+		var cell = virus.closestCell;
+		var distance = virus.distance;
+
+		if (distance - cell.size < 300) {
+			destination.point.x = virus.x;
+			destination.point.y = virus.y;
+			destination.shoot = true;
+			destination.override = true;
+		}
+	},
+	ejectVirus : function() {
 
 		if (this.closestVirus) {
 
@@ -519,6 +531,9 @@ function initializeEntity() {
 		this.closestCell = closestInfo.cell;
 		this.distance = closestInfo.distance;
 
+		if (!this.lastSize) {
+			this.lastSize = this.size;
+		}
 		/*
 		if (entity.hasMoved) {
 			this.predictPosition(Constants.splitDuration, this.previousUpdated);
@@ -642,7 +657,7 @@ function AposBot() {
 		if (81 == key.keyCode) { // 'q'
 			this.toggleFollow = !this.toggleFollow;
 		} else if (key.keyCode == 69) { // 'e'
-			this.player.shootVirus();
+			this.player.ejectVirus();
 		} else if (key.keyCode == 77) { // 'm'
 			this.player.merge();
 		}
@@ -1131,7 +1146,6 @@ function AposBot() {
 		player.closestVirus = null;
 
 		Object.keys(this.entities).filter(this.entities.virusFilter, this.entities).forEach(function(key) {
-
 			var virus = this.entities[key];
 
 			if (!player.closestVirus || virus.distance < player.closestVirus.distance) {
@@ -1139,6 +1153,24 @@ function AposBot() {
 			}
 
 		}, this);
+	};
+
+	this.checkViruses = function(player, destination) {
+
+		if (player.canShoot()) {
+
+			Object.keys(this.entities).filter(this.entities.virusFilter, this.entities).forEach(function(key) {
+				var virus = this.entities[key];
+
+				if (virus.lastSize > virus.size && virus.distance - virus.closestCell.size < 300) {
+
+					player.shootVirus(virus, destination);
+					return true;
+				}
+
+			}, this);
+		}
+		return false;
 	};
 
 	this.displayVirusTargets = function(player) {
@@ -1721,6 +1753,7 @@ function AposBot() {
 
 			entity.lastX = entity.x;
 			entity.lastY = entity.y;
+			entity.lastSize = entity.size;
 
 		}, this);
 
@@ -1774,6 +1807,12 @@ function AposBot() {
 		}
 
 		if (!isHumanControlled()) {
+			if (this.checkViruses(player, destination)) {
+				return destination;
+			}
+		}
+
+		if (!isHumanControlled()) {
 			this.determineTeams();
 			player.isSafeToSplit(this.entities);
 			player.checkIfMerging();
@@ -1795,6 +1834,7 @@ function AposBot() {
 				// drawPoint(entity.x, entity.y + 20, 1, entity.mass.toFixed(2));
 				break;
 			case Classification.virus:
+				drawCircle(entity.x, entity.y, entity.size + 300, Constants.orange);
 				drawPoint(entity.x, entity.y, 1, entity.mass.toFixed(2));
 				break;
 			case Classification.splitTarget:
