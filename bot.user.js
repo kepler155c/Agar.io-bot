@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1502
+// @version     3.1503
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1502;
+var aposBotVersion = 3.1503;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1441,9 +1441,16 @@ function AposBot() {
 
 					virus.range = null;
 
+					var angle = Math.atan2(virus.y - player.cells[0].y, virus.x - player.cells[0].x);
+					var degrees = this.toDegrees(angle);
+					var angleLeft = this.degreesToAngle((degrees - 90) % 360);
+					var angleRight = this.degreesToAngle((degrees + 90) % 360);
+					this.drawAngledLine(player.x, player.y, angleLeft, 500, Constants.cyan);
+					this.drawAngledLine(player.x, player.y, angleRight, 500, Constants.cyan);
+					
 					for (var j = 0; j < player.cells.length; j++) {
 						var cell = player.cells[j];
-						
+
 						if (virus.distance < cell.size + 750
 								&& ((cell.mass + virus.foodMass) / virus.mass > 1.2 || player.isMerging)) {
 
@@ -1452,7 +1459,7 @@ function AposBot() {
 								minDistance += cell.size;
 							}
 
-							var tempOb = this.getAngleRange(cell, virus, i, minDistance, Classification.virus);
+							var tempOb = this.getAngleRange(cell, virus, i, minDistance, Classification.unknown);
 							var angle1 = tempOb[0];
 							var angle2 = this.rangeToAngle(tempOb);
 							obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
@@ -1566,11 +1573,11 @@ function AposBot() {
 
 		}, this);
 	};
-	
+
 	this.toDegrees = function(angle) {
 		return angle * 180 / Math.PI + 180;
 	};
-	
+
 	this.degreesToAngle = function(degrees) {
 		degrees -= 180;
 		return degrees / (180 / Math.PI);
@@ -1604,50 +1611,60 @@ function AposBot() {
 				//console.log('final: ' + finalAngle);
 				//console.log(angles);
 			}
-			this.drawAngledLine(player.x, player.y, finalAngle, 500, Constants.green);
+		}
 
-			Object.keys(this.entities).filter(this.entities.virusFilter, this.entities).forEach(
-					function(key) {
+		Object.keys(this.entities).filter(this.entities.virusFilter, this.entities).forEach(
+				function(key) {
 
-						var virus = this.entities[key];
+					var virus = this.entities[key];
 
-						for (var j = 0; j < player.cells.length; j++) {
-							var cell = player.cells[0];
+					for (var j = 0; j < player.cells.length; j++) {
+						var cell = player.cells[0];
 
-							if (virus.distance < cell.size + 750
-									&& ((cell.mass + virus.foodMass) / virus.mass > 1.2 || player.isMerging)) {
+						if (virus.distance < cell.size + 750
+								&& ((cell.mass + virus.foodMass) / virus.mass > 1.2 || player.isMerging)) {
 
-								var minDistance = cell.size + cell.velocity;
-								if (virus.distance < virus.size + cell.size + 100) { // cell.size * 2) {
-									angle = Math.atan2(virus.y - cell.y, virus.x - cell.x);
-									var degrees = this.toDegrees(angle);
-									var angleLeft = this.degreesToAngle((degrees - 90) % 360);
-									var angleRight = this.degreesToAngle((degrees + 90) % 360);
-									console.log('virus');
-									console.log([ this.toDegrees(angle), this.toDegrees(angleLeft),
-											this.toDegrees(angleRight) ]);
-									this.drawAngledLine(player.x, player.y, angleLeft, 500, Constants.cyan);
-									this.drawAngledLine(player.x, player.y, angleRight, 500, Constants.cyan);
-									console.log([ angle, angleLeft, angleRight, finalAngle ]);
-									if (finalAngle > angleLeft && finalAngle < angleRight) {
-										var angleDiffLeft = finalAngle - angleLeft;
-										var angleDiffRight = angleRight - finalAngle;
-										console.log('adjusting ' + finalAngle);
-										finalAngle = angleLeft;
-										if (angleDiffLeft > angleDiffRight) {
-											finalAngle = angleRight;
-										}
-										console.log([ angle, angleLeft, angleRight, angleDiffLeft, angleDiffRight,
-												finalAngle ]);
-										this.drawAngledLine(player.x, player.y, finalAngle, 500, Constants.yellow);
+							var minDistance = cell.size + cell.velocity;
+							if (virus.distance < virus.size + cell.size + 100) { // cell.size * 2) {
+								angle = Math.atan2(virus.y - cell.y, virus.x - cell.x);
+								var degrees = this.toDegrees(angle);
+								var angleLeft = this.degreesToAngle((degrees - 90) % 360);
+								var angleRight = this.degreesToAngle((degrees + 90) % 360);
+								console.log('virus');
+								console.log([ this.toDegrees(angle), this.toDegrees(angleLeft),
+										this.toDegrees(angleRight) ]);
+								this.drawAngledLine(player.x, player.y, angleLeft, 500, Constants.cyan);
+								this.drawAngledLine(player.x, player.y, angleRight, 500, Constants.cyan);
+								console.log([ angle, angleLeft, angleRight, finalAngle ]);
+								
+								if (finalAngle === 0) {
+									finalAngle = angle;
+									console.log('no angle was set');
+								}
+								
+								if (finalAngle >= angleLeft && finalAngle <= angleRight) {
+									var angleDiffLeft = finalAngle - angleLeft;
+									var angleDiffRight = angleRight - finalAngle;
+									console.log('adjusting ' + finalAngle);
+									finalAngle = angleLeft;
+									if (angleDiffLeft > angleDiffRight) {
+										finalAngle = angleRight;
 									}
+									console.log([ angle, angleLeft, angleRight, angleDiffLeft, angleDiffRight,
+											finalAngle ]);
+									this.drawAngledLine(player.x, player.y, finalAngle, 500, Constants.yellow);
 								}
 							}
 						}
-					}, this);
+					}
+				}, this);
 
+		if (finalAngle !== 0) {
 			destination.point.x = player.x - Math.cos(finalAngle) * 1000;
 			destination.point.y = player.y - Math.sin(finalAngle) * 1000;
+			this.drawAngledLine(player.x, player.y, finalAngle, 500, Constants.green);
+		} else {
+			console.log('no final angle');
 		}
 	};
 
