@@ -1626,8 +1626,8 @@ function AposBot() {
 							var minDistance = cell.size + cell.velocity;
 							if (virus.distance < virus.size + cell.size) { // cell.size * 2) {
 								angle = Math.atan2(virus.y - cell.y, virus.x - cell.x);
-								var angleLeft = (angle + (Math.PI / 2)) % Math.PI;
-								var angleRight = (angle - (Math.PI / 2)) % Math.PI;
+								var angleLeft = (angle - (Math.PI / 2)) % Math.PI;
+								var angleRight = (angle + (Math.PI / 2)) % Math.PI;
 								//this.drawAngledLine(player.x, player.y, angleLeft, 500, Constants.cyan);
 								//this.drawAngledLine(player.x, player.y, angleRight, 500, Constants.cyan);
 
@@ -1635,9 +1635,9 @@ function AposBot() {
 									var angleDiffLeft = finalAngle - angleLeft;
 									var angleDiffRight = angleRight - finalAngle;
 									console.log('adjusting ' + finalAngle);
-									finalAngle = angleDiffLeft;
+									finalAngle = angleLeft;
 									if (angleDiffLeft > angleDiffRight) {
-										finalAngle = angleDiffRight;
+										finalAngle = angleRight;
 									}
 									console.log([ angle, angleLeft, angleRight, angleDiffLeft, angleDiffRight, finalAngle ]);
 									this.drawAngledLine(player.x, player.y, finalAngle, 500, Constants.yellow);
