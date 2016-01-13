@@ -1595,8 +1595,8 @@ function AposBot() {
 
 			finalAngle /= angles.length;
 			if (angles.length > 1) {
-				console.log('final: ' + finalAngle);
-				console.log(angles);
+				//console.log('final: ' + finalAngle);
+				//console.log(angles);
 			}
 			this.drawAngledLine(player.x, player.y, finalAngle, 500, Constants.green);
 
