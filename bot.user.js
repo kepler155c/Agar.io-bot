@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1496
+// @version     3.1497
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1496;
+var aposBotVersion = 3.1497;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1580,45 +1580,26 @@ function AposBot() {
 		for (var i = 0; i < player.cells.length; i++) {
 			var cell = player.cells[i];
 
-			angle = 0;
-			var threatCount = 0;
-
 			for (var j = 0; j < cell.threats.length; j++) {
 				var threat = cell.threats[j];
 
 				if (threat.distance < threat.dangerZone) {
 
-					angle += threat.angle;
-					threatCount++;
-angles.push(angle);
+					finalAngle += threat.angle;
+					angles.push(threat.angle);
 				}
-			}
-			if (threatCount > 0) {
-
-				var distance = 500;
-
-				angle /= threatCount;
-
-				finalAngle += angle;
-				finalCount++;
-
-				//this.drawAngledLine(cell.x, cell.y, angle, 500, Constants.yellow);
-
 			}
 		}
 		
 
-		if (finalCount > 0) {
+		if (angles.length > 0) {
 
-			finalAngle /= finalCount;
+			finalAngle /= angles.length;
 			if (angles.length > 1) {
 				console.log('final: ' + finalAngle);
 				console.log(angles);
 			}
 			this.drawAngledLine(player.x, player.y, finalAngle, 500, Constants.green);
-		}
-
-		if (finalAngle !== 0) {
 
 			Object.keys(this.entities).filter(this.entities.virusFilter, this.entities).forEach(
 					function(key) {
