@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1509
+// @version     3.1510
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1509;
+var aposBotVersion = 3.1510;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1615,7 +1615,7 @@ function AposBot() {
 									console.log('no angle was set');
 								}
 								
-								if (this.angleIsWithin(finalAngle, [angleLeft, angleRight])) {
+								if (this.angleIsWithin(this.toDegrees(finalAngle), [this.toDegrees(angleLeft), this.toDegrees(angleRight)])) {
 									var angleDiffLeft = finalAngle - angleLeft;
 									var angleDiffRight = angleRight - finalAngle;
 									console.log('adjusting ' + finalAngle);
