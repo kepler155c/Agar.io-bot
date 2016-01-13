@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1494
+// @version     3.1495
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1494;
+var aposBotVersion = 3.1495;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1575,6 +1575,7 @@ function AposBot() {
 		var finalAngle = 0;
 		var finalCount = 0;
 		var angle;
+		var angles = [];
 
 		for (var i = 0; i < player.cells.length; i++) {
 			var cell = player.cells[i];
@@ -1589,7 +1590,7 @@ function AposBot() {
 
 					angle += threat.angle;
 					threatCount++;
-
+angles.push(angle);
 				}
 			}
 			if (threatCount > 0) {
@@ -1605,6 +1606,11 @@ function AposBot() {
 
 			}
 		}
+		
+if (angles.length > 1) {
+	console.log('final: ' + finalAngle);
+	console.log(angles);
+}
 
 		if (finalCount > 0) {
 
@@ -1612,43 +1618,47 @@ function AposBot() {
 			this.drawAngledLine(player.x, player.y, finalAngle, 500, Constants.green);
 		}
 
-		Object.keys(this.entities).filter(this.entities.virusFilter, this.entities).forEach(
-				function(key) {
+		if (finalAngle !== 0) {
 
-					var virus = this.entities[key];
+			Object.keys(this.entities).filter(this.entities.virusFilter, this.entities).forEach(
+					function(key) {
 
-					for (var j = 0; j < player.cells.length; j++) {
-						var cell = player.cells[0];
+						var virus = this.entities[key];
 
-						if (virus.distance < cell.size + 750
-								&& ((cell.mass + virus.foodMass) / virus.mass > 1.2 || player.isMerging)) {
+						for (var j = 0; j < player.cells.length; j++) {
+							var cell = player.cells[0];
 
-							var minDistance = cell.size + cell.velocity;
-							if (virus.distance < virus.size + cell.size) { // cell.size * 2) {
-								angle = Math.atan2(virus.y - cell.y, virus.x - cell.x);
-								var angleLeft = (angle - (Math.PI / 2)) % Math.PI;
-								var angleRight = (angle + (Math.PI / 2)) % Math.PI;
-								//this.drawAngledLine(player.x, player.y, angleLeft, 500, Constants.cyan);
-								//this.drawAngledLine(player.x, player.y, angleRight, 500, Constants.cyan);
+							if (virus.distance < cell.size + 750
+									&& ((cell.mass + virus.foodMass) / virus.mass > 1.2 || player.isMerging)) {
 
-								if (finalAngle > angleLeft && finalAngle < angleRight) {
-									var angleDiffLeft = finalAngle - angleLeft;
-									var angleDiffRight = angleRight - finalAngle;
-									console.log('adjusting ' + finalAngle);
-									finalAngle = angleLeft;
-									if (angleDiffLeft > angleDiffRight) {
-										finalAngle = angleRight;
+								var minDistance = cell.size + cell.velocity;
+								if (virus.distance < virus.size + cell.size) { // cell.size * 2) {
+									angle = Math.atan2(virus.y - cell.y, virus.x - cell.x);
+									var angleLeft = (angle - (Math.PI / 2)) % Math.PI;
+									var angleRight = (angle + (Math.PI / 2)) % Math.PI;
+									//this.drawAngledLine(player.x, player.y, angleLeft, 500, Constants.cyan);
+									//this.drawAngledLine(player.x, player.y, angleRight, 500, Constants.cyan);
+
+									if (finalAngle > angleLeft && finalAngle < angleRight) {
+										var angleDiffLeft = finalAngle - angleLeft;
+										var angleDiffRight = angleRight - finalAngle;
+										console.log('adjusting ' + finalAngle);
+										finalAngle = angleLeft;
+										if (angleDiffLeft > angleDiffRight) {
+											finalAngle = angleRight;
+										}
+										console.log([ angle, angleLeft, angleRight, angleDiffLeft, angleDiffRight,
+												finalAngle ]);
+										this.drawAngledLine(player.x, player.y, finalAngle, 500, Constants.yellow);
 									}
-									console.log([ angle, angleLeft, angleRight, angleDiffLeft, angleDiffRight, finalAngle ]);
-									this.drawAngledLine(player.x, player.y, finalAngle, 500, Constants.yellow);
 								}
 							}
 						}
-					}
-				}, this);
+					}, this);
 
-		destination.point.x = player.x - Math.cos(finalAngle) * 1000;
-		destination.point.y = player.y - Math.sin(finalAngle) * 1000;
+			destination.point.x = player.x - Math.cos(finalAngle) * 1000;
+			destination.point.y = player.y - Math.sin(finalAngle) * 1000;
+		}
 	};
 
 	this.drawAngledLine = function(x, y, angle, distance, color) {
