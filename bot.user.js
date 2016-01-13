@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1497
+// @version     3.1498
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1497;
+var aposBotVersion = 3.1498;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -266,7 +266,7 @@ Player.prototype = {
 	},
 	split : function(targetCell, x, y, destination) {
 
-		if (this.canSplit()) {
+		if (this.canSplit() && false) {
 
 			this.splitInfo = {
 				target : targetCell,
@@ -1590,7 +1590,6 @@ function AposBot() {
 				}
 			}
 		}
-		
 
 		if (angles.length > 0) {
 
@@ -1613,13 +1612,14 @@ function AposBot() {
 									&& ((cell.mass + virus.foodMass) / virus.mass > 1.2 || player.isMerging)) {
 
 								var minDistance = cell.size + cell.velocity;
-								if (virus.distance < virus.size + cell.size) { // cell.size * 2) {
+								if (virus.distance < virus.size + cell.size + 100) { // cell.size * 2) {
 									angle = Math.atan2(virus.y - cell.y, virus.x - cell.x);
 									var angleLeft = (angle - (Math.PI / 2)) % Math.PI;
 									var angleRight = (angle + (Math.PI / 2)) % Math.PI;
 									//this.drawAngledLine(player.x, player.y, angleLeft, 500, Constants.cyan);
 									//this.drawAngledLine(player.x, player.y, angleRight, 500, Constants.cyan);
-
+									console.log('virus');
+									console.log([ angle, angleLeft, angleRight, finalAngle ]);
 									if (finalAngle > angleLeft && finalAngle < angleRight) {
 										var angleDiffLeft = finalAngle - angleLeft;
 										var angleDiffRight = angleRight - finalAngle;
