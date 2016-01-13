@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1506
+// @version     3.1507
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1506;
+var aposBotVersion = 3.1507;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1089,7 +1089,7 @@ function AposBot() {
 		// angle towards enemy when obstacles are in the way
 		var shiftedAngle = this.shiftAngle(obstacleAngles, angle, [ 0, 360 ]);
 
-		shiftedAngle[0] = this.toDegrees(this.avoidViruses(player, this.degreesToAngle(shiftedAngle[0])));
+		shiftedAngle.angle = this.toDegrees(this.avoidViruses(player, this.degreesToAngle(shiftedAngle.angle)));
 
 		destination.point = this.followAngle(shiftedAngle.angle, cluster.closestCell.x, cluster.closestCell.y,
 				cluster.distance);
