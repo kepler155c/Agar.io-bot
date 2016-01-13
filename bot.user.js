@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1485
+// @version     3.1486
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1485;
+var aposBotVersion = 3.1486;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1574,11 +1574,12 @@ function AposBot() {
 
 		var finalAngle = 0;
 		var finalCount = 0;
+		var angle;
 
 		for (var i = 0; i < player.cells.length; i++) {
 			var cell = player.cells[i];
 
-			var angle = 0;
+			angle = 0;
 			var threatCount = 0;
 
 			for (var j = 0; j < cell.threats.length; j++) {
@@ -1601,15 +1602,31 @@ function AposBot() {
 				finalCount++;
 
 				this.drawAngledLine(cell.x, cell.y, angle, 500, Constants.yellow);
-				
+
 			}
 		}
-		
+
 		if (finalCount > 1) {
-			
+
 			finalAngle /= finalCount;
 			this.drawAngledLine(player.x, player.y, finalAngle, 500, Constants.green);
 		}
+
+		Object.keys(this.entities).filter(this.entities.virusFilter, this.entities).forEach(function(key) {
+
+			var virus = this.entities[key];
+
+			for (var j = 0; j < player.cells.length; j++) {
+				var cell = player.cells[j];
+
+				var minDistance = cell.size + cell.velocity;
+//				if (virus.distance < cell.size * 2) {
+					angle = Math.atan2(virus.y - cell.y, virus.x - cell.x);
+					this.drawAngledLine(player.x, player.y, (angle - (Math.PI / 4)) % Math.PI, 500, Constants.cyan);
+					this.drawAngledLine(player.x, player.y, (angle + (Math.PI / 4)) % Math.PI, 500, Constants.cyan);
+//				}
+			}
+		}, this);
 	};
 
 	this.drawAngledLine = function(x, y, angle, distance, color) {
