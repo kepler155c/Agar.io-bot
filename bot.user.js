@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1503
+// @version     3.1504
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1503;
+var aposBotVersion = 3.1504;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1032,7 +1032,7 @@ function AposBot() {
 		var goodAngles = [];
 		var obstacleAngles = [];
 
-		this.addVirusAngles(player, badAngles, obstacleList);
+		//this.addVirusAngles(player, badAngles, obstacleList);
 		this.addFoodObstacles(player, obstacleList);
 		this.combineAngles(player, badAngles, obstacleList, goodAngles, obstacleAngles);
 
@@ -1089,7 +1089,9 @@ function AposBot() {
 		// angle towards enemy when obstacles are in the way
 		var shiftedAngle = this.shiftAngle(obstacleAngles, angle, [ 0, 360 ]);
 
-		destination.point = this.followAngle(shiftedAngle.angle, cluster.closestCell.x, cluster.closestCell.y,
+		var finalAngle = this.avoidViruses(player, this.degreesToAngle(shiftedAngle));
+
+		destination.point = this.followAngle(this.toDegrees(shiftedAngle.angle), cluster.closestCell.x, cluster.closestCell.y,
 				cluster.distance);
 
 		var color = Constants.orange;
@@ -1583,36 +1585,7 @@ function AposBot() {
 		return degrees / (180 / Math.PI);
 	};
 
-	this.computeDestinationAngle = function(player, destination) {
-
-		var finalAngle = 0;
-		var finalCount = 0;
-		var angle;
-		var angles = [];
-
-		for (var i = 0; i < player.cells.length; i++) {
-			var cell = player.cells[i];
-
-			for (var j = 0; j < cell.threats.length; j++) {
-				var threat = cell.threats[j];
-
-				if (threat.distance < threat.dangerZone) {
-
-					finalAngle += threat.angle;
-					angles.push(threat.angle);
-				}
-			}
-		}
-
-		if (angles.length > 0) {
-
-			finalAngle /= angles.length;
-			if (angles.length > 1) {
-				//console.log('final: ' + finalAngle);
-				//console.log(angles);
-			}
-		}
-
+	this.avoidViruses = function(player, finalAngle) {
 		Object.keys(this.entities).filter(this.entities.virusFilter, this.entities).forEach(
 				function(key) {
 
@@ -1626,7 +1599,7 @@ function AposBot() {
 
 							var minDistance = cell.size + cell.velocity;
 							if (virus.distance < virus.size + cell.size + 100) { // cell.size * 2) {
-								angle = Math.atan2(virus.y - cell.y, virus.x - cell.x);
+								var angle = Math.atan2(virus.y - cell.y, virus.x - cell.x);
 								var degrees = this.toDegrees(angle);
 								var angleLeft = this.degreesToAngle((degrees - 90) % 360);
 								var angleRight = this.degreesToAngle((degrees + 90) % 360);
@@ -1658,6 +1631,42 @@ function AposBot() {
 						}
 					}
 				}, this);
+		
+		return finalAngle;
+
+	};
+	
+	this.computeDestinationAngle = function(player, destination) {
+
+		var finalAngle = 0;
+		var finalCount = 0;
+		var angle;
+		var angles = [];
+
+		for (var i = 0; i < player.cells.length; i++) {
+			var cell = player.cells[i];
+
+			for (var j = 0; j < cell.threats.length; j++) {
+				var threat = cell.threats[j];
+
+				if (threat.distance < threat.dangerZone) {
+
+					finalAngle += threat.angle;
+					angles.push(threat.angle);
+				}
+			}
+		}
+
+		if (angles.length > 0) {
+
+			finalAngle /= angles.length;
+			if (angles.length > 1) {
+				//console.log('final: ' + finalAngle);
+				//console.log(angles);
+			}
+		}
+
+		finalAngle = this.avoidViruses(player, finalAngle);
 
 		if (finalAngle !== 0) {
 			destination.point.x = player.x - Math.cos(finalAngle) * 1000;
