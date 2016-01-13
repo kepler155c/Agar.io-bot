@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1495
+// @version     3.1496
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1495;
+var aposBotVersion = 3.1496;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1607,14 +1607,14 @@ angles.push(angle);
 			}
 		}
 		
-if (angles.length > 1) {
-	console.log('final: ' + finalAngle);
-	console.log(angles);
-}
 
 		if (finalCount > 0) {
 
 			finalAngle /= finalCount;
+			if (angles.length > 1) {
+				console.log('final: ' + finalAngle);
+				console.log(angles);
+			}
 			this.drawAngledLine(player.x, player.y, finalAngle, 500, Constants.green);
 		}
 
