@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1513
+// @version     3.1514
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1513;
+var aposBotVersion = 3.1514;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1443,13 +1443,6 @@ function AposBot() {
 
 					virus.range = null;
 
-					var angle = Math.atan2(virus.y - player.cells[0].y, virus.x - player.cells[0].x);
-					var degrees = this.toDegrees(angle);
-					var angleLeft = this.degreesToAngle((degrees - 90) % 360);
-					var angleRight = this.degreesToAngle((degrees + 90) % 360);
-					this.drawAngledLine(player.x, player.y, angleLeft, 500, Constants.cyan);
-					this.drawAngledLine(player.x, player.y, angleRight, 500, Constants.cyan);
-					
 					for (var j = 0; j < player.cells.length; j++) {
 						var cell = player.cells[j];
 
@@ -1620,6 +1613,9 @@ function AposBot() {
 									if (angleDiffLeft > angleDiffRight) {
 										finalAngle = angleRight;
 									}
+									this.drawAngledLine(player.x, player.y, angleLeft, 500, Constants.cyan);
+									this.drawAngledLine(player.x, player.y, angleRight, 500, Constants.cyan);
+									
 									//console.log([ angle, angleLeft, angleRight, angleDiffLeft, angleDiffRight,
 									//		finalAngle ]);
 									//this.drawAngledLine(player.x, player.y, finalAngle, 500, Constants.yellow);
@@ -1696,7 +1692,7 @@ function AposBot() {
 
 		for (var i = 0; i < obstacleAngles.length; i++) {
 
-			this.drawAngle(player, obstacleAngles[i], 50, Constants.cyan);
+			// this.drawAngle(player, obstacleAngles[i], 50, Constants.cyan);
 		}
 
 		if (goodAngles.length > 0) {
