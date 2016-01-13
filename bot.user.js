@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1490
+// @version     3.1491
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1490;
+var aposBotVersion = 3.1491;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1570,7 +1570,7 @@ function AposBot() {
 		}, this);
 	};
 
-	this.computeDestinationAngle = function(player) {
+	this.computeDestinationAngle = function(player, destination) {
 
 		var finalAngle = 0;
 		var finalCount = 0;
@@ -1640,6 +1640,9 @@ console.log('adjusting');
 				}
 			}
 		}, this);
+		
+		destination.point.x = player.x - Math.cos(finalAngle) * 1000;
+		destination.point.y = player.y - Math.sin(finalAngle) * 1000;
 	};
 
 	this.drawAngledLine = function(x, y, angle, distance, color) {
@@ -1680,9 +1683,9 @@ console.log('adjusting');
 			var perfectAngle = this.mod(bIndex[0] + bIndex[1] / 2, 360);
 			perfectAngle = this.shiftAngle(obstacleAngles, perfectAngle, bIndex);
 
-			this.computeDestinationAngle(player);
+			this.computeDestinationAngle(player, destination);
 
-			destination.point = this.followAngle(perfectAngle.angle, player.x, player.y, verticalDistance());
+			//destination.point = this.followAngle(perfectAngle.angle, player.x, player.y, verticalDistance());
 
 			// this.adjustDestination(player, destination);
 
