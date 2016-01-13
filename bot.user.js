@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1499
+// @version     3.1500
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1499;
+var aposBotVersion = 3.1500;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1099,17 +1099,14 @@ function AposBot() {
 			doSplit = false;
 		} else if (doSplit && !shiftedAngle.shifted) {
 
-			console.log('DUMPING');
 			var destinationAngle = Util.getAngle(destination.point.x, destination.point.y, cluster.closestCell.x,
 					cluster.closestCell.y);
-			console.log(destinationAngle);
 
 			Object.keys(this.entities).filter(this.entities.virusFilter, this.entities).forEach(function(key) {
 
 				var virus = this.entities[key];
 
 				if (virus.range) {
-					console.log(virus.range);
 
 					if (destinationAngle >= virus.range[0] && destinationAngle <= virus.range[1]) {
 						// cannot split, there is a virus in the path
@@ -1618,13 +1615,13 @@ function AposBot() {
 								var minDistance = cell.size + cell.velocity;
 								if (virus.distance < virus.size + cell.size + 100) { // cell.size * 2) {
 									angle = Math.atan2(virus.y - cell.y, virus.x - cell.x);
-									var angleLeft = (angle - (Math.PI / 4)) % Math.PI;
-									var angleRight = (angle + (Math.PI / 4)) % Math.PI;
+									var angleLeft = (angle - (Math.PI / 2)) % Math.PI;
+									var angleRight = (angle + (Math.PI / 2)) % Math.PI;
+									console.log('virus');
 									console.log([ this.toDegrees(angle), this.toDegrees(angleLeft),
 											this.toDegrees(angleRight) ]);
 									this.drawAngledLine(player.x, player.y, angleLeft, 500, Constants.cyan);
 									this.drawAngledLine(player.x, player.y, angleRight, 500, Constants.cyan);
-									console.log('virus');
 									console.log([ angle, angleLeft, angleRight, finalAngle ]);
 									if (finalAngle > angleLeft && finalAngle < angleRight) {
 										var angleDiffLeft = finalAngle - angleLeft;
