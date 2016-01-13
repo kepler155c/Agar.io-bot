@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1498
+// @version     3.1499
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1498;
+var aposBotVersion = 3.1499;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1569,6 +1569,10 @@ function AposBot() {
 
 		}, this);
 	};
+	
+	this.toDegrees = function(angle) {
+		return angle * 180 / Math.PI + 180;
+	};
 
 	this.computeDestinationAngle = function(player, destination) {
 
@@ -1614,10 +1618,12 @@ function AposBot() {
 								var minDistance = cell.size + cell.velocity;
 								if (virus.distance < virus.size + cell.size + 100) { // cell.size * 2) {
 									angle = Math.atan2(virus.y - cell.y, virus.x - cell.x);
-									var angleLeft = (angle - (Math.PI / 2)) % Math.PI;
-									var angleRight = (angle + (Math.PI / 2)) % Math.PI;
-									//this.drawAngledLine(player.x, player.y, angleLeft, 500, Constants.cyan);
-									//this.drawAngledLine(player.x, player.y, angleRight, 500, Constants.cyan);
+									var angleLeft = (angle - (Math.PI / 4)) % Math.PI;
+									var angleRight = (angle + (Math.PI / 4)) % Math.PI;
+									console.log([ this.toDegrees(angle), this.toDegrees(angleLeft),
+											this.toDegrees(angleRight) ]);
+									this.drawAngledLine(player.x, player.y, angleLeft, 500, Constants.cyan);
+									this.drawAngledLine(player.x, player.y, angleRight, 500, Constants.cyan);
 									console.log('virus');
 									console.log([ angle, angleLeft, angleRight, finalAngle ]);
 									if (finalAngle > angleLeft && finalAngle < angleRight) {
