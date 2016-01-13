@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1500
+// @version     3.1501
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1500;
+var aposBotVersion = 3.1501;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1444,6 +1444,15 @@ function AposBot() {
 					for (var j = 0; j < player.cells.length; j++) {
 						var cell = player.cells[j];
 
+						var angle = Math.atan2(virus.y - cell.y, virus.x - cell.x);
+						var degrees = this.toDegrees(angle);
+						var angleLeft = this.degreesToAngle((degrees - 90) % 360);
+						var angleRight = this.degreesToAngle((degrees + 90) % 360);
+						console.log('virus');
+						console.log([ this.toDegrees(angle), this.toDegrees(angleLeft),
+								this.toDegrees(angleRight) ]);
+						console.log([ angle, angleLeft, angleRight ]);
+						
 						if (virus.distance < cell.size + 750
 								&& ((cell.mass + virus.foodMass) / virus.mass > 1.2 || player.isMerging)) {
 
@@ -1570,6 +1579,11 @@ function AposBot() {
 	this.toDegrees = function(angle) {
 		return angle * 180 / Math.PI + 180;
 	};
+	
+	this.degreesToAngle = function(degrees) {
+		degrees -= 180;
+		return degrees / (180 / Math.PI);
+	};
 
 	this.computeDestinationAngle = function(player, destination) {
 
@@ -1615,8 +1629,9 @@ function AposBot() {
 								var minDistance = cell.size + cell.velocity;
 								if (virus.distance < virus.size + cell.size + 100) { // cell.size * 2) {
 									angle = Math.atan2(virus.y - cell.y, virus.x - cell.x);
-									var angleLeft = (angle - (Math.PI / 2)) % Math.PI;
-									var angleRight = (angle + (Math.PI / 2)) % Math.PI;
+									var degrees = this.toDegrees(angle);
+									var angleLeft = this.degreesToAngle((degrees - 90) % 360);
+									var angleRight = this.degreesToAngle((degrees + 90) % 360);
 									console.log('virus');
 									console.log([ this.toDegrees(angle), this.toDegrees(angleLeft),
 											this.toDegrees(angleRight) ]);
