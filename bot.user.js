@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1471
+// @version     3.1472
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1471;
+var aposBotVersion = 3.1472;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -892,8 +892,6 @@ function AposBot() {
 
 	this.addFoodObstacles = function(player, obstacleList) {
 
-		var i = 0;
-
 		player.eachCellThreat(function(cell, threat) {
 
 			// var distance = threat.size + threat.cell.size + threat.safeDistance;
@@ -902,7 +900,7 @@ function AposBot() {
 
 			if (distance > threat.distance) {
 
-				var tempOb = this.getAngleRange(cell, threat, i++, threat.size - cell.size, Classification.unknown, true);
+				var tempOb = this.getAngleRange(cell, threat, 0, threat.size, Classification.unknown);
 				var angle1 = tempOb[0];
 				var angle2 = this.rangeToAngle(tempOb);
 
@@ -1199,6 +1197,7 @@ function AposBot() {
 					safeDistance : t.safeDistance
 				};
 
+				/*
 				t.futurePosition();
 				var futureDistance = Util.computeDistance(t.px, t.py, cell.x, cell.y);
 
@@ -1207,6 +1206,7 @@ function AposBot() {
 					threat.y = t.py;
 					threat.distance = futureDistance;
 				}
+				*/
 
 				// if the threat is moving towards any cell, mark this threat as moving towards us
 				if (threat.isMovingTowards) {
@@ -2171,7 +2171,7 @@ function AposBot() {
 		if (!dontInvert) {
 			var tempRadius = Util.computeDistance(px, py, cx, cy);
 			if (tempRadius <= radius) {
-				radius = tempRadius - 5;
+				radius = tempRadius - 15;
 				//radius = tempRadius - 1;
 			}
 		}
