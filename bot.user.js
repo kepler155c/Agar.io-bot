@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1501
+// @version     3.1502
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1501;
+var aposBotVersion = 3.1502;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -266,7 +266,7 @@ Player.prototype = {
 	},
 	split : function(targetCell, x, y, destination) {
 
-		if (this.canSplit() && false) {
+		if (this.canSplit()) {
 
 			this.splitInfo = {
 				target : targetCell,
@@ -1443,15 +1443,6 @@ function AposBot() {
 
 					for (var j = 0; j < player.cells.length; j++) {
 						var cell = player.cells[j];
-
-						var angle = Math.atan2(virus.y - cell.y, virus.x - cell.x);
-						var degrees = this.toDegrees(angle);
-						var angleLeft = this.degreesToAngle((degrees - 90) % 360);
-						var angleRight = this.degreesToAngle((degrees + 90) % 360);
-						console.log('virus');
-						console.log([ this.toDegrees(angle), this.toDegrees(angleLeft),
-								this.toDegrees(angleRight) ]);
-						console.log([ angle, angleLeft, angleRight ]);
 						
 						if (virus.distance < cell.size + 750
 								&& ((cell.mass + virus.foodMass) / virus.mass > 1.2 || player.isMerging)) {
