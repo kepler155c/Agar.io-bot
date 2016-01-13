@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1480
+// @version     3.1481
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1480;
+var aposBotVersion = 3.1481;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1570,6 +1570,24 @@ function AposBot() {
 		}, this);
 	};
 
+	this.computeDestination = function(player) {
+
+		player.eachCellThreat(function(cell, threat) {
+			
+			var angle = Math.atan2(cell.y - threat.y, cell.x - threat.x);
+
+			var distance = threat.distance + 500;
+
+			var threatRange = {
+				x : cell.x - Math.cos(angle) * distance,
+				y : cell.y - Math.sin(angle) * distance,
+			};
+
+			drawLine(cell.x, cell.y, threatRange.x, threatRange.y, Constants.yellow);
+			
+		}, this);
+	};
+
 	/**
 	 * The bot works by removing angles in which it is too
 	 * dangerous to travel towards to.
@@ -1602,6 +1620,8 @@ function AposBot() {
 			}
 			var perfectAngle = this.mod(bIndex[0] + bIndex[1] / 2, 360);
 			perfectAngle = this.shiftAngle(obstacleAngles, perfectAngle, bIndex);
+
+			this.computeDestinationAngle(player);
 
 			destination.point = this.followAngle(perfectAngle.angle, player.x, player.y, verticalDistance());
 
