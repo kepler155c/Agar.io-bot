@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1468
+// @version     3.1469
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1468;
+var aposBotVersion = 3.1469;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -47,7 +47,7 @@ var Constants = {
 	playerRatio : 1.285,
 	enemyRatio : 1.27,
 	splitDuration : 1000, // 800 was pretty good
-	
+
 	virusShotDistance : 800, // distance a virus travels when shot
 	virusFeedAmount : 7, // Amount of times you need to feed a virus to shoot it
 	ejectMass : 13.7, // was 12, // Mass of ejected cells
@@ -901,14 +901,14 @@ function AposBot() {
 			//drawCircle(threat.x, threat.y, distance, Constants.yellow);
 
 			if (distance > threat.distance) {
-				
-				var tempOb = this.getAngleRange(cell, threat, i++, distance, Classification.unknown);
+
+				var tempOb = this.getAngleRange(cell, threat, i++, distance, Classification.unknown, true);
 				var angle1 = tempOb[0];
 				var angle2 = this.rangeToAngle(tempOb);
-	
+
 				obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
-				
-				drawCircle(threat.x, threat.y, threat.size + 40, Constants.yellow);
+
+				drawCircle(threat.x, threat.y, distance, Constants.yellow);
 			}
 		}, this);
 	};
@@ -1265,7 +1265,8 @@ function AposBot() {
 				}
 
 				// drawPoint(threat.x, threat.y + 20, 2, parseInt(threat.distance, 10) + " " + parseInt(threat.dangerZone, 10));
-				drawPoint(threat.x, threat.y + 20 + threat.size / 15, Constants.yellow, "/***" + "***\\ " + parseInt(t.mass));
+				drawPoint(threat.x, threat.y + 20 + threat.size / 15, Constants.yellow, "/***" + "***\\ "
+						+ parseInt(t.mass));
 
 				cell.threats.push(threat);
 				player.allThreats.push(threat);
@@ -2150,7 +2151,7 @@ function AposBot() {
 	};
 
 	//TODO: Don't let this function do the radius math.
-	this.getEdgeLinesFromPoint = function(blob1, blob2, radius) {
+	this.getEdgeLinesFromPoint = function(blob1, blob2, radius, dontInvert) {
 		var px = blob1.x;
 		var py = blob1.y;
 
@@ -2167,13 +2168,12 @@ function AposBot() {
 		    radius += blob1.size * 2;
 		}*/
 
-		var shouldInvert = false;
-
-		var tempRadius = Util.computeDistance(px, py, cx, cy);
-		if (tempRadius <= radius) {
-			radius = tempRadius - 5;
-			//radius = tempRadius - 1;
-			shouldInvert = true;
+		if (!dontInvert) {
+			var tempRadius = Util.computeDistance(px, py, cx, cy);
+			if (tempRadius <= radius) {
+				radius = tempRadius - 5;
+				//radius = tempRadius - 1;
+			}
 		}
 
 		var dx = cx - px;
@@ -2345,9 +2345,9 @@ function AposBot() {
 		return newListToUse;
 	};
 
-	this.getAngleRange = function(blob1, blob2, index, radius, classification) {
+	this.getAngleRange = function(blob1, blob2, index, radius, classification, dontInvert) {
 
-		var angleStuff = this.getEdgeLinesFromPoint(blob1, blob2, radius);
+		var angleStuff = this.getEdgeLinesFromPoint(blob1, blob2, radius, dontInvert);
 		var leftAngle = angleStuff[0];
 		var rightAngle = this.rangeToAngle(angleStuff);
 		var difference = angleStuff[1];
