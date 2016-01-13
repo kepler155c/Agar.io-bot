@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1516
+// @version     3.1517
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1516;
+var aposBotVersion = 3.1517;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1069,6 +1069,8 @@ function AposBot() {
 		if (cluster.canSplitKill && player.safeToSplit) {
 
 			doSplit = true;
+			console.log('cluster marked for splitting');
+			console.log(cluster.cell);
 		}
 
 		if (cluster.cell) {
@@ -1133,6 +1135,8 @@ function AposBot() {
 
 		// are we avoiding obstacles ??
 		if (doSplit) {
+			console.log('do split set');
+			console.log(cluster.cell);
 			player.split(cluster.cell, cluster.x, cluster.y, destination);
 		}
 
@@ -1651,7 +1655,7 @@ function AposBot() {
 
 				if (threat.distance < threat.dangerZone) {
 
-					finalAngle += threat.angle;
+					finalAngle += this.toDegrees(threat.angle);
 					angles.push(threat.angle);
 				}
 			}
@@ -1660,13 +1664,14 @@ function AposBot() {
 		if (angles.length > 0) {
 
 			finalAngle /= angles.length;
+			finalAngle = this.degreesToAngle(finalAngle);
 			if (angles.length > 1) {
 				//console.log('final: ' + finalAngle);
 				//console.log(angles);
 			}
 		}
-
-		finalAngle = this.avoidViruses(player, [ finalAngle, false ]);
+		
+		// finalAngle = this.avoidViruses(player, [ finalAngle, false ]);
 
 		if (finalAngle !== 0) {
 			destination.point.x = player.x - Math.cos(finalAngle) * 1000;
@@ -1757,6 +1762,7 @@ function AposBot() {
 			if (player.cells.length == 1) {
 				// this.predictPosition(threat, 200);
 				if (threat.distance < threat.size + player.largestCell.size * 0.75 && threat.velocity > 20) {
+					console.log('splitting due to near death');
 					player.split(null, 0, 0, destination);
 				}
 			}
