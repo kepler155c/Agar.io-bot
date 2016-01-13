@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1514
+// @version     3.1515
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1514;
+var aposBotVersion = 3.1515;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1088,8 +1088,10 @@ function AposBot() {
 
 		// angle towards enemy when obstacles are in the way
 		var shiftedAngle = this.shiftAngle(obstacleAngles, angle, [ 0, 360 ]);
+		shiftedAngle.angle = this.degreesToAngle(shiftedAngle.angle);
 
-		shiftedAngle.angle = this.toDegrees(this.avoidViruses(player, this.degreesToAngle(shiftedAngle.angle)));
+		this.avoidViruses(player, shiftedAngle);
+		shiftAngle.angle = this.toDegrees(shiftedAngle.angle);
 
 		destination.point = this.followAngle(shiftedAngle.angle, cluster.closestCell.x, cluster.closestCell.y,
 				cluster.distance);
@@ -1578,7 +1580,10 @@ function AposBot() {
 		return degrees / (180 / Math.PI);
 	};
 
-	this.avoidViruses = function(player, finalAngle) {
+	this.avoidViruses = function(player, shiftedAngle) {
+		
+		var finalAngle = shiftedAngle.angle;
+		
 		Object.keys(this.entities).filter(this.entities.virusFilter, this.entities).forEach(
 				function(key) {
 
@@ -1616,6 +1621,7 @@ function AposBot() {
 									this.drawAngledLine(player.x, player.y, angleLeft, 500, Constants.cyan);
 									this.drawAngledLine(player.x, player.y, angleRight, 500, Constants.cyan);
 									
+									shiftedAngle.shifted = true;
 									//console.log([ angle, angleLeft, angleRight, angleDiffLeft, angleDiffRight,
 									//		finalAngle ]);
 									//this.drawAngledLine(player.x, player.y, finalAngle, 500, Constants.yellow);
@@ -1624,7 +1630,8 @@ function AposBot() {
 						}
 					}
 				}, this);
-		
+
+		shiftedAngle.angle = finalAngle;
 		return finalAngle;
 
 	};
@@ -1659,7 +1666,7 @@ function AposBot() {
 			}
 		}
 
-		finalAngle = this.avoidViruses(player, finalAngle);
+		finalAngle = this.avoidViruses(player, [ finalAngle, false ]);
 
 		if (finalAngle !== 0) {
 			destination.point.x = player.x - Math.cos(finalAngle) * 1000;
