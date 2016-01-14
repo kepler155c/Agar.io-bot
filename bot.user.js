@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1518
+// @version     3.1519
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1518;
+var aposBotVersion = 3.1519;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1089,7 +1089,7 @@ function AposBot() {
 		var angle = Util.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
 
 		// angle towards enemy when obstacles are in the way
-		var shiftedAngle = this.shiftAngle(obstacleAngles, angle, [ 0, 360 ])
+		var shiftedAngle = this.shiftAngle(obstacleAngles, angle, [ 0, 360 ]);
 		this.avoidViruses(player, shiftedAngle);
 
 		destination.point = this.followAngle(shiftedAngle.angle, cluster.closestCell.x, cluster.closestCell.y,
@@ -1582,9 +1582,9 @@ function AposBot() {
 	};
 
 	this.avoidViruses = function(player, shiftedAngle) {
-		
+
 		var finalAngle = shiftedAngle.angle;
-		
+
 		Object.keys(this.entities).filter(this.entities.virusFilter, this.entities).forEach(
 				function(key) {
 
@@ -1594,7 +1594,7 @@ function AposBot() {
 						var cell = player.cells[0];
 
 						if (virus.distance < cell.size + 750
-							&& ((cell.mass + virus.foodMass) / virus.mass > 1.2 || player.isMerging)) {
+								&& ((cell.mass + virus.foodMass) / virus.mass > 1.2 || player.isMerging)) {
 
 							var minDistance = cell.size + cell.velocity;
 							if (virus.distance < virus.size + cell.size + 50) {
@@ -1605,12 +1605,12 @@ function AposBot() {
 								//console.log([ this.toDegrees(angle), this.toDegrees(angleLeft),
 								//		this.toDegrees(angleRight) ]);
 								//console.log([ angle, angleLeft, angleRight, finalAngle ]);
-								
+
 								if (finalAngle === 0) {
 									finalAngle = angle;
 								}
-								
-								if (this.angleIsWithin(finalAngle, [angleLeft, angleRight])) {
+
+								if (this.angleIsWithin(finalAngle, [ angleLeft, angleRight ])) {
 									var angleDiffLeft = finalAngle - angleLeft;
 									var angleDiffRight = angleRight - finalAngle;
 									console.log('adjusting ' + finalAngle);
@@ -1620,7 +1620,7 @@ function AposBot() {
 									}
 									this.drawAngledLine(player.x, player.y, angleLeft, 500, Constants.cyan);
 									this.drawAngledLine(player.x, player.y, angleRight, 500, Constants.cyan);
-									
+
 									shiftedAngle.shifted = true;
 									//console.log([ angle, angleLeft, angleRight, angleDiffLeft, angleDiffRight,
 									//		finalAngle ]);
@@ -1633,9 +1633,8 @@ function AposBot() {
 
 		shiftedAngle.angle = finalAngle;
 		return finalAngle;
-
 	};
-	
+
 	this.computeDestinationAngle = function(player, destination) {
 
 		var finalAngle = 0;
@@ -1658,13 +1657,12 @@ function AposBot() {
 		if (angles.length > 0) {
 
 			finalAngle /= angles.length;
-			if (angles.length > 1) {
-				//console.log('final: ' + finalAngle);
-				//console.log(angles);
-			}
 		}
-		
-		finalAngle = this.avoidViruses(player, [ finalAngle, false ]);
+
+		finalAngle = this.avoidViruses(player, {
+			angle : finalAngle,
+			shifted : false
+		});
 
 		if (finalAngle !== 0) {
 			var angle = this.degreesToAngle(finalAngle);
