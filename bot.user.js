@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1522
+// @version     3.1523
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1522;
+var aposBotVersion = 3.1523;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1032,7 +1032,7 @@ function AposBot() {
 		var goodAngles = [];
 		var obstacleAngles = [];
 
-		//this.addVirusAngles(player, badAngles, obstacleList);
+		this.addVirusAngles(player, badAngles, obstacleList);
 		this.addFoodObstacles(player, obstacleList);
 		this.combineAngles(player, badAngles, obstacleList, goodAngles, obstacleAngles);
 
@@ -1090,7 +1090,7 @@ function AposBot() {
 
 		// angle towards enemy when obstacles are in the way
 		var shiftedAngle = this.shiftAngle(obstacleAngles, angle, [ 0, 360 ]);
-		this.avoidViruses(player, shiftedAngle);
+		//this.avoidViruses(player, shiftedAngle);
 
 		destination.point = this.followAngle(shiftedAngle.angle, cluster.closestCell.x, cluster.closestCell.y,
 				cluster.distance);
@@ -1722,9 +1722,9 @@ function AposBot() {
 			var perfectAngle = this.mod(bIndex[0] + bIndex[1] / 2, 360);
 			perfectAngle = this.shiftAngle(obstacleAngles, perfectAngle, bIndex);
 
-			this.computeDestinationAngle(player, destination);
+			// this.computeDestinationAngle(player, destination);
 
-			//destination.point = this.followAngle(perfectAngle.angle, player.x, player.y, verticalDistance());
+			destination.point = this.followAngle(perfectAngle.angle, player.x, player.y, verticalDistance());
 
 			// this.adjustDestination(player, destination);
 
