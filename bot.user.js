@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1525
+// @version     3.1526
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1525;
+var aposBotVersion = 3.1526;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1092,6 +1092,10 @@ function AposBot() {
 
 		// angle towards enemy when obstacles are in the way
 		var shiftedAngle = this.shiftAngle(obstacleAngles, angle, [ 0, 360 ]);
+
+		if (player.cells.length == 1) {
+			this.avoidObstacles(player, angle);
+		}
 		//this.avoidViruses(player, shiftedAngle);
 
 		destination.point = this.followAngle(shiftedAngle.angle, cluster.closestCell.x, cluster.closestCell.y,
@@ -1234,8 +1238,10 @@ function AposBot() {
 					safeDistance : t.safeDistance
 				};
 
-				/*
 				t.futurePosition();
+				threat.px = t.px;
+				threat.py = t.py;
+				/*
 				var futureDistance = Util.computeDistance(t.px, t.py, cell.x, cell.y);
 
 				if (futureDistance < threat.distance) {
@@ -1586,55 +1592,139 @@ function AposBot() {
 		return degrees / (180 / Math.PI);
 	};
 
-	this.avoidViruses = function(player, shiftedAngle) {
+	//TODO: Don't let this function do the radius math.
+	this.getAngles = function(blob1, blob2, radius) {
+		var px = blob1.x;
+		var py = blob1.y;
+
+		var cx = blob2.x;
+		var cy = blob2.y;
+
+		var dx = cx - px;
+		var dy = cy - py;
+		var dd = Math.sqrt(dx * dx + dy * dy);
+		var a = Math.asin(radius / dd);
+		var b = Math.atan2(dy, dx);
+
+		var t = b - a;
+		var ta = {
+			x : radius * Math.sin(t),
+			y : radius * -Math.cos(t)
+		};
+
+		t = b + a;
+		var tb = {
+			x : radius * -Math.sin(t),
+			y : radius * Math.cos(t)
+		};
+
+		var angleLeft = Util.getAngle(cx + ta.x, cy + ta.y, px, py);
+		var angleRight = Util.getAngle(cx + tb.x, cy + tb.y, px, py);
+
+		return {
+			left : angleLeft,
+			right : angleRight
+		};
+	};
+
+	this.avoidObstacles = function(player, angle) {
+
+		this.addVirusObstacles(player, angle);
+		this.addThreatObstacles(player, angle);
+
+		for (var i = 0; i < player.allObstacles.length; i++) {
+
+			var obstacle = player.allObstacles[i];
+
+			var angles = this.getAngles(obstacle.cell, obstacle.entity, obstacle.entity.size + obstacle.cell.size);
+
+			this.drawAngledLine(obstacle.cell.x, obstacle.cell.y, angles.left, 500, Constants.cyan);
+			this.drawAngledLine(obstacle.cell.x, obstacle.cell.y, angles.right, 500, Constants.cyan);
+
+			/*
+			var angle = this.toDegrees(Math.atan2(cell.y - virus.y, cell.x - virus.x));
+			var angleLeft = (angle - 90) % 360;
+			var angleRight = (angle + 90) % 360;
+			//console.log('virus');
+			//console.log([ this.toDegrees(angle), this.toDegrees(angleLeft),
+			//		this.toDegrees(angleRight) ]);
+			//console.log([ angle, angleLeft, angleRight, finalAngle ]);
+
+			if (finalAngle === 0) {
+				finalAngle = angle;
+			}
+
+			if (this.angleIsWithin(finalAngle, [ angleLeft, angleRight ])) {
+				var angleDiffLeft = finalAngle - angleLeft;
+				var angleDiffRight = angleRight - finalAngle;
+				console.log('adjusting ' + finalAngle);
+				finalAngle = angleLeft;
+				if (angleDiffLeft > angleDiffRight) {
+					finalAngle = angleRight;
+				}
+				this.drawAngledLine(player.x, player.y, angleLeft, 500, Constants.cyan);
+				this.drawAngledLine(player.x, player.y, angleRight, 500, Constants.cyan);
+
+				shiftedAngle.shifted = true;
+				//console.log([ angle, angleLeft, angleRight, angleDiffLeft, angleDiffRight,
+				//		finalAngle ]);
+				//this.drawAngledLine(player.x, player.y, finalAngle, 500, Constants.yellow);
+			}
+			*/
+		}
+
+	};
+
+	this.addThreatObstacles = function(player, obstacleList) {
+
+		player.eachCellThreat(function(cell, threat) {
+
+			var distance = threat.size + cell.size + cell.t.velocity; // should use dangerZone
+
+			if (threat.isMovingTowards) {
+				distance += threat.t.velocity;
+			}
+
+			if (threat.distance < distance) {
+
+				var obstacle = {
+					entity : threat.t,
+					cell : cell
+				};
+				cell.obstacles.push(obstacle);
+				player.allObstacles.push(obstacle);
+			}
+		}, this);
+	};
+
+	this.addVirusObstacles = function(player, shiftedAngle) {
 
 		var finalAngle = shiftedAngle.angle;
 
-		Object.keys(this.entities).filter(this.entities.virusFilter, this.entities).forEach(
-				function(key) {
+		Object.keys(this.entities).filter(this.entities.virusFilter, this.entities).forEach(function(key) {
 
-					var virus = this.entities[key];
+			var virus = this.entities[key];
 
-					for (var j = 0; j < player.cells.length; j++) {
-						var cell = player.cells[j];
+			for (var j = 0; j < player.cells.length; j++) {
+				var cell = player.cells[j];
 
-						if (virus.distance < cell.size + 750
-								&& ((cell.mass + virus.foodMass) / virus.mass > 1.2 || player.isMerging)) {
+				if (cell.mass + virus.foodMass / virus.mass > 1.2 || player.isMerging) {
 
-							var minDistance = cell.size + cell.velocity;
-							if (virus.distance < virus.size + cell.size) {
-								var angle = this.toDegrees(Math.atan2(cell.y - virus.y, cell.x - virus.x));
-								var angleLeft = (angle - 90) % 360;
-								var angleRight = (angle + 90) % 360;
-								//console.log('virus');
-								//console.log([ this.toDegrees(angle), this.toDegrees(angleLeft),
-								//		this.toDegrees(angleRight) ]);
-								//console.log([ angle, angleLeft, angleRight, finalAngle ]);
+					var minDistance = cell.size + virus.size + cell.velocity;
 
-								if (finalAngle === 0) {
-									finalAngle = angle;
-								}
+					if (virus.distance < minDistance) {
 
-								if (this.angleIsWithin(finalAngle, [ angleLeft, angleRight ])) {
-									var angleDiffLeft = finalAngle - angleLeft;
-									var angleDiffRight = angleRight - finalAngle;
-									console.log('adjusting ' + finalAngle);
-									finalAngle = angleLeft;
-									if (angleDiffLeft > angleDiffRight) {
-										finalAngle = angleRight;
-									}
-									this.drawAngledLine(player.x, player.y, angleLeft, 500, Constants.cyan);
-									this.drawAngledLine(player.x, player.y, angleRight, 500, Constants.cyan);
+						var obstacle = {
+							entity : virus,
+							cell : cell
+						};
 
-									shiftedAngle.shifted = true;
-									//console.log([ angle, angleLeft, angleRight, angleDiffLeft, angleDiffRight,
-									//		finalAngle ]);
-									//this.drawAngledLine(player.x, player.y, finalAngle, 500, Constants.yellow);
-								}
-							}
-						}
+						cell.obstacles.push(obstacle);
+						player.allObstacles.push(obstacle);
 					}
-				}, this);
+				}
+			}
+		}, this);
 
 		shiftedAngle.angle = finalAngle;
 		return finalAngle;
@@ -1647,7 +1737,7 @@ function AposBot() {
 
 		for (var i = 0; i < player.cells.length; i++) {
 			var cell = player.cells[i];
-			
+
 			var cellAngle = 0;
 			var cellAngles = [];
 
@@ -1661,7 +1751,7 @@ function AposBot() {
 				}
 			}
 			if (cellAngles.length > 0) {
-				
+
 				cellAngle /= cellAngles.length;
 				finalAngle += cellAngle;
 				angles.push(cellAngle);
