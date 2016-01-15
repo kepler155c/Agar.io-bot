@@ -20,11 +20,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.310
+// @version     4.311
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.310;
+var aposLauncherVersion = 4.311;
 
 var showAd = false;
 var moveLoc = null;
@@ -607,10 +607,16 @@ console.log("Running Bot Launcher!");
                 delete interNodes[element];
             } else {
                 if (isRemoved &&
+                		/*
                     interNodes[element].x > (getX() - (1920 / 2) / getZoomlessRatio()) &&
                     interNodes[element].x < (getX() + (1920 / 2) / getZoomlessRatio()) &&
                     interNodes[element].y > getY() - (1080 / 2) / getZoomlessRatio() &&
                     interNodes[element].y < getY() + (1080 / 2) / getZoomlessRatio()) {
+                    */
+                    interNodes[element].x > getX() - (1920 / 2) &&
+                    interNodes[element].x < getX() + (1920 / 2) &&
+                    interNodes[element].y > getY() - (1080 / 2) &&
+                    interNodes[element].y < getY() + (1080 / 2)) {
 
                     delete interNodes[element];
                 } else {
