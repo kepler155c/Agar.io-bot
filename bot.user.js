@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1528
+// @version     3.1529
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1528;
+var aposBotVersion = 3.1529;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -757,7 +757,11 @@ function AposBot() {
 
 					var entity = this.entities[key];
 
-					if (this.isItMe(player, entity)) {
+					if (this.isRemoved) { // hack until the isRemoved is fixed
+
+						entity.classification = Classification.unknown;
+
+					} else if (this.isItMe(player, entity)) {
 
 						entity.classification = Classification.player;
 						entity.velocity = entity.getVelocity(this.previousUpdated);
@@ -1633,8 +1637,8 @@ function AposBot() {
 
 			var angles = this.getAngles(obstacle.cell, obstacle.entity, obstacle.entity.size + obstacle.cell.size);
 
-			this.drawAngledLine(obstacle.cell.x, obstacle.cell.y, angles.left, 500, Constants.cyan);
-			this.drawAngledLine(obstacle.cell.x, obstacle.cell.y, angles.right, 500, Constants.cyan);
+			this.drawAngledLine(obstacle.cell.x, obstacle.cell.y, angles.left, 500, Constants.orange);
+			this.drawAngledLine(obstacle.cell.x, obstacle.cell.y, angles.right, 500, Constants.yellow);
 
 			/*
 			var angle = this.toDegrees(Math.atan2(cell.y - virus.y, cell.x - virus.x));
@@ -1674,7 +1678,7 @@ function AposBot() {
 
 		player.eachCellThreat(function(cell, threat) {
 
-			var distance = threat.size + cell.size + cell.t.velocity; // should use dangerZone
+			var distance = threat.size + cell.size + cell.t.velocity + 300; // should use dangerZone
 
 			if (threat.isMovingTowards) {
 				distance += threat.t.velocity;
@@ -1703,7 +1707,7 @@ function AposBot() {
 
 				if (cell.mass + virus.foodMass / virus.mass > 1.2 || player.isMerging) {
 
-					var minDistance = cell.size + virus.size + cell.velocity;
+					var minDistance = cell.size + virus.size + cell.velocity + 300;
 
 					if (virus.distance < minDistance) {
 
