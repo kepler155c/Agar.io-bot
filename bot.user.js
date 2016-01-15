@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1529
+// @version     3.1530
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1529;
+var aposBotVersion = 3.1530;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -526,6 +526,7 @@ function initializeEntity() {
 		this.teamSize = 1;
 		this.teamMass = this.mass;
 		this.isSplitThreat = false;
+		this.velocity = 0;
 
 		var closestInfo = player.closestCell(this.x, this.y);
 		this.closestCell = closestInfo.cell;
@@ -1628,8 +1629,8 @@ function AposBot() {
 
 	this.avoidObstacles = function(player, angle) {
 
-		this.addVirusObstacles(player, angle);
-		this.addThreatObstacles(player, angle);
+		this.addVirusObstacles(player);
+		this.addThreatObstacles(player);
 
 		for (var i = 0; i < player.allObstacles.length; i++) {
 
@@ -1674,11 +1675,11 @@ function AposBot() {
 
 	};
 
-	this.addThreatObstacles = function(player, obstacleList) {
+	this.addThreatObstacles = function(player) {
 
 		player.eachCellThreat(function(cell, threat) {
 
-			var distance = threat.size + cell.size + cell.t.velocity + 300; // should use dangerZone
+			var distance = threat.size + cell.size + cell.velocity + 300; // should use dangerZone
 
 			if (threat.isMovingTowards) {
 				distance += threat.t.velocity;
@@ -1705,7 +1706,7 @@ function AposBot() {
 			for (var j = 0; j < player.cells.length; j++) {
 				var cell = player.cells[j];
 
-				if (cell.mass + virus.foodMass / virus.mass > 1.2 || player.isMerging) {
+				if ((cell.mass + virus.foodMass) / virus.mass > 1.2 || player.isMerging) {
 
 					var minDistance = cell.size + virus.size + cell.velocity + 300;
 
