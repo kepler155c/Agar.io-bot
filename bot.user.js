@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1524
+// @version     3.1525
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1524;
+var aposBotVersion = 3.1525;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -814,7 +814,7 @@ function AposBot() {
 		target.velocityX = (target.x - lastPos.x);
 		target.velocityY = (target.y - lastPos.y);
 
-		var a = sqr(target.velocityX) + sqr(target.velocityY) - sqr(source.velocity * 9);
+		var a = sqr(target.velocityX) + sqr(target.velocityY) - sqr(source.velocity * 8);
 
 		var b = 2 * (target.velocityX * (target.x - source.x) + target.velocityY * (target.y - source.y));
 
@@ -1464,8 +1464,8 @@ function AposBot() {
 							var angle2 = this.rangeToAngle(tempOb);
 							obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
 
-							cell.obstacles.push(threat);
-							player.allObstacles.push(threat);
+							cell.obstacles.push(virus);
+							player.allObstacles.push(virus);
 
 							virus.range = [ angle1, angle2 ];
 
