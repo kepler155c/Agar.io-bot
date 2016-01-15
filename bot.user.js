@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1523
+// @version     3.1524
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1523;
+var aposBotVersion = 3.1524;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -916,11 +916,13 @@ function AposBot() {
 
 			if (threat.distance < distance) {
 
-				var tempOb = this.getAngleRange(cell, threat, 0, distance, Classification.unknown);
+				var tempOb = this.getAngleRange(cell, threat, 0, distance + cell.size, Classification.unknown);
 				var angle1 = tempOb[0];
 				var angle2 = this.rangeToAngle(tempOb);
 
 				obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
+				cell.obstacles.push(threat);
+				player.allObstacles.push(threat);
 
 				drawCircle(threat.x, threat.y, distance, Constants.yellow);
 			}
@@ -1462,6 +1464,9 @@ function AposBot() {
 							var angle2 = this.rangeToAngle(tempOb);
 							obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
 
+							cell.obstacles.push(threat);
+							player.allObstacles.push(threat);
+
 							virus.range = [ angle1, angle2 ];
 
 							if (virus.distance < minDistance) {
@@ -1750,6 +1755,7 @@ function AposBot() {
 		// 1 = in the split distance of a threat
 
 		player.allThreats = [];
+		player.allObstacles = [];
 
 		Object.keys(this.entities).filter(this.entities.threatFilter, this.entities).forEach(function(key) {
 
@@ -1862,6 +1868,7 @@ function AposBot() {
 			var cell = player.cells[i];
 
 			cell.threats = [];
+			cell.obstacles = [];
 		}
 
 		var destination = this.update(cells);
