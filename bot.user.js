@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1526
+// @version     3.1527
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1526;
+var aposBotVersion = 3.1527;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1697,9 +1697,7 @@ function AposBot() {
 		}, this);
 	};
 
-	this.addVirusObstacles = function(player, shiftedAngle) {
-
-		var finalAngle = shiftedAngle.angle;
+	this.addVirusObstacles = function(player) {
 
 		Object.keys(this.entities).filter(this.entities.virusFilter, this.entities).forEach(function(key) {
 
@@ -1725,9 +1723,6 @@ function AposBot() {
 				}
 			}
 		}, this);
-
-		shiftedAngle.angle = finalAngle;
-		return finalAngle;
 	};
 
 	this.computeDestinationAngle = function(player, destination) {
