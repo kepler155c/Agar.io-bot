@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1542
+// @version     3.1543
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1542;
+var aposBotVersion = 3.1543;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1631,9 +1631,11 @@ function AposBot() {
 
 	this.angleIsInside = function(angle, angleLeft, angleRight) {
 
-		angle += 360;
-		return angle > angleLeft + 360 && angle < angleRight + 360;
-	}
+		if (angleRight < angleLeft) {
+			return !(angle >= angleRight && angle <= angleLeft);
+		}
+		return angle >= angleLeft && angle <= angleRight;
+	};
 
 	this.avoidObstacles = function(player, angle) {
 
