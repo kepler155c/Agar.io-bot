@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1564
+// @version     3.1565
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1564;
+var aposBotVersion = 3.1565;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -286,7 +286,7 @@ Player.prototype = {
 			destination.split = true;
 			if (targetCell) {
 				destination.point = this.splitInfo.location;
-				console.log("splitting for: " + targetCell.isRemoved);
+				console.log("splitting for: " + targetCell.isRemoved + targetCell.interceptVelocity);
 				console.log([ targetCell.distance, targetCell.size, targetCell.closestCell.size ]);
 				console.log(targetCell);
 			}
@@ -830,6 +830,7 @@ function AposBot() {
 		target.velocityY = (target.y - lastPos.y);
 
 		var a = sqr(target.velocityX) + sqr(target.velocityY) - sqr(Constants.splitVelocity); // sqr(source.velocity * 8);
+		target.interceptVelocity = a;
 
 		var b = 2 * (target.velocityX * (target.x - source.x) + target.velocityY * (target.y - source.y));
 
