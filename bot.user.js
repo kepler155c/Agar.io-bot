@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1540
+// @version     3.1541
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1540;
+var aposBotVersion = 3.1541;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1586,8 +1586,9 @@ function AposBot() {
 			angle = Util.getAngle(blob1.x, blob1.y, blob2.x, blob2.y);
 
 			return {
-				left : angle,
-				right : this.mod(angle + 1, 360)
+				left : this.mod(angle + 1, 360),
+				right : angle,
+				inside : true
 			};
 		}
 
@@ -1598,8 +1599,9 @@ function AposBot() {
 			angle = Util.getAngle(blob1.x, blob1.y, blob2.x, blob2.y);
 
 			return {
-				left : angle,
-				right : this.mod(angle + 1, 360)
+				left : this.mod(angle + 1, 360),
+				right : angle,
+				inside : true
 			};
 		}
 		
@@ -1622,7 +1624,8 @@ function AposBot() {
 
 		return {
 			left : angleLeft,
-			right : angleRight
+			right : angleRight,
+			inside : false
 		};
 	};
 
@@ -1656,6 +1659,9 @@ function AposBot() {
 				shiftedAngle.shifted = true;
 				console.log('shifting');
 				console.log([ angle, angles.left, angles.right ]);
+			} else if (angles.inside) {
+				console.log('huh');
+				this.angleIsWithin(angle, [ angles.left, angles.right ]);
 			}
 
 			/*
