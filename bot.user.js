@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1553
+// @version     3.1554
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1553;
+var aposBotVersion = 3.1554;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1080,8 +1080,7 @@ function AposBot() {
 			return false;
 		}
 
-		var doSplit = (player.largestCell.mass >= 36 && player.mass <= 50 && player.cells.length == 1 && player.safeToSplit);
-		//				|| (player.largestCell.mass >= 900 && player.cells.length < 16);
+		var doSplit = false; // (player.largestCell.mass >= 36 && player.mass <= 50 && player.cells.length == 1 && player.safeToSplit);
 
 		cluster = this.getBestFood(player);
 
