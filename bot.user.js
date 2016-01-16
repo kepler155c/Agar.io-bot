@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1530
+// @version     3.1531
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1530;
+var aposBotVersion = 3.1531;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1097,7 +1097,7 @@ function AposBot() {
 		var shiftedAngle = this.shiftAngle(obstacleAngles, angle, [ 0, 360 ]);
 
 		if (player.cells.length == 1) {
-			this.avoidObstacles(player, angle);
+			shiftedAngle = this.avoidObstacles(player, angle);
 		}
 		//this.avoidViruses(player, shiftedAngle);
 
@@ -1629,6 +1629,11 @@ function AposBot() {
 
 	this.avoidObstacles = function(player, angle) {
 
+		var shiftedAngle = {
+			angle : angle,
+			shifted : false
+		};
+
 		this.addVirusObstacles(player);
 		this.addThreatObstacles(player);
 
@@ -1640,6 +1645,18 @@ function AposBot() {
 
 			this.drawAngledLine(obstacle.cell.x, obstacle.cell.y, angles.left, 500, Constants.orange);
 			this.drawAngledLine(obstacle.cell.x, obstacle.cell.y, angles.right, 500, Constants.yellow);
+
+			if (this.angleIsWithin(angle, [ angles.left, angles.right ])) {
+
+				shiftedAngle.angle = angles.left;
+				if (Math.abs(angle - angles.left) > Math.abs(angle, angles.right)) {
+					shiftedAngle.angle = angles.right;
+				}
+
+				shiftedAngle.shifted = true;
+				console.log('shifting');
+				console.log([ angle, angles.left, angles.right ]);
+			}
 
 			/*
 			var angle = this.toDegrees(Math.atan2(cell.y - virus.y, cell.x - virus.x));
@@ -1679,7 +1696,7 @@ function AposBot() {
 
 		player.eachCellThreat(function(cell, threat) {
 
-			var distance = threat.size + cell.size + cell.velocity + 300; // should use dangerZone
+			var distance = threat.size + cell.size + cell.velocity + threat.velocity; // should use dangerZone
 
 			if (threat.isMovingTowards) {
 				distance += threat.t.velocity;
@@ -1708,7 +1725,7 @@ function AposBot() {
 
 				if ((cell.mass + virus.foodMass) / virus.mass > 1.2 || player.isMerging) {
 
-					var minDistance = cell.size + virus.size + cell.velocity + 300;
+					var minDistance = cell.size + virus.size + cell.velocity;
 
 					if (virus.distance < minDistance) {
 
