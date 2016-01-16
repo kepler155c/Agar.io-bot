@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1544
+// @version     3.1545
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1544;
+var aposBotVersion = 3.1545;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1651,57 +1651,20 @@ function AposBot() {
 
 			var obstacle = player.allObstacles[i];
 
-			var angles = this.getAngles(obstacle.cell, obstacle.entity, obstacle.entity.size + obstacle.cell.size
-					+ obstacle.cell.velocity + obstacle.entity.velocity);
+			var angles = this.getAngles(obstacle.cell, obstacle.entity, obstacle.distance);
 
 			this.drawAngledLine(obstacle.cell.x, obstacle.cell.y, angles.left, 500, Constants.orange);
 			this.drawAngledLine(obstacle.cell.x, obstacle.cell.y, angles.right, 500, Constants.yellow);
 
 			if (this.angleIsInside(angle, angles.left, angles.right)) {
 
+				shiftedAngle.shifted = true;
 				shiftedAngle.angle = angles.left;
+
 				if (Math.abs(angle - angles.left) > Math.abs(angle, angles.right)) {
 					shiftedAngle.angle = angles.right;
 				}
-
-				shiftedAngle.shifted = true;
-				console.log('shifting');
-				console.log([ angle, angles.left, angles.right ]);
-			} else if (angles.inside) {
-				console.log('huh');
-				this.angleIsInside(angle, angles.left, angles.right);
 			}
-
-			/*
-			var angle = this.toDegrees(Math.atan2(cell.y - virus.y, cell.x - virus.x));
-			var angleLeft = (angle - 90) % 360;
-			var angleRight = (angle + 90) % 360;
-			//console.log('virus');
-			//console.log([ this.toDegrees(angle), this.toDegrees(angleLeft),
-			//		this.toDegrees(angleRight) ]);
-			//console.log([ angle, angleLeft, angleRight, finalAngle ]);
-
-			if (finalAngle === 0) {
-				finalAngle = angle;
-			}
-
-			if (this.angleIsWithin(finalAngle, [ angleLeft, angleRight ])) {
-				var angleDiffLeft = finalAngle - angleLeft;
-				var angleDiffRight = angleRight - finalAngle;
-				console.log('adjusting ' + finalAngle);
-				finalAngle = angleLeft;
-				if (angleDiffLeft > angleDiffRight) {
-					finalAngle = angleRight;
-				}
-				this.drawAngledLine(player.x, player.y, angleLeft, 500, Constants.cyan);
-				this.drawAngledLine(player.x, player.y, angleRight, 500, Constants.cyan);
-
-				shiftedAngle.shifted = true;
-				//console.log([ angle, angleLeft, angleRight, angleDiffLeft, angleDiffRight,
-				//		finalAngle ]);
-				//this.drawAngledLine(player.x, player.y, finalAngle, 500, Constants.yellow);
-			}
-			*/
 		}
 		return shiftedAngle;
 	};
@@ -1720,7 +1683,8 @@ function AposBot() {
 
 				var obstacle = {
 					entity : threat.t,
-					cell : cell
+					cell : cell,
+					distance : distance
 				};
 				cell.obstacles.push(obstacle);
 				player.allObstacles.push(obstacle);
@@ -1739,13 +1703,14 @@ function AposBot() {
 
 				//if ((cell.mass + virus.foodMass) / virus.mass > 1.2 || player.isMerging) {
 
-				var minDistance = cell.size + virus.size + cell.velocity;
+				var distance = cell.size + virus.size + cell.velocity;
 
-				if (virus.distance < minDistance) {
+				if (virus.distance < distance) {
 
 					var obstacle = {
 						entity : virus,
-						cell : cell
+						cell : cell,
+						distance : distance
 					};
 
 					cell.obstacles.push(obstacle);
