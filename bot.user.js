@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1535
+// @version     3.1536
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1535;
+var aposBotVersion = 3.1536;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1093,7 +1093,7 @@ function AposBot() {
 		// angle of food
 		var angle = Util.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
 
-		// angle towards enemy when obstacles are in the way
+		// angle away from obstacles
 		var shiftedAngle = this.shiftAngle(obstacleAngles, angle, [ 0, 360 ]);
 
 		if (player.cells.length == 1) {
@@ -1578,7 +1578,7 @@ function AposBot() {
 		if (dd < radius) {
 
 			// inside the radius - back up
-			var angle = Util.getAngle(blob2.x, blob2.y, blob1.x, blob1.y);
+			var angle = Util.getAngle(blob1.x, blob1.y, blob2.x, blob2.y);
 
 			return {
 				left : angle,
@@ -1624,7 +1624,8 @@ function AposBot() {
 
 			var obstacle = player.allObstacles[i];
 
-			var angles = this.getAngles(obstacle.cell, obstacle.entity, obstacle.entity.size + obstacle.cell.size);
+			var angles = this.getAngles(obstacle.cell, obstacle.entity, obstacle.entity.size + obstacle.cell.size + 200
+					+ obstacle.cell.velocity + obstacle.entity.velocity);
 
 			this.drawAngledLine(obstacle.cell.x, obstacle.cell.y, angles.left, 500, Constants.orange);
 			this.drawAngledLine(obstacle.cell.x, obstacle.cell.y, angles.right, 500, Constants.yellow);
@@ -1679,7 +1680,7 @@ function AposBot() {
 
 		player.eachCellThreat(function(cell, threat) {
 
-			var distance = threat.size + cell.size + cell.velocity + threat.velocity; // should use dangerZone
+			var distance = threat.size + cell.size + cell.velocity + threat.velocity + 200; // should use dangerZone
 
 			if (threat.isMovingTowards) {
 				distance += threat.t.velocity;
@@ -1706,9 +1707,9 @@ function AposBot() {
 			for (var j = 0; j < player.cells.length; j++) {
 				var cell = player.cells[j];
 
-				if ((cell.mass + virus.foodMass) / virus.mass > 1.2 || player.isMerging) {
+				//if ((cell.mass + virus.foodMass) / virus.mass > 1.2 || player.isMerging) {
 
-					var minDistance = cell.size + virus.size + cell.velocity;
+					var minDistance = cell.size + virus.size + cell.velocity + 200;
 
 					if (virus.distance < minDistance) {
 
@@ -1720,7 +1721,7 @@ function AposBot() {
 						cell.obstacles.push(obstacle);
 						player.allObstacles.push(obstacle);
 					}
-				}
+				//}
 			}
 		}, this);
 	};
