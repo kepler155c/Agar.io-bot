@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1546
+// @version     3.1547
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1546;
+var aposBotVersion = 3.1547;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1574,10 +1574,8 @@ function AposBot() {
 
 		var dx = cx - px;
 		var dy = cy - py;
-		var dd = Math.sqrt(dx * dx + dy * dy);
-		
-		radius += blob1.size;
-		
+		var dd = Math.sqrt(dx * dx + dy * dy) + blob1.size;
+
 		if (dd < radius) {
 			// partially inside radius - angle out
 			radius -= blob1.size;
