@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1560
+// @version     3.1561
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1560;
+var aposBotVersion = 3.1561;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -47,7 +47,7 @@ var Constants = {
 	playerRatio : 1.285,
 	enemyRatio : 1.27,
 	splitDuration : 1000, // 800 was pretty good
-	splitVelocity : 60,
+	splitVelocity : 25,
 
 	virusShotDistance : 800, // distance a virus travels when shot
 	virusFeedAmount : 7, // Amount of times you need to feed a virus to shoot it
@@ -79,7 +79,7 @@ var Constants = {
 	yellow : "#FFFF00",
 };
 
-window.Contants = Constants;
+window.Constants = Constants;
 
 var Classification = {
 	unknown : 0,
@@ -271,7 +271,7 @@ Player.prototype = {
 	},
 	split : function(targetCell, x, y, destination) {
 
-		if (this.canSplit()) {
+		if (this.canSplit() && !targetCell.isRemoved) {
 
 			this.splitInfo = {
 				target : targetCell,
@@ -286,7 +286,7 @@ Player.prototype = {
 			destination.split = true;
 			if (targetCell) {
 				destination.point = this.splitInfo.location;
-				console.log("splitting for: ");
+				console.log("splitting for: " + targetCell.isRemoved);
 				console.log(targetCell);
 			}
 		}
