@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1565
+// @version     3.1566
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1565;
+var aposBotVersion = 3.1566;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -141,6 +141,7 @@ Player.prototype = {
 			var cell = cells[i];
 
 			cell.mass = cell.size * cell.size / 100;
+			cell.isMe = true;
 
 			this.mass = this.mass + cell.mass;
 
