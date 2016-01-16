@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1558
+// @version     3.1559
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1558;
+var aposBotVersion = 3.1559;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -47,6 +47,7 @@ var Constants = {
 	playerRatio : 1.285,
 	enemyRatio : 1.27,
 	splitDuration : 1000, // 800 was pretty good
+	splitVelocity : 60,
 
 	virusShotDistance : 800, // distance a virus travels when shot
 	virusFeedAmount : 7, // Amount of times you need to feed a virus to shoot it
@@ -77,6 +78,8 @@ var Constants = {
 	black : "#000000",
 	yellow : "#FFFF00",
 };
+
+window.Contants = constants;
 
 var Classification = {
 	unknown : 0,
@@ -825,7 +828,7 @@ function AposBot() {
 		target.velocityX = (target.x - lastPos.x);
 		target.velocityY = (target.y - lastPos.y);
 
-		var a = sqr(target.velocityX) + sqr(target.velocityY) - sqr(80); // sqr(source.velocity * 8);
+		var a = sqr(target.velocityX) + sqr(target.velocityY) - sqr(Constants.splitVelocity); // sqr(source.velocity * 8);
 
 		var b = 2 * (target.velocityX * (target.x - source.x) + target.velocityY * (target.y - source.y));
 
