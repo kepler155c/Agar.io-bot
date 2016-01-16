@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1533
+// @version     3.1534
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1533;
+var aposBotVersion = 3.1534;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1555,34 +1555,6 @@ function AposBot() {
 		}
 	};
 
-	this.adjustDestination = function(player, destination) {
-
-		var angle = Math.atan2(destination.point.y - player.cells[0].y, destination.point.x - player.cells[0].x);
-
-		player.eachCellThreat(function(cell, threat) {
-
-			var circle = {
-				x : cell.x + Math.cos(angle) * (cell.velocity + player.size),
-				y : cell.y + Math.sin(angle) * (cell.velocity + player.size),
-				size : cell.size
-			};
-
-			if (Util.circlesIntersect(circle, threat)) {
-
-				destination.point.x = cell.x + Math.cos(angle) * (cell.velocity + player.size / 2);
-				destination.point.y = cell.y + Math.sin(angle) * (cell.velocity + player.size / 2);
-
-				console.log('angle ' + angle + ' '
-						+ Math.atan2(destination.point.y - cell.y, destination.point.x - cell.x));
-
-				console.log('adjusted destination');
-				console.log(destination);
-				return;
-			}
-
-		}, this);
-	};
-
 	this.toDegrees = function(angle) {
 		return angle * 180 / Math.PI + 180;
 	};
@@ -1604,9 +1576,16 @@ function AposBot() {
 		var dy = cy - py;
 		var dd = Math.sqrt(dx * dx + dy * dy);
 		if (dd < radius) {
-			dd = radius-1;
+
+			// inside the radius - back up
+			var angle = Util.getAngle(blob2.x, blob2.y, blob1.x, blob1.y);
+
+			return {
+				left : angle,
+				right : angle
+			};
 		}
-		
+
 		var a = Math.asin(radius / dd);
 		var b = Math.atan2(dy, dx);
 
