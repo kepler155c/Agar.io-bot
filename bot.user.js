@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1548
+// @version     3.1549
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1548;
+var aposBotVersion = 3.1549;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1003,7 +1003,7 @@ function AposBot() {
 
 		for (var i = 0; i < keys.length; i++) {
 
-			var virus = this.entities[key];
+			var virus = this.entities[keys[i]];
 
 			if (Util.circlesIntersect(food, virus)) {
 				virus.foodMass += food.mass;
