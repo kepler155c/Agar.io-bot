@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1547
+// @version     3.1548
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1547;
+var aposBotVersion = 3.1548;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -988,8 +988,10 @@ function AposBot() {
 		var bestClusterWeight = player.foodClusters[0].clusterWeight;
 		for (i = 1; i < player.foodClusters.length; i++) {
 			if (player.foodClusters[i].clusterWeight < bestClusterWeight) {
-				bestClusterWeight = player.foodClusters[i].clusterWeight;
-				bestFoodI = i;
+				if (!this.foodInVirus(player.foodClusters[i])) {
+					bestClusterWeight = player.foodClusters[i].clusterWeight;
+					bestFoodI = i;
+				}
 			}
 		}
 		return player.foodClusters[bestFoodI];
@@ -997,15 +999,20 @@ function AposBot() {
 
 	this.foodInVirus = function(food) {
 
-		Object.keys(this.entities).filter(this.entities.virusFilter, this.entities).forEach(function(key) {
+		var keys = Object.keys(this.entities).filter(this.entities.virusFilter, this.entities);
+
+		for (var i = 0; i < keys.length; i++) {
 
 			var virus = this.entities[key];
 
 			if (Util.circlesIntersect(food, virus)) {
 				virus.foodMass += food.mass;
 				virus.foodList.push(food);
+				return true;
 			}
-		}, this);
+		}
+
+		return false;
 	};
 
 	this.calculateVirusMass = function(player) {
@@ -1014,7 +1021,9 @@ function AposBot() {
 
 			var food = this.entities[key];
 			// increase virus mass if food is within
-			this.foodInVirus(food);
+			if (food.isMoving) {
+				this.foodInVirus(food);
+			}
 		}, this);
 
 		Object.keys(this.entities).filter(this.entities.virusFilter, this.entities).forEach(function(key) {
@@ -2027,7 +2036,7 @@ function AposBot() {
 			this.determineTeams();
 			player.isSafeToSplit(this.entities);
 			player.checkIfMerging();
-			this.calculateVirusMass(player);
+			// this.calculateVirusMass(player);
 
 			this.determineBestDestination(player, destination, tempPoint);
 		}
