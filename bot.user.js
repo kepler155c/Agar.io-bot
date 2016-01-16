@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1537
+// @version     3.1538
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1537;
+var aposBotVersion = 3.1538;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -281,6 +281,8 @@ Player.prototype = {
 			destination.split = true;
 			if (targetCell) {
 				destination.point = this.splitInfo.location;
+				console.log("splitting for: ");
+				console.log(targetCell);
 			}
 		}
 	},
@@ -1072,10 +1074,7 @@ function AposBot() {
 
 		// drawPoint(bestFood.x, bestFood.y, 1, "");
 		if (cluster.canSplitKill && player.safeToSplit) {
-
 			doSplit = true;
-			console.log('cluster marked for splitting');
-			console.log(cluster.cell);
 		}
 
 		if (cluster.cell) {
@@ -1141,8 +1140,6 @@ function AposBot() {
 
 		// are we avoiding obstacles ??
 		if (doSplit) {
-			console.log('do split set');
-			console.log(cluster.cell);
 			player.split(cluster.cell, cluster.x, cluster.y, destination);
 		}
 
@@ -1581,8 +1578,10 @@ function AposBot() {
 		if (dd < radius) {
 			// partially inside radius - angle out
 			radius -= blob1.size;
+			console.log('partially inside');
 		}
 		if (dd < radius) {
+			console.log('way inside');
 			// half-way inside the radius - back up
 			angle = Util.getAngle(blob1.x, blob1.y, blob2.x, blob2.y);
 
@@ -1595,6 +1594,7 @@ function AposBot() {
 		var a = Math.asin(radius / dd);
 
 		if (isNaN(a)) {
+			console.log('it is NaN');
 			angle = Util.getAngle(blob1.x, blob1.y, blob2.x, blob2.y);
 
 			return {
