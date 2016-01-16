@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1541
+// @version     3.1542
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1541;
+var aposBotVersion = 3.1542;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1563,7 +1563,7 @@ function AposBot() {
 
 	//TODO: Don't let this function do the radius math.
 	this.getAngles = function(blob1, blob2, radius) {
-		
+
 		var angle;
 
 		var px = blob1.x;
@@ -1604,7 +1604,7 @@ function AposBot() {
 				inside : true
 			};
 		}
-		
+
 		var b = Math.atan2(dy, dx);
 
 		var t = b - a;
@@ -1629,6 +1629,12 @@ function AposBot() {
 		};
 	};
 
+	this.angleIsInside = function(angle, angleLeft, angleRight) {
+
+		angle += 360;
+		return angle > angleLeft + 360 && angle < angleRight + 360;
+	}
+
 	this.avoidObstacles = function(player, angle) {
 
 		var shiftedAngle = {
@@ -1649,7 +1655,7 @@ function AposBot() {
 			this.drawAngledLine(obstacle.cell.x, obstacle.cell.y, angles.left, 500, Constants.orange);
 			this.drawAngledLine(obstacle.cell.x, obstacle.cell.y, angles.right, 500, Constants.yellow);
 
-			if (this.angleIsWithin(angle, [ angles.left, angles.right ])) {
+			if (this.angleIsInside(angle, angles.left, angles.right)) {
 
 				shiftedAngle.angle = angles.left;
 				if (Math.abs(angle - angles.left) > Math.abs(angle, angles.right)) {
@@ -1661,7 +1667,7 @@ function AposBot() {
 				console.log([ angle, angles.left, angles.right ]);
 			} else if (angles.inside) {
 				console.log('huh');
-				this.angleIsWithin(angle, [ angles.left, angles.right ]);
+				this.angleIsInside(angle, angles.left, angles.right);
 			}
 
 			/*
@@ -1731,18 +1737,18 @@ function AposBot() {
 
 				//if ((cell.mass + virus.foodMass) / virus.mass > 1.2 || player.isMerging) {
 
-					var minDistance = cell.size + virus.size + cell.velocity + 200;
+				var minDistance = cell.size + virus.size + cell.velocity + 200;
 
-					if (virus.distance < minDistance) {
+				if (virus.distance < minDistance) {
 
-						var obstacle = {
-							entity : virus,
-							cell : cell
-						};
+					var obstacle = {
+						entity : virus,
+						cell : cell
+					};
 
-						cell.obstacles.push(obstacle);
-						player.allObstacles.push(obstacle);
-					}
+					cell.obstacles.push(obstacle);
+					player.allObstacles.push(obstacle);
+				}
 				//}
 			}
 		}, this);
