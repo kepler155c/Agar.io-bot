@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1536
+// @version     3.1537
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1536;
+var aposBotVersion = 3.1537;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1566,6 +1566,9 @@ function AposBot() {
 
 	//TODO: Don't let this function do the radius math.
 	this.getAngles = function(blob1, blob2, radius) {
+		
+		var angle;
+
 		var px = blob1.x;
 		var py = blob1.y;
 
@@ -1576,9 +1579,12 @@ function AposBot() {
 		var dy = cy - py;
 		var dd = Math.sqrt(dx * dx + dy * dy);
 		if (dd < radius) {
-
-			// inside the radius - back up
-			var angle = Util.getAngle(blob1.x, blob1.y, blob2.x, blob2.y);
+			// partially inside radius - angle out
+			radius -= blob1.size;
+		}
+		if (dd < radius) {
+			// half-way inside the radius - back up
+			angle = Util.getAngle(blob1.x, blob1.y, blob2.x, blob2.y);
 
 			return {
 				left : angle,
@@ -1587,6 +1593,16 @@ function AposBot() {
 		}
 
 		var a = Math.asin(radius / dd);
+
+		if (isNaN(a)) {
+			angle = Util.getAngle(blob1.x, blob1.y, blob2.x, blob2.y);
+
+			return {
+				left : angle,
+				right : angle
+			};
+		}
+		
 		var b = Math.atan2(dy, dx);
 
 		var t = b - a;
