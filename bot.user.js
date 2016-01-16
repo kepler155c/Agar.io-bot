@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1559
+// @version     3.1560
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1559;
+var aposBotVersion = 3.1560;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -79,7 +79,7 @@ var Constants = {
 	yellow : "#FFFF00",
 };
 
-window.Contants = constants;
+window.Contants = Constants;
 
 var Classification = {
 	unknown : 0,
