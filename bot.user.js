@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1538
+// @version     3.1539
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1538;
+var aposBotVersion = 3.1539;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1696,7 +1696,7 @@ function AposBot() {
 
 		player.eachCellThreat(function(cell, threat) {
 
-			var distance = threat.size + cell.size + cell.velocity + threat.velocity + 200; // should use dangerZone
+			var distance = threat.size + cell.size + cell.velocity + threat.t.velocity + 200; // should use dangerZone
 
 			if (threat.isMovingTowards) {
 				distance += threat.t.velocity;
