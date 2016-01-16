@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1551
+// @version     3.1552
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1551;
+var aposBotVersion = 3.1552;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -781,7 +781,8 @@ function AposBot() {
 						entity.foodList = [];
 						entity.foodMass = 0;
 
-					} else if (this.canEat(entity, player.smallestCell, Constants.enemyRatio)) {
+//					} else if (this.canEat(entity, player.smallestCell, Constants.enemyRatio)) {
+					} else if (this.canEat(entity, entity.closestCell, Constants.enemyRatio)) {
 
 						entity.classification = Classification.threat;
 
@@ -795,7 +796,7 @@ function AposBot() {
 							entity.classification = Classification.splitTarget;
 						}
 
-					} else if (this.canEat(player.smallestCell, entity, Constants.playerRatio)) {
+					} else if (this.canEat(entity.closestCell, entity, Constants.playerRatio)) {
 
 						entity.classification = Classification.food;
 
