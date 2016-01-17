@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1599
+// @version     3.1600
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1599;
+var aposBotVersion = 3.1600;
 
 var Constants = {
 
@@ -961,30 +961,6 @@ function AposBot() {
 		}, this);
 	};
 
-	this.addFoodObstacles = function(player, obstacleList) {
-
-		player.eachCellThreat(function(cell, threat) {
-
-			var distance = threat.size + cell.size + cell.velocity;
-
-			if (threat.isMovingTowards) {
-				distance += threat.t.velocity;
-
-			}
-
-			if (threat.distance < distance) {
-
-				var tempOb = this.getAngleRange(cell, threat, 0, distance, Classification.unknown);
-				var angle1 = tempOb[0];
-				var angle2 = this.rangeToAngle(tempOb);
-
-				obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
-
-				drawCircle(threat.x, threat.y, distance, Constants.yellow);
-			}
-		}, this);
-	};
-
 	this.getBestFood = function(player) {
 
 		var i;
@@ -1099,15 +1075,6 @@ function AposBot() {
 
 	this.determineFoodDestination = function(player, destination) {
 
-		var badAngles = [];
-		var obstacleList = [];
-		var goodAngles = [];
-		var obstacleAngles = [];
-
-		this.addVirusAngles(player, badAngles, obstacleList);
-		this.addFoodObstacles(player, obstacleList);
-		this.combineAngles(player, badAngles, obstacleList, goodAngles, obstacleAngles);
-
 		this.clusterFood(player, player.largestCell.size);
 
 		var i, j, cluster;
@@ -1158,11 +1125,7 @@ function AposBot() {
 
 		// angle away from obstacles
 		//var shiftedAngle = this.shiftAngle(obstacleAngles, angle, [ 0, 360 ]);
-
-		//if (player.cells.length == 1) {
-			var shiftedAngle = this.avoidObstacles(player, angle);
-		//}
-		//this.avoidViruses(player, shiftedAngle);
+		var shiftedAngle = this.avoidObstacles(player, angle);
 
 		destination.point = this.followAngle(shiftedAngle.angle, cluster.closestCell.x, cluster.closestCell.y,
 				cluster.distance);
@@ -1196,7 +1159,13 @@ function AposBot() {
 		}
 
 		drawLine(cluster.closestCell.x, cluster.closestCell.y, destination.point.x, destination.point.y,
-				Constants.orange);
+				Constants.green);
+
+		if (shiftedAngle.shifted) {
+			
+			drawLine(cluster.closestCell.x, cluster.closestCell.y, destination.point.x, destination.point.y,
+					Constants.orange);
+		}
 
 		return true;
 	};
@@ -1507,20 +1476,6 @@ function AposBot() {
 				}
 				badAngles.push(this.getAngleRange(cell, threat, i++, threat.dangerZone, Classification.threat).concat(
 						threat.distance));
-
-				/*
-				if (threat.intersects) {
-					//badAngles.push(this.getAngleRange(threat.cell, threat, i, threat.size + threat.safeDistance,
-					//		Classification.threat).concat(threat.distance));
-					badAngles.push(this.getAngleRange(threat.cell, threat, i,
-							threat.size - threat.cell.size + threat.safeDistance, Classification.threat).concat(
-							threat.distance));
-				} else {
-				
-					badAngles.push(this.getAngleRange(threat.cell, threat, i, threat.dangerZone, Classification.threat)
-							.concat(threat.distance));
-				}
-				*/
 			}
 		}, this);
 	};
@@ -1675,23 +1630,6 @@ function AposBot() {
 		};
 	};
 
-	this.showRanges = function(player) {
-
-		Object.keys(this.entities).filter(this.entities.threatAndVirusFilter, this.entities).forEach(function(key) {
-			var entity = this.entities[key];
-
-			if (entity.closestCell.distance < entity.size + player.cells[0].size * 2) {
-
-				var range = this.getSafeRange(player, entity, entity.size + player.cells[0].size);
-
-				this.drawAngledLine(player.cells[0].x, player.cells[0].y, range.left, 500, Constants.orange);
-				this.drawAngledLine(player.cells[0].x, player.cells[0].y, range.right, 500, Constants.yellow);
-			}
-
-		}, this);
-
-	};
-
 	//TODO: Don't let this function do the radius math.
 	this.getSafeRange = function(blob1, blob2, radius) {
 
@@ -1767,26 +1705,17 @@ function AposBot() {
 		};
 		var range;
 		var ranges = [];
-		var rangeCount = 0;
-
-		this.addVirusObstacles(player);
-		this.addThreatObstacles(player);
 
 		for (var i = 0; i < player.allObstacles.length; i++) {
 
 			var obstacle = player.allObstacles[i];
 
-			range = this.getSafeRange(obstacle.cell, obstacle.entity, obstacle.distance);
+			range = obstacle.range;
 
 			this.drawAngledLine(obstacle.cell.x, obstacle.cell.y, range.left, 500, Constants.orange);
 			this.drawAngledLine(obstacle.cell.x, obstacle.cell.y, range.right, 500, Constants.yellow);
 
 			if (this.angleInRange(angle, range)) {
-				rangeCount++;
-
-				if (rangeCount > 1) {
-					console.log('combining ranges');
-				}
 				this.addRange(ranges, range);
 			}
 		}
@@ -1855,18 +1784,12 @@ function AposBot() {
 
 		player.eachCellThreat(function(cell, threat) {
 
-			var distance = threat.size + cell.size + cell.velocity; // should use dangerZone
-
-			if (threat.isMovingTowards) {
-				distance += threat.t.velocity;
-			}
-
-			if (threat.distance < distance) {
+			if (threat.distance < threat.dangerZone) {
 
 				var obstacle = {
 					entity : threat.t,
 					cell : cell,
-					distance : distance
+					range : this.getSafeRange(cell, threat.t, threat.dangerZone)
 				};
 				cell.obstacles.push(obstacle);
 				player.allObstacles.push(obstacle);
@@ -1896,7 +1819,8 @@ function AposBot() {
 					var obstacle = {
 						entity : virus,
 						cell : cell,
-						distance : distance
+						distance : distance,
+						range : this.getSafeRange(cell, virus, distance)
 					};
 
 					cell.obstacles.push(obstacle);
@@ -2024,6 +1948,16 @@ function AposBot() {
 		player.allThreats = [];
 		player.allObstacles = [];
 
+		for (var i = 0; i < player.cells.length; i++) {
+			var cell = player.cells[i];
+
+			cell.threats = [];
+			cell.obstacles = [];
+		}
+
+		this.addVirusObstacles(player);
+		this.addThreatObstacles(player);
+		
 		Object.keys(this.entities).filter(this.entities.threatFilter, this.entities).forEach(function(key) {
 
 			threat = this.entities[key];
@@ -2127,13 +2061,6 @@ function AposBot() {
 		var player = this.player;
 		this.player.setCells(cells);
 
-		for (var i = 0; i < player.cells.length; i++) {
-			var cell = player.cells[i];
-
-			cell.threats = [];
-			cell.obstacles = [];
-		}
-
 		var destination = this.update(cells);
 
 		this.updateInfo(this.player);
@@ -2193,8 +2120,6 @@ function AposBot() {
 		this.separateListBasedOnFunction(player);
 		this.setClosestVirus(player);
 		this.displayVirusTargets(player);
-
-		this.showRanges(player);
 
 		if (player.action && player.action(destination)) {
 			return destination;
