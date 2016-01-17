@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1570
+// @version     3.1571
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1570;
+var aposBotVersion = 3.1571;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1134,7 +1134,7 @@ function AposBot() {
 
 		var color = Constants.orange;
 
-		this.showAngles();
+		this.showAngles(player);
 
 		if (doSplit && shiftedAngle.shifted) {
 			color = Constants.red; // cannot split, our angle was shifted from target
