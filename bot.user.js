@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1586
+// @version     3.1587
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1586;
+var aposBotVersion = 3.1587;
 
 var Constants = {
 
@@ -1489,7 +1489,7 @@ function AposBot() {
 
 			if (threat.distance < threat.dangerZone) {
 				if (threat.size + cell.size > threat.distance) {
-					console.log("t: " + (threat.size + cell.size) - threat.distance);
+					console.log("t: " + ((threat.size + cell.size) - threat.distance));
 				}
 				badAngles.push(this.getAngleRange(cell, threat, i++, threat.dangerZone, Classification.threat).concat(
 						threat.distance));
@@ -1818,7 +1818,7 @@ function AposBot() {
 					var distance = cell.size + virus.size + cell.velocity;
 
 					if (virus.size + cell.size > virus.distance) {
-						console.log("v: " + (virus.size + cell.size) - virus.distance);
+						console.log("v: " + ((virus.size + cell.size) - virus.distance));
 					}
 
 					if (virus.distance < distance) {
@@ -2721,8 +2721,6 @@ function AposBot() {
 			drawPoint(angleStuff[2][0], angleStuff[2][1], Constants.red, "");
 			drawPoint(angleStuff[3][0], angleStuff[3][1], Constants.red, "");
 
-			//console.log("Adding badAngles: " + leftAngle + ", " + rightAngle + " diff: " + difference);
-
 			var lineLeft = this.followAngle(leftAngle, blob1.x, blob1.y, safeDistance - index * 10);
 			var lineRight = this.followAngle(rightAngle, blob1.x, blob1.y, safeDistance - index * 10);
 
@@ -2748,7 +2746,6 @@ function AposBot() {
 		//TODO: shiftAngle needs to respect the range! DONE?
 		for (var i = 0; i < listToUse.length; i++) {
 			if (this.angleIsWithin(angle, listToUse[i])) {
-				//console.log("Shifting needed!");
 
 				var angle1 = listToUse[i][0];
 				var angle2 = this.rangeToAngle(listToUse[i]);
@@ -2781,7 +2778,7 @@ function AposBot() {
 				};
 			}
 		}
-		//console.log("No Shifting Was needed!");
+
 		return {
 			angle : angle,
 			shifted : false
