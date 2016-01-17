@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1605
+// @version     3.1606
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1605;
+var aposBotVersion = 3.1606;
 
 var Constants = {
 
@@ -1675,11 +1675,13 @@ function AposBot() {
 			console.log('it is NaN');
 			angle = Util.getAngle(blob1.x, blob1.y, blob2.x, blob2.y);
 
+			a = -Math.PI/2;
+/*
 			return {
 				left : this.mod(angle + 1, 360),
 				right : angle,
 				inside : true
-			};
+			}; */
 		}
 
 		var b = Math.atan2(dy, dx);
