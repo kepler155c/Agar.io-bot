@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1582
+// @version     3.1583
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1582;
+var aposBotVersion = 3.1583;
 
 var Constants = {
 
@@ -459,8 +459,8 @@ Player.prototype = {
 
 				if (threat.t != this.allThreats[0].t) {
 
-					if (threat.distance - threat.dangerZone < 750) {
-						threat.dangerZone = threat.distance + 1;
+					if (threat.t.closestCell.distance - threat.dangerZone < 750) {
+						threat.dangerZone = threat.t.closestCell.distance + 1;
 						drawCircle(threat.x, threat.y, threat.dangerZone, Constants.red);
 					}
 					break;
@@ -693,7 +693,7 @@ function AposBot() {
 		} else if (key.keyCode == 77) { // 'm: merge'
 			this.player.merge();
 		} else if (key.keyCode == 76) { // 'l: lower aggression'
-			Constants.aggressionLevel = Math.max(0, Contants.agressionLevel - 1);
+			Constants.aggressionLevel = Math.max(0, Constants.agressionLevel - 1);
 		} else if (key.keyCode == 65) { // 'a: raise aggression'
 			Constants.aggressionLevel = Math.min(3, Constants.aggressionLevel + 1);
 		}
@@ -2521,23 +2521,30 @@ function AposBot() {
 
 	//TODO: Don't let this function do the radius math.
 	this.getEdgeLinesFromPoint = function(blob1, blob2, radius) {
+
+		var inverted = false;
+
 		var px = blob1.x;
 		var py = blob1.y;
 
 		var cx = blob2.x;
 		var cy = blob2.y;
 
-		var tempRadius = Util.computeDistance(px, py, cx, cy);
-		if (tempRadius <= radius) {
-			radius = tempRadius - 5;
-			//radius = tempRadius - 1;
-		}
-
 		var dx = cx - px;
 		var dy = cy - py;
 		var dd = Math.sqrt(dx * dx + dy * dy);
+
+		if (dd < radius) {
+			inverted = true;
+			radius = dd + (radius - dd);
+		}
+
 		var a = Math.asin(radius / dd);
 		var b = Math.atan2(dy, dx);
+
+		if (inverted) {
+			b = -b;
+		}
 
 		var t = b - a;
 		var ta = {
