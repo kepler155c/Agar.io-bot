@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1580
+// @version     3.1581
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1580;
+var aposBotVersion = 3.1581;
 
 var Constants = {
 
@@ -688,12 +688,14 @@ function AposBot() {
 	this.keyAction = function(key) {
 		if (81 == key.keyCode) { // 'q'
 			this.toggleFollow = !this.toggleFollow;
-		} else if (key.keyCode == 69) { // 'e'
+		} else if (key.keyCode == 69) { // 'e: eject virus'
 			this.player.ejectVirus();
-		} else if (key.keyCode == 77) { // 'm'
+		} else if (key.keyCode == 77) { // 'm: merge'
 			this.player.merge();
-		} else if (key.keyCode == 65) { // 'a'
-			Constants.aggressionLevel = (Constants.aggressionLevel + 1) % 4;
+		} else if (key.keyCode == 76) { // 'l: lower aggression'
+			Constants.aggressionLevel = Math.max(0, Contants.agressionLevel - 1);
+		} else if (key.keyCode == 65) { // 'a: raise aggression'
+			Constants.aggressionLevel = Math.min(3, Constants.aggressionLevel + 1);
 		}
 	};
 
@@ -2530,7 +2532,7 @@ function AposBot() {
 
 		var dx = cx - px;
 		var dy = cy - py;
-		var dd = Math.sqrt(dx * dx + dy * dy) + blob1.size;
+		var dd = Math.sqrt(dx * dx + dy * dy);
 
 		if (dd < radius) {
 			inverted = true;
