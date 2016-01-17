@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1573
+// @version     3.1574
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1573;
+var aposBotVersion = 3.1574;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1189,8 +1189,8 @@ function AposBot() {
 
 				var range = this.getRange(player, entity);
 
-				this.drawAngledLine(player.x, player.y, this.radiansToDegrees(range.left), 500, Constants.orange);
-				this.drawAngledLine(player.x, player.y, this.radiansToDegrees(range.right), 500, Constants.yellow);
+				this.drawAngledLine(player.x, player.y, range.left, 500, Constants.orange);
+				this.drawAngledLine(player.x, player.y, range.right, 500, Constants.yellow);
 			}
 
 		}, this);
