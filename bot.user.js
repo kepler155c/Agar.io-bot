@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1575
+// @version     3.1576
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1575;
+var aposBotVersion = 3.1576;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -175,7 +175,7 @@ Player.prototype = {
 	},
 	isSafeToSplit : function(entities) {
 
-		this.safeToSplit = this.cells.length == 1;
+		this.safeToSplit = true; //this.cells.length == 1;
 
 		Object.keys(entities).forEach(
 				function(key) {
@@ -186,14 +186,14 @@ Player.prototype = {
 
 						if (entity.closestCell.size * entity.closestCell.size / 2 < entity.size * entity.size
 								* Constants.enemyRatio) {
-							if (entity.distance < 750 + entity.closestCell.size) {
+							if (entity.distance < entity.size + entity.closestCell.size) {
 								this.safeToSplit = false;
 							}
 						}
 					}
 				}, this);
 
-		this.safeToSplit = true;
+		//this.safeToSplit = true;
 	},
 	merge : function() {
 
@@ -1643,10 +1643,30 @@ function AposBot() {
 		};
 	};
 
+	this.showRanges = function(player) {
+
+		Object.keys(this.entities).filter(this.entities.threatAndVirusFilter, this.entities).forEach(function(key) {
+			var entity = this.entities[key];
+
+			if (entity.closestCell.distance < entity.size + player.cells[0].size * 2) {
+
+				var range = this.getSafeRange(player, entity, entity.size + player.cells[0].size);
+
+				this.drawAngledLine(player.cells[0].x, player.cells[0].y, range.left, 500, Constants.orange);
+				this.drawAngledLine(player.cells[0].x, player.cells[0].y, range.right, 500, Constants.yellow);
+			}
+
+		}, this);
+
+	};
+
 	//TODO: Don't let this function do the radius math.
 	this.getSafeRange = function(blob1, blob2, radius) {
 
 		var angle;
+		var range = {
+			inverted : false
+		};
 
 		var px = blob1.x;
 		var py = blob1.y;
@@ -1656,23 +1676,11 @@ function AposBot() {
 
 		var dx = cx - px;
 		var dy = cy - py;
-		var dd = Math.sqrt(dx * dx + dy * dy) + blob1.size;
+		var dd = Math.sqrt(dx * dx + dy * dy) + blob1.size; // distance + 1 radius (not touching)
 
 		if (dd < radius) {
-			// partially inside radius - angle out
-			radius -= blob1.size;
-			console.log('partially inside');
-		}
-		if (dd < radius) {
-			console.log('way inside');
-			// half-way inside the radius - back up
-			angle = Util.getAngle(blob1.x, blob1.y, blob2.x, blob2.y);
-
-			return {
-				left : this.mod(angle + 1, 360),
-				right : angle,
-				inside : true
-			};
+			range.inverted = true;
+			radius = dd + (radius - dd);
 		}
 
 		var a = Math.asin(radius / dd);
@@ -1689,6 +1697,9 @@ function AposBot() {
 		}
 
 		var b = Math.atan2(dy, dx);
+		if (range.inverted) {
+			b = -b;
+		}
 
 		var t = b - a;
 		var ta = {
@@ -1702,14 +1713,10 @@ function AposBot() {
 			y : radius * Math.cos(t)
 		};
 
-		var angleLeft = Util.getAngle(cx + ta.x, cy + ta.y, px, py);
-		var angleRight = Util.getAngle(cx + tb.x, cy + tb.y, px, py);
+		range.left = Util.getAngle(cx + ta.x, cy + ta.y, px, py);
+		range.right = Util.getAngle(cx + tb.x, cy + tb.y, px, py);
 
-		return {
-			left : angleLeft,
-			right : angleRight,
-			inside : false
-		};
+		return range;
 	};
 
 	this.angleInRange = function(angle, range) {
@@ -1726,6 +1733,7 @@ function AposBot() {
 			angle : angle,
 			shifted : false
 		};
+		var ranges = [];
 
 		this.addVirusObstacles(player);
 		this.addThreatObstacles(player);
@@ -1740,6 +1748,7 @@ function AposBot() {
 			this.drawAngledLine(obstacle.cell.x, obstacle.cell.y, range.right, 500, Constants.yellow);
 
 			if (this.angleInRange(angle, range)) {
+				ranges.push(range);
 
 				shiftedAngle.shifted = true;
 				shiftedAngle.angle = range.left;
@@ -1747,8 +1756,10 @@ function AposBot() {
 				if (Math.abs(angle - range.left) > Math.abs(angle, range.right)) {
 					shiftedAngle.angle = range.right;
 				}
+
 			}
 		}
+
 		return shiftedAngle;
 	};
 
@@ -1756,7 +1767,7 @@ function AposBot() {
 
 		player.eachCellThreat(function(cell, threat) {
 
-			var distance = threat.size + cell.size + cell.velocity + threat.t.velocity; // should use dangerZone
+			var distance = threat.size + cell.size + (cell.velocity + threat.t.velocity) * 2; // should use dangerZone
 
 			if (threat.isMovingTowards) {
 				distance += threat.t.velocity;
@@ -2094,6 +2105,8 @@ function AposBot() {
 		this.separateListBasedOnFunction(player);
 		this.setClosestVirus(player);
 		this.displayVirusTargets(player);
+		
+		this.showRanges(player);
 
 		if (player.action && player.action(destination)) {
 			return destination;
