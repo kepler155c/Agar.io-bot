@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1600
+// @version     3.1601
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1600;
+var aposBotVersion = 3.1601;
 
 var Constants = {
 
@@ -1162,7 +1162,7 @@ function AposBot() {
 				Constants.green);
 
 		if (shiftedAngle.shifted) {
-			
+
 			drawLine(cluster.closestCell.x, cluster.closestCell.y, destination.point.x, destination.point.y,
 					Constants.orange);
 		}
@@ -1948,7 +1948,7 @@ function AposBot() {
 		player.allThreats = [];
 		player.allObstacles = [];
 
-		for (var i = 0; i < player.cells.length; i++) {
+		for (i = 0; i < player.cells.length; i++) {
 			var cell = player.cells[i];
 
 			cell.threats = [];
@@ -1957,7 +1957,20 @@ function AposBot() {
 
 		this.addVirusObstacles(player);
 		this.addThreatObstacles(player);
-		
+
+		var ranges = [];
+
+		for (i = 0; i < player.allObstacles.length; i++) {
+
+			var obstacle = player.allObstacles[i];
+
+			this.addRange(ranges, obstacle.range);
+		}
+
+		if (ranges.length == 1) {
+			this.infoStrings.push(ranges[0].left + " " + ranges[0].right);
+		}
+
 		Object.keys(this.entities).filter(this.entities.threatFilter, this.entities).forEach(function(key) {
 
 			threat = this.entities[key];
@@ -2184,38 +2197,43 @@ function AposBot() {
 			}
 		}, this);
 
-		player.eachCellThreat(function(cell, threat) {
+		if (!isHumanControlled()) {
 
-			if (threat.isSplitThreat) {
+			player.eachCellThreat(
+					function(cell, threat) {
 
-				var tsize = Math.sqrt(threat.mass / 2 * 100);
-				var shadowDistance = Math.min(threat.t.size + Constants.splitRangeMax, threat.distance);
+						if (threat.isSplitThreat) {
 
-				var shadowThreat = {
-					x : threat.t.x - Math.cos(threat.angle) * shadowDistance,
-					y : threat.t.y - Math.sin(threat.angle) * shadowDistance,
-				};
-				// distance = Util.computeDistance(shadowThreat.x, shadowThreat.y, cell.x, cell.y);
+							var tsize = Math.sqrt(threat.mass / 2 * 100);
+							var shadowDistance = Math.min(threat.t.size + Constants.splitRangeMax, threat.distance);
 
-				drawCircle(shadowThreat.x, shadowThreat.y, tsize, Constants.gray);
+							var shadowThreat = {
+								x : threat.t.x - Math.cos(threat.angle) * shadowDistance,
+								y : threat.t.y - Math.sin(threat.angle) * shadowDistance,
+							};
+							// distance = Util.computeDistance(shadowThreat.x, shadowThreat.y, cell.x, cell.y);
 
-				var shadowLineDistance = Math.min(threat.t.size - tsize + Constants.splitRangeMax, threat.distance);
-				var shadowThreatLine = {
-					x : threat.t.x - Math.cos(threat.angle) * shadowLineDistance,
-					y : threat.t.y - Math.sin(threat.angle) * shadowLineDistance,
-				};
+							drawCircle(shadowThreat.x, shadowThreat.y, tsize, Constants.gray);
 
-				drawLine(threat.t.x, threat.t.y, shadowThreatLine.x, shadowThreatLine.y,
-						threat.isMovingTowards ? Constants.red : Constants.gray);
-			}
-		}, this);
+							var shadowLineDistance = Math.min(threat.t.size - tsize + Constants.splitRangeMax,
+									threat.distance);
+							var shadowThreatLine = {
+								x : threat.t.x - Math.cos(threat.angle) * shadowLineDistance,
+								y : threat.t.y - Math.sin(threat.angle) * shadowLineDistance,
+							};
 
-		Object.keys(this.teams).forEach(function(key) {
+							drawLine(threat.t.x, threat.t.y, shadowThreatLine.x, shadowThreatLine.y,
+									threat.isMovingTowards ? Constants.red : Constants.gray);
+						}
+					}, this);
 
-			var team = this.teams[key];
+			Object.keys(this.teams).forEach(function(key) {
 
-			drawCircle(team.x, team.y, team.size, Constants.cyan);
-		}, this);
+				var team = this.teams[key];
+
+				drawCircle(team.x, team.y, team.size, Constants.cyan);
+			}, this);
+		}
 
 		// cursor
 		// drawPoint(tempPoint[0], tempPoint[1], tempPoint[2], "");
