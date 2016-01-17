@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1614
+// @version     3.1615
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1614;
+var aposBotVersion = 3.1615;
 
 var Constants = {
 
@@ -465,8 +465,8 @@ Player.prototype = {
 
 				if (threat.t != this.allThreats[0].t) {
 
-					if (threat.t.distance - threat.dangerZone < 750) {
-						threat.dangerZone = threat.t.distance + 1;
+					if (threat.distance - threat.dangerZone < 750) {
+						threat.dangerZone = threat.distance + 1;
 						drawCircle(threat.x, threat.y, threat.dangerZone, Constants.red);
 					}
 					break;
@@ -1118,7 +1118,7 @@ function AposBot() {
 		var doSplit = false; // (player.largestCell.mass >= 36 && player.mass <= 50 && player.cells.length == 1 && player.safeToSplit);
 
 		cluster = this.getBestFood(player, ranges);
-		
+
 		if (cluster === null) {
 			return false;
 		}
@@ -1147,7 +1147,7 @@ function AposBot() {
 		//var shiftedAngle = this.shiftAngle(obstacleAngles, angle, [ 0, 360 ]);
 		var shiftedAngle = this.avoidObstacles(player, angle);
 
-		console.log('angle is: ' + shiftedAngle.angle);
+		// console.log('angle is: ' + shiftedAngle.angle);
 		destination.point = this.followAngle(shiftedAngle.angle, cluster.closestCell.x, cluster.closestCell.y,
 				cluster.distance);
 
@@ -1179,13 +1179,9 @@ function AposBot() {
 			player.split(cluster, cluster.x, cluster.y, destination);
 		}
 
-		drawLine(cluster.closestCell.x, cluster.closestCell.y, destination.point.x, destination.point.y,
-				Constants.green);
-
 		if (shiftedAngle.shifted) {
 
-			drawLine(cluster.closestCell.x, cluster.closestCell.y, destination.point.x, destination.point.y,
-					Constants.orange);
+			drawLine(cluster.closestCell.x, cluster.closestCell.y, cluster.x, cluster.y, Constants.orange);
 		}
 
 		return true;
@@ -1691,9 +1687,9 @@ function AposBot() {
 		}
 
 		var b = Math.atan2(dy, dx);
-//		if (range.inverted) {
-//			b = -b;
-//		}
+		//		if (range.inverted) {
+		//			b = -b;
+		//		}
 
 		var t = b - a;
 		var ta = {
@@ -1916,7 +1912,7 @@ function AposBot() {
 	this.avoidThreats = function(player, destination) {
 
 		var i;
-		
+
 		player.allObstacles = [];
 
 		this.addVirusObstacles(player);
@@ -1950,7 +1946,7 @@ function AposBot() {
 				return null;
 			}
 		}
-		
+
 		return ranges;
 
 		/*
@@ -2097,7 +2093,7 @@ function AposBot() {
 		var ranges = this.avoidThreats(player, destination);
 
 		if (ranges === null) {
-			
+
 			player.eachCellThreat(function(cell, threat) {
 				threat.dangerZone = threat.minDistance;
 			});
@@ -2112,7 +2108,7 @@ function AposBot() {
 		if (ranges.length > 1) {
 			console.log(ranges);
 		}
-		
+
 		destination.point.x = player.x;
 		destination.point.y = player.y;
 
@@ -2120,20 +2116,21 @@ function AposBot() {
 			if (!this.determineFoodDestination(player, destination, threatened ? ranges : [])) {
 				console.log('no food');
 				if (ranges.length > 0) {
-					
+
 					destination.point = this.pointFromAngle(player.x, player.y, this.mod(ranges[0].left + 1, 360), 500);
 					console.log('no range');
 				}
 			}
 		}
+		drawLine(player.x, player.y, destination.point.x, destination.point.y, Constants.green);
 	};
-	
+
 	this.pointFromAngle = function(x, y, angle, distance) {
 		var radians = this.degreesToRadians(angle);
-		
+
 		return {
-			x: x - Math.cos(radians) * distance,
-			y: y - Math.sin(radians) * distance
+			x : x - Math.cos(radians) * distance,
+			y : y - Math.sin(radians) * distance
 		};
 	};
 
