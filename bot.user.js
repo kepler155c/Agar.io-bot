@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1587
+// @version     3.1588
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1587;
+var aposBotVersion = 3.1588;
 
 var Constants = {
 
@@ -693,7 +693,7 @@ function AposBot() {
 		} else if (key.keyCode == 77) { // 'm: merge'
 			this.player.merge();
 		} else if (key.keyCode == 76) { // 'l: lower aggression'
-			Constants.aggressionLevel = Math.max(0, Constants.agressionLevel - 1);
+			Constants.aggressionLevel = Math.max(0, Constants.aggressionLevel - 1);
 		} else if (key.keyCode == 65) { // 'a: raise aggression'
 			Constants.aggressionLevel = Math.min(3, Constants.aggressionLevel + 1);
 		}
@@ -1815,7 +1815,7 @@ function AposBot() {
 
 				if ((cell.mass + virus.foodMass) / virus.mass > 1.2 || player.isMerging) {
 
-					var distance = cell.size + virus.size + cell.velocity;
+					var distance = cell.size + virus.size + 50; // ??? cell.velocity;
 
 					if (virus.size + cell.size > virus.distance) {
 						console.log("v: " + ((virus.size + cell.size) - virus.distance));
