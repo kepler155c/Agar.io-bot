@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1584
+// @version     3.1585
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1584;
+var aposBotVersion = 3.1585;
 
 var Constants = {
 
@@ -1381,7 +1381,6 @@ function AposBot() {
 				player.allThreats.push(threat);
 			}
 		}
-
 	};
 
 	this.pruneThreats = function(threats) {
@@ -1489,6 +1488,9 @@ function AposBot() {
 		player.eachCellThreat(function(cell, threat) {
 
 			if (threat.distance < threat.dangerZone) {
+				if (threat.size + cell.size < threat.distance) {
+					this.infoStrings.push("t: " + (threat.size + cell.size) - threat.distance);
+				}
 				badAngles.push(this.getAngleRange(cell, threat, i++, threat.dangerZone, Classification.threat).concat(
 						threat.distance));
 
