@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1602
+// @version     3.1603
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1602;
+var aposBotVersion = 3.1603;
 
 var Constants = {
 
@@ -1022,7 +1022,7 @@ function AposBot() {
 			cluster = player.foodClusters[i];
 
 			if (cluster.clusterWeight < bestClusterWeight) {
-				if (!this.foodInVirus(cluster) && this.foodInValidRange(cluster, ranges)) {
+				if (!this.foodInVirus(cluster) && this.clusterInValidRange(cluster, ranges)) {
 					bestClusterWeight = cluster.clusterWeight;
 					bestFoodI = i;
 				}
