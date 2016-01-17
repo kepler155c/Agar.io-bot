@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1588
+// @version     3.1589
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1588;
+var aposBotVersion = 3.1589;
 
 var Constants = {
 
@@ -2527,30 +2527,23 @@ function AposBot() {
 
 	//TODO: Don't let this function do the radius math.
 	this.getEdgeLinesFromPoint = function(blob1, blob2, radius) {
-
-		var inverted = false;
-
 		var px = blob1.x;
 		var py = blob1.y;
 
 		var cx = blob2.x;
 		var cy = blob2.y;
 
+		var tempRadius = Util.computeDistance(px, py, cx, cy);
+		if (tempRadius <= radius) {
+			radius = tempRadius - 5;
+			//radius = tempRadius - 1;
+		}
+
 		var dx = cx - px;
 		var dy = cy - py;
-		var dd = Math.sqrt(dx * dx + dy * dy) + blob1.size;
-
-		if (dd < radius) {
-			inverted = true;
-			radius = dd + (radius - dd);
-		}
-
+		var dd = Math.sqrt(dx * dx + dy * dy);
 		var a = Math.asin(radius / dd);
 		var b = Math.atan2(dy, dx);
-
-		if (inverted) {
-			b = -b;
-		}
 
 		var t = b - a;
 		var ta = {
