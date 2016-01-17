@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1571
+// @version     3.1572
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1571;
+var aposBotVersion = 3.1572;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1184,11 +1184,11 @@ function AposBot() {
 
 		Object.keys(this.entities).filter(this.entities.threatAndVirusFilter, this.entities).forEach(function(key) {
 			var entity = this.entities[key];
-			
+
 			if (entity.distance < 750) {
-				
+
 				var range = this.getRange(player, entity);
-				
+
 				this.drawAngledLine(player.x, player.y, this.radiansToDegrees(range.left), 500, Constants.orange);
 				this.drawAngledLine(player.x, player.y, this.radiansToDegrees(range.right), 500, Constants.yellow);
 			}
@@ -1602,36 +1602,39 @@ function AposBot() {
 	this.radiansToDegrees = function(angle) {
 		return angle * 180 / Math.PI + 180;
 	};
-	
+
 	this.degreesToRadiansHuh = function(degrees) {
-        return degrees * Math.PI / 180;
-    };
+		return degrees * Math.PI / 180;
+	};
 
 	this.degreesToRadians = function(degrees) {
 		degrees -= 180;
 		return degrees / (180 / Math.PI);
 	};
 
-	this.getRange = function(cell, entity) {
+	this.getRange = function(source, target) {
 
-		var vector = {
-			x : entity.x - cell.x,
-			y : entity.y - cell.y
+		//Alpha
+		var a = Math.asin(target.size / target.distance);
+		//Beta
+		var b = Math.atan2(target.y - source.y, target.x - source.x);
+		//Tangent angle
+		var t = b - a;
+		//Tangent points
+		var T1 = {
+			x : target.x + target.size * Math.sin(t),
+			y : target.y + target.size * -Math.cos(t)
 		};
 
-		var p1 = {
-			x : entity.x + vector.x * Math.cos(this.degreesToRadiansHuh(9)),
-			y : entity.y + vector.y * Math.sin(this.degreesToRadiansHuh(9))
-		};
-
-		var p2 = {
-			x : entity.x + vector.x * Math.sin(this.degreesToRadiansHuh(9)),
-			y : entity.y + vector.y * Math.cos(this.degreesToRadiansHuh(9))
+		t = b + a;
+		var T2 = {
+			x : target.x + target.size * -Math.sin(t),
+			y : target.y + target.size * Math.cos(t)
 		};
 
 		return {
-			left : Util.getAngle(cell.x, cell.y, p1.x, p1.y),
-			right : Util.getAngle(cell.x, cell.y, p2.x, p2.y)
+			left : Util.getAngle(source.x, source.y, T1.x, T1.y),
+			right : Util.getAngle(source.x, source.y, T2.x, T2.y)
 		};
 	};
 
