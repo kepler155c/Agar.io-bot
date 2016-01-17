@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1601
+// @version     3.1602
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1601;
+var aposBotVersion = 3.1602;
 
 var Constants = {
 
@@ -961,13 +961,13 @@ function AposBot() {
 		}, this);
 	};
 
-	this.getBestFood = function(player) {
+	this.getBestFood = function(player, ranges) {
 
-		var i;
+		var i, cluster;
 
 		for (i = 0; i < player.foodClusters.length; i++) {
 
-			var cluster = player.foodClusters[i];
+			cluster = player.foodClusters[i];
 			var multiplier = 3;
 			var weight = cluster.size; // shouldn't this be cluster.mass ?
 
@@ -1019,14 +1019,30 @@ function AposBot() {
 		var bestFoodI = 0;
 		var bestClusterWeight = player.foodClusters[0].clusterWeight;
 		for (i = 1; i < player.foodClusters.length; i++) {
-			if (player.foodClusters[i].clusterWeight < bestClusterWeight) {
-				if (!this.foodInVirus(player.foodClusters[i])) {
-					bestClusterWeight = player.foodClusters[i].clusterWeight;
+			cluster = player.foodClusters[i];
+
+			if (cluster.clusterWeight < bestClusterWeight) {
+				if (!this.foodInVirus(cluster) && this.foodInValidRange(cluster, ranges)) {
+					bestClusterWeight = cluster.clusterWeight;
 					bestFoodI = i;
 				}
 			}
 		}
 		return player.foodClusters[bestFoodI];
+	};
+
+	this.clusterInValidRange = function(cluster, ranges) {
+
+		if (ranges.length > 0) {
+			for (var i = 0; i < ranges.length; i++) {
+				var range = ranges[i];
+				var angle = Util.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
+				if (this.angleInRange(angle, range)) {
+					return false;
+				}
+			}
+		}
+		return true;
 	};
 
 	this.foodInVirus = function(food) {
@@ -1073,7 +1089,7 @@ function AposBot() {
 		}, this);
 	};
 
-	this.determineFoodDestination = function(player, destination) {
+	this.determineFoodDestination = function(player, destination, ranges) {
 
 		this.clusterFood(player, player.largestCell.size);
 
@@ -1101,7 +1117,7 @@ function AposBot() {
 
 		var doSplit = false; // (player.largestCell.mass >= 36 && player.mass <= 50 && player.cells.length == 1 && player.safeToSplit);
 
-		cluster = this.getBestFood(player);
+		cluster = this.getBestFood(player, ranges);
 
 		// drawPoint(bestFood.x, bestFood.y, 1, "");
 		if (cluster.canSplitKill && player.safeToSplit) {
@@ -1931,7 +1947,6 @@ function AposBot() {
 			return false;
 		}
 
-		this.determineFoodDestination(player, destination);
 		return true;
 	};
 
@@ -1990,6 +2005,7 @@ function AposBot() {
 		var imminentThreatCount = 0;
 		var intersectCount = 0;
 		var overlappedBy = null;
+		var threatened = false;
 
 		player.eachCellThreat(function(cell, threat) {
 
@@ -2001,6 +2017,7 @@ function AposBot() {
 				} else if (threat.t != overlappedBy.t) {
 					imminentThreatCount++;
 				}
+				threatened = true;
 			}
 
 			if (threat.intersects) {
@@ -2056,6 +2073,8 @@ function AposBot() {
 				console.log('could not determine destination');
 			}
 		}
+
+		this.determineFoodDestination(player, destination, threatened ? ranges : []);
 	};
 
 	/**
