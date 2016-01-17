@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1613
+// @version     3.1614
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1613;
+var aposBotVersion = 3.1614;
 
 var Constants = {
 
@@ -1016,19 +1016,18 @@ function AposBot() {
 			//		+ parseInt(cluster.size, 10));
 		}
 
-		var bestFoodI = 0;
-		var bestClusterWeight = player.foodClusters[0].clusterWeight;
+		var bestCluster = null;
+
 		for (i = 1; i < player.foodClusters.length; i++) {
 			cluster = player.foodClusters[i];
 
-			if (cluster.clusterWeight < bestClusterWeight) {
+			if (!bestCluster || cluster.clusterWeight < bestCluster.clusterWeight) {
 				if (!this.foodInVirus(cluster) && this.clusterInValidRange(cluster, ranges)) {
-					bestClusterWeight = cluster.clusterWeight;
-					bestFoodI = i;
+					bestCluster = cluster;
 				}
 			}
 		}
-		return player.foodClusters[bestFoodI];
+		return bestCluster;
 	};
 
 	this.clusterInValidRange = function(cluster, ranges) {
@@ -1056,6 +1055,7 @@ function AposBot() {
 			if (Util.circlesIntersect(food, virus)) {
 				virus.foodMass += food.mass;
 				virus.foodList.push(food);
+				console.log('food is in virus');
 				return true;
 			}
 		}
@@ -1118,6 +1118,10 @@ function AposBot() {
 		var doSplit = false; // (player.largestCell.mass >= 36 && player.mass <= 50 && player.cells.length == 1 && player.safeToSplit);
 
 		cluster = this.getBestFood(player, ranges);
+		
+		if (cluster === null) {
+			return false;
+		}
 
 		// drawPoint(bestFood.x, bestFood.y, 1, "");
 		if (cluster.canSplitKill && player.safeToSplit) {
@@ -1901,8 +1905,8 @@ function AposBot() {
 
 	this.drawAngledLine = function(x, y, degrees, distance, color) {
 
-		var angle = this.degreesToRadians(degrees);
-		drawLine(x, y, x - Math.cos(angle) * distance, y - Math.sin(angle) * distance, color);
+		var radians = this.degreesToRadians(degrees);
+		drawLine(x, y, x - Math.cos(radians) * distance, y - Math.sin(radians) * distance, color);
 	};
 
 	/**
@@ -2107,12 +2111,28 @@ function AposBot() {
 
 		console.log(ranges);
 		
+		destination.point.x = player.x;
+		destination.point.y = player.y;
+
 		if (ranges) {
-			this.determineFoodDestination(player, destination, threatened ? ranges : []);
-		} else {
-			destination.x = player.x;
-			destination.y = player.y;
+			if (!this.determineFoodDestination(player, destination, threatened ? ranges : [])) {
+				console.log('no food');
+				if (ranges.length > 0) {
+					
+					destination.point = this.pointFromAngle(player.x, player.y, this.mod(ranges[0].left + 1, 360), 500);
+					console.log('no range');
+				}
+			}
 		}
+	};
+	
+	this.pointFromAngle = function(x, y, angle, distance) {
+		var radians = this.degreesToRadians(angle);
+		
+		return {
+			x: x - Math.cos(radians) * distance,
+			y: y - Math.sin(radians) * distance
+		};
 	};
 
 	/**
