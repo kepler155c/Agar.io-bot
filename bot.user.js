@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1572
+// @version     3.1573
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1572;
+var aposBotVersion = 3.1573;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1614,27 +1614,29 @@ function AposBot() {
 
 	this.getRange = function(source, target) {
 
+		var radius = target.size;
+
 		//Alpha
-		var a = Math.asin(target.size / target.distance);
+		var a = Math.asin(radius / target.distance);
 		//Beta
 		var b = Math.atan2(target.y - source.y, target.x - source.x);
 		//Tangent angle
 		var t = b - a;
-		//Tangent points
-		var T1 = {
-			x : target.x + target.size * Math.sin(t),
-			y : target.y + target.size * -Math.cos(t)
+
+		var ta = {
+			x : radius * Math.sin(t),
+			y : radius * -Math.cos(t)
 		};
 
 		t = b + a;
-		var T2 = {
-			x : target.x + target.size * -Math.sin(t),
-			y : target.y + target.size * Math.cos(t)
+		var tb = {
+			x : radius * -Math.sin(t),
+			y : radius * Math.cos(t)
 		};
 
 		return {
-			left : Util.getAngle(source.x, source.y, T1.x, T1.y),
-			right : Util.getAngle(source.x, source.y, T2.x, T2.y)
+			left : Util.getAngle(target.x + ta.x, target.y + ta.y, source.x, source.y),
+			right : Util.getAngle(target.x + tb.x, target.y + tb.y, source.x, source.y)
 		};
 	};
 
