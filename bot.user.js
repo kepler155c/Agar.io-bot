@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1593
+// @version     3.1594
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1593;
+var aposBotVersion = 3.1594;
 
 var Constants = {
 
@@ -612,7 +612,7 @@ function initializeEntity() {
 			return 0;
 		}
 
-		return this.size < 50 ? 50 : 50 + (this.size - 50) / 2;
+		return Math.max(45, (this.size - 50) / 2);
 	};
 
 	da.prototype.getMovementAngle = function() {
