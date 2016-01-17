@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1598
+// @version     3.1599
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1598;
+var aposBotVersion = 3.1599;
 
 var Constants = {
 
@@ -1157,11 +1157,11 @@ function AposBot() {
 		var angle = Util.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
 
 		// angle away from obstacles
-		var shiftedAngle = this.shiftAngle(obstacleAngles, angle, [ 0, 360 ]);
+		//var shiftedAngle = this.shiftAngle(obstacleAngles, angle, [ 0, 360 ]);
 
-		if (player.cells.length == 1) {
-			shiftedAngle = this.avoidObstacles(player, angle);
-		}
+		//if (player.cells.length == 1) {
+			var shiftedAngle = this.avoidObstacles(player, angle);
+		//}
 		//this.avoidViruses(player, shiftedAngle);
 
 		destination.point = this.followAngle(shiftedAngle.angle, cluster.closestCell.x, cluster.closestCell.y,
