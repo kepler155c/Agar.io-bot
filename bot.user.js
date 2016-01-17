@@ -34,14 +34,14 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1579
+// @version     3.1580
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1579;
+var aposBotVersion = 3.1580;
 
 var Constants = {
-		
+
 	aggressionLevel : 1,
 
 	splitRangeMin : 650,
@@ -178,12 +178,18 @@ Player.prototype = {
 	},
 	isSafeToSplit : function(entities) {
 
-		this.safeToSplit = this.cells.length == 1;
+		this.safeToSplit = false;
 
-		if (Constants.aggressionLevel > 1) {
+		if (Constants.aggressionLevel == 1) {
+			this.safeToSplit = this.cells.length == 1;
+
+		} else if (Constants.aggressionLevel == 2) {
+			this.safeToSplit = this.cells.length <= 2;
+
+		} else if (Constants.aggressionLevel > 2) {
 			this.safeToSplit = true;
-		} 
-		
+		}
+
 		Object.keys(entities).forEach(
 				function(key) {
 
@@ -686,6 +692,8 @@ function AposBot() {
 			this.player.ejectVirus();
 		} else if (key.keyCode == 77) { // 'm'
 			this.player.merge();
+		} else if (key.keyCode == 65) { // 'a'
+			Constants.aggressionLevel = (Constants.aggressionLevel + 1) % 4;
 		}
 	};
 
@@ -2111,7 +2119,7 @@ function AposBot() {
 		this.separateListBasedOnFunction(player);
 		this.setClosestVirus(player);
 		this.displayVirusTargets(player);
-		
+
 		this.showRanges(player);
 
 		if (player.action && player.action(destination)) {
@@ -2218,27 +2226,33 @@ function AposBot() {
 
 	this.updateInfo = function(player) {
 		this.infoStrings.push("");
-		this.infoStrings.push("Player Mass: " + parseInt(player.mass, 10));
-		this.infoStrings.push("Player Size: " + parseInt(player.size, 10));
-		this.infoStrings.push("Player Velocity: " + parseInt(player.smallestCell.velocity, 10));
-		this.infoStrings.push("Player Angle: " + player.cells[0].getMovementAngle());
+		this.infoStrings.push("Mass      : " + parseInt(player.mass, 10));
+		this.infoStrings.push("");
+		this.infoStrings.push("Size      : " + parseInt(player.size, 10));
+		this.infoStrings.push("Velocity  : " + parseInt(player.smallestCell.velocity, 10));
+		this.infoStrings.push("Angle     : " + player.cells[0].getMovementAngle());
+		this.infoStrings.push("Aggression: " + Constants.aggressionLevel);
 		/*
 		if (player.cells.length > 1) {
 			this.infoStrings.push("Player Min:  " + parseInt(player.smallestCell.size, 10));
 			this.infoStrings.push("Player Max:  " + parseInt(player.largestCell.size, 10));
 		}
 		*/
-		this.infoStrings.push("");
 
-		for (var i = 0; i < player.cells.length; i++) {
+		if (player.cells.length > 1) {
+			this.infoStrings.push("");
 
-			var cell = player.cells[i];
-			var cellInfo = "Cell " + i + " Mass: " + parseInt(cell.mass, 10);
-			if (cell.fuseTimer) {
-				cellInfo += "   Fuse: " + parseInt((cell.fuseTimer - Date.now()) / 1000, 10);
+			for (var i = 0; i < player.cells.length; i++) {
+
+				var cell = player.cells[i];
+				var cellInfo = "Cell " + i + " Mass: " + parseInt(cell.mass, 10);
+				if (cell.fuseTimer && i > 0) {
+					cellInfo += "   Fuse: " + parseInt((cell.fuseTimer - Date.now()) / 1000, 10);
+				}
+				this.infoStrings.push(cellInfo);
 			}
-			this.infoStrings.push(cellInfo);
 		}
+		this.infoStrings.push("");
 		var offsetX = -getMapStartX();
 		var offsetY = -getMapStartY();
 		this.infoStrings.push("Location: " + Math.floor(player.x + offsetX) + ", " + Math.floor(player.y + offsetY));
@@ -2507,7 +2521,7 @@ function AposBot() {
 	this.getEdgeLinesFromPoint = function(blob1, blob2, radius) {
 
 		var inverted = false;
-		
+
 		var px = blob1.x;
 		var py = blob1.y;
 
