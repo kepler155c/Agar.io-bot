@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1609
+// @version     3.1610
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1609;
+var aposBotVersion = 3.1610;
 
 var Constants = {
 
@@ -1664,11 +1664,11 @@ function AposBot() {
 
 		var dx = cx - px;
 		var dy = cy - py;
-		var dd = Math.sqrt(dx * dx + dy * dy) + blob1.size; // distance + 1 radius (not touching)
+		var dd = Math.sqrt(dx * dx + dy * dy); // distance + 1 radius (not touching)
 
 		if (dd < radius) {
 			range.inverted = true;
-			radius = dd + (radius - dd);
+			dd = radius + (radius - dd);
 		}
 
 		var a = Math.asin(radius / dd);
@@ -1686,9 +1686,9 @@ function AposBot() {
 		}
 
 		var b = Math.atan2(dy, dx);
-		if (range.inverted) {
-			b = -b;
-		}
+//		if (range.inverted) {
+//			b = -b;
+//		}
 
 		var t = b - a;
 		var ta = {
