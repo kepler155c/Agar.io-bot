@@ -1955,22 +1955,6 @@ function AposBot() {
 			cell.obstacles = [];
 		}
 
-		this.addVirusObstacles(player);
-		this.addThreatObstacles(player);
-
-		var ranges = [];
-
-		for (i = 0; i < player.allObstacles.length; i++) {
-
-			var obstacle = player.allObstacles[i];
-
-			this.addRange(ranges, obstacle.range);
-		}
-
-		if (ranges.length == 1) {
-			this.infoStrings.push(ranges[0].left + " " + ranges[0].right);
-		}
-
 		Object.keys(this.entities).filter(this.entities.threatFilter, this.entities).forEach(function(key) {
 
 			threat = this.entities[key];
@@ -1986,6 +1970,22 @@ function AposBot() {
 			}
 
 		}, this);
+
+		this.addVirusObstacles(player);
+		this.addThreatObstacles(player);
+
+		var ranges = [];
+
+		for (i = 0; i < player.allObstacles.length; i++) {
+
+			var obstacle = player.allObstacles[i];
+
+			this.addRange(ranges, obstacle.range);
+		}
+
+		if (ranges.length == 1) {
+			this.infoStrings.push(ranges[0].left + " " + ranges[0].right);
+		}
 
 		var imminentThreatCount = 0;
 		var intersectCount = 0;
