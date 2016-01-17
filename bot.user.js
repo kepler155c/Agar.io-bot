@@ -34,13 +34,16 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1577
+// @version     3.1578
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1577;
+var aposBotVersion = 3.1578;
 
 var Constants = {
+		
+	aggressionLevel : 1,
+
 	splitRangeMin : 650,
 	splitRangeMax : 700, // 674.5,
 	enemySplitDistance : 710,
@@ -175,25 +178,28 @@ Player.prototype = {
 	},
 	isSafeToSplit : function(entities) {
 
-		this.safeToSplit = true; //this.cells.length == 1;
+		this.safeToSplit = this.cells.length == 1;
 
+		if (aggressionLevel > 1) {
+			this.safeToSplit = true;
+		} 
+		
 		Object.keys(entities).forEach(
 				function(key) {
 
 					var entity = entities[key];
-					// if any largish enemies are within our split radius, dont allow split
+					// if any largish enemies are within our split radius, don't allow split
 					if (!entity.isVirus() && entity.size > 14 && !entity.isType(Classification.player)) {
 
 						if (entity.closestCell.size * entity.closestCell.size / 2 < entity.size * entity.size
 								* Constants.enemyRatio) {
-							if (entity.distance < entity.size + entity.closestCell.size) {
+							//if (entity.distance < entity.size + entity.closestCell.size) {
+							if (entity.distance < 750 + entity.closestCell.size) {
 								this.safeToSplit = false;
 							}
 						}
 					}
 				}, this);
-
-		//this.safeToSplit = true;
 	},
 	merge : function() {
 
@@ -2498,36 +2504,31 @@ function AposBot() {
 	};
 
 	//TODO: Don't let this function do the radius math.
-	this.getEdgeLinesFromPoint = function(blob1, blob2, radius, dontInvert) {
+	this.getEdgeLinesFromPoint = function(blob1, blob2, radius) {
+
+		var inverted = false;
+		
 		var px = blob1.x;
 		var py = blob1.y;
 
 		var cx = blob2.x;
 		var cy = blob2.y;
 
-		//var radius = blob2.size;
-
-		/*if (blob2.isVirus()) {
-		    radius = blob1.size;
-		} else if(canSplit(blob1, blob2)) {
-		    radius += splitDistance;
-		} else {
-		    radius += blob1.size * 2;
-		}*/
-
-		if (!dontInvert) {
-			var tempRadius = Util.computeDistance(px, py, cx, cy);
-			if (tempRadius <= radius) {
-				radius = tempRadius - 5;
-				//radius = tempRadius - 1;
-			}
-		}
-
 		var dx = cx - px;
 		var dy = cy - py;
-		var dd = Math.sqrt(dx * dx + dy * dy);
+		var dd = Math.sqrt(dx * dx + dy * dy) + blob1.size;
+
+		if (dd < radius) {
+			inverted = true;
+			radius = dd + (radius - dd);
+		}
+
 		var a = Math.asin(radius / dd);
 		var b = Math.atan2(dy, dx);
+
+		if (inverted) {
+			b = -b;
+		}
 
 		var t = b - a;
 		var ta = {
@@ -2544,13 +2545,6 @@ function AposBot() {
 		var angleLeft = Util.getAngle(cx + ta.x, cy + ta.y, px, py);
 		var angleRight = Util.getAngle(cx + tb.x, cy + tb.y, px, py);
 		var angleDistance = this.mod(angleRight - angleLeft, 360);
-
-		/*if (shouldInvert) {
-		    var temp = angleLeft;
-		    angleLeft = this.mod(angleRight + 180, 360);
-		    angleRight = this.mod(temp + 180, 360);
-		    angleDistance = this.mod(angleRight - angleLeft, 360);
-		}*/
 
 		return [ angleLeft, angleDistance, [ cx + tb.x, cy + tb.y ], [ cx + ta.x, cy + ta.y ] ];
 	};
@@ -2692,9 +2686,9 @@ function AposBot() {
 		return newListToUse;
 	};
 
-	this.getAngleRange = function(blob1, blob2, index, radius, classification, dontInvert) {
+	this.getAngleRange = function(blob1, blob2, index, radius, classification) {
 
-		var angleStuff = this.getEdgeLinesFromPoint(blob1, blob2, radius, dontInvert);
+		var angleStuff = this.getEdgeLinesFromPoint(blob1, blob2, radius);
 		var leftAngle = angleStuff[0];
 		var rightAngle = this.rangeToAngle(angleStuff);
 		var difference = angleStuff[1];
