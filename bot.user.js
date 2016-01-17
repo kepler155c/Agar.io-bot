@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1590
+// @version     3.1591
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1590;
+var aposBotVersion = 3.1591;
 
 var Constants = {
 
@@ -547,11 +547,10 @@ function initializeEntity() {
 		this.isMovingTowards = this.getMovingTowards(player);
 		this.mass = this.size * this.size / 100;
 		this.originalMass = this.mass; // save the original mass in case the merge logic changes it
-		this.safeDistance = 0;
 		this.teamSize = 1;
 		this.teamMass = this.mass;
 		this.isSplitThreat = false;
-		this.velocity = 0;
+		this.velocity = this.getVelocity();
 
 		var closestInfo = player.closestCell(this.x, this.y);
 		this.closestCell = closestInfo.cell;
@@ -605,9 +604,15 @@ function initializeEntity() {
 	};
 
 	da.prototype.getVelocity = function(previousUpdate) {
-		var lastPos = this.getLastPos();
+		//var lastPos = this.getLastPos();
 
-		return Util.computeDistance(this.x, this.y, lastPos.x, lastPos.y);
+		//return Util.computeDistance(this.x, this.y, lastPos.x, lastPos.y);
+		
+		if (!this.hasMoved) {
+			return 0;
+		}
+		
+		return 40 + this.size * 2.7;
 	};
 
 	da.prototype.getMovementAngle = function() {
@@ -800,7 +805,7 @@ function AposBot() {
 					} else if (this.isItMe(player, entity)) {
 
 						entity.classification = Classification.player;
-						entity.velocity = entity.getVelocity(this.previousUpdated);
+						//entity.velocity = entity.getVelocity(this.previousUpdated);
 
 					} else if (this.isFood(player.smallestCell, entity)) {
 
@@ -952,14 +957,16 @@ function AposBot() {
 
 		player.eachCellThreat(function(cell, threat) {
 
-			// var distance = threat.size + threat.cell.size + threat.safeDistance;
-			var distance = threat.size + cell.size
-					+ (threat.isMovingTowards ? cell.size + threat.t.velocity : cell.size / 2 + threat.t.velocity);
-			//drawCircle(threat.x, threat.y, distance, Constants.yellow);
+			var distance = threat.size + cell.size + cell.velocity;
+			
+			if (threat.isMovingTowards) {
+				distance += threat.t.velocity;
+				
+			}
 
 			if (threat.distance < distance) {
 
-				var tempOb = this.getAngleRange(cell, threat, 0, distance + cell.size, Classification.unknown);
+				var tempOb = this.getAngleRange(cell, threat, 0, distance, Classification.unknown);
 				var angle1 = tempOb[0];
 				var angle2 = this.rangeToAngle(tempOb);
 
@@ -1300,8 +1307,7 @@ function AposBot() {
 					massLoss : cell.mass,
 					teamSize : t.teamSize,
 					isSplitThreat : false,
-					t : t,
-					safeDistance : t.safeDistance
+					t : t
 				};
 
 				t.futurePosition();
@@ -1322,10 +1328,10 @@ function AposBot() {
 					t.isMovingTowards = true;
 				}
 
-				var velocityPadding = cell.size < 50 ? cell.velocity : 0; // (t.velocity + cell.velocity);
+				var velocityPadding = cell.velocity; // (t.velocity + cell.velocity);
 
 				if (threat.isMovingTowards) {
-					//					velocityPadding += t.velocity * 2;
+					velocityPadding += t.velocity;
 				}
 				threat.intersects = threat.distance < cell.size + t.size + velocityPadding;
 
@@ -1785,7 +1791,7 @@ function AposBot() {
 
 		player.eachCellThreat(function(cell, threat) {
 
-			var distance = threat.size + cell.size + (cell.velocity + threat.t.velocity) * 2; // should use dangerZone
+			var distance = threat.size + cell.size + cell.velocity; // should use dangerZone
 
 			if (threat.isMovingTowards) {
 				distance += threat.t.velocity;
@@ -1815,7 +1821,7 @@ function AposBot() {
 
 				//if ((cell.mass + virus.foodMass) / virus.mass > 1.2 || player.isMerging) {
 
-					var distance = cell.size + virus.size + 50; // ??? cell.velocity;
+					var distance = cell.size + virus.size + cell.velocity; // ??? cell.velocity;
 
 					if (virus.size + cell.size > virus.distance) {
 						console.log("v: " + ((virus.size + cell.size) - virus.distance));
@@ -1957,10 +1963,6 @@ function AposBot() {
 		Object.keys(this.entities).filter(this.entities.threatFilter, this.entities).forEach(function(key) {
 
 			threat = this.entities[key];
-
-			threat.velocity = threat.getVelocity(this.previousUpdated);
-			var velocity = (threat.velocity + threat.closestCell.velocity);
-			threat.safeDistance = velocity;
 
 			this.calculateThreatWeight(player, threat);
 
