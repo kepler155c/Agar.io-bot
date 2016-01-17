@@ -465,8 +465,8 @@ Player.prototype = {
 
 				if (threat.t != this.allThreats[0].t) {
 
-					if (threat.t.closestCell.distance - threat.dangerZone < 750) {
-						threat.dangerZone = threat.t.closestCell.distance + 1;
+					if (threat.t.distance - threat.dangerZone < 750) {
+						threat.dangerZone = threat.t.distance + 1;
 						drawCircle(threat.x, threat.y, threat.dangerZone, Constants.red);
 					}
 					break;
@@ -2109,7 +2109,9 @@ function AposBot() {
 			}
 		}
 
-		console.log(ranges);
+		if (ranges.length > 1) {
+			console.log(ranges);
+		}
 		
 		destination.point.x = player.x;
 		destination.point.y = player.y;
