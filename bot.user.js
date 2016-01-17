@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1604
+// @version     3.1605
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1604;
+var aposBotVersion = 3.1605;
 
 var Constants = {
 
@@ -1748,6 +1748,7 @@ function AposBot() {
 				var diffRight = Math.abs(angle - range.right);
 				var diff = Math.min(diffLeft, diffRight);
 
+				// should add / subtract 1 from the angle
 				if (closestAngle === null || diff < leastDiff) {
 
 					leastDiff = diff;
@@ -1955,6 +1956,7 @@ function AposBot() {
 		var i, j;
 		var panicLevel = 0;
 		var threat;
+		var goHungry = false;
 
 		// panic levels:
 		// 2 = partially inside a threat
@@ -2003,6 +2005,7 @@ function AposBot() {
 			
 			if (Math.abs(ranges[0].left - ranges[0].right) <= 1) {
 				console.log(ranges[0]);
+				goHungry = true;
 			}
 		}
 
@@ -2078,7 +2081,9 @@ function AposBot() {
 			}
 		}
 
-		this.determineFoodDestination(player, destination, threatened ? ranges : []);
+		if (!goHungry) {
+			this.determineFoodDestination(player, destination, threatened ? ranges : []);
+		}
 	};
 
 	/**
