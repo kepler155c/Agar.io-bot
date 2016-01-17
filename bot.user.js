@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1595
+// @version     3.1596
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1595;
+var aposBotVersion = 3.1596;
 
 var Constants = {
 
@@ -64,7 +64,7 @@ var Constants = {
 	playerRecombineTime : 30, // Base amount of seconds before a cell is allowed to recombine
 	playerMassDecayRate : 0.002, // Amount of mass lost per second
 	playerMinMassDecay : 9, // Minimum mass for decay to occur
-	playerSpeed : 30, // Player base speed
+	playerSpeed : 30, // Player base speed (seems like 72ish to me)
 
 	// adjustables
 	lureDistance : 1000,
@@ -218,6 +218,12 @@ Player.prototype = {
 			};
 			this.action = this.mergeAction;
 		}
+	},
+	getSpeed : function() {
+		//return Constants.playerSpeed * Math.pow(this.mass, -1.0 / 4.5) * 50 / 40;
+	},
+	getSplitDistance : function() {
+		//return splitDist = (4 * (cell.getSpeed() * 5)) + (cell.getSize() * 1.75);
 	},
 	mergeAction : function(destination) {
 
@@ -850,6 +856,9 @@ function AposBot() {
 	this.interceptPosition = function(source, target) {
 
 		// http://stackoverflow.com/questions/2248876/2d-game-fire-at-a-moving-target-by-predicting-intersection-of-projectile-and-u
+
+		// starting speed is 6 times player speed ending in 1 time
+		// so the speed needed is 6 - (6 / (750 / distance)) * player speed
 
 		function sqr(a) {
 			return a * a;
@@ -1756,7 +1765,9 @@ function AposBot() {
 			angle : angle,
 			shifted : false
 		};
+		var range;
 		var ranges = [];
+		var rangeCount = 0;
 
 		this.addVirusObstacles(player);
 		this.addThreatObstacles(player);
@@ -1765,25 +1776,81 @@ function AposBot() {
 
 			var obstacle = player.allObstacles[i];
 
-			var range = this.getSafeRange(obstacle.cell, obstacle.entity, obstacle.distance);
+			range = this.getSafeRange(obstacle.cell, obstacle.entity, obstacle.distance);
 
 			this.drawAngledLine(obstacle.cell.x, obstacle.cell.y, range.left, 500, Constants.orange);
 			this.drawAngledLine(obstacle.cell.x, obstacle.cell.y, range.right, 500, Constants.yellow);
 
 			if (this.angleInRange(angle, range)) {
-				ranges.push(range);
+				rangeCount++;
 
-				shiftedAngle.shifted = true;
-				shiftedAngle.angle = range.left;
-
-				if (Math.abs(angle - range.left) > Math.abs(angle, range.right)) {
-					shiftedAngle.angle = range.right;
+				if (rangeCount > 1) {
+					console.log('combining ranges');
 				}
-
+				this.addRange(ranges, range);
 			}
 		}
 
+		if (ranges.length > 0) {
+
+			this.combineRanges(ranges);
+
+			var closestAngle = null;
+			var leastDiff = null;
+
+			for (var j = 0; j < ranges.length; j++) {
+				range = ranges[j];
+
+				var diffLeft = Math.abs(angle - range.left);
+				var diffRight = Math.abs(angle - range.right);
+				var diff = Math.min(diffLeft, diffRight);
+
+				if (closestAngle === null || diff < leastDiff) {
+
+					leastDiff = diff;
+					closestAngle = range.left;
+					if (diffLeft > diffRight) {
+						closestAngle = range.right;
+					}
+				}
+			}
+
+			shiftedAngle.shifted = true;
+			shiftedAngle.angle = closestAngle;
+		}
+
 		return shiftedAngle;
+	};
+
+	this.combineRange = function(range1, range2) {
+
+		if (this.angleInRange(range2.left, range1) || this.angleInRange(range2.right, range1)) {
+
+			range1.left = Math.min(range1.left, range2.left);
+			range1.right = Math.max(range1.right, range2.right);
+
+			return true;
+		}
+		return false;
+	}
+
+	this.addRange = function(ranges, range) {
+
+		for (var i = 0; i < ranges.length; i++) {
+
+			var testRange = ranges[i];
+
+			if (this.combineRange(testRange, range)) {
+
+				ranges.splice(testRange, 1);
+
+				this.addRange(ranges, testRange);
+				return false; // wasn't added - just combined with existing
+			}
+		}
+
+		ranges.push(range);
+		return true; // range added
 	};
 
 	this.addThreatObstacles = function(player) {
