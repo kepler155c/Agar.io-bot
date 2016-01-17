@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1607
+// @version     3.1608
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1607;
+var aposBotVersion = 3.1608;
 
 var Constants = {
 
@@ -1487,9 +1487,11 @@ function AposBot() {
 		player.eachCellThreat(function(cell, threat) {
 
 			if (threat.distance < threat.dangerZone) {
+				/*
 				if (threat.size + cell.size > threat.distance) {
 					console.log("t: " + ((threat.size + cell.size) - threat.distance));
 				}
+				*/
 				badAngles.push(this.getAngleRange(cell, threat, i++, threat.dangerZone, Classification.threat).concat(
 						threat.distance));
 			}
@@ -1672,8 +1674,9 @@ function AposBot() {
 		var a = Math.asin(radius / dd);
 
 		if (isNaN(a)) {
-			console.log('it is NaN');
+			//console.log('it is NaN');
 			angle = Util.getAngle(blob1.x, blob1.y, blob2.x, blob2.y);
+			this.drawAngledLine(blob1.x, blob1.y, angle, 500, Constants.red);
 
 			return {
 				left : angle,
@@ -1827,9 +1830,11 @@ function AposBot() {
 
 				var distance = cell.size + virus.size + cell.velocity; // ??? cell.velocity;
 
+				/*
 				if (virus.size + cell.size > virus.distance) {
 					console.log("v: " + ((virus.size + cell.size) - virus.distance));
 				}
+				*/
 
 				if (virus.distance < distance) {
 
