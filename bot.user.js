@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1610
+// @version     3.1611
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1610;
+var aposBotVersion = 3.1611;
 
 var Constants = {
 
@@ -1492,7 +1492,7 @@ function AposBot() {
 					console.log("t: " + ((threat.size + cell.size) - threat.distance));
 				}
 				*/
-				badAngles.push(this.getAngleRange(cell, threat, i++, threat.dangerZone, Classification.threat).concat(
+				badAngles.push(this.getAngleRange(cell, threat, i++, threat.dangerZone, Classification.unknown).concat(
 						threat.distance));
 			}
 		}, this);
@@ -1744,8 +1744,8 @@ function AposBot() {
 			for (var j = 0; j < ranges.length; j++) {
 				range = ranges[j];
 
-				var diffLeft = Math.abs(angle - range.left);
-				var diffRight = Math.abs(angle - range.right);
+				var diffLeft = this.mod(angle - range.left, 360);
+				var diffRight = this.mod(angle - range.right, 360);
 				var diff = Math.min(diffLeft, diffRight);
 
 				// should add / subtract 1 from the angle
