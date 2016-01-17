@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1569
+// @version     3.1570
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1569;
+var aposBotVersion = 3.1570;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -1187,7 +1187,7 @@ function AposBot() {
 			
 			if (entity.distance < 750) {
 				
-				var range = this.getRangle(player, entity);
+				var range = this.getRange(player, entity);
 				
 				this.drawAngledLine(player.x, player.y, this.radiansToDegrees(range.left), 500, Constants.orange);
 				this.drawAngledLine(player.x, player.y, this.radiansToDegrees(range.right), 500, Constants.yellow);
