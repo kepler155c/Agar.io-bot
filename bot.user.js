@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1592
+// @version     3.1593
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1592;
+var aposBotVersion = 3.1593;
 
 var Constants = {
 
@@ -607,12 +607,12 @@ function initializeEntity() {
 		//var lastPos = this.getLastPos();
 
 		//return Util.computeDistance(this.x, this.y, lastPos.x, lastPos.y);
-		
+
 		if (!this.hasMoved) {
 			return 0;
 		}
-		
-		return 40 + this.size / 2.7;
+
+		return this.size < 50 ? 50 : 50 + (this.size - 50) / 2;
 	};
 
 	da.prototype.getMovementAngle = function() {
@@ -958,10 +958,10 @@ function AposBot() {
 		player.eachCellThreat(function(cell, threat) {
 
 			var distance = threat.size + cell.size + cell.velocity;
-			
+
 			if (threat.isMovingTowards) {
 				distance += threat.t.velocity;
-				
+
 			}
 
 			if (threat.distance < distance) {
@@ -1821,23 +1821,23 @@ function AposBot() {
 
 				//if ((cell.mass + virus.foodMass) / virus.mass > 1.2 || player.isMerging) {
 
-					var distance = cell.size + virus.size + cell.velocity; // ??? cell.velocity;
+				var distance = cell.size + virus.size + cell.velocity; // ??? cell.velocity;
 
-					if (virus.size + cell.size > virus.distance) {
-						console.log("v: " + ((virus.size + cell.size) - virus.distance));
-					}
+				if (virus.size + cell.size > virus.distance) {
+					console.log("v: " + ((virus.size + cell.size) - virus.distance));
+				}
 
-					if (virus.distance < distance) {
+				if (virus.distance < distance) {
 
-						var obstacle = {
-							entity : virus,
-							cell : cell,
-							distance : distance
-						};
+					var obstacle = {
+						entity : virus,
+						cell : cell,
+						distance : distance
+					};
 
-						cell.obstacles.push(obstacle);
-						player.allObstacles.push(obstacle);
-					}
+					cell.obstacles.push(obstacle);
+					player.allObstacles.push(obstacle);
+				}
 				//}
 			}
 		}, this);
