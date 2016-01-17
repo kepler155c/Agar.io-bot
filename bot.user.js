@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1574
+// @version     3.1575
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1574;
+var aposBotVersion = 3.1575;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -270,26 +270,30 @@ Player.prototype = {
 			}
 		}
 	},
-	split : function(targetCell, x, y, destination) {
+	split : function(cluster, x, y, destination) {
 
-		if (this.canSplit() && (targetCell && (typeof targetCell.isMe == "undefined"))) {
+		if (this.canSplit() && (cluster && (typeof cluster.cell.isMe == "undefined"))) {
 
 			this.splitInfo = {
-				target : targetCell,
+				target : null,
 				size : Math.floor(this.size),
 				timer : Date.now(),
 				initialSize : Math.floor(this.cells[0].size * 0.9),
-				location : new Point(this.largestCell.x + (x - this.largestCell.x) * 4, this.largestCell.y
-						+ (y - this.largestCell.y) * 4)
+				location : null
 			};
 
 			this.action = this.splitAction;
 			destination.split = true;
-			if (targetCell) {
+
+			if (cluster) {
+				this.splitInfo.target = cluster.cell;
+				// really should use an angle here
+				this.splitInfo.location = new Point(cluster.closestCell.x + (x - cluster.closestCell.x) * 4,
+						cluster.closestCell.y + (y - cluster.closestCell.y) * 4);
 				destination.point = this.splitInfo.location;
-				console.log("splitting for: " + targetCell.isRemoved + targetCell.interceptVelocity);
-				console.log([ targetCell.distance, targetCell.size, targetCell.closestCell.size ]);
-				console.log(targetCell);
+				console.log("splitting for: " + cluster.cell.isRemoved + cluster.cell.interceptVelocity);
+				console.log([ cluster.cell.distance, cluster.cell.size, cluster.cell.closestCell.size ]);
+				console.log(cluster.cell);
 			}
 		}
 	},
@@ -1134,31 +1138,17 @@ function AposBot() {
 
 		var color = Constants.orange;
 
-		this.showAngles(player);
-
 		if (doSplit && shiftedAngle.shifted) {
 			color = Constants.red; // cannot split, our angle was shifted from target
 			doSplit = false;
 		} else if (doSplit && !shiftedAngle.shifted) {
 
-			var destinationAngle = Util.getAngle(destination.point.x, destination.point.y, cluster.closestCell.x,
-					cluster.closestCell.y);
-
-			Object.keys(this.entities).filter(this.entities.virusFilter, this.entities).forEach(function(key) {
-
-				var virus = this.entities[key];
-
-				if (virus.range) {
-
-					if (destinationAngle >= virus.range[0] && destinationAngle <= virus.range[1]) {
-						// cannot split, there is a virus in the path
-						doSplit = false;
-						// console.log('inrange');
-						color = Constants.red;
-						return;
-					}
+			if (cluster.cell) {
+				if (this.obstaclesInPath(player, cluster)) {
+					doSplit = false;
+					color = Constants.red;
 				}
-			}, this);
+			}
 		}
 
 		drawCircle(cluster.x, cluster.y, cluster.size + 40, color);
@@ -1171,7 +1161,7 @@ function AposBot() {
 
 		// are we avoiding obstacles ??
 		if (doSplit) {
-			player.split(cluster.cell, cluster.x, cluster.y, destination);
+			player.split(cluster, cluster.x, cluster.y, destination);
 		}
 
 		drawLine(cluster.closestCell.x, cluster.closestCell.y, destination.point.x, destination.point.y,
@@ -1180,20 +1170,33 @@ function AposBot() {
 		return true;
 	};
 
-	this.showAngles = function(player) {
+	this.obstaclesInPath = function(player, target) {
 
-		Object.keys(this.entities).filter(this.entities.threatAndVirusFilter, this.entities).forEach(function(key) {
-			var entity = this.entities[key];
+		var keys = Object.keys(this.entities).filter(this.entities.threatAndVirusFilter, this.entities);
 
-			if (entity.distance < 750) {
+		// cell -> target
+		var angle = Util.getAngle(target.closestCell.x, target.closestCell.y, target.x, target.y);
 
-				var range = this.getRange(player, entity);
+		for (var i = 0; i < keys.length; i++) {
+			var entity = this.entities[keys[i]];
 
-				this.drawAngledLine(player.x, player.y, range.left, 500, Constants.orange);
-				this.drawAngledLine(player.x, player.y, range.right, 500, Constants.yellow);
+			if (entity.distance < target.distance) {
+
+				for (var j = 0; j < player.cells.length; j++) {
+					var cell = player.cells[j];
+
+					var range = this.getRange(cell, entity);
+
+					if (this.angleInRange(angle, range)) {
+						this.drawAngledLine(player.x, player.y, range.left, 500, Constants.orange);
+						this.drawAngledLine(player.x, player.y, range.right, 500, Constants.yellow);
+
+						return true;
+					}
+				}
 			}
-
-		}, this);
+		}
+		return false;
 	};
 
 	this.setClosestVirus = function(player) {
@@ -1641,7 +1644,7 @@ function AposBot() {
 	};
 
 	//TODO: Don't let this function do the radius math.
-	this.getAngles = function(blob1, blob2, radius) {
+	this.getSafeRange = function(blob1, blob2, radius) {
 
 		var angle;
 
@@ -1709,12 +1712,12 @@ function AposBot() {
 		};
 	};
 
-	this.angleIsInside = function(angle, angleLeft, angleRight) {
+	this.angleInRange = function(angle, range) {
 
-		if (angleRight < angleLeft) {
-			return !(angle >= angleRight && angle <= angleLeft);
+		if (range.right < range.left) {
+			return !(angle >= range.right && angle <= range.left);
 		}
-		return angle >= angleLeft && angle <= angleRight;
+		return angle >= range.left && angle <= range.right;
 	};
 
 	this.avoidObstacles = function(player, angle) {
@@ -1731,18 +1734,18 @@ function AposBot() {
 
 			var obstacle = player.allObstacles[i];
 
-			var angles = this.getAngles(obstacle.cell, obstacle.entity, obstacle.distance);
+			var range = this.getSafeRange(obstacle.cell, obstacle.entity, obstacle.distance);
 
-			this.drawAngledLine(obstacle.cell.x, obstacle.cell.y, angles.left, 500, Constants.orange);
-			this.drawAngledLine(obstacle.cell.x, obstacle.cell.y, angles.right, 500, Constants.yellow);
+			this.drawAngledLine(obstacle.cell.x, obstacle.cell.y, range.left, 500, Constants.orange);
+			this.drawAngledLine(obstacle.cell.x, obstacle.cell.y, range.right, 500, Constants.yellow);
 
-			if (this.angleIsInside(angle, angles.left, angles.right)) {
+			if (this.angleInRange(angle, range)) {
 
 				shiftedAngle.shifted = true;
-				shiftedAngle.angle = angles.left;
+				shiftedAngle.angle = range.left;
 
-				if (Math.abs(angle - angles.left) > Math.abs(angle, angles.right)) {
-					shiftedAngle.angle = angles.right;
+				if (Math.abs(angle - range.left) > Math.abs(angle, range.right)) {
+					shiftedAngle.angle = range.right;
 				}
 			}
 		}
