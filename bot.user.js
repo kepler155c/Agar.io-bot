@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1568
+// @version     3.1569
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1568;
+var aposBotVersion = 3.1569;
 
 var Constants = {
 	splitRangeMin : 650,
@@ -649,6 +649,12 @@ function initializeEntity() {
 
 		return entity.isType(Classification.threat);
 	};
+	entitiesPrototype.threatAndVirusFilter = function(key) {
+
+		var entity = this[key];
+
+		return entity.isType(Classification.threat) || entity.isType(Classification.virus);
+	};
 }
 
 console.log("Apos Bot!");
@@ -787,7 +793,7 @@ function AposBot() {
 						entity.foodMass = 0;
 
 					} else if (this.canEat(entity, player.smallestCell, Constants.enemyRatio)) {
-					//} else if (this.canEat(entity, entity.closestCell, Constants.enemyRatio)) {
+						//} else if (this.canEat(entity, entity.closestCell, Constants.enemyRatio)) {
 
 						entity.classification = Classification.threat;
 
@@ -1128,6 +1134,8 @@ function AposBot() {
 
 		var color = Constants.orange;
 
+		this.showAngles();
+
 		if (doSplit && shiftedAngle.shifted) {
 			color = Constants.red; // cannot split, our angle was shifted from target
 			doSplit = false;
@@ -1170,6 +1178,22 @@ function AposBot() {
 				Constants.orange);
 
 		return true;
+	};
+
+	this.showAngles = function(player) {
+
+		Object.keys(this.entities).filter(this.entities.threatAndVirusFilter, this.entities).forEach(function(key) {
+			var entity = this.entities[key];
+			
+			if (entity.distance < 750) {
+				
+				var range = this.getRangle(player, entity);
+				
+				this.drawAngledLine(player.x, player.y, this.radiansToDegrees(range.left), 500, Constants.orange);
+				this.drawAngledLine(player.x, player.y, this.radiansToDegrees(range.right), 500, Constants.yellow);
+			}
+
+		}, this);
 	};
 
 	this.setClosestVirus = function(player) {
@@ -1575,13 +1599,40 @@ function AposBot() {
 		}
 	};
 
-	this.toDegrees = function(angle) {
+	this.radiansToDegrees = function(angle) {
 		return angle * 180 / Math.PI + 180;
 	};
+	
+	this.degreesToRadiansHuh = function(degrees) {
+        return degrees * Math.PI / 180;
+    };
 
-	this.degreesToAngle = function(degrees) {
+	this.degreesToRadians = function(degrees) {
 		degrees -= 180;
 		return degrees / (180 / Math.PI);
+	};
+
+	this.getRange = function(cell, entity) {
+
+		var vector = {
+			x : entity.x - cell.x,
+			y : entity.y - cell.y
+		};
+
+		var p1 = {
+			x : entity.x + vector.x * Math.cos(this.degreesToRadiansHuh(9)),
+			y : entity.y + vector.y * Math.sin(this.degreesToRadiansHuh(9))
+		};
+
+		var p2 = {
+			x : entity.x + vector.x * Math.sin(this.degreesToRadiansHuh(9)),
+			y : entity.y + vector.y * Math.cos(this.degreesToRadiansHuh(9))
+		};
+
+		return {
+			left : Util.getAngle(cell.x, cell.y, p1.x, p1.y),
+			right : Util.getAngle(cell.x, cell.y, p2.x, p2.y)
+		};
 	};
 
 	//TODO: Don't let this function do the radius math.
@@ -1761,7 +1812,7 @@ function AposBot() {
 
 				if (threat.distance < threat.dangerZone) {
 
-					cellAngle += this.toDegrees(threat.angle);
+					cellAngle += this.radiansToDegrees(threat.angle);
 					cellAngles.push(threat.angle);
 				}
 			}
@@ -1784,7 +1835,7 @@ function AposBot() {
 		});
 
 		if (finalAngle !== 0) {
-			var angle = this.degreesToAngle(finalAngle);
+			var angle = this.degreesToRadians(finalAngle);
 			destination.point.x = player.x - Math.cos(angle) * 1000;
 			destination.point.y = player.y - Math.sin(angle) * 1000;
 			this.drawAngledLine(player.x, player.y, finalAngle, 500, Constants.green);
@@ -1795,7 +1846,7 @@ function AposBot() {
 
 	this.drawAngledLine = function(x, y, degrees, distance, color) {
 
-		var angle = this.degreesToAngle(degrees);
+		var angle = this.degreesToRadians(degrees);
 		drawLine(x, y, x - Math.cos(angle) * distance, y - Math.sin(angle) * distance, color);
 	};
 
