@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1611
+// @version     3.1613
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1611;
+var aposBotVersion = 3.1613;
 
 var Constants = {
 
@@ -1143,6 +1143,7 @@ function AposBot() {
 		//var shiftedAngle = this.shiftAngle(obstacleAngles, angle, [ 0, 360 ]);
 		var shiftedAngle = this.avoidObstacles(player, angle);
 
+		console.log('angle is: ' + shiftedAngle.angle);
 		destination.point = this.followAngle(shiftedAngle.angle, cluster.closestCell.x, cluster.closestCell.y,
 				cluster.distance);
 
@@ -1910,6 +1911,45 @@ function AposBot() {
 	 */
 	this.avoidThreats = function(player, destination) {
 
+		var i;
+		
+		player.allObstacles = [];
+
+		this.addVirusObstacles(player);
+		this.addThreatObstacles(player);
+
+		var ranges = [];
+
+		for (i = 0; i < player.allObstacles.length; i++) {
+
+			var obstacle = player.allObstacles[i];
+
+			this.addRange(ranges, obstacle.range);
+		}
+
+		var colors = [ "#FF0000", "#00FF00", "#0000FF", "#FF8000", "#8A2BE2", "#FF69B4", "#008080", "#F2FBFF",
+				"#000000", "#FFFF00", ];
+
+		for (i = 0; i < ranges.length; i++) {
+			var range = ranges[i];
+
+			this.drawAngledLine(player.x, player.y, range.left, 500, colors[i]);
+			this.drawAngledLine(player.x, player.y, range.right, 500, colors[i]);
+		}
+
+		if (ranges.length == 1) {
+			this.infoStrings.push(ranges[0].left + " " + ranges[0].right);
+
+			if (this.mod(ranges[0].left - ranges[0].right, 360) <= 1) {
+				console.log('bad range');
+				console.log(ranges[0]);
+				return null;
+			}
+		}
+		
+		return ranges;
+
+		/*
 		var badAngles = [];
 		var obstacleList = [];
 		var goodAngles = [];
@@ -1951,6 +1991,7 @@ function AposBot() {
 		}
 
 		return true;
+		*/
 	};
 
 	this.determineBestDestination = function(player, destination, tempPoint) {
@@ -1965,7 +2006,6 @@ function AposBot() {
 		// 1 = in the split distance of a threat
 
 		player.allThreats = [];
-		player.allObstacles = [];
 
 		for (i = 0; i < player.cells.length; i++) {
 			var cell = player.cells[i];
@@ -1989,37 +2029,6 @@ function AposBot() {
 			}
 
 		}, this);
-
-		this.addVirusObstacles(player);
-		this.addThreatObstacles(player);
-
-		var ranges = [];
-
-		for (i = 0; i < player.allObstacles.length; i++) {
-
-			var obstacle = player.allObstacles[i];
-
-			this.addRange(ranges, obstacle.range);
-		}
-
-		var colors = [ "#FF0000", "#00FF00", "#0000FF", "#FF8000", "#8A2BE2", "#FF69B4", "#008080", "#F2FBFF",
-				"#000000", "#FFFF00", ];
-
-		for (i = 0; i < ranges.length; i++) {
-			var range = ranges[i];
-
-			this.drawAngledLine(player.x, player.y, range.left, 500, colors[i]);
-			this.drawAngledLine(player.x, player.y, range.right, 500, colors[i]);
-		}
-
-		if (ranges.length == 1) {
-			this.infoStrings.push(ranges[0].left + " " + ranges[0].right);
-
-			if (Math.abs(ranges[0].left - ranges[0].right) <= 1) {
-				console.log(ranges[0]);
-				goHungry = true;
-			}
-		}
 
 		var imminentThreatCount = 0;
 		var intersectCount = 0;
@@ -2081,20 +2090,28 @@ function AposBot() {
 			evasionStrategy.call(player);
 		}
 
-		if (!this.avoidThreats(player, destination)) {
+		var ranges = this.avoidThreats(player, destination);
 
+		if (ranges === null) {
+			
 			player.eachCellThreat(function(cell, threat) {
 				threat.dangerZone = threat.minDistance;
 			});
 
 			console.log('trying again to determine destination');
-			if (!this.avoidThreats(player, destination)) {
+			ranges = this.avoidThreats(player, destination);
+			if (ranges === null) {
 				console.log('could not determine destination');
 			}
 		}
 
-		if (!goHungry) {
+		console.log(ranges);
+		
+		if (ranges) {
 			this.determineFoodDestination(player, destination, threatened ? ranges : []);
+		} else {
+			destination.x = player.x;
+			destination.y = player.y;
 		}
 	};
 
