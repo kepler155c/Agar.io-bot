@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1615
+// @version     3.1616
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1615;
+var aposBotVersion = 3.1616;
 
 var Constants = {
 
@@ -831,8 +831,13 @@ function AposBot() {
 							&& this.canSplitKill(entity.closestCell, entity, Constants.playerRatio)) {
 
 						entity.classification = Classification.food;
+
+						var largeThreatRatio = Constants.largeThreatRatio;
+						if (Constants.aggressionLevel > 1) {
+							largeThreatRatio *= 2;
+						}
 						//if (player.cells.length == 1 && player.mass / entity.mass < Constants.largeThreatRatio) {
-						if (player.mass / entity.mass < Constants.largeThreatRatio * 2) {
+						if (player.mass / entity.mass < largeThreatRatio) {
 							// split worthy
 							entity.classification = Classification.splitTarget;
 						}
@@ -1055,7 +1060,7 @@ function AposBot() {
 			if (Util.circlesIntersect(food, virus)) {
 				virus.foodMass += food.mass;
 				virus.foodList.push(food);
-				console.log('food is in virus');
+				drawCircle(food.x, food.y, food.size + 5, Constants.red);
 				return true;
 			}
 		}
@@ -2115,10 +2120,11 @@ function AposBot() {
 		if (ranges) {
 			if (!this.determineFoodDestination(player, destination, threatened ? ranges : [])) {
 				console.log('no food');
+				console.log(ranges);
 				if (ranges.length > 0) {
 
 					destination.point = this.pointFromAngle(player.x, player.y, this.mod(ranges[0].left + 1, 360), 500);
-					console.log('no range');
+					console.log('setting range manually');
 				}
 			}
 		}
