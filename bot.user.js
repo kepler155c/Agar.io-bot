@@ -1675,7 +1675,7 @@ function AposBot() {
 
 		if (isNaN(a)) {
 			//console.log('it is NaN');
-			angle = Util.getAngle(blob1.x, blob1.y, blob2.x, blob2.y);
+			angle = Util.getAngle(blob2.x, blob2.y, blob1.x, blob1.y);
 			this.drawAngledLine(blob1.x, blob1.y, angle, 500, Constants.red);
 
 			return {
