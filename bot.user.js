@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1608
+// @version     3.1609
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1608;
+var aposBotVersion = 3.1609;
 
 var Constants = {
 
@@ -1676,7 +1676,7 @@ function AposBot() {
 		if (isNaN(a)) {
 			//console.log('it is NaN');
 			angle = Util.getAngle(blob2.x, blob2.y, blob1.x, blob1.y);
-			this.drawAngledLine(blob1.x, blob1.y, angle, 500, Constants.red);
+			this.drawAngledLine(blob1.x, blob1.y, angle, 500, Constants.cyan);
 
 			return {
 				left : angle,
@@ -1730,9 +1730,6 @@ function AposBot() {
 			var obstacle = player.allObstacles[i];
 
 			range = obstacle.range;
-
-			this.drawAngledLine(obstacle.cell.x, obstacle.cell.y, range.left, 500, Constants.orange);
-			this.drawAngledLine(obstacle.cell.x, obstacle.cell.y, range.right, 500, Constants.yellow);
 
 			if (this.angleInRange(angle, range)) {
 				this.addRange(ranges, range);
@@ -2005,9 +2002,19 @@ function AposBot() {
 			this.addRange(ranges, obstacle.range);
 		}
 
+		var colors = [ "#FF0000", "#00FF00", "#0000FF", "#FF8000", "#8A2BE2", "#FF69B4", "#008080", "#F2FBFF",
+				"#000000", "#FFFF00", ];
+
+		for (i = 0; i < ranges.length; i++) {
+			var range = ranges[i];
+
+			this.drawAngledLine(player.x, player.y, range.left, 500, colors[i]);
+			this.drawAngledLine(player.x, player.y, range.right, 500, colors[i]);
+		}
+
 		if (ranges.length == 1) {
 			this.infoStrings.push(ranges[0].left + " " + ranges[0].right);
-			
+
 			if (Math.abs(ranges[0].left - ranges[0].right) <= 1) {
 				console.log(ranges[0]);
 				goHungry = true;
