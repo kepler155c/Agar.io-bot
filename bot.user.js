@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1624
+// @version     3.1625
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1624;
+var aposBotVersion = 3.1625;
 
 var Constants = {
 
@@ -1160,7 +1160,7 @@ function AposBot() {
 
 		// console.log('angle is: ' + shiftedAngle.angle);
 		destination.point = this.followAngle(shiftedAngle.angle, cluster.closestCell.x, cluster.closestCell.y,
-				cluster.distance);
+				ranges.length > 0 ? verticalDistance() : cluster.distance);
 
 		if (this.angleInRanges(shiftedAngle.angle, ranges)) {
 			console.log('not shifting');
@@ -1789,9 +1789,24 @@ function AposBot() {
 		return shiftedAngle;
 	};
 
+	this.rangeSize = function(range) {
+		if (range.right < range.left) {
+			console.log([ range.left, range.right, this.mod(range.right - range.left, 360) ]);
+		}
+		return this.mod(range.right - range.left, 360);
+	};
+
+	this.rangesOverlap = function(range1, range2) {
+
+		if (this.rangeSize(range1) > this.rangeSize(range2)) {
+			return this.angleInRange(range2.left, range1) || this.angleInRange(range2.right, range1);
+		}
+		return this.angleInRange(range1.left, range2) || this.angleInRange(range1.right, range2);
+	};
+
 	this.combineRange = function(range1, range2) {
 
-		if (this.angleInRange(range2.left, range1) || this.angleInRange(range2.right, range1)) {
+		if (this.rangesOverlap(range1, range2)) {
 
 			range1.left = Math.min(range1.left, range2.left);
 			range1.right = Math.max(range1.right, range2.right);
@@ -2143,12 +2158,13 @@ function AposBot() {
 				console.log(ranges);
 				if (ranges.length > 0) {
 
-					destination.point = this.pointFromAngle(player.x, player.y, this.mod(ranges[0].left + 1, 360), 500);
+					destination.point = this.followAngle(this.mod(ranges[0].left + 1, 360), player.x, player.y,
+							verticalDistance());
 					console.log('setting range manually');
 					drawLine(player.x, player.y, destination.point.x, destination.point.y, Constants.green);
 				}
-
 			}
+
 		} else {
 			drawLine(player.x, player.y, destination.point.x, destination.point.y, Constants.green);
 		}
