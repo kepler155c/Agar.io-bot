@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1640
+// @version     3.1641
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1640;
+var aposBotVersion = 3.1641;
 
 var Constants = {
 
@@ -515,7 +515,11 @@ function Range(left, right) {
 	};
 
 	this.size = function() {
-		return Util.mod(this.right - this.left, 360);
+
+		if (this.left > this.right) {
+			return (360 - this.left) + this.right + 1;
+		}
+		return Util.mod(this.left - this.right, 360) + 1;
 	};
 
 	this.overlaps = function(range) {
@@ -536,6 +540,12 @@ function Range(left, right) {
 			return true;
 		}
 		return false;
+	};
+	
+	this.getInverseMidpoint = function() {
+		
+		var diff = (360 - this.size()) / 2;
+		return Util.mod(this.right + diff, 360);
 	};
 }
 
@@ -1994,9 +2004,11 @@ function AposBot() {
 				}
 				if (ranges.length > 0) {
 
-					destination.point = this.followAngle(Util.mod(ranges[0].left + 1, 360), player.x, player.y,
+					// should get the range with the largest size
+					var midPoint = ranges[0].getInverseMidpoint();
+					destination.point = this.followAngle(midPoint, player.x, player.y,
 							verticalDistance());
-					console.log('setting range manually');
+					console.log('setting range manually to ' + midPoint);
 					drawLine(player.x, player.y, destination.point.x, destination.point.y, Constants.red);
 				}
 			}
