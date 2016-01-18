@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1622
+// @version     3.1623
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1622;
+var aposBotVersion = 3.1623;
 
 var Constants = {
 
@@ -1028,7 +1028,9 @@ function AposBot() {
 			cluster = player.foodClusters[i];
 
 			if (!bestCluster || cluster.clusterWeight < bestCluster.clusterWeight) {
-				if (!this.foodInVirus(cluster) && this.clusterInValidRange(cluster, ranges)) {
+				var angle = Util.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
+
+				if (!this.foodInVirus(cluster) && !this.angleInRanges(angle, ranges)) {
 					bestCluster = cluster;
 				}
 			}
@@ -1036,18 +1038,16 @@ function AposBot() {
 		return bestCluster;
 	};
 
-	this.clusterInValidRange = function(cluster, ranges) {
+	this.angleInRanges = function(angle, ranges) {
 
-		if (ranges.length > 0) {
-			for (var i = 0; i < ranges.length; i++) {
-				var range = ranges[i];
-				var angle = Util.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
-				if (this.angleInRange(angle, range)) {
-					return false;
-				}
+		for (var i = 0; i < ranges.length; i++) {
+			var range = ranges[i];
+
+			if (this.angleInRange(angle, range)) {
+				return true;
 			}
 		}
-		return true;
+		return false;
 	};
 
 	this.foodInVirus = function(food) {
@@ -1099,7 +1099,7 @@ function AposBot() {
 
 		this.clusterFood(player, player.largestCell.size);
 
-		var i, j, cluster;
+		var i, j, cluster, range;
 
 		// remove clusters within enemy split distance
 		Object.keys(this.entities).filter(this.entities.splitThreatFilter, this.entities).forEach(
@@ -1149,6 +1149,11 @@ function AposBot() {
 		// angle of food
 		var angle = Util.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
 
+		if (this.angleInRanges(angle, ranges)) {
+			console.log('wtf');
+			return false;
+		}
+
 		// angle away from obstacles
 		//var shiftedAngle = this.shiftAngle(obstacleAngles, angle, [ 0, 360 ]);
 		var shiftedAngle = this.avoidObstacles(player, angle);
@@ -1157,12 +1162,13 @@ function AposBot() {
 		destination.point = this.followAngle(shiftedAngle.angle, cluster.closestCell.x, cluster.closestCell.y,
 				cluster.distance);
 
-		for (i = 0; i < ranges.length; i++) {
-			var range = ranges[i];
-			if (this.angleInRange(shiftedAngle.angle, range)) {
-				console.log('wtf');
-				return false;
-			}
+		if (this.angleInRanges(shiftedAngle.angle, ranges)) {
+			console.log('not shifting');
+			destination.point = {
+				x : cluster.x,
+				y : cluster.y
+			};
+			return true;
 		}
 
 		var color = Constants.orange;
@@ -1193,12 +1199,13 @@ function AposBot() {
 			player.split(cluster, cluster.x, cluster.y, destination);
 		}
 
-		drawLine(cluster.closestCell.x, cluster.closestCell.y, destination.point.x, destination.point.y, Constants.green);
+		drawLine(cluster.closestCell.x, cluster.closestCell.y, destination.point.x, destination.point.y,
+				Constants.green);
 		if (shiftedAngle.shifted) {
 
 			drawLine(cluster.closestCell.x, cluster.closestCell.y, cluster.x, cluster.y, Constants.orange);
 		}
-		
+
 		return true;
 	};
 
@@ -2122,18 +2129,15 @@ function AposBot() {
 			}
 		}
 
-		if (ranges) {
-			this.drawRanges(player, ranges);
-		}
-
-		if (ranges.length > 1) {
-			console.log(ranges);
-		}
-
 		destination.point.x = player.x;
 		destination.point.y = player.y;
 
 		if (ranges) {
+
+			this.drawRanges(player, ranges);
+			if (ranges.length > 1) {
+				console.log(ranges);
+			}
 			if (!this.determineFoodDestination(player, destination, threatened ? ranges : [])) {
 				console.log('no food');
 				console.log(ranges);
@@ -2143,7 +2147,7 @@ function AposBot() {
 					console.log('setting range manually');
 					drawLine(player.x, player.y, destination.point.x, destination.point.y, Constants.green);
 				}
-				
+
 			}
 		} else {
 			drawLine(player.x, player.y, destination.point.x, destination.point.y, Constants.green);
