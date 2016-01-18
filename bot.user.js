@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1636
+// @version     3.1637
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1636;
+var aposBotVersion = 3.1637;
 
 var Constants = {
 
@@ -1241,7 +1241,9 @@ function AposBot() {
 					color = Constants.red;
 				}
 			}
+			doSplit = false;
 		}
+		this.obstaclesInPath(player, cluster);
 
 		drawCircle(cluster.x, cluster.y, cluster.size + 40, color);
 		drawPoint(cluster.x, cluster.y + 20, Constants.yellow, "m:" + cluster.mass.toFixed(1) + " w:"
@@ -1275,8 +1277,13 @@ function AposBot() {
 
 		for (var i = 0; i < keys.length; i++) {
 			var entity = this.entities[keys[i]];
+			var distance = target.distance;
+			
+			if (entity.classification == Classification.virus) {
+				distance = 750;
+			}
 
-			if (entity.distance < target.distance) {
+			if (entity.distance < distance) {
 
 				for (var j = 0; j < player.cells.length; j++) {
 					var cell = player.cells[j];
@@ -1284,10 +1291,14 @@ function AposBot() {
 					var range = this.getRange(cell, entity);
 
 					if (range.angleWithin(angle)) {
-						//this.drawAngledLine(player.x, player.y, range.left, 500, Constants.orange);
-						//this.drawAngledLine(player.x, player.y, range.right, 500, Constants.yellow);
+						this.drawAngledLine(player.x, player.y, range.left, 500, Constants.yellow);
+						this.drawAngledLine(player.x, player.y, range.right, 500, Constants.yellow);
 
 						return true;
+					} else {
+						this.drawAngledLine(player.x, player.y, range.left, 500, Constants.cyan);
+						this.drawAngledLine(player.x, player.y, range.right, 500, Constants.cyan);
+
 					}
 				}
 			}
@@ -1663,7 +1674,7 @@ function AposBot() {
 
 		function angleDiff(angle1, angle2) {
 			
-			var diff = Util.mod(angle - range.right, 360)
+			var diff = Util.mod(angle - range.right, 360);
 			if (diff > 180) {
 				diff = 360-diff;
 			}
