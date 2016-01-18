@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1634
+// @version     3.1635
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1634;
+var aposBotVersion = 3.1635;
 
 var Constants = {
 
@@ -1207,7 +1207,7 @@ function AposBot() {
 		// angle of food
 		var angle = Util.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
 
-		if (this.angleInRanges(angle, ranges)) {
+		if (this.angleInThreatRanges(angle, ranges)) {
 			console.log('wtf');
 			return false;
 		}
@@ -1225,7 +1225,7 @@ function AposBot() {
 				x : cluster.x,
 				y : cluster.y
 			};
-			return true;
+			return false;
 		}
 
 		var color = Constants.orange;
@@ -1841,18 +1841,6 @@ function AposBot() {
 
 			this.addRange(ranges, player.allObstacles[i]);
 		}
-
-		var colors = [ "#FF0000", "#00FF00", "#0000FF", "#FF8000", "#8A2BE2", "#FF69B4", "#008080", "#F2FBFF",
-				"#000000", "#FFFF00", ];
-
-		/*
-		for (i = 0; i < ranges.length; i++) {
-			var range = ranges[i];
-
-			this.drawAngledLine(player.x, player.y, range.left, 500, colors[id]);
-			this.drawAngledLine(player.x, player.y, range.right, 500, colors[i]);
-		}
-		*/
 
 		if (ranges.length == 1) {
 			this.infoStrings.push(ranges[0].left + " " + ranges[0].right);
