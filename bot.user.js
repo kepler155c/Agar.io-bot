@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1632
+// @version     3.1633
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1632;
+var aposBotVersion = 3.1633;
 
 var Constants = {
 
@@ -1076,7 +1076,7 @@ function AposBot() {
 			if (!bestCluster || cluster.clusterWeight < bestCluster.clusterWeight) {
 				var angle = Util.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
 
-				if (!this.foodInVirus(cluster) && !this.angleInRanges(angle, ranges)) {
+				if (!this.foodInVirus(cluster) && !this.angleInThreatRanges(angle, player.allObstacles)) {
 					bestCluster = cluster;
 				}
 			}
@@ -1090,6 +1090,18 @@ function AposBot() {
 			var range = ranges[i];
 
 			if (range.angleWithin(angle)) {
+				return true;
+			}
+		}
+		return false;
+	};
+
+	this.angleInThreatRanges = function(angle, ranges) {
+
+		for (var i = 0; i < ranges.length; i++) {
+			var range = ranges[i];
+
+			if (range.classification == Classification.threat && range.angleWithin(angle)) {
 				return true;
 			}
 		}
@@ -1679,7 +1691,7 @@ function AposBot() {
 				}
 			}
 
-			if (closestAngle) {				
+			if (closestAngle) {
 				shiftedAngle.shifted = true;
 				shiftedAngle.angle = closestAngle;
 			}
@@ -1703,7 +1715,7 @@ function AposBot() {
 			}
 		}
 
-		ranges.push(range);
+		ranges.push(new Range(range.left, range.right));
 		return true; // range added
 	};
 
@@ -1713,13 +1725,11 @@ function AposBot() {
 
 			if (threat.distance < threat.dangerZone) {
 
-				var obstacle = {
-					entity : threat.t,
-					cell : cell,
-					range : this.getSafeRange(cell, threat.t, threat.dangerZone)
-				};
-				cell.obstacles.push(obstacle);
-				player.allObstacles.push(obstacle);
+				var range = this.getSafeRange(cell, threat.t, threat.dangerZone);
+				range.classification = Classification.threat;
+
+				cell.obstacles.push(range);
+				player.allObstacles.push(range);
 			}
 		}, this);
 	};
@@ -1745,17 +1755,13 @@ function AposBot() {
 
 				if (virus.distance < distance) {
 
-					var obstacle = {
-						entity : virus,
-						cell : cell,
-						distance : distance,
-						range : this.getSafeRange(cell, virus, distance)
-					};
+					range = this.getSafeRange(cell, virus, distance);
+					range.classification = Classification.virus;
 
 					drawCircle(virus.x, virus.y, virus.size + 20, Constants.red);
 
-					cell.obstacles.push(obstacle);
-					player.allObstacles.push(obstacle);
+					cell.obstacles.push(range);
+					player.allObstacles.push(range);
 				}
 				//}
 			}
@@ -1833,9 +1839,7 @@ function AposBot() {
 
 		for (i = 0; i < player.allObstacles.length; i++) {
 
-			var obstacle = player.allObstacles[i];
-
-			this.addRange(ranges, obstacle.range);
+			this.addRange(ranges, player.allObstacles[i]);
 		}
 
 		var colors = [ "#FF0000", "#00FF00", "#0000FF", "#FF8000", "#8A2BE2", "#FF69B4", "#008080", "#F2FBFF",
@@ -1990,7 +1994,7 @@ function AposBot() {
 					destination.point = this.followAngle(Util.mod(ranges[0].left + 1, 360), player.x, player.y,
 							verticalDistance());
 					console.log('setting range manually');
-					drawLine(player.x, player.y, destination.point.x, destination.point.y, Constants.green);
+					drawLine(player.x, player.y, destination.point.x, destination.point.y, Constants.red);
 				}
 			}
 
