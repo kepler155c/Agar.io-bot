@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1617
+// @version     3.1618
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1617;
+var aposBotVersion = 3.1618;
 
 var Constants = {
 
@@ -2111,6 +2111,10 @@ function AposBot() {
 			}
 		}
 
+		if (ranges) {
+			this.drawRanges(player, ranges);
+		}
+
 		if (ranges.length > 1) {
 			console.log(ranges);
 		}
@@ -2131,6 +2135,15 @@ function AposBot() {
 		}
 		drawLine(player.x, player.y, destination.point.x, destination.point.y, Constants.green);
 	};
+
+	this.drawRanges = function(player, ranges) {
+
+		for (var i = 0; i < ranges.length; i++) {
+			var range = ranges[i];
+
+			this.drawRange(player.x, player.y, range, i, Constants.red);
+		}
+	}
 
 	this.pointFromAngle = function(x, y, angle, distance) {
 		var radians = this.degreesToRadians(angle);
@@ -2505,6 +2518,19 @@ function AposBot() {
 		var newY2 = (useY + (((-distance) * slope) / r));
 
 		return [ new Point(newX1, newY1), new Point(newX2, newY2) ];
+	};
+
+	this.drawRange = function(x, y, range, index, color) {
+
+		//		drawPoint(angleStuff[2][0], angleStuff[2][1], Constants.red, "");
+		//		drawPoint(angleStuff[3][0], angleStuff[3][1], Constants.red, "");
+
+		var lineLeft = this.followAngle(range.left, x, y, 300 - index * 10);
+		var lineRight = this.followAngle(range.right, x, y, 300 - index * 10);
+
+		drawLine(x, y, lineLeft.x, lineLeft.y, color);
+		drawLine(x, y, lineRight.x, lineRight.y, color);
+		drawArc(lineLeft.x, lineLeft.y, lineRight.x, lineRight.y, x, y, color);
 	};
 
 	this.drawAngle = function(cell, angle, distance, color) {
