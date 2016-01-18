@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1631
+// @version     3.1632
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1631;
+var aposBotVersion = 3.1632;
 
 var Constants = {
 
@@ -1654,8 +1654,8 @@ function AposBot() {
 			var closestAngle = null;
 			var leastDiff = null;
 
-			for (var j = 0; j < ranges.length; j++) {
-				var range = ranges[j];
+			for (var i = 0; i < ranges.length; i++) {
+				var range = ranges[i];
 
 				if (range.angleWithin(angle)) {
 
@@ -1868,7 +1868,6 @@ function AposBot() {
 		var i, j;
 		var panicLevel = 0;
 		var threat;
-		var goHungry = false;
 
 		// panic levels:
 		// 2 = partially inside a threat
@@ -1902,7 +1901,6 @@ function AposBot() {
 		var imminentThreatCount = 0;
 		var intersectCount = 0;
 		var overlappedBy = null;
-		var threatened = false;
 
 		player.eachCellThreat(function(cell, threat) {
 
@@ -1914,7 +1912,6 @@ function AposBot() {
 				} else if (threat.t != overlappedBy.t) {
 					imminentThreatCount++;
 				}
-				threatened = true;
 			}
 
 			if (threat.intersects) {
@@ -1983,7 +1980,7 @@ function AposBot() {
 			if (ranges.length > 1) {
 				console.log(ranges);
 			}
-			if (!this.determineFoodDestination(player, destination, threatened ? ranges : [])) {
+			if (!this.determineFoodDestination(player, destination, ranges)) {
 				console.log('no food');
 				if (ranges.length > 0) {
 					console.log(ranges);
