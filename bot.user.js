@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1621
+// @version     3.1622
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1621;
+var aposBotVersion = 3.1622;
 
 var Constants = {
 
@@ -1157,6 +1157,14 @@ function AposBot() {
 		destination.point = this.followAngle(shiftedAngle.angle, cluster.closestCell.x, cluster.closestCell.y,
 				cluster.distance);
 
+		for (i = 0; i < ranges.length; i++) {
+			var range = ranges[i];
+			if (this.angleInRange(shiftedAngle.angle, range)) {
+				console.log('wtf');
+				return false;
+			}
+		}
+
 		var color = Constants.orange;
 
 		if (doSplit && shiftedAngle.shifted) {
@@ -1185,11 +1193,12 @@ function AposBot() {
 			player.split(cluster, cluster.x, cluster.y, destination);
 		}
 
+		drawLine(cluster.closestCell.x, cluster.closestCell.y, destination.point.x, destination.point.y, Constants.green);
 		if (shiftedAngle.shifted) {
 
 			drawLine(cluster.closestCell.x, cluster.closestCell.y, cluster.x, cluster.y, Constants.orange);
 		}
-
+		
 		return true;
 	};
 
@@ -2132,10 +2141,13 @@ function AposBot() {
 
 					destination.point = this.pointFromAngle(player.x, player.y, this.mod(ranges[0].left + 1, 360), 500);
 					console.log('setting range manually');
+					drawLine(player.x, player.y, destination.point.x, destination.point.y, Constants.green);
 				}
+				
 			}
+		} else {
+			drawLine(player.x, player.y, destination.point.x, destination.point.y, Constants.green);
 		}
-		drawLine(player.x, player.y, destination.point.x, destination.point.y, Constants.green);
 	};
 
 	this.drawRanges = function(player, ranges) {
