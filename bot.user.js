@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1628
+// @version     3.1629
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1628;
+var aposBotVersion = 3.1629;
 
 var Constants = {
 
@@ -515,7 +515,7 @@ function Range(left, right) {
 	};
 
 	this.size = function() {
-		return this.mod(this.right - this.left, 360);
+		return Util.mod(this.right - this.left, 360);
 	};
 
 	this.overlaps = function(range) {
@@ -540,6 +540,14 @@ function Range(left, right) {
 }
 
 var Util = function() {
+};
+
+// Using mod function instead the prototype directly as it is very slow
+Util.mod = function(num, mod) {
+	if (mod & (mod - 1) === 0 && mod !== 0) {
+		return num & (mod - 1);
+	}
+	return num < 0 ? ((num % mod) + mod) % mod : num % mod;
 };
 
 Util.computeDistance = function(x1, y1, x2, y2, s1, s2) {
@@ -1609,7 +1617,7 @@ function AposBot() {
 
 			return {
 				left : angle,
-				right : this.mod(angle + 1, 360),
+				right : Util.mod(angle + 1, 360),
 				inside : false
 			};
 		}
@@ -1662,8 +1670,8 @@ function AposBot() {
 			for (var j = 0; j < ranges.length; j++) {
 				range = ranges[j];
 
-				var diffLeft = this.mod(angle - range.left, 360);
-				var diffRight = this.mod(angle - range.right, 360);
+				var diffLeft = Util.mod(angle - range.left, 360);
+				var diffRight = Util.mod(angle - range.right, 360);
 				var diff = Math.min(diffLeft, diffRight);
 
 				// should add / subtract 1 from the angle
@@ -1847,7 +1855,7 @@ function AposBot() {
 		if (ranges.length == 1) {
 			this.infoStrings.push(ranges[0].left + " " + ranges[0].right);
 
-			if (this.mod(ranges[0].left - ranges[0].right, 360) <= 1) {
+			if (Util.mod(ranges[0].left - ranges[0].right, 360) <= 1) {
 				console.log('bad range');
 				console.log(ranges[0]);
 				return null;
@@ -1984,7 +1992,7 @@ function AposBot() {
 				}
 				if (ranges.length > 0) {
 
-					destination.point = this.followAngle(this.mod(ranges[0].left + 1, 360), player.x, player.y,
+					destination.point = this.followAngle(Util.mod(ranges[0].left + 1, 360), player.x, player.y,
 							verticalDistance());
 					console.log('setting range manually');
 					drawLine(player.x, player.y, destination.point.x, destination.point.y, Constants.green);
@@ -2248,14 +2256,6 @@ function AposBot() {
 		return debugStrings;
 	};
 
-	// Using mod function instead the prototype directly as it is very slow
-	this.mod = function(num, mod) {
-		if (mod & (mod - 1) === 0 && mod !== 0) {
-			return num & (mod - 1);
-		}
-		return num < 0 ? ((num % mod) + mod) % mod : num % mod;
-	};
-
 	this.isMerging = function(cell1, cell2) {
 		var dist = Util.computeDistance(cell1.x, cell1.y, cell2.x, cell2.y, cell1.size, cell2.size);
 
@@ -2395,7 +2395,7 @@ function AposBot() {
 
 	this.drawAngle = function(cell, angle, distance, color) {
 		var line1 = this.followAngle(angle[0], cell.x, cell.y, distance + cell.size);
-		var line2 = this.followAngle(this.mod(angle[0] + angle[1], 360), cell.x, cell.y, distance + cell.size);
+		var line2 = this.followAngle(Util.mod(angle[0] + angle[1], 360), cell.x, cell.y, distance + cell.size);
 
 		drawLine(cell.x, cell.y, line1.x, line1.y, color);
 		drawLine(cell.x, cell.y, line2.x, line2.y, color);
@@ -2412,7 +2412,7 @@ function AposBot() {
 		var slope = this.slopeFromAngle(angle);
 		var coords = this.pointsOnLine(slope, useX, useY, distance);
 
-		var side = this.mod(angle - 90, 360);
+		var side = Util.mod(angle - 90, 360);
 		if (side < 180) {
 			return coords[1];
 		} else {
