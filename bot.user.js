@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1620
+// @version     3.1621
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1620;
+var aposBotVersion = 3.1621;
 
 var Constants = {
 
@@ -1940,7 +1940,7 @@ function AposBot() {
 		for (i = 0; i < ranges.length; i++) {
 			var range = ranges[i];
 
-			this.drawAngledLine(player.x, player.y, range.left, 500, colors[i]);
+			this.drawAngledLine(player.x, player.y, range.left, 500, colors[id]);
 			this.drawAngledLine(player.x, player.y, range.right, 500, colors[i]);
 		}
 		*/
@@ -2522,13 +2522,13 @@ function AposBot() {
 		return [ new Point(newX1, newY1), new Point(newX2, newY2) ];
 	};
 
-	this.drawRange = function(x, y, range, index, color) {
+	this.drawRange = function(x, y, size, range, index, color) {
 
 		//		drawPoint(angleStuff[2][0], angleStuff[2][1], Constants.red, "");
 		//		drawPoint(angleStuff[3][0], angleStuff[3][1], Constants.red, "");
 
-		var lineLeft = this.followAngle(range.left, x, y, player.size - index * 10);
-		var lineRight = this.followAngle(range.right, x, y, player.size - index * 10);
+		var lineLeft = this.followAngle(range.left, x, y, size - index * 10);
+		var lineRight = this.followAngle(range.right, x, y, size - index * 10);
 
 		drawLine(x, y, lineLeft.x, lineLeft.y, color);
 		drawLine(x, y, lineRight.x, lineRight.y, color);
