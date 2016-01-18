@@ -1679,8 +1679,10 @@ function AposBot() {
 				}
 			}
 
-			shiftedAngle.shifted = true;
-			shiftedAngle.angle = closestAngle;
+			if (closestAngle) {				
+				shiftedAngle.shifted = true;
+				shiftedAngle.angle = closestAngle;
+			}
 		}
 
 		return shiftedAngle;

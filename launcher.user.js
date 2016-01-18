@@ -712,7 +712,7 @@ console.log("Running Bot Launcher!");
 
         if (getPlayer().length == 0 && !firstStart) {
             console.log("Revive");
-            setNick(originalName);
+            //setNick(originalName);
             reviving = true;
         } else if (getPlayer().length > 0 && reviving) {
             reviving = false;
