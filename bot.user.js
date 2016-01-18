@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1626
+// @version     3.1627
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1626;
+var aposBotVersion = 3.1627;
 
 var Constants = {
 
@@ -500,6 +500,44 @@ Player.prototype = {
 		}, this);
 	},
 };
+
+function Range(left, right) {
+
+	this.left = left;
+	this.right = right;
+
+	this.angleWithin = function(angle) {
+
+		if (this.right < this.left) {
+			return !(angle > this.right && angle < this.left);
+		}
+		return angle >= this.left && angle <= this.right;
+	};
+
+	this.size = function() {
+		return this.mod(this.right - this.left, 360);
+	};
+
+	this.overlaps = function(range) {
+
+		if (this.size() > range.size()) {
+			return this.angleWithin(range.left) || this.angleWithin(range.right);
+		}
+		return range.angleWithin(this.left) || range.angleWithin(this.right);
+	};
+
+	this.combine = function(range) {
+
+		if (this.overlaps(range)) {
+
+			this.left = Math.min(this.left, range.left);
+			this.right = Math.max(this.right, range.right);
+
+			return true;
+		}
+		return false;
+	};
+}
 
 var Util = function() {
 };
@@ -1043,7 +1081,7 @@ function AposBot() {
 		for (var i = 0; i < ranges.length; i++) {
 			var range = ranges[i];
 
-			if (this.angleInRange(angle, range)) {
+			if (range.angleWithin(angle)) {
 				return true;
 			}
 		}
@@ -1155,7 +1193,6 @@ function AposBot() {
 		}
 
 		// angle away from obstacles
-		//var shiftedAngle = this.shiftAngle(obstacleAngles, angle, [ 0, 360 ]);
 		var shiftedAngle = this.avoidObstacles(player, angle);
 
 		// console.log('angle is: ' + shiftedAngle.angle);
@@ -1226,7 +1263,7 @@ function AposBot() {
 
 					var range = this.getRange(cell, entity);
 
-					if (this.angleInRange(angle, range)) {
+					if (range.angleWithin(angle)) {
 						//this.drawAngledLine(player.x, player.y, range.left, 500, Constants.orange);
 						//this.drawAngledLine(player.x, player.y, range.right, 500, Constants.yellow);
 
@@ -1503,133 +1540,6 @@ function AposBot() {
 		}
 	};
 
-	this.addThreatAngles = function(player, badAngles) {
-
-		var i = 0;
-
-		player.eachCellThreat(function(cell, threat) {
-
-			if (threat.distance < threat.dangerZone) {
-				/*
-				if (threat.size + cell.size > threat.distance) {
-					console.log("t: " + ((threat.size + cell.size) - threat.distance));
-				}
-				*/
-				badAngles.push(this.getAngleRange(cell, threat, i++, threat.dangerZone, Classification.unknown).concat(
-						threat.distance));
-			}
-		}, this);
-	};
-
-	this.addVirusAngles = function(player, badAngles, obstacleList) {
-
-		var i = 0;
-
-		Object.keys(this.entities).filter(this.entities.virusFilter, this.entities).forEach(
-				function(key) {
-
-					var virus = this.entities[key];
-
-					virus.range = null;
-
-					for (var j = 0; j < player.cells.length; j++) {
-						var cell = player.cells[j];
-
-						if (virus.distance < cell.size + 750
-								&& ((cell.mass + virus.foodMass) / virus.mass > 1.2 || player.isMerging)) {
-
-							var minDistance = cell.size + cell.velocity;
-							if (player.isMerging) {
-								minDistance += cell.size;
-							}
-
-							var tempOb = this.getAngleRange(cell, virus, i, minDistance, Classification.unknown);
-							var angle1 = tempOb[0];
-							var angle2 = this.rangeToAngle(tempOb);
-							obstacleList.push([ [ angle1, true ], [ angle2, false ] ]);
-
-							virus.range = [ angle1, angle2 ];
-
-							if (virus.distance < minDistance) {
-								badAngles.push(tempOb.concat(minDistance));
-							}
-						}
-					}
-					i++;
-				}, this);
-	};
-
-	this.combineAngles = function(player, badAngles, obstacleList, goodAngles, obstacleAngles) {
-
-		var i, j, angle1, angle2, tempOb, line1, line2, diff, shiftedAngle, destination;
-		var stupidList = [];
-
-		if (badAngles.length > 0) {
-			//NOTE: This is only bandaid wall code. It's not the best way to do it.
-			stupidList = this.addWall(stupidList, player);
-		}
-
-		for (i = 0; i < badAngles.length; i++) {
-			angle1 = badAngles[i][0];
-			angle2 = this.rangeToAngle(badAngles[i]);
-			stupidList.push([ [ angle1, true ], [ angle2, false ], badAngles[i][2] ]);
-		}
-
-		stupidList.sort(function(a, b) {
-			return a[2] - b[2];
-		});
-
-		var sortedInterList = [];
-		var sortedObList = [];
-
-		for (i = 0; i < stupidList.length; i++) {
-
-			var tempList = this.addAngle(sortedInterList, stupidList[i]);
-
-			if (tempList.length === 0) {
-
-				console.log("MAYDAY IT'S HAPPENING!");
-				// break;
-				return false;
-
-			} else {
-				sortedInterList = tempList;
-			}
-		}
-
-		for (i = 0; i < obstacleList.length; i++) {
-			sortedObList = this.addAngle(sortedObList, obstacleList[i]);
-
-			if (sortedObList.length === 0) {
-				break;
-			}
-		}
-
-		var offsetI = 0;
-		var obOffsetI = 1;
-
-		if (sortedInterList.length > 0 && sortedInterList[0][1]) {
-			offsetI = 1;
-		}
-		if (sortedObList.length > 0 && sortedObList[0][1]) {
-			obOffsetI = 0;
-		}
-
-		for (i = 0; i < sortedInterList.length; i += 2) {
-			angle1 = sortedInterList[this.mod(i + offsetI, sortedInterList.length)][0];
-			angle2 = sortedInterList[this.mod(i + 1 + offsetI, sortedInterList.length)][0];
-			diff = this.mod(angle2 - angle1, 360);
-			goodAngles.push([ angle1, diff ]);
-		}
-
-		for (i = 0; i < sortedObList.length; i += 2) {
-			angle1 = sortedObList[this.mod(i + obOffsetI, sortedObList.length)][0];
-			angle2 = sortedObList[this.mod(i + 1 + obOffsetI, sortedObList.length)][0];
-			diff = this.mod(angle2 - angle1, 360);
-			obstacleAngles.push([ angle1, diff ]);
-		}
-	};
-
 	this.radiansToDegrees = function(angle) {
 		return angle * 180 / Math.PI + 180;
 	};
@@ -1665,19 +1575,15 @@ function AposBot() {
 			y : radius * Math.cos(t)
 		};
 
-		return {
-			left : Util.getAngle(target.x + ta.x, target.y + ta.y, source.x, source.y),
-			right : Util.getAngle(target.x + tb.x, target.y + tb.y, source.x, source.y)
-		};
+		return new Range(Util.getAngle(target.x + ta.x, target.y + ta.y, source.x, source.y), Util.getAngle(target.x
+				+ tb.x, target.y + tb.y, source.x, source.y));
 	};
 
 	//TODO: Don't let this function do the radius math.
 	this.getSafeRange = function(blob1, blob2, radius) {
 
 		var angle;
-		var range = {
-			inverted : false
-		};
+		var inverted = false;
 
 		var px = blob1.x;
 		var py = blob1.y;
@@ -1690,7 +1596,7 @@ function AposBot() {
 		var dd = Math.sqrt(dx * dx + dy * dy); // distance + 1 radius (not touching)
 
 		if (dd < radius) {
-			range.inverted = true;
+			inverted = true;
 			dd = radius + (radius - dd) / Math.PI;
 		}
 
@@ -1709,9 +1615,6 @@ function AposBot() {
 		}
 
 		var b = Math.atan2(dy, dx);
-		//		if (range.inverted) {
-		//			b = -b;
-		//		}
 
 		var t = b - a;
 		var ta = {
@@ -1725,18 +1628,10 @@ function AposBot() {
 			y : radius * Math.cos(t)
 		};
 
-		range.left = Util.getAngle(cx + ta.x, cy + ta.y, px, py);
-		range.right = Util.getAngle(cx + tb.x, cy + tb.y, px, py);
+		var range = new Range(Util.getAngle(cx + ta.x, cy + ta.y, px, py), Util.getAngle(cx + tb.x, cy + tb.y, px, py));
+		range.inverted = inverted;
 
 		return range;
-	};
-
-	this.angleInRange = function(angle, range) {
-
-		if (range.right < range.left) {
-			return !(angle > range.right && angle < range.left);
-		}
-		return angle >= range.left && angle <= range.right;
 	};
 
 	this.avoidObstacles = function(player, angle) {
@@ -1754,7 +1649,7 @@ function AposBot() {
 
 			range = obstacle.range;
 
-			if (this.angleInRange(angle, range)) {
+			if (range.angleWithin(angle)) {
 				this.addRange(ranges, range);
 			}
 		}
@@ -1789,37 +1684,13 @@ function AposBot() {
 		return shiftedAngle;
 	};
 
-	this.rangeSize = function(range) {
-		return this.mod(range.right - range.left, 360);
-	};
-
-	this.rangesOverlap = function(range1, range2) {
-
-		if (this.rangeSize(range1) > this.rangeSize(range2)) {
-			return this.angleInRange(range2.left, range1) || this.angleInRange(range2.right, range1);
-		}
-		return this.angleInRange(range1.left, range2) || this.angleInRange(range1.right, range2);
-	};
-
-	this.combineRange = function(range1, range2) {
-
-		if (this.rangesOverlap(range1, range2)) {
-
-			range1.left = Math.min(range1.left, range2.left);
-			range1.right = Math.max(range1.right, range2.right);
-
-			return true;
-		}
-		return false;
-	};
-
 	this.addRange = function(ranges, range) {
 
 		for (var i = 0; i < ranges.length; i++) {
 
 			var testRange = ranges[i];
 
-			if (this.combineRange(testRange, range)) {
+			if (testRange.combineRange(range)) {
 
 				ranges.splice(testRange, 1);
 
@@ -1984,50 +1855,6 @@ function AposBot() {
 		}
 
 		return ranges;
-
-		/*
-		var badAngles = [];
-		var obstacleList = [];
-		var goodAngles = [];
-		var obstacleAngles = [];
-
-		this.addThreatAngles(player, badAngles);
-		this.addVirusAngles(player, badAngles, obstacleList);
-		this.combineAngles(player, badAngles, obstacleList, goodAngles, obstacleAngles);
-
-		for (var i = 0; i < obstacleAngles.length; i++) {
-
-			// this.drawAngle(player, obstacleAngles[i], 50, Constants.cyan);
-		}
-
-		if (goodAngles.length > 0) {
-			var bIndex = goodAngles[0];
-			var biggest = goodAngles[0][1];
-			for (i = 1; i < goodAngles.length; i++) {
-				var size = goodAngles[i][1];
-				if (size > biggest) {
-					biggest = size;
-					bIndex = goodAngles[i];
-				}
-			}
-			var perfectAngle = this.mod(bIndex[0] + bIndex[1] / 2, 360);
-			perfectAngle = this.shiftAngle(obstacleAngles, perfectAngle, bIndex);
-
-			// this.computeDestinationAngle(player, destination);
-
-			destination.point = this.followAngle(perfectAngle.angle, player.x, player.y, verticalDistance());
-
-			// this.adjustDestination(player, destination);
-
-			return true;
-
-		} else if (badAngles.length > 0 && goodAngles.length === 0) {
-
-			return false;
-		}
-
-		return true;
-		*/
 	};
 
 	this.determineBestDestination = function(player, destination, tempPoint) {
@@ -2152,7 +1979,9 @@ function AposBot() {
 			}
 			if (!this.determineFoodDestination(player, destination, threatened ? ranges : [])) {
 				console.log('no food');
-				console.log(ranges);
+				if (ranges.length > 0) {
+					console.log(ranges);
+				}
 				if (ranges.length > 0) {
 
 					destination.point = this.followAngle(this.mod(ranges[0].left + 1, 360), player.x, player.y,
@@ -2591,129 +2420,6 @@ function AposBot() {
 		}
 	};
 
-	//Using a line formed from point a to b, tells if point c is on S side of that line.
-	this.isSideLine = function(a, b, c) {
-		if ((b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]) > 0) {
-			return true;
-		}
-		return false;
-	};
-
-	//angle range2 is within angle range2
-	//an Angle is a point and a distance between an other point [5, 40]
-	this.angleRangeIsWithin = function(range1, range2) {
-		if (range2[0] == this.mod(range2[0] + range2[1], 360)) {
-			return true;
-		}
-		//console.log("r1: " + range1[0] + ", " + range1[1] + " ... r2: " + range2[0] + ", " + range2[1]);
-
-		var distanceFrom0 = this.mod(range1[0] - range2[0], 360);
-		var distanceFrom1 = this.mod(range1[1] - range2[0], 360);
-
-		if (distanceFrom0 < range2[1] && distanceFrom1 < range2[1] && distanceFrom0 < distanceFrom1) {
-			return true;
-		}
-		return false;
-	};
-
-	this.angleRangeIsWithinInverted = function(range1, range2) {
-		var distanceFrom0 = this.mod(range1[0] - range2[0], 360);
-		var distanceFrom1 = this.mod(range1[1] - range2[0], 360);
-
-		if (distanceFrom0 < range2[1] && distanceFrom1 < range2[1] && distanceFrom0 > distanceFrom1) {
-			return true;
-		}
-		return false;
-	};
-
-	this.angleIsWithin = function(angle, range) {
-		var diff = this.mod(this.rangeToAngle(range) - angle, 360);
-		if (diff >= 0 && diff <= range[1]) {
-			return true;
-		}
-		return false;
-	};
-
-	this.rangeToAngle = function(range) {
-		return this.mod(range[0] + range[1], 360);
-	};
-
-	this.anglePair = function(range) {
-		return (range[0] + ", " + this.rangeToAngle(range) + " range: " + range[1]);
-	};
-
-	this.computeAngleRanges = function(blob1, blob2) {
-		var mainAngle = Util.getAngle(blob1.x, blob1.y, blob2.x, blob2.y);
-		var leftAngle = this.mod(mainAngle - 90, 360);
-		var rightAngle = this.mod(mainAngle + 90, 360);
-
-		var blob1Left = this.followAngle(leftAngle, blob1.x, blob1.y, blob1.size);
-		var blob1Right = this.followAngle(rightAngle, blob1.x, blob1.y, blob1.size);
-
-		var blob2Left = this.followAngle(rightAngle, blob2.x, blob2.y, blob2.size);
-		var blob2Right = this.followAngle(leftAngle, blob2.x, blob2.y, blob2.size);
-
-		var blob1AngleLeft = Util.getAngle(blob2.x, blob2.y, blob1Left.x, blob1Left.y);
-		var blob1AngleRight = Util.getAngle(blob2.x, blob2.y, blob1Right.x, blob1Right.y);
-
-		var blob2AngleLeft = Util.getAngle(blob1.x, blob1.y, blob2Left.x, blob2Left.y);
-		var blob2AngleRight = Util.getAngle(blob1.x, blob1.y, blob2Right.x, blob2Right.y);
-
-		var blob1Range = this.mod(blob1AngleRight - blob1AngleLeft, 360);
-		var blob2Range = this.mod(blob2AngleRight - blob2AngleLeft, 360);
-
-		var tempLine = this.followAngle(blob2AngleLeft, blob2Left.x, blob2Left.y, 400);
-		//drawLine(blob2Left[0], blob2Left[1], tempLine[0], tempLine[1], 0);
-
-		if ((blob1Range / blob2Range) > 1) {
-			drawPoint(blob1Left.x, blob1Left.y, Constants.red, "");
-			drawPoint(blob1Right.x, blob1Right.y, Constants.red, "");
-			drawPoint(blob1.x, blob1.y, Constants.red, "" + blob1Range + ", " + blob2Range + " R: "
-					+ (Math.round((blob1Range / blob2Range) * 1000) / 1000));
-		}
-
-		//drawPoint(blob2.x, blob2.y, 3, "" + blob1Range);
-	};
-
-	//TODO: Don't let this function do the radius math.
-	this.getEdgeLinesFromPoint = function(blob1, blob2, radius) {
-		var px = blob1.x;
-		var py = blob1.y;
-
-		var cx = blob2.x;
-		var cy = blob2.y;
-
-		var tempRadius = Util.computeDistance(px, py, cx, cy);
-		if (tempRadius <= radius) {
-			radius = tempRadius - 5;
-			//radius = tempRadius - 1;
-		}
-
-		var dx = cx - px;
-		var dy = cy - py;
-		var dd = Math.sqrt(dx * dx + dy * dy);
-		var a = Math.asin(radius / dd);
-		var b = Math.atan2(dy, dx);
-
-		var t = b - a;
-		var ta = {
-			x : radius * Math.sin(t),
-			y : radius * -Math.cos(t)
-		};
-
-		t = b + a;
-		var tb = {
-			x : radius * -Math.sin(t),
-			y : radius * Math.cos(t)
-		};
-
-		var angleLeft = Util.getAngle(cx + ta.x, cy + ta.y, px, py);
-		var angleRight = Util.getAngle(cx + tb.x, cy + tb.y, px, py);
-		var angleDistance = this.mod(angleRight - angleLeft, 360);
-
-		return [ angleLeft, angleDistance, [ cx + tb.x, cy + tb.y ], [ cx + ta.x, cy + ta.y ] ];
-	};
-
 	this.addWall = function(listToUse, blob) {
 
 		var lineLeft, lineRight;
@@ -2770,163 +2476,6 @@ function AposBot() {
 		return listToUse;
 	};
 
-	//listToUse contains angles in the form of [angle, boolean].
-	//boolean is true when the range is starting. False when it's ending.
-	//range = [[angle1, true], [angle2, false]]
-
-	this.getAngleIndex = function(listToUse, angle) {
-		if (listToUse.length === 0) {
-			return 0;
-		}
-
-		for (var i = 0; i < listToUse.length; i++) {
-			if (angle <= listToUse[i][0]) {
-				return i;
-			}
-		}
-
-		return listToUse.length;
-	};
-
-	this.addAngle = function(listToUse, range) {
-		//#1 Find first open element
-		//#2 Try to add range1 to the list. If it is within other range, don't add it, set a boolean.
-		//#3 Try to add range2 to the list. If it is withing other range, don't add it, set a boolean.
-
-		//TODO: Only add the new range at the end after the right stuff has been removed.
-
-		var newListToUse = listToUse.slice();
-
-		var startIndex = 1;
-		var i;
-
-		if (newListToUse.length > 0 && !newListToUse[0][1]) {
-			startIndex = 0;
-		}
-
-		var startMark = this.getAngleIndex(newListToUse, range[0][0]);
-		var startBool = this.mod(startMark, 2) != startIndex;
-
-		var endMark = this.getAngleIndex(newListToUse, range[1][0]);
-		var endBool = this.mod(endMark, 2) != startIndex;
-
-		var removeList = [];
-
-		if (startMark != endMark) {
-			//Note: If there is still an error, this would be it.
-			var biggerList = 0;
-			if (endMark == newListToUse.length) {
-				biggerList = 1;
-			}
-
-			for (i = startMark; i < startMark + this.mod(endMark - startMark, newListToUse.length + biggerList); i++) {
-				removeList.push(this.mod(i, newListToUse.length));
-			}
-		} else if (startMark < newListToUse.length && endMark < newListToUse.length) {
-			var startDist = this.mod(newListToUse[startMark][0] - range[0][0], 360);
-			var endDist = this.mod(newListToUse[endMark][0] - range[1][0], 360);
-
-			if (startDist < endDist) {
-				for (i = 0; i < newListToUse.length; i++) {
-					removeList.push(i);
-				}
-			}
-		}
-
-		removeList.sort(function(a, b) {
-			return b - a;
-		});
-
-		for (i = 0; i < removeList.length; i++) {
-			newListToUse.splice(removeList[i], 1);
-		}
-
-		if (startBool) {
-			newListToUse.splice(this.getAngleIndex(newListToUse, range[0][0]), 0, range[0]);
-		}
-		if (endBool) {
-			newListToUse.splice(this.getAngleIndex(newListToUse, range[1][0]), 0, range[1]);
-		}
-
-		return newListToUse;
-	};
-
-	this.getAngleRange = function(blob1, blob2, index, radius, classification) {
-
-		var angleStuff = this.getEdgeLinesFromPoint(blob1, blob2, radius);
-		var leftAngle = angleStuff[0];
-		var rightAngle = this.rangeToAngle(angleStuff);
-		var difference = angleStuff[1];
-		var safeDistance = blob1.size + blob2.size;
-
-		if (classification != Classification.unknown) {
-
-			drawPoint(angleStuff[2][0], angleStuff[2][1], Constants.red, "");
-			drawPoint(angleStuff[3][0], angleStuff[3][1], Constants.red, "");
-
-			var lineLeft = this.followAngle(leftAngle, blob1.x, blob1.y, safeDistance - index * 10);
-			var lineRight = this.followAngle(rightAngle, blob1.x, blob1.y, safeDistance - index * 10);
-
-			var color = Constants.orange;
-			if (classification == Classification.virus) {
-				color = Constants.cyan;
-			} else if (classification == Classification.threat) { // (getCells().hasOwnProperty(blob2.id)) {
-				color = Constants.red;
-			} else if (classification == Classification.cluster) {
-				color = Constants.green;
-			}
-
-			drawLine(blob1.x, blob1.y, lineLeft.x, lineLeft.y, color);
-			drawLine(blob1.x, blob1.y, lineRight.x, lineRight.y, color);
-			drawArc(lineLeft.x, lineLeft.y, lineRight.x, lineRight.y, blob1.x, blob1.y, color);
-		}
-		return [ leftAngle, difference ];
-	};
-
-	//Given a list of conditions, shift the angle to the closest available spot respecting the range given.
-	this.shiftAngle = function(listToUse, angle, range) {
-
-		//TODO: shiftAngle needs to respect the range! DONE?
-		for (var i = 0; i < listToUse.length; i++) {
-			if (this.angleIsWithin(angle, listToUse[i])) {
-
-				var angle1 = listToUse[i][0];
-				var angle2 = this.rangeToAngle(listToUse[i]);
-
-				var dist1 = this.mod(angle - angle1, 360);
-				var dist2 = this.mod(angle2 - angle, 360);
-
-				if (dist1 < dist2) {
-					if (this.angleIsWithin(angle1, range)) {
-						return {
-							angle : angle1,
-							shifted : true
-						};
-					}
-					return {
-						angle : angle2,
-						shifted : true
-					};
-				}
-
-				if (this.angleIsWithin(angle2, range)) {
-					return {
-						angle : angle2,
-						shifted : true
-					};
-				}
-				return {
-					angle : angle1,
-					shifted : true
-				};
-			}
-		}
-
-		return {
-			angle : angle,
-			shifted : false
-		};
-	};
 	this.inSplitRange = function(cluster) {
 
 		var interceptPoint = this.interceptPosition(cluster.cell.closestCell, cluster.cell);
