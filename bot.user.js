@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1633
+// @version     3.1634
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1633;
+var aposBotVersion = 3.1634;
 
 var Constants = {
 
@@ -1755,7 +1755,7 @@ function AposBot() {
 
 				if (virus.distance < distance) {
 
-					range = this.getSafeRange(cell, virus, distance);
+					var range = this.getSafeRange(cell, virus, distance);
 					range.classification = Classification.virus;
 
 					drawCircle(virus.x, virus.y, virus.size + 20, Constants.red);
