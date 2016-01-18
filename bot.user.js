@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1618
+// @version     3.1619
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1618;
+var aposBotVersion = 3.1619;
 
 var Constants = {
 
@@ -1675,7 +1675,7 @@ function AposBot() {
 
 		if (dd < radius) {
 			range.inverted = true;
-			dd = radius + (radius - dd);
+			dd = radius + (radius - dd) / Math.PI;
 		}
 
 		var a = Math.asin(radius / dd);
@@ -2143,7 +2143,7 @@ function AposBot() {
 
 			this.drawRange(player.x, player.y, range, i, Constants.red);
 		}
-	}
+	};
 
 	this.pointFromAngle = function(x, y, angle, distance) {
 		var radians = this.degreesToRadians(angle);
