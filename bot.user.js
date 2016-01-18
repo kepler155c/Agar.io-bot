@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1635
+// @version     3.1636
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1635;
+var aposBotVersion = 3.1636;
 
 var Constants = {
 
@@ -1661,6 +1661,15 @@ function AposBot() {
 			shifted : false
 		};
 
+		function angleDiff(angle1, angle2) {
+			
+			var diff = Util.mod(angle - range.right, 360)
+			if (diff > 180) {
+				diff = 360-diff;
+			}
+			return diff;
+		}
+
 		if (ranges.length > 0) {
 
 			var closestAngle = null;
@@ -1671,8 +1680,8 @@ function AposBot() {
 
 				if (range.angleWithin(angle)) {
 
-					var diffLeft = Util.mod(angle - range.left, 360);
-					var diffRight = Util.mod(angle - range.right, 360);
+					var diffLeft = angleDiff(angle, range.left);
+					var diffRight = angleDiff(angle, range.right);
 					var diff = Math.min(diffLeft, diffRight);
 
 					// should add / subtract 1 from the angle
