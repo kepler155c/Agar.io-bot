@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1616
+// @version     3.1617
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1616;
+var aposBotVersion = 3.1617;
 
 var Constants = {
 
@@ -214,7 +214,8 @@ Player.prototype = {
 			this.mergeInfo = {
 				cellCount : this.cells.length,
 				x : Math.floor(this.x),
-				y : Math.floor(this.y)
+				y : Math.floor(this.y),
+				timer : Date.now()
 			};
 			this.action = this.mergeAction;
 		}
@@ -227,7 +228,7 @@ Player.prototype = {
 	},
 	mergeAction : function(destination) {
 
-		if (this.cells.length >= this.mergeInfo.cellCount) {
+		if (this.cells.length >= this.mergeInfo.cellCount && Date.now() - this.mergeInfo.timer < 2000) {
 
 			destination.point.x = this.mergeInfo.x;
 			destination.point.y = this.mergeInfo.y;
@@ -365,12 +366,12 @@ Player.prototype = {
 			};
 		}
 	},
-	shootVirusAction : function(destination) {
+	shootVirusAction : function(destination, entities) {
 
 		var info = this.virusShootInfo;
 		var virus = info.virus;
 
-		if (virus.distance > virus.closestCell.size && this.canShoot(1)) {
+		if (virus.distance > virus.closestCell.size && this.canShoot(1) && entities[virus.id]) {
 
 			var cell = virus.closestCell;
 			var distance = virus.distance;
@@ -1242,7 +1243,7 @@ function AposBot() {
 			Object.keys(this.entities).filter(this.entities.virusFilter, this.entities).forEach(function(key) {
 				var virus = this.entities[key];
 
-				if (virus.lastSize > virus.size && virus.distance - virus.closestCell.size < 300) {
+				if (virus.size > virus.lastSize && virus.distance - virus.closestCell.size < 300) {
 
 					player.shootVirus(virus, destination);
 					return true;
@@ -2216,7 +2217,7 @@ function AposBot() {
 		this.setClosestVirus(player);
 		this.displayVirusTargets(player);
 
-		if (player.action && player.action(destination)) {
+		if (player.action && player.action(destination, this.entities)) {
 			return destination;
 		}
 
