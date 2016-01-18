@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1623
+// @version     3.1624
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1623;
+var aposBotVersion = 3.1624;
 
 var Constants = {
 
@@ -1734,7 +1734,7 @@ function AposBot() {
 	this.angleInRange = function(angle, range) {
 
 		if (range.right < range.left) {
-			return !(angle >= range.right && angle <= range.left);
+			return !(angle > range.right && angle < range.left);
 		}
 		return angle >= range.left && angle <= range.right;
 	};
