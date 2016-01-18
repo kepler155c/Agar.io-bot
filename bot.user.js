@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1630
+// @version     3.1631
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1630;
+var aposBotVersion = 3.1631;
 
 var Constants = {
 
@@ -1201,7 +1201,7 @@ function AposBot() {
 		}
 
 		// angle away from obstacles
-		var shiftedAngle = this.avoidObstacles(player, angle);
+		var shiftedAngle = this.avoidObstacles(player, angle, ranges);
 
 		// console.log('angle is: ' + shiftedAngle.angle);
 		destination.point = this.followAngle(shiftedAngle.angle, cluster.closestCell.x, cluster.closestCell.y,
@@ -1642,25 +1642,12 @@ function AposBot() {
 		return range;
 	};
 
-	this.avoidObstacles = function(player, angle) {
+	this.avoidObstacles = function(player, angle, ranges) {
 
 		var shiftedAngle = {
 			angle : angle,
 			shifted : false
 		};
-		var range;
-		var ranges = [];
-
-		for (var i = 0; i < player.allObstacles.length; i++) {
-
-			var obstacle = player.allObstacles[i];
-
-			range = obstacle.range;
-
-			if (range.angleWithin(angle)) {
-				this.addRange(ranges, range);
-			}
-		}
 
 		if (ranges.length > 0) {
 
@@ -1668,19 +1655,26 @@ function AposBot() {
 			var leastDiff = null;
 
 			for (var j = 0; j < ranges.length; j++) {
-				range = ranges[j];
+				var range = ranges[j];
 
-				var diffLeft = Util.mod(angle - range.left, 360);
-				var diffRight = Util.mod(angle - range.right, 360);
-				var diff = Math.min(diffLeft, diffRight);
+				if (range.angleWithin(angle)) {
 
-				// should add / subtract 1 from the angle
-				if (closestAngle === null || diff < leastDiff) {
+					var diffLeft = Util.mod(angle - range.left, 360);
+					var diffRight = Util.mod(angle - range.right, 360);
+					var diff = Math.min(diffLeft, diffRight);
 
-					leastDiff = diff;
-					closestAngle = range.left;
-					if (diffLeft > diffRight) {
-						closestAngle = range.right;
+					// should add / subtract 1 from the angle
+					if (closestAngle === null || diff < leastDiff) {
+
+						leastDiff = diff;
+						closestAngle = range.left;
+						console.log([ range.left, range.right, angle, diffLeft, diffRight ]);
+						if (diffLeft > diffRight) {
+							closestAngle = range.right;
+							console.log('went right');
+						} else {
+							console.log('went left');
+						}
 					}
 				}
 			}
