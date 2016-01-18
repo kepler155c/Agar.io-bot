@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1619
+// @version     3.1620
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1619;
+var aposBotVersion = 3.1620;
 
 var Constants = {
 
@@ -1211,8 +1211,8 @@ function AposBot() {
 					var range = this.getRange(cell, entity);
 
 					if (this.angleInRange(angle, range)) {
-						this.drawAngledLine(player.x, player.y, range.left, 500, Constants.orange);
-						this.drawAngledLine(player.x, player.y, range.right, 500, Constants.yellow);
+						//this.drawAngledLine(player.x, player.y, range.left, 500, Constants.orange);
+						//this.drawAngledLine(player.x, player.y, range.right, 500, Constants.yellow);
 
 						return true;
 					}
@@ -1936,12 +1936,14 @@ function AposBot() {
 		var colors = [ "#FF0000", "#00FF00", "#0000FF", "#FF8000", "#8A2BE2", "#FF69B4", "#008080", "#F2FBFF",
 				"#000000", "#FFFF00", ];
 
+		/*
 		for (i = 0; i < ranges.length; i++) {
 			var range = ranges[i];
 
 			this.drawAngledLine(player.x, player.y, range.left, 500, colors[i]);
 			this.drawAngledLine(player.x, player.y, range.right, 500, colors[i]);
 		}
+		*/
 
 		if (ranges.length == 1) {
 			this.infoStrings.push(ranges[0].left + " " + ranges[0].right);
@@ -2141,7 +2143,7 @@ function AposBot() {
 		for (var i = 0; i < ranges.length; i++) {
 			var range = ranges[i];
 
-			this.drawRange(player.x, player.y, range, i, Constants.red);
+			this.drawRange(player.x, player.y, player.size + 100, range, i, Constants.red);
 		}
 	};
 
@@ -2525,8 +2527,8 @@ function AposBot() {
 		//		drawPoint(angleStuff[2][0], angleStuff[2][1], Constants.red, "");
 		//		drawPoint(angleStuff[3][0], angleStuff[3][1], Constants.red, "");
 
-		var lineLeft = this.followAngle(range.left, x, y, 300 - index * 10);
-		var lineRight = this.followAngle(range.right, x, y, 300 - index * 10);
+		var lineLeft = this.followAngle(range.left, x, y, player.size - index * 10);
+		var lineRight = this.followAngle(range.right, x, y, player.size - index * 10);
 
 		drawLine(x, y, lineLeft.x, lineLeft.y, color);
 		drawLine(x, y, lineRight.x, lineRight.y, color);
