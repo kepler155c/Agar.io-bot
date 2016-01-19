@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1652
+// @version     3.1653
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1652;
+var aposBotVersion = 3.1653;
 
 var Constants = {
 
@@ -508,10 +508,14 @@ function Range(left, right) {
 
 	this.angleWithin = function(angle) {
 
+		var diff = Util.mod(Util.mod(this.left + this.right, 360) - angle, 360);
+		return diff >= 0 && diff <= this.right;
+		/*
 		if (this.right < this.left) {
 			return !(angle > this.right && angle < this.left);
 		}
 		return angle >= this.left && angle <= this.right;
+		*/
 	};
 
 	this.size = function() {
@@ -538,6 +542,7 @@ function Range(left, right) {
 	};
 
 	this.normalize = function() {
+		this.left = Util.mod(this.left, 360);
 		this.right = Util.mod(this.right, 360);
 	};
 
@@ -548,13 +553,17 @@ function Range(left, right) {
 			this.denormalize();
 			range.denormalize();
 
+			if (range.right < this.left) {
+				range.left += 360;
+				range.right += 360;
+			}
+
 			this.left = Math.min(this.left, range.left);
 			this.right = Math.max(this.right, range.right);
 
 			if (this.right - this.left > 359) {
 				this.right = this.left - 1;
 			}
-
 			this.normalize();
 			range.normalize();
 
@@ -1252,7 +1261,7 @@ function AposBot() {
 
 		if (this.angleInRanges(shiftedAngle.angle, ranges)) {
 			console.log('not shifting');
-//			return false;
+			//			return false;
 		}
 
 		var color = Constants.orange;
