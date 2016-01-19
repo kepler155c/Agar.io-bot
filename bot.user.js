@@ -1264,7 +1264,7 @@ function AposBot() {
 
 		if (this.angleInRanges(shiftedAngle.angle, ranges)) {
 			console.log('not shifting');
-			console.log([angle, shiftedAngle.angle]);
+			console.log([ angle, shiftedAngle.angle ]);
 			return false;
 		}
 
@@ -2000,7 +2000,12 @@ function AposBot() {
 		if (ranges) {
 
 			this.drawRanges(player, ranges);
-			if (!this.determineFoodDestination(player, destination, ranges)) {
+			if (ranges.length === 0) {
+				var midPoint = ranges[0].getInverseMidpoint();
+				destination.point = this.followAngle(midPoint, player.x, player.y, verticalDistance());
+				drawLine(player.x, player.y, destination.point.x, destination.point.y, Constants.red);
+
+			} else if (!this.determineFoodDestination(player, destination, ranges)) {
 				console.log('no food');
 				if (ranges.length > 0) {
 
