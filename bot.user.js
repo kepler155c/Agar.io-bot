@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1651
+// @version     3.1652
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1651;
+var aposBotVersion = 3.1652;
 
 var Constants = {
 
@@ -1252,11 +1252,7 @@ function AposBot() {
 
 		if (this.angleInRanges(shiftedAngle.angle, ranges)) {
 			console.log('not shifting');
-			destination.point = {
-				x : cluster.x,
-				y : cluster.y
-			};
-			return false;
+//			return false;
 		}
 
 		var color = Constants.orange;
