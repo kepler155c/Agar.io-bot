@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1646
+// @version     3.1647
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1646;
+var aposBotVersion = 3.1647;
 
 var Constants = {
 
@@ -1699,7 +1699,7 @@ function AposBot() {
 
 		function angleDiff(angle1, angle2) {
 
-			var diff = Util.mod(angle - range.right, 360);
+			var diff = Util.mod(angle - angle2, 360);
 			if (diff > 180) {
 				diff = 360 - diff;
 			}
@@ -2005,6 +2005,7 @@ function AposBot() {
 			ranges = this.avoidThreats(player, destination);
 			if (ranges === null) {
 				console.log('could not determine destination');
+				console.log(player.allObstacles);
 			}
 		}
 
