@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1643
+// @version     3.1644
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1643;
+var aposBotVersion = 3.1644;
 
 var Constants = {
 
@@ -552,7 +552,7 @@ function Range(left, right) {
 			this.right = Math.max(this.right, range.right);
 
 			if (Math.abs(this.left) + this.right > 359) {
-				this.right = Util.mod(this.left + 1, 360);
+				this.right = Util.mod(this.left - 1, 360);
 			}
 			this.normalize();
 			range.normalize();
@@ -2014,20 +2014,19 @@ function AposBot() {
 		if (ranges) {
 
 			this.drawRanges(player, ranges);
-			if (ranges.length > 1) {
-				console.log(ranges);
-			}
 			if (!this.determineFoodDestination(player, destination, ranges)) {
 				console.log('no food');
-				if (ranges.length > 0) {
-					console.log(ranges);
-				}
 				if (ranges.length > 0) {
 
 					// should get the range with the largest size
 					var midPoint = ranges[0].getInverseMidpoint();
 					destination.point = this.followAngle(midPoint, player.x, player.y, verticalDistance());
 					console.log('setting range manually to ' + midPoint);
+					if (ranges.length > 0) {
+						console.log('ranges');
+						console.log(ranges);
+					}
+					console.log('obstacles');
 					console.log(player.allObstacles);
 
 					drawLine(player.x, player.y, destination.point.x, destination.point.y, Constants.red);
