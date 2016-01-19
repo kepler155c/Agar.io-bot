@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1647
+// @version     3.1648
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1647;
+var aposBotVersion = 3.1648;
 
 var Constants = {
 
@@ -2002,6 +2002,7 @@ function AposBot() {
 			});
 
 			console.log('trying again to determine destination');
+			console.log(player.allObstacles);
 			ranges = this.avoidThreats(player, destination);
 			if (ranges === null) {
 				console.log('could not determine destination');
