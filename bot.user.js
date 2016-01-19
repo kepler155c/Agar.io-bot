@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1648
+// @version     3.1649
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1648;
+var aposBotVersion = 3.1649;
 
 var Constants = {
 
@@ -1772,6 +1772,11 @@ function AposBot() {
 
 				var range = this.getSafeRange(cell, threat.t, threat.dangerZone);
 				range.classification = Classification.threat;
+				range.distance = threat.dangerZone;
+				range.deathDistance = threat.size - (cell.size * 0.4);
+				range.cell = cell;
+				range.entity = threat.t;
+				// Eating range = radius of eating cell + 40% of the radius of the cell being eaten
 
 				cell.obstacles.push(range);
 				player.allObstacles.push(range);
@@ -1802,8 +1807,10 @@ function AposBot() {
 
 					var range = this.getSafeRange(cell, virus, distance);
 					range.classification = Classification.virus;
-
-					drawCircle(virus.x, virus.y, virus.size + 20, Constants.red);
+					range.distance = distance;
+					range.deathDistance = cell.size - virus.size;
+					range.cell = cell;
+					range.entity = virus;
 
 					cell.obstacles.push(range);
 					player.allObstacles.push(range);
@@ -1811,54 +1818,6 @@ function AposBot() {
 				//}
 			}
 		}, this);
-	};
-
-	this.computeDestinationAngle = function(player, destination) {
-
-		var finalAngle = 0;
-		var angles = [];
-
-		for (var i = 0; i < player.cells.length; i++) {
-			var cell = player.cells[i];
-
-			var cellAngle = 0;
-			var cellAngles = [];
-
-			for (var j = 0; j < cell.threats.length; j++) {
-				var threat = cell.threats[j];
-
-				if (threat.distance < threat.dangerZone) {
-
-					cellAngle += this.radiansToDegrees(threat.angle);
-					cellAngles.push(threat.angle);
-				}
-			}
-			if (cellAngles.length > 0) {
-
-				cellAngle /= cellAngles.length;
-				finalAngle += cellAngle;
-				angles.push(cellAngle);
-			}
-		}
-
-		if (angles.length > 0) {
-
-			finalAngle /= angles.length;
-		}
-
-		finalAngle = this.avoidViruses(player, {
-			angle : finalAngle,
-			shifted : false
-		});
-
-		if (finalAngle !== 0) {
-			var angle = this.degreesToRadians(finalAngle);
-			destination.point.x = player.x - Math.cos(angle) * 1000;
-			destination.point.y = player.y - Math.sin(angle) * 1000;
-			this.drawAngledLine(player.x, player.y, finalAngle, 500, Constants.green);
-		} else {
-			console.log('no final angle');
-		}
 	};
 
 	this.drawAngledLine = function(x, y, degrees, distance, color) {
@@ -1871,7 +1830,7 @@ function AposBot() {
 	 * The bot works by removing angles in which it is too
 	 * dangerous to travel towards to.
 	 */
-	this.avoidThreats = function(player, destination) {
+	this.avoidThreats = function(player, destination, shrinkage) {
 
 		var i;
 
@@ -1884,7 +1843,16 @@ function AposBot() {
 
 		for (i = 0; i < player.allObstacles.length; i++) {
 
-			this.addRange(ranges, player.allObstacles[i]);
+			var range = player.allObstacles[i];
+
+			if (shrinkage > 1) {
+				range.distance -= (range.distance - range.deathDistance) / 2;
+				var shrunkRange = this.getSafeRange(range.cell, range.entity, range.distance);
+				range.left = shrunkRange.left;
+				range.right = shrunkRange.right;
+			}
+
+			this.addRange(ranges, range);
 		}
 
 		if (ranges.length == 1) {
@@ -1900,7 +1868,7 @@ function AposBot() {
 		return ranges;
 	};
 
-	this.determineBestDestination = function(player, destination, tempPoint) {
+	this.determineBestDestination = function(player, destination) {
 
 		var i, j;
 		var panicLevel = 0;
@@ -2003,10 +1971,16 @@ function AposBot() {
 
 			console.log('trying again to determine destination');
 			console.log(player.allObstacles);
-			ranges = this.avoidThreats(player, destination);
-			if (ranges === null) {
-				console.log('could not determine destination');
-				console.log(player.allObstacles);
+			for (i = 1; i < 10; i++) {
+
+				ranges = this.avoidThreats(player, destination, i);
+				if (ranges === null) {
+					console.log('could not determine destination: ' + i);
+					console.log(player.allObstacles);
+				} else {
+					break;
+				}
+
 			}
 		}
 
@@ -2105,10 +2079,6 @@ function AposBot() {
 		this.teams = [];
 		this.entities = getMemoryCells();
 
-		var useMouseX = screenToGameX(getMouseX());
-		var useMouseY = screenToGameY(getMouseY());
-		var tempPoint = [ useMouseX, useMouseY, 1 ];
-
 		//The current destination that the cells were going towards.
 
 		drawLine(getX() - (1920 / 2) / getZoomlessRatio(), getY() - (1080 / 2) / getZoomlessRatio(), getX()
@@ -2150,7 +2120,7 @@ function AposBot() {
 			player.checkIfMerging();
 			// this.calculateVirusMass(player);
 
-			this.determineBestDestination(player, destination, tempPoint);
+			this.determineBestDestination(player, destination);
 		}
 
 		if (player.safeToSplit) {
@@ -2234,9 +2204,6 @@ function AposBot() {
 				drawCircle(team.x, team.y, team.size, Constants.cyan);
 			}, this);
 		}
-
-		// cursor
-		// drawPoint(tempPoint[0], tempPoint[1], tempPoint[2], "");
 
 		return destination;
 	};
