@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1649
+// @version     3.1650
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1649;
+var aposBotVersion = 3.1650;
 
 var Constants = {
 
@@ -1653,7 +1653,7 @@ function AposBot() {
 
 		if (dd < radius) {
 			inverted = true;
-			dd = radius + (radius - dd) / Math.PI;
+			dd = radius + (radius - dd); // / Math.PI;
 		}
 
 		var a = Math.asin(radius / dd);
