@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1642
+// @version     3.1643
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1642;
+var aposBotVersion = 3.1643;
 
 var Constants = {
 
@@ -531,20 +531,39 @@ function Range(left, right) {
 		return range.angleWithin(this.left) || range.angleWithin(this.right);
 	};
 
+	this.denormalize = function() {
+		if (this.left > this.right) {
+			this.left -= 360;
+		}
+	};
+
+	this.normalize = function() {
+		this.left = Util.mod(this.left, 360);
+	};
+
 	this.combine = function(range) {
 
 		if (this.overlaps(range)) {
 
+			this.denormalize();
+			range.denormalize();
+
 			this.left = Math.min(this.left, range.left);
 			this.right = Math.max(this.right, range.right);
+
+			if (Math.abs(this.left) + this.right > 359) {
+				this.right = Util.mod(this.left + 1, 360);
+			}
+			this.normalize();
+			range.normalize();
 
 			return true;
 		}
 		return false;
 	};
-	
+
 	this.getInverseMidpoint = function() {
-		
+
 		var diff = (360 - this.size()) / 2;
 		return Util.mod(this.right + diff, 360);
 	};
@@ -1288,7 +1307,7 @@ function AposBot() {
 		for (var i = 0; i < keys.length; i++) {
 			var entity = this.entities[keys[i]];
 			var distance = target.distance;
-			
+
 			if (entity.classification == Classification.virus) {
 				distance = 750;
 			}
@@ -1679,10 +1698,10 @@ function AposBot() {
 		};
 
 		function angleDiff(angle1, angle2) {
-			
+
 			var diff = Util.mod(angle - range.right, 360);
 			if (diff > 180) {
-				diff = 360-diff;
+				diff = 360 - diff;
 			}
 			return diff;
 		}
@@ -2007,11 +2026,10 @@ function AposBot() {
 
 					// should get the range with the largest size
 					var midPoint = ranges[0].getInverseMidpoint();
-					destination.point = this.followAngle(midPoint, player.x, player.y,
-							verticalDistance());
+					destination.point = this.followAngle(midPoint, player.x, player.y, verticalDistance());
 					console.log('setting range manually to ' + midPoint);
 					console.log(player.allObstacles);
-					
+
 					drawLine(player.x, player.y, destination.point.x, destination.point.y, Constants.red);
 				}
 			}
