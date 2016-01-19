@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1653
+// @version     3.1654
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1653;
+var aposBotVersion = 3.1654;
 
 var Constants = {
 
@@ -1662,7 +1662,7 @@ function AposBot() {
 
 		if (dd < radius) {
 			inverted = true;
-			dd = radius + (radius - dd); // / Math.PI;
+			dd = radius + (radius - dd) / Math.PI;
 		}
 
 		var a = Math.asin(radius / dd);
@@ -2268,12 +2268,6 @@ function AposBot() {
 		return debugStrings;
 	};
 
-	this.isMerging = function(cell1, cell2) {
-		var dist = Util.computeDistance(cell1.x, cell1.y, cell2.x, cell2.y, cell1.size, cell2.size);
-
-		return dist <= -5; // was -50
-	};
-
 	// Get a distance that is Inexpensive on the cpu for various purpaces
 	this.computeInexpensiveDistance = function(x1, y1, x2, y2) {
 
@@ -2352,10 +2346,6 @@ function AposBot() {
 			return (eater.mass / 2) / eatee.mass > ratio;
 		}
 		return false;
-	};
-
-	this.getTimeToRemerge = function(mass) {
-		return ((mass * 0.02) + 30);
 	};
 
 	this.slope = function(x1, y1, x2, y2) {
