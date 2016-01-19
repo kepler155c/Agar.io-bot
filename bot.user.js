@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1655
+// @version     3.1656
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1655;
+var aposBotVersion = 3.1656;
 
 var Constants = {
 
@@ -1997,11 +1997,12 @@ function AposBot() {
 		destination.point.x = player.x;
 		destination.point.y = player.y;
 
+		var midPoint;
 		if (ranges) {
 
 			this.drawRanges(player, ranges);
-			if (ranges.length === 0) {
-				var midPoint = ranges[0].getInverseMidpoint();
+			if (ranges.length > 0) {
+				midPoint = ranges[0].getInverseMidpoint();
 				destination.point = this.followAngle(midPoint, player.x, player.y, verticalDistance());
 				drawLine(player.x, player.y, destination.point.x, destination.point.y, Constants.red);
 
@@ -2010,7 +2011,7 @@ function AposBot() {
 				if (ranges.length > 0) {
 
 					// should get the range with the largest size
-					var midPoint = ranges[0].getInverseMidpoint();
+					midPoint = ranges[0].getInverseMidpoint();
 					destination.point = this.followAngle(midPoint, player.x, player.y, verticalDistance());
 					console.log('setting range manually to ' + midPoint);
 					if (ranges.length > 0) {
