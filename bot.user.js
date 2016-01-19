@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1650
+// @version     3.1651
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1650;
+var aposBotVersion = 3.1651;
 
 var Constants = {
 
@@ -533,12 +533,12 @@ function Range(left, right) {
 
 	this.denormalize = function() {
 		if (this.left > this.right) {
-			this.left -= 360;
+			this.right += 360;
 		}
 	};
 
 	this.normalize = function() {
-		this.left = Util.mod(this.left, 360);
+		this.right = Util.mod(this.right, 360);
 	};
 
 	this.combine = function(range) {
@@ -551,9 +551,10 @@ function Range(left, right) {
 			this.left = Math.min(this.left, range.left);
 			this.right = Math.max(this.right, range.right);
 
-			if (this.left < 0 && Math.abs(this.left) + this.right > 359) {
-				this.right = Util.mod(this.left - 1, 360);
+			if (this.right - this.left > 359) {
+				this.right = this.left - 1;
 			}
+
 			this.normalize();
 			range.normalize();
 
