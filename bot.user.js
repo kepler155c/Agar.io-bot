@@ -556,6 +556,9 @@ function Range(left, right) {
 			if (range.right < this.left) {
 				range.left += 360;
 				range.right += 360;
+			} else if (this.right < range.left) {
+				this.left += 360;
+				this.right += 360;
 			}
 
 			this.left = Math.min(this.left, range.left);
