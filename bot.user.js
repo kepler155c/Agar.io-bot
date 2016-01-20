@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1703
+// @version     3.1704
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1703;
+var aposBotVersion = 3.1704;
 
 var Constants = {
 
@@ -310,6 +310,11 @@ Player.prototype = {
 			if (cell != info.cell) {
 				nextLargestCell = cell;
 			}
+		}
+		
+		if (nextLargestCell.size < 50) {
+			this.action = null;
+			return false;
 		}
 
 		// point to largest cell - mouse pos half radius distance on largest cell towards next largest
