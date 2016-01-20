@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1683
+// @version     3.1684
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1683;
+var aposBotVersion = 3.1684;
 
 var Constants = {
 
@@ -286,7 +286,7 @@ Player.prototype = {
 
 		// point to largest cell - mouse pos half radius distance on largest cell towards center
 
-		var angle = largestCell.getAngle(this.x, this.y);
+		var angle = this.getAngle(largestCell);
 		var point = Util.pointFromAngle(largestCell.x, largestCell.y, angle, largestCell.size / 2);
 
 		for (i = 0; i < this.cells.length; i++) {
@@ -1919,7 +1919,7 @@ function AposBot() {
 			}
 		}
 
-		ranges.push(new Range(range.left, range.right));
+		ranges.push(range);
 		return true; // range added
 	};
 
@@ -1946,6 +1946,8 @@ function AposBot() {
 				this.addRange(ranges, range);
 			}
 		}, this);
+
+		this.addWall(player, ranges);
 
 		if (ranges.length == 1) {
 			if (Util.mod(ranges[0].left - ranges[0].right) <= 1) { // wrong - this should use size
@@ -2487,60 +2489,23 @@ function AposBot() {
 		}
 	};
 
-	this.addWall = function(listToUse, blob) {
+	this.addWall = function(player, ranges) {
 
-		var lineLeft, lineRight;
-		//var mapSizeX = Math.abs(f.getMapStartX - f.getMapEndX);
-		//var mapSizeY = Math.abs(f.getMapStartY - f.getMapEndY);
-		//var distanceFromWallX = mapSizeX/3;
-		//var distanceFromWallY = mapSizeY/3;
-		var distanceFromWallY = blob.size + 50; // originally 2000
-		var distanceFromWallX = blob.size + 50; // originally 2000
-		if (blob.x < getMapStartX() + distanceFromWallX) {
-			//LEFT
-			//console.log("Left");
-			listToUse.push([ [ 115, true ], [ 245, false ],
-					this.computeInexpensiveDistance(getMapStartX(), blob.y, blob.x, blob.y) ]);
-			lineLeft = this.followAngle(115, blob.x, blob.y, 190 + blob.size);
-			lineRight = this.followAngle(245, blob.x, blob.y, 190 + blob.size);
-			drawLine(blob.x, blob.y, lineLeft.x, lineLeft.y, Constants.gray);
-			drawLine(blob.x, blob.y, lineRight.x, lineRight.y, Constants.gray);
-			drawArc(lineLeft.x, lineLeft.y, lineRight.x, lineRight.y, blob.x, blob.y, Constants.pink);
+		var distanceFromWallY = player.size / 2;
+		var distanceFromWallX = player.size / 2;
+
+		if (player.x < getMapStartX() + distanceFromWallX) { // LEFT
+			this.addRange(ranges, new Range(90, 270));
 		}
-		if (blob.y < getMapStartY() + distanceFromWallY) {
-			//TOP
-			//console.log("TOP");
-			listToUse.push([ [ 205, true ], [ 335, false ],
-					this.computeInexpensiveDistance(blob.x, getMapStartY(), blob.x, blob.y) ]);
-			lineLeft = this.followAngle(205, blob.x, blob.y, 190 + blob.size);
-			lineRight = this.followAngle(335, blob.x, blob.y, 190 + blob.size);
-			drawLine(blob.x, blob.y, lineLeft.x, lineLeft.y, Constants.gray);
-			drawLine(blob.x, blob.y, lineRight.x, lineRight.y, Constants.gray);
-			drawArc(lineLeft.x, lineLeft[1], lineRight.x, lineRight.y, blob.x, blob.y, Constants.pink);
+		if (player.y < getMapStartY() + distanceFromWallY) { // TOP
+			this.addRange(ranges, new Range(180, 359));
 		}
-		if (blob.x > getMapEndX() - distanceFromWallX) {
-			//RIGHT
-			//console.log("RIGHT");
-			listToUse.push([ [ 295, true ], [ 65, false ],
-					this.computeInexpensiveDistance(getMapEndX(), blob.y, blob.x, blob.y) ]);
-			lineLeft = this.followAngle(295, blob.x, blob.y, 190 + blob.size);
-			lineRight = this.followAngle(65, blob.x, blob.y, 190 + blob.size);
-			drawLine(blob.x, blob.y, lineLeft.x, lineLeft.y, Constants.gray);
-			drawLine(blob.x, blob.y, lineRight.x, lineRight.y, Constants.gray);
-			drawArc(lineLeft.x, lineLeft.y, lineRight.x, lineRight.y, blob.x, blob.y, Constants.pink);
+		if (player.x > getMapEndX() - distanceFromWallX) { // RIGHT
+			this.addRange(ranges, new Range(270, 90));
 		}
-		if (blob.y > getMapEndY() - distanceFromWallY) {
-			//BOTTOM
-			//console.log("BOTTOM");
-			listToUse.push([ [ 25, true ], [ 155, false ],
-					this.computeInexpensiveDistance(blob.x, getMapEndY(), blob.x, blob.y) ]);
-			lineLeft = this.followAngle(25, blob.x, blob.y, 190 + blob.size);
-			lineRight = this.followAngle(155, blob.x, blob.y, 190 + blob.size);
-			drawLine(blob.x, blob.y, lineLeft.x, lineLeft.y, Constants.gray);
-			drawLine(blob.x, blob.y, lineRight.x, lineRight.y, Constants.gray);
-			drawArc(lineLeft.x, lineLeft.y, lineRight.x, lineRight.y, blob.x, blob.y, Constants.pink);
+		if (player.y > getMapEndY() - distanceFromWallY) { // BOTTOM
+			this.addRange(ranges, new Range(0, 180));
 		}
-		return listToUse;
 	};
 
 	this.inSplitRange = function(cluster) {
