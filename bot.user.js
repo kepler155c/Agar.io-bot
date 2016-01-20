@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1692
+// @version     3.1693
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1692;
+var aposBotVersion = 3.1693;
 
 var Constants = {
 
@@ -268,6 +268,7 @@ Player.prototype = {
 		var i, cell;
 
 		function myNearestCell(player, testCell) {
+			/*
 			var distance = null;
 
 			for (var j = 0; j < player.cells.length; j++) {
@@ -284,6 +285,8 @@ Player.prototype = {
 				}
 			}
 			return distance;
+			*/
+			return 0;
 		}
 
 		var nope = false;
@@ -304,7 +307,7 @@ Player.prototype = {
 			}
 		}
 
-		if (canShootCount < 2 || nope) {
+		if (canShootCount < 2 || nope || this.size + 20 > largestCell.size + nextLargestCell.size) {
 			return false;
 		}
 
