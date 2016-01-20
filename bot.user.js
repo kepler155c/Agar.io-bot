@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1686
+// @version     3.1687
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1686;
+var aposBotVersion = 3.1687;
 
 var Constants = {
 
@@ -274,7 +274,7 @@ Player.prototype = {
 				var distance = Util.computeDistance(cell.x, cell.y, largestCell.x, largestCell.y) - cell.size
 						- largestCell.size;
 
-				if (distance < 200) {
+				if (distance < 50) {
 					canShootCount++;
 				}
 			}
