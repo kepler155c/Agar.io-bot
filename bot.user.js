@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1690
+// @version     3.1691
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1690;
+var aposBotVersion = 3.1691;
 
 var Constants = {
 
@@ -267,22 +267,44 @@ Player.prototype = {
 		var canShootCount = 0;
 		var i, cell;
 
+		function myNearestCell(player, testCell) {
+			var distance = null;
+
+			for (var i = 0; i < player.cells.length; i++) {
+				var cell = player.cells[i];
+
+				if (cell != testCell) {
+
+					var testDistance = Util.computeDistance(cell.x, cell.y, testCell.x, testCell.y) - cell.size
+							- testCell.size;
+
+					if (!distance || testDistance < distance) {
+						distance = testDistance;
+					}
+				}
+			}
+			return distance;
+		}
+
+		var nope = false;
 		for (i = 0; i < this.cells.length; i++) {
 			cell = this.cells[i];
 
-			if (cell != largestCell && cell.mass > 32 + 19) {
+			if (cell != largestCell && cell.mass > 34) {
 
-				var distance = Util.computeDistance(cell.x, cell.y, largestCell.x, largestCell.y) - cell.size
-						- largestCell.size;
+				var distance = myNearestCell(this, cell);
 
-				if (distance < 20) {
+				if (distance > 20) {
+					drawCircle(cell.x, cell.y, cell.size + 10, Constants.red);
+					nope = true;
+				} else {
 					canShootCount++;
 					drawCircle(cell.x, cell.y, cell.size + 10, Constants.green);
 				}
 			}
 		}
 
-		if (canShootCount < 2) {
+		if (canShootCount < 2 || nope) {
 			return false;
 		}
 
@@ -369,6 +391,7 @@ Player.prototype = {
 				console.log("splitting for: " + cluster.cell.isRemoved + cluster.cell.interceptVelocity);
 				console.log([ cluster.cell.distance, cluster.cell.size, cluster.cell.closestCell.size ]);
 				console.log(cluster.cell);
+				console.log(this.splitInfo);
 			}
 		}
 	},
@@ -377,6 +400,9 @@ Player.prototype = {
 		if (Math.floor(this.size) <= this.splitInfo.size && (Date.now() - this.splitInfo.timer > 100)
 				&& this.cells[0].size < this.splitInfo.initialSize || (Date.now() - this.splitInfo.timer > 1000)) {
 
+			console.log('done splitting');
+			console.log(this.splitInfo);
+			console.log([ Date.now() - this.splitInfo.timer, this.size, this.cells[0].size ]);
 			// player size grows as long as we are splitting
 			this.action = null;
 		} else {
