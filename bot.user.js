@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1661
+// @version     3.1662
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1661;
+var aposBotVersion = 3.1662;
 
 var Constants = {
 
@@ -524,7 +524,7 @@ function Range(left, right) {
 			return (360 - this.left) + this.right + 1;
 		}
 
-		return this.right - this.left;
+		return this.right - this.left + 1;
 	};
 
 	this.overlaps = function(range) {
