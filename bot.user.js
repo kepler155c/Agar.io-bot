@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1689
+// @version     3.1690
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1689;
+var aposBotVersion = 3.1690;
 
 var Constants = {
 
@@ -275,8 +275,9 @@ Player.prototype = {
 				var distance = Util.computeDistance(cell.x, cell.y, largestCell.x, largestCell.y) - cell.size
 						- largestCell.size;
 
-				if (distance < 50) {
+				if (distance < 20) {
 					canShootCount++;
+					drawCircle(cell.x, cell.y, cell.size + 10, Constants.green);
 				}
 			}
 		}
@@ -382,6 +383,7 @@ Player.prototype = {
 			this.splitInfo.size = Math.floor(this.size);
 
 			drawCircle(this.splitInfo.location.x, this.splitInfo.location.y, 50, Constants.green);
+			drawCircle(this.x, this.y, this.size + 60, Constants.red);
 			if (this.splitInfo.target) {
 				destination.point.x = this.splitInfo.target.x;
 				destination.point.y = this.splitInfo.target.y;
