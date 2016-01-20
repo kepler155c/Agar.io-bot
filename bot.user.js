@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1700
+// @version     3.1701
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1700;
+var aposBotVersion = 3.1701;
 
 var Constants = {
 
@@ -129,7 +129,7 @@ var Player = function() {
 	this.lastPoint = null;
 
 	this.lureTimer = Date.now();
-	this.lastShotTime = Date.now();
+	this.lastShotTime = Date.now() - 200;
 };
 
 Player.prototype = {
@@ -298,9 +298,7 @@ Player.prototype = {
 			if (canShootCount < 2) {
 				return false;
 			}
-		}
 
-		if (Date.now() - this.lastShotTime > 100) {
 			destination.shoot = true;
 			this.lastShotTime = Date.now();
 		}
