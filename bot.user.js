@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1668
+// @version     3.1669
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1668;
+var aposBotVersion = 3.1669;
 
 var Constants = {
 
@@ -1118,9 +1118,8 @@ function AposBot() {
 		for (i = 1; i < player.foodClusters.length; i++) {
 			cluster = player.foodClusters[i];
 
-			if (this.isFoodValid(player, cluster, range)) {
 			if (!bestCluster || cluster.clusterWeight < bestCluster.clusterWeight) {
-
+				if (this.isFoodValid(player, cluster, range)) {
 					bestCluster = cluster;
 				}
 			}
@@ -1131,12 +1130,11 @@ function AposBot() {
 	this.isFoodValid = function(player, cluster, range) {
 
 		if (range) {
+			// why is this reversed ?
 			var angle = Util.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
 			if (!range.angleWithin(angle)) {
-				drawCircle(cluster.x, cluster.y, cluster.size + 25, Constants.red);
 				return false;
 			}
-			drawCircle(cluster.x, cluster.y, cluster.size + 25, Constants.green);
 		}
 
 		if (this.foodInVirus(cluster)) {
@@ -1268,7 +1266,7 @@ function AposBot() {
 			range.left = Util.mod(range.left + size);
 			range.right = Util.mod(range.right - size);
 
-			this.drawRange(player.x, player.y, player.size + 800, range, 0, Constants.green);
+			this.drawRange(player.x, player.y, player.size + 100, range, 0, Constants.green);
 		}
 
 		var doSplit = false; // (player.largestCell.mass >= 36 && player.mass <= 50 && player.cells.length == 1 && player.safeToSplit);
@@ -1348,11 +1346,10 @@ function AposBot() {
 			player.split(cluster, cluster.x, cluster.y, destination);
 		}
 
-		drawLine(player.x, player.y, destination.point.x, destination.point.y,
-				Constants.green);
+		drawLine(player.x, player.y, destination.point.x, destination.point.y, Constants.green);
 		//drawLine(cluster.closestCell.x, cluster.closestCell.y, destination.point.x, destination.point.y,
 		//		Constants.green);
-		
+
 		if (shiftedAngle.shifted) {
 
 			drawLine(cluster.closestCell.x, cluster.closestCell.y, cluster.x, cluster.y, Constants.orange);
@@ -1717,7 +1714,7 @@ function AposBot() {
 
 		if (dd < radius) {
 			inverted = true;
-			dd = radius + (radius - dd) / Math.PI;
+			dd = radius + (radius - dd);
 		}
 
 		var a = Math.asin(radius / dd);
@@ -2060,7 +2057,7 @@ function AposBot() {
 
 		var midPoint;
 		if (ranges) {
-			
+
 			if (ranges.length > 1) {
 				console.log("multiple ranges");
 				console.log(ranges);
