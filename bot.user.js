@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1657
+// @version     3.1658
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1657;
+var aposBotVersion = 3.1658;
 
 var Constants = {
 
@@ -1829,7 +1829,11 @@ function AposBot() {
 
 			if (threat.distance < threat.dangerZone) {
 
-				var range = this.getSafeRange(cell, threat.t, threat.dangerZone);
+				var angle = cell.getAngle(threat);
+
+				var range = new Range(Util.mod(angle - 90), Util.mod(angle + 90));
+
+				//var range = this.getSafeRange(cell, threat.t, threat.dangerZone);
 				range.classification = Classification.threat;
 				range.distance = threat.dangerZone;
 				range.preferredDistance = threat.preferredDistance;
@@ -2055,12 +2059,7 @@ function AposBot() {
 		if (ranges) {
 
 			this.drawRanges(player, ranges);
-			if (ranges.length > 0) {
-				midPoint = ranges[0].getInverseMidpoint();
-				destination.point = this.followAngle(midPoint, player.x, player.y, verticalDistance());
-				drawLine(player.x, player.y, destination.point.x, destination.point.y, Constants.red);
-
-			} else if (!this.determineFoodDestination(player, destination, ranges)) {
+			if (!this.determineFoodDestination(player, destination, ranges)) {
 				console.log('no food');
 				if (ranges.length > 0) {
 
