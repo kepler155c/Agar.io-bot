@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1687
+// @version     3.1688
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1687;
+var aposBotVersion = 3.1688;
 
 var Constants = {
 
@@ -262,6 +262,7 @@ Player.prototype = {
 		});
 
 		var largestCell = clone[0];
+		var nextLargestCell = clone[1];
 
 		var canShootCount = 0;
 		var i, cell;
@@ -274,20 +275,22 @@ Player.prototype = {
 				var distance = Util.computeDistance(cell.x, cell.y, largestCell.x, largestCell.y) - cell.size
 						- largestCell.size;
 
-				if (distance < 50) {
+				if (distance < 25) {
 					canShootCount++;
+				} else {
+					return false;
 				}
 			}
 		}
 
-		if (canShootCount < 1) {
+		if (canShootCount < 2) {
 			return false;
 		}
 
-		// point to largest cell - mouse pos half radius distance on largest cell towards center
+		// point to largest cell - mouse pos half radius distance on largest cell towards next largest
 
-		var angle = Util.getAngle(this.x, this.y, largestCell.x, largestCell.y);
-		var point = Util.pointFromAngle(largestCell.x, largestCell.y, angle, largestCell.size / 2);
+		var angle = Util.getAngle(nextLargestCell.x, nextLargestCell.y, largestCell.x, largestCell.y);
+		var point = Util.pointFromAngle(largestCell.x, largestCell.y, angle, largestCell.size / 4);
 
 		for (i = 0; i < this.cells.length; i++) {
 			cell = this.cells[i];
