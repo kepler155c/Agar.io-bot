@@ -1919,7 +1919,7 @@ function AposBot() {
 
 		Object.keys(this.entities).filter(this.entities.threatAndVirusFilter, this.entities).forEach(function(key) {
 
-			entity = this.entities[key];
+			var entity = this.entities[key];
 
 			this.calculateThreatWeight(player, entity);
 
