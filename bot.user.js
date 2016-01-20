@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1676
+// @version     3.1677
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1676;
+var aposBotVersion = 3.1677;
 
 var Constants = {
 
@@ -672,10 +672,11 @@ function initializeEntity() {
 
 		var a = this.getLastPos();
 
-		var bAngle = Util.getAngle(a.x, a.y, this.x, this.y);
-		var targetAngle = Util.getAngle(this.x, this.y, target.x, target.y);
+		var range = new Range(Util.getAngle(a.x, a.y, this.x, this.y), Util
+				.getAngle(this.x, this.y, target.x, target.y));
 
-		return Math.abs(bAngle - targetAngle) < 30;
+		// hmm - 360 - 5 ??
+		return range.size() < 30 || range.size() > 330; // within 30 degrees
 	};
 
 	da.prototype.predictPosition = function(timeDiff, previousUpdate) {
@@ -1235,6 +1236,8 @@ function AposBot() {
 			return new Range(ranges[0].right + 1, ranges[0].left - 1);
 		}
 
+		// umm - shouldnt this be sorted first ??		
+
 		var left = ranges[0].right + 1;
 		var goodRanges = [];
 		for (var i = 1; i < ranges.length; i++) {
@@ -1331,7 +1334,6 @@ function AposBot() {
 				}
 			}
 		}
-		this.obstaclesInPath(player, cluster);
 
 		drawCircle(cluster.x, cluster.y, cluster.size + 40, color);
 		drawPoint(cluster.x, cluster.y + 20, Constants.yellow, "m:" + cluster.mass.toFixed(1) + " w:"
@@ -1459,7 +1461,7 @@ function AposBot() {
 	this.calculateThreatWeight = function(player, entity) {
 
 		var threat;
-		
+
 		for (var i = 0; i < player.cells.length; i++) {
 
 			var cell = player.cells[i];
@@ -1702,10 +1704,6 @@ function AposBot() {
 		return angle * 180 / Math.PI + 180;
 	};
 
-	this.degreesToRadiansHuh = function(degrees) {
-		return degrees * Math.PI / 180;
-	};
-
 	this.degreesToRadians = function(degrees) {
 		degrees -= 180;
 		return degrees / (180 / Math.PI);
@@ -1883,14 +1881,15 @@ function AposBot() {
 		player.eachCellThreat(function(cell, threat) {
 
 			if (threat.distance < threat.dangerZone) {
-				// only increment if it is a different threat (not the same threat for 2 different cells)
-				var range = new Range(Util.mod(threat.angle + 90), Util.mod(threat.angle - 90));
+
+				var x = 180 / shrinkage;  // 180 degress initially, then 90, 45, 22.5
+				var range = new Range(Util.mod(threat.angle + x), Util.mod(threat.angle - x));
 				this.addRange(ranges, range);
 			}
 		}, this);
 
 		if (ranges.length == 1) {
-			if (Util.mod(ranges[0].left - ranges[0].right) <= 1) {
+			if (Util.mod(ranges[0].left - ranges[0].right) <= 1) {  // wrong - this should use size
 				console.log('bad range');
 				console.log(ranges[0]);
 				return null;
@@ -1923,7 +1922,6 @@ function AposBot() {
 					player.split(null, 0, 0, destination);
 				}
 			}
-
 		}, this);
 
 		var imminentThreatCount = 0;
@@ -2008,7 +2006,6 @@ function AposBot() {
 		destination.point.x = player.x;
 		destination.point.y = player.y;
 
-		var midPoint;
 		if (ranges) {
 
 			if (ranges.length > 1) {
@@ -2022,7 +2019,7 @@ function AposBot() {
 				if (ranges.length > 0) {
 
 					// should get the range with the largest size
-					midPoint = ranges[0].getInverseMidpoint();
+					var midPoint = ranges[0].getInverseMidpoint();
 					destination.point = this.followAngle(midPoint, player.x, player.y, verticalDistance());
 					console.log('setting range manually to ' + midPoint);
 					if (ranges.length > 0) {
@@ -2194,34 +2191,33 @@ function AposBot() {
 
 		if (!isHumanControlled()) {
 
-			player.eachCellThreat(
-					function(cell, threat) {
+			player.eachCellThreat(function(cell, threat) {
 
-						if (threat.isSplitThreat) {
+				if (threat.isSplitThreat) {
 
-							var tsize = Math.sqrt(threat.mass / 2 * 100);
-							var shadowDistance = Math.min(threat.entity.size + Constants.splitRangeMax, threat.distance);
-							var angle = this.degreesToRadians(threat.angle);
+					var tsize = Math.sqrt(threat.mass / 2 * 100);
+					var shadowDistance = Math.min(threat.entity.size + Constants.splitRangeMax, threat.distance);
+					var angle = this.degreesToRadians(threat.angle);
 
-							var shadowThreat = {
-								x : threat.entity.x - Math.cos(angle) * shadowDistance,
-								y : threat.entity.y - Math.sin(angle) * shadowDistance,
-							};
-							// distance = Util.computeDistance(shadowThreat.x, shadowThreat.y, cell.x, cell.y);
+					var shadowThreat = {
+						x : threat.entity.x - Math.cos(angle) * shadowDistance,
+						y : threat.entity.y - Math.sin(angle) * shadowDistance,
+					};
+					// distance = Util.computeDistance(shadowThreat.x, shadowThreat.y, cell.x, cell.y);
 
-							drawCircle(shadowThreat.x, shadowThreat.y, tsize, Constants.gray);
+					drawCircle(shadowThreat.x, shadowThreat.y, tsize, Constants.gray);
 
-							var shadowLineDistance = Math.min(threat.entity.size - tsize + Constants.splitRangeMax,
-									threat.distance);
-							var shadowThreatLine = {
-								x : threat.entity.x - Math.cos(angle) * shadowLineDistance,
-								y : threat.entity.y - Math.sin(angle) * shadowLineDistance,
-							};
+					var shadowLineDistance = Math.min(threat.entity.size - tsize + Constants.splitRangeMax,
+							threat.distance);
+					var shadowThreatLine = {
+						x : threat.entity.x - Math.cos(angle) * shadowLineDistance,
+						y : threat.entity.y - Math.sin(angle) * shadowLineDistance,
+					};
 
-							drawLine(threat.entity.x, threat.entity.y, shadowThreatLine.x, shadowThreatLine.y,
-									threat.isMovingTowards ? Constants.red : Constants.gray);
-						}
-					}, this);
+					drawLine(threat.entity.x, threat.entity.y, shadowThreatLine.x, shadowThreatLine.y,
+							threat.isMovingTowards ? Constants.red : Constants.gray);
+				}
+			}, this);
 
 			Object.keys(this.teams).forEach(function(key) {
 
