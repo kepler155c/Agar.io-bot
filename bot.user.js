@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1691
+// @version     3.1692
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1691;
+var aposBotVersion = 3.1692;
 
 var Constants = {
 
@@ -270,12 +270,12 @@ Player.prototype = {
 		function myNearestCell(player, testCell) {
 			var distance = null;
 
-			for (var i = 0; i < player.cells.length; i++) {
-				var cell = player.cells[i];
+			for (var j = 0; j < player.cells.length; j++) {
+				var zcell = player.cells[j];
 
-				if (cell != testCell) {
+				if (zcell != testCell) {
 
-					var testDistance = Util.computeDistance(cell.x, cell.y, testCell.x, testCell.y) - cell.size
+					var testDistance = Util.computeDistance(zcell.x, zcell.y, testCell.x, testCell.y) - zcell.size
 							- testCell.size;
 
 					if (!distance || testDistance < distance) {
