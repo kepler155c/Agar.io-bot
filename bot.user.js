@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1701
+// @version     3.1702
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1701;
+var aposBotVersion = 3.1702;
 
 var Constants = {
 
@@ -129,7 +129,6 @@ var Player = function() {
 	this.lastPoint = null;
 
 	this.lureTimer = Date.now();
-	this.lastShotTime = Date.now() - 200;
 };
 
 Player.prototype = {
@@ -250,10 +249,49 @@ Player.prototype = {
 		}
 		return false;
 	},
+	canShootCount : function() {
+
+		var count = 0;
+
+		for (var i = 0; i < this.cells.length; i++) {
+			var cell = this.cells[i];
+
+			if (cell.mass > 34) {
+
+				count++;
+			}
+		}
+		return count;
+	},
+	mergeMass : function() {
+
+		if (this.action === null) {
+
+			if (this.cells.length < 3 || this.size > this.largestCell.size * 2.5 || this.canShootCount() < 3) {
+				return;
+			}
+
+			this.action = this.mergeMassAction;
+			this.mergeMassInfo = {
+				timer : 0,
+				cell : this.largestCell
+			};
+		}
+	},
 	mergeMassAction : function(destination) {
 
-		if (this.cells.length < 3) { // || this.size > this.largestCell.size * 2.5) {
-			return false;
+		var info = this.mergeMassInfo;
+
+		if (Date.now() - info.timer > 100) {
+
+			if (this.canShootCount() < 3) {
+
+				this.action = null;
+				return false;
+			}
+
+			destination.shoot = true;
+			info.timer = Date.now();
 		}
 
 		var clone = this.cells.slice(0);
@@ -262,49 +300,20 @@ Player.prototype = {
 			return b.size - a.size;
 		});
 
-		var nextLargestCell = clone[1];
-		var canShootCount = 0;
-		var i, cell;
+		// could break if largest cell gets eaten during this action
 
-		for (i = 0; i < this.cells.length; i++) {
-			cell = this.cells[i];
+		var nextLargestCell = clone[0];
+		for (var i = 0; i < this.cells.length; i++) {
+			var cell = this.cells[i];
 
-			if (cell != this.largestCell && cell.mass > 34) {
-
-				canShootCount++;
-				drawCircle(cell.x, cell.y, cell.size + 10, Constants.green);
+			if (cell != info.cell) {
+				nextLargestCell = cell;
 			}
 		}
 
 		// point to largest cell - mouse pos half radius distance on largest cell towards next largest
-
-		var angle = Util.getAngle(nextLargestCell.x, nextLargestCell.y, this.largestCell.x, this.largestCell.y);
-		var point = Util.pointFromAngle(this.largestCell.x, this.largestCell.y, angle, this.largestCell.size / 2);
-
-		for (i = 0; i < this.cells.length; i++) {
-			cell = this.cells[i];
-
-			if (cell != this.largestCell) {
-				drawLine(cell.x, cell.y, point.x, point.y, Constants.orange);
-			}
-		}
-
-		if (Date.now() - this.lastShotTime > 100) {
-
-			if (this.size > this.largestCell.size * 2.5) {
-				return false;
-			}
-
-			if (canShootCount < 2) {
-				return false;
-			}
-
-			destination.shoot = true;
-			this.lastShotTime = Date.now();
-		}
-
-		destination.point.x = point.x;
-		destination.point.y = point.y;
+		var angle = Util.getAngle(nextLargestCell.x, nextLargestCell.y, info.cell.x, info.cell.y);
+		destination.point = Util.pointFromAngle(info.cell.x, info.cell.y, angle, info.cell.size / 2);
 
 		return true;
 	},
@@ -2188,12 +2197,9 @@ function AposBot() {
 		this.separateListBasedOnFunction(player);
 		this.setClosestVirus(player);
 		this.displayVirusTargets(player);
+		player.mergeMass();
 
 		if (player.action && player.action(destination, this.entities)) {
-			return destination;
-		}
-
-		if (player.mergeMassAction(destination, this.entities)) {
 			return destination;
 		}
 
