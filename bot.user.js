@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1693
+// @version     3.1694
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1693;
+var aposBotVersion = 3.1694;
 
 var Constants = {
 
@@ -307,7 +307,7 @@ Player.prototype = {
 			}
 		}
 
-		if (canShootCount < 2 || nope || this.size + 20 > largestCell.size + nextLargestCell.size) {
+		if (canShootCount < 2 || nope || this.size < largestCell.size + nextLargestCell.size + 20) {
 			return false;
 		}
 
