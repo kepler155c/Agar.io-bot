@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1699
+// @version     3.1700
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1699;
+var aposBotVersion = 3.1700;
 
 var Constants = {
 
@@ -289,22 +289,25 @@ Player.prototype = {
 			}
 		}
 
-		if (this.size > this.largestCell.size * 2.5) {
-			return false;
-		}
-		
-		if (canShootCount < 2) {
-			return false;
+		if (Date.now() - this.lastShotTime > 100) {
+
+			if (this.size > this.largestCell.size * 2.5) {
+				return false;
+			}
+
+			if (canShootCount < 2) {
+				return false;
+			}
 		}
 
 		if (Date.now() - this.lastShotTime > 100) {
 			destination.shoot = true;
 			this.lastShotTime = Date.now();
 		}
-		
+
 		destination.point.x = point.x;
 		destination.point.y = point.y;
-		
+
 		return true;
 	},
 	closestCell : function(x, y) {
@@ -2503,8 +2506,8 @@ function AposBot() {
 
 	this.addWall = function(player, ranges) {
 
-		var distanceFromWallY = player.size / 2;
-		var distanceFromWallX = player.size / 2;
+		var distanceFromWallY = player.size;
+		var distanceFromWallX = player.size;
 
 		if (player.x < getMapStartX() + distanceFromWallX) { // LEFT
 			this.addRange(ranges, new Range(90, 270));
