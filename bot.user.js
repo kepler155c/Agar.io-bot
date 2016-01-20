@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1669
+// @version     3.1670
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1669;
+var aposBotVersion = 3.1670;
 
 var Constants = {
 
@@ -464,7 +464,7 @@ Player.prototype = {
 			for (var i = 1; i < this.allThreats.length; i++) {
 				var threat = this.allThreats[i];
 
-				if (threat.t != this.allThreats[0].t) {
+				if (threat.entity != this.allThreats[0].entity) {
 
 					if (threat.distance - threat.dangerZone < 250) {
 						threat.dangerZone = threat.distance + 1;
@@ -1456,33 +1456,72 @@ function AposBot() {
 		}
 	};
 
-	this.calculateThreatWeight = function(player, t) {
+	this.calculateThreatWeight = function(player, entity) {
 
+		var threat;
+		
 		for (var i = 0; i < player.cells.length; i++) {
 
 			var cell = player.cells[i];
 
-			if (this.canEat(t, cell, Constants.playerRatio)) {
+			/*
+			if (virus.size + cell.size > virus.distance) {
+				console.log("v: " + ((virus.size + cell.size) - virus.distance));
+			}
+			*/
 
-				var threat = {
-					x : t.x,
-					y : t.y,
-					size : t.size,
-					mass : t.mass,
-					distance : Util.computeDistance(t.x, t.y, cell.x, cell.y),
-					isMovingTowards : t.getMovingTowards(cell),
+			if (entity.classification == Classification.virus) {
+
+				if (entity.distance < 750) {
+
+					var distance = cell.size + entity.size + cell.velocity; // ??? cell.velocity;
+
+					threat = {
+						classification : entity.classification,
+						x : entity.x,
+						y : entity.y,
+						size : entity.size,
+						mass : entity.mass,
+						distance : Util.computeDistance(entity.x, entity.y, cell.x, cell.y),
+						isMovingTowards : false,
+						cell : cell,
+						angle : cell.getAngle(entity),
+						threatLevel : 40,
+						massLoss : 0,
+						teamSize : 1,
+						isSplitThreat : false,
+						entity : entity,
+						deathDistance : cell.size,
+						minDistance : distance,
+						preferredDistance : distance,
+						threatenedDistance : distance,
+					};
+					cell.threats.push(threat);
+					player.allThreats.push(threat);
+				}
+
+			} else if (this.canEat(entity, cell, Constants.playerRatio)) {
+
+				threat = {
+					classification : entity.classification,
+					x : entity.x,
+					y : entity.y,
+					size : entity.size,
+					mass : entity.mass,
+					distance : Util.computeDistance(entity.x, entity.y, cell.x, cell.y),
+					isMovingTowards : entity.getMovingTowards(cell),
 					cell : cell,
-					angle : Math.atan2(t.y - cell.y, t.x - cell.x),
+					angle : cell.getAngle(entity),
 					threatLevel : 40,
 					massLoss : cell.mass,
-					teamSize : t.teamSize,
+					teamSize : entity.teamSize,
 					isSplitThreat : false,
-					t : t
+					entity : entity
 				};
 
-				t.futurePosition();
-				threat.px = t.px;
-				threat.py = t.py;
+				entity.futurePosition();
+				threat.px = entity.px;
+				threat.py = entity.py;
 				/*
 				var futureDistance = Util.computeDistance(t.px, t.py, cell.x, cell.y);
 
@@ -1495,25 +1534,25 @@ function AposBot() {
 
 				// if the threat is moving towards any cell, mark this threat as moving towards us
 				if (threat.isMovingTowards) {
-					t.isMovingTowards = true;
+					entity.isMovingTowards = true;
 				}
 
 				var velocityPadding = cell.velocity; // (t.velocity + cell.velocity);
 
 				if (threat.isMovingTowards) {
-					velocityPadding += t.velocity;
+					velocityPadding += entity.velocity;
 				}
-				threat.intersects = threat.distance < cell.size + t.size + velocityPadding;
+				threat.intersects = threat.distance < cell.size + entity.size + velocityPadding;
 
-				if (this.canSplitKill(t, cell, Constants.enemyRatio)
-						&& t.teamMass / player.mass <= Constants.largeThreatRatio && t.teamSize < 6) {
+				if (this.canSplitKill(entity, cell, Constants.enemyRatio)
+						&& entity.teamMass / player.mass <= Constants.largeThreatRatio && entity.teamSize < 6) {
 
 					// this should really be 2 threats - maybe
 
 					//threat.mass = t.mass / 2;
 					//threat.size = Math.sqrt(threat.mass * 100);
 					threat.isSplitThreat = true;
-					t.isSplitThreat = true;
+					entity.isSplitThreat = true;
 				}
 
 				//threat.deathDistance = Math.min(threat.size - cell.size, threat.size); // how much overlap until we are eaten ??
@@ -1522,7 +1561,7 @@ function AposBot() {
 				var notTouchingDistance = cell.size + threat.size;
 
 				// too big - not a threat
-				if (t.teamMass / player.mass > Constants.largeThreatRatio) {
+				if (entity.teamMass / player.mass > Constants.largeThreatRatio) {
 
 					threat.preferredDistance = notTouchingDistance;
 					threat.threatenedDistance = notTouchingDistance;
@@ -1544,14 +1583,13 @@ function AposBot() {
 				threat.threatenedDistance += velocityPadding;
 
 				if (threat.isMovingTowards) {
-					threat.dangerZone = threat.threatenedDistance;
-				} else {
-					threat.dangerZone = threat.preferredDistance;
+					threat.preferredDistance = threat.threatenedDistance;
 				}
+				threat.dangerZone = threat.preferredDistance;
 
 				// drawPoint(threat.x, threat.y + 20, 2, parseInt(threat.distance, 10) + " " + parseInt(threat.dangerZone, 10));
 				drawPoint(threat.x, threat.y + 20 + threat.size / 15, Constants.yellow, "/***" + "***\\ "
-						+ parseInt(t.mass));
+						+ parseInt(entity.mass));
 
 				cell.threats.push(threat);
 				player.allThreats.push(threat);
@@ -1767,18 +1805,19 @@ function AposBot() {
 			return diff;
 		}
 
-		player.allObstacles.sort(function(a, b) {
+		player.allThreats.sort(function(a, b) {
 			return a.distance - b.distance;
 		});
 
-		for (var i = 0; i < player.allObstacles.length; i++) {
-			var obstacle = player.allObstacles[i];
+		for (var i = 0; i < player.allThreats.length; i++) {
 
-			if (obstacle.entity.distance > distance) {
+			var threat = player.allThreats[i];
+
+			if (threat.distance > distance) {
 				break;
 			}
 
-			var range = this.getSafeRange(obstacle.cell, obstacle.entity, obstacle.preferredDistance);
+			var range = this.getSafeRange(threat.cell, threat.entity, threat.preferredDistance);
 
 			if (range.angleWithin(angle)) {
 
@@ -1823,71 +1862,6 @@ function AposBot() {
 		return true; // range added
 	};
 
-	this.addThreatObstacles = function(player) {
-
-		player.eachCellThreat(function(cell, threat) {
-
-			if (threat.distance < threat.dangerZone) {
-
-				var angle = cell.getAngle(threat);
-
-				var range = new Range(Util.mod(angle + 90), Util.mod(angle - 90));
-
-				//var range = this.getSafeRange(cell, threat.t, threat.dangerZone);
-				range.classification = Classification.threat;
-				range.distance = threat.dangerZone;
-				range.preferredDistance = threat.preferredDistance;
-				range.deathDistance = threat.size - (cell.size * 0.4);
-				range.cell = cell;
-				range.entity = threat.t;
-				// Eating range = radius of eating cell + 40% of the radius of the cell being eaten
-
-				cell.obstacles.push(range);
-				player.allObstacles.push(range);
-			}
-		}, this);
-	};
-
-	this.addVirusObstacles = function(player) {
-
-		Object.keys(this.entities).filter(this.entities.virusFilter, this.entities).forEach(function(key) {
-
-			var virus = this.entities[key];
-
-			for (var j = 0; j < player.cells.length; j++) {
-				var cell = player.cells[j];
-
-				//if ((cell.mass + virus.foodMass) / virus.mass > 1.2 || player.isMerging) {
-
-				var distance = cell.size + virus.size + cell.velocity; // ??? cell.velocity;
-
-				/*
-				if (virus.size + cell.size > virus.distance) {
-					console.log("v: " + ((virus.size + cell.size) - virus.distance));
-				}
-				*/
-
-				if (virus.distance < distance) {
-
-					var angle = cell.getAngle(virus);
-
-					var range = new Range(Util.mod(angle + 90), Util.mod(angle - 90));
-					//var range = this.getSafeRange(cell, virus, distance);
-					range.classification = Classification.virus;
-					range.distance = distance;
-					range.deathDistance = cell.size - virus.size;
-					range.preferredDistance = distance;
-					range.cell = cell;
-					range.entity = virus;
-
-					cell.obstacles.push(range);
-					player.allObstacles.push(range);
-				}
-				//}
-			}
-		}, this);
-	};
-
 	this.drawAngledLine = function(x, y, degrees, distance, color) {
 
 		var radians = this.degreesToRadians(degrees);
@@ -1900,32 +1874,18 @@ function AposBot() {
 	 */
 	this.avoidThreats = function(player, destination, shrinkage) {
 
-		var i;
-
-		player.allObstacles = [];
-
-		this.addVirusObstacles(player);
-		this.addThreatObstacles(player);
-
 		var ranges = [];
 
-		for (i = 0; i < player.allObstacles.length; i++) {
+		player.eachCellThreat(function(cell, threat) {
 
-			var range = player.allObstacles[i];
-
-			if (shrinkage > 1) {
-				range.distance -= (range.distance - range.deathDistance) / 2;
-				var shrunkRange = this.getSafeRange(range.cell, range.entity, range.distance);
-				range.left = shrunkRange.left;
-				range.right = shrunkRange.right;
+			if (threat.distance < threat.dangerZone) {
+				// only increment if it is a different threat (not the same threat for 2 different cells)
+				var range = new Range(Util.mod(threat.angle + 90), Util.mod(threat.angle - 90));
+				this.addRange(ranges, range);
 			}
-
-			this.addRange(ranges, range);
-		}
+		}, this);
 
 		if (ranges.length == 1) {
-			this.infoStrings.push(ranges[0].left + " " + ranges[0].right);
-
 			if (Util.mod(ranges[0].left - ranges[0].right) <= 1) {
 				console.log('bad range');
 				console.log(ranges[0]);
@@ -1952,7 +1912,6 @@ function AposBot() {
 			var cell = player.cells[i];
 
 			cell.threats = [];
-			cell.obstacles = [];
 		}
 
 		Object.keys(this.entities).filter(this.entities.threatFilter, this.entities).forEach(function(key) {
@@ -1982,7 +1941,7 @@ function AposBot() {
 				if (!overlappedBy) {
 					overlappedBy = threat;
 					imminentThreatCount++;
-				} else if (threat.t != overlappedBy.t) {
+				} else if (threat.entity != overlappedBy.entity) {
 					imminentThreatCount++;
 				}
 			}
@@ -2038,13 +1997,11 @@ function AposBot() {
 			});
 
 			console.log('trying again to determine destination');
-			console.log(player.allObstacles);
 			for (i = 1; i < 10; i++) {
 
 				ranges = this.avoidThreats(player, destination, i);
 				if (ranges === null) {
 					console.log('could not determine destination: ' + i);
-					console.log(player.allObstacles);
 				} else {
 					break;
 				}
@@ -2061,7 +2018,6 @@ function AposBot() {
 			if (ranges.length > 1) {
 				console.log("multiple ranges");
 				console.log(ranges);
-				console.log(player.allObstacles);
 			}
 
 			this.drawRanges(player, ranges);
@@ -2077,8 +2033,6 @@ function AposBot() {
 						console.log('ranges');
 						console.log(ranges);
 					}
-					console.log('obstacles');
-					console.log(player.allObstacles);
 
 					drawLine(player.x, player.y, destination.point.x, destination.point.y, Constants.red);
 				}
@@ -2250,24 +2204,25 @@ function AposBot() {
 						if (threat.isSplitThreat) {
 
 							var tsize = Math.sqrt(threat.mass / 2 * 100);
-							var shadowDistance = Math.min(threat.t.size + Constants.splitRangeMax, threat.distance);
+							var shadowDistance = Math.min(threat.entity.size + Constants.splitRangeMax, threat.distance);
+							var angle = this.degreesToRadians(threat.angle);
 
 							var shadowThreat = {
-								x : threat.t.x - Math.cos(threat.angle) * shadowDistance,
-								y : threat.t.y - Math.sin(threat.angle) * shadowDistance,
+								x : threat.entity.x + Math.cos(angle) * shadowDistance,
+								y : threat.entity.y + Math.sin(angle) * shadowDistance,
 							};
 							// distance = Util.computeDistance(shadowThreat.x, shadowThreat.y, cell.x, cell.y);
 
 							drawCircle(shadowThreat.x, shadowThreat.y, tsize, Constants.gray);
 
-							var shadowLineDistance = Math.min(threat.t.size - tsize + Constants.splitRangeMax,
+							var shadowLineDistance = Math.min(threat.entity.size - tsize + Constants.splitRangeMax,
 									threat.distance);
 							var shadowThreatLine = {
-								x : threat.t.x - Math.cos(threat.angle) * shadowLineDistance,
-								y : threat.t.y - Math.sin(threat.angle) * shadowLineDistance,
+								x : threat.entity.x + Math.cos(angle) * shadowLineDistance,
+								y : threat.entity.y + Math.sin(angle) * shadowLineDistance,
 							};
 
-							drawLine(threat.t.x, threat.t.y, shadowThreatLine.x, shadowThreatLine.y,
+							drawLine(threat.entity.x, threat.entity.y, shadowThreatLine.x, shadowThreatLine.y,
 									threat.isMovingTowards ? Constants.red : Constants.gray);
 						}
 					}, this);
