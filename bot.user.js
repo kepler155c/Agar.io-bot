@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1664
+// @version     3.1665
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1664;
+var aposBotVersion = 3.1665;
 
 var Constants = {
 
@@ -1135,11 +1135,11 @@ function AposBot() {
 	this.isFoodValid = function(player, cluster, range) {
 
 		if (range) {
-			var angle = cluster.closestCell.getAngle(cluster);
+			var angle = Util.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
 			if (!range.angleWithin(angle)) {
-				drawCircle(cluster.x, cluster.y, cluster.size + 25, Constants.red);
 				return false;
 			}
+			drawCircle(cluster.x, cluster.y, cluster.size + 25, Constants.red);
 		}
 
 		if (this.foodInVirus(cluster)) {
