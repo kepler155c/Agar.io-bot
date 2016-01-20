@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1658
+// @version     3.1659
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1658;
+var aposBotVersion = 3.1659;
 
 var Constants = {
 
@@ -1831,7 +1831,7 @@ function AposBot() {
 
 				var angle = cell.getAngle(threat);
 
-				var range = new Range(Util.mod(angle - 90), Util.mod(angle + 90));
+				var range = new Range(Util.mod(angle + 90), Util.mod(angle - 90));
 
 				//var range = this.getSafeRange(cell, threat.t, threat.dangerZone);
 				range.classification = Classification.threat;
@@ -1871,7 +1871,7 @@ function AposBot() {
 
 					var angle = cell.getAngle(virus);
 
-					var range = new Range(Util.mod(angle - 90), Util.mod(angle + 90));
+					var range = new Range(Util.mod(angle + 90), Util.mod(angle - 90));
 					//var range = this.getSafeRange(cell, virus, distance);
 					range.classification = Classification.virus;
 					range.distance = distance;
