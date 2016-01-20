@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1662
+// @version     3.1663
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1662;
+var aposBotVersion = 3.1663;
 
 var Constants = {
 
@@ -1137,6 +1137,7 @@ function AposBot() {
 		if (range) {
 			var angle = cluster.closestCell.getAngle(cluster);
 			if (!range.angleWithin(angle)) {
+				drawCircle(cluster.x, cluster.y, cluster.size + 5, Constants.red);
 				return false;
 			}
 		}
