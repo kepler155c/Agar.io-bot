@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1696
+// @version     3.1697
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1696;
+var aposBotVersion = 3.1697;
 
 var Constants = {
 
@@ -252,7 +252,7 @@ Player.prototype = {
 	},
 	mergeMassAction : function(destination) {
 
-		if (this.cells.length < 3 || this.size > this.largestCell.size * 2.5) {
+		if (this.cells.length < 3) { // || this.size > this.largestCell.size * 2.5) {
 			return false;
 		}
 
@@ -280,10 +280,6 @@ Player.prototype = {
 			}
 		}
 
-		if (canShootCount < 2) {
-			return false;
-		}
-
 		// point to largest cell - mouse pos half radius distance on largest cell towards next largest
 
 		var angle = Util.getAngle(nextLargestCell.x, nextLargestCell.y, this.largestCell.x, this.largestCell.y);
@@ -295,6 +291,14 @@ Player.prototype = {
 			if (cell != this.largestCell) {
 				drawLine(cell.x, cell.y, point.x, point.y, Constants.orange);
 			}
+		}
+
+		if (this.size > this.largestCell.size * 2.5) {
+			return false;
+		}
+		
+		if (canShootCount < 2) {
+			return false;
 		}
 
 		this.lastShotTime = Date.now();
