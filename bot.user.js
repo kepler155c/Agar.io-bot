@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1675
+// @version     3.1676
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1675;
+var aposBotVersion = 3.1676;
 
 var Constants = {
 
@@ -1591,8 +1591,8 @@ function AposBot() {
 				threat.dangerZone = threat.preferredDistance;
 
 				// drawPoint(threat.x, threat.y + 20, 2, parseInt(threat.distance, 10) + " " + parseInt(threat.dangerZone, 10));
-				drawPoint(threat.x, threat.y + 20 + threat.size / 15, Constants.yellow, "/***" + "***\\ "
-						+ parseInt(entity.mass));
+				drawPoint(threat.x, threat.y + 20 + threat.size / 15, Constants.yellow, "/***" + "***\\ ");
+				drawPoint(threat.x, threat.y + 40 + threat.size / 15, Constants.yellow, parseInt(entity.mass), 24);
 
 				cell.threats.push(threat);
 				player.allThreats.push(threat);

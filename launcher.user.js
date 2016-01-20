@@ -20,11 +20,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.314
+// @version     4.315
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.314;
+var aposLauncherVersion = 4.315;
 
 var showAd = false;
 var moveLoc = null;
@@ -673,9 +673,10 @@ console.log("Running Bot Launcher!");
         return (y - getHeight() / 2) / getRatio() + getY();
     }
 
-    window.drawPoint = function(x_1, y_1, drawColor, text) {
+    window.drawPoint = function(x_1, y_1, drawColor, text, size) {
         if (!toggleDraw) {
-            dPoints.push([x_1, y_1, drawColor]);
+        	size = size || 18;
+            dPoints.push([x_1, y_1, drawColor, size]);
             dText.push(text);
         }
     }
@@ -983,7 +984,7 @@ console.log("Running Bot Launcher!");
                 d.strokeStyle = '#003300';
                 d.stroke();
             } else {
-                var text = new va(18, (getDarkBool() ? '#F2FBFF' : '#111111'), true, (getDarkBool() ? '#111111' : '#F2FBFF'));
+                var text = new va(dPoints[i][3], (getDarkBool() ? '#F2FBFF' : '#111111'), true, (getDarkBool() ? '#111111' : '#F2FBFF'));
 
                 text.C(dText[i]);
                 var textRender = text.L();
