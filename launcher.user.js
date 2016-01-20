@@ -20,14 +20,16 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.315
+// @version     4.316
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.315;
+var aposLauncherVersion = 4.316;
 
 var showAd = false;
 var moveLoc = null;
+var reviving = false;
+var doRevive = false;
 
 Number.prototype.mod = function(n) {
     return ((this % n) + n) % n;
@@ -118,8 +120,11 @@ console.log("Running Bot Launcher!");
             }
         }
         if (82 == e.keyCode) {
-            console.log("ToggleDraw");
-            toggleDraw = !toggleDraw;
+            console.log("Revive");
+            if (reviving) {
+            	doRevive = true;
+            }
+            //toggleDraw = !toggleDraw;
         }
         if (68 == e.keyCode) {
             window.setDarkTheme(!getDarkBool());
@@ -713,9 +718,12 @@ console.log("Running Bot Launcher!");
 
         if (getPlayer().length == 0 && !firstStart) {
             //console.log("Revive");
-            //setNick(originalName);
+        	if (doRevive) {
+                setNick(originalName);
+        	}
             reviving = true;
         } else if (getPlayer().length > 0 && reviving) {
+    		doRevive = false;
             reviving = false;
             console.log("Done Reviving!");
         }
@@ -1349,7 +1357,6 @@ console.log("Running Bot Launcher!");
                 lifeTimer = new Date(),
                 bestTime = 0,
                 botIndex = 0,
-                reviving = false,
                 message = [],
 
                 q = null,
