@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1694
+// @version     3.1695
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1694;
+var aposBotVersion = 3.1695;
 
 var Constants = {
 
@@ -307,10 +307,11 @@ Player.prototype = {
 			}
 		}
 
-		if (canShootCount < 2 || nope || this.size < largestCell.size + nextLargestCell.size + 20) {
+		if (canShootCount < 2 || nope || this.size > largestCell.size + nextLargestCell.size + 20) {
 			return false;
 		}
 
+		console.log([ this.size, largestCell.size + nextLargestCell.size + 20 ]);
 		// point to largest cell - mouse pos half radius distance on largest cell towards next largest
 
 		var angle = Util.getAngle(nextLargestCell.x, nextLargestCell.y, largestCell.x, largestCell.y);
