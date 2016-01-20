@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1682
+// @version     3.1683
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1682;
+var aposBotVersion = 3.1683;
 
 var Constants = {
 
@@ -269,8 +269,12 @@ Player.prototype = {
 		for (i = 0; i < this.cells.length; i++) {
 			cell = this.cells[i];
 
-			if (cell != largestCell) {
-				if (cell.size > 32 + 19 && Util.computeDistance(cell.x, cell.y, largestCell.x, largestCell.y) < 200) {
+			if (cell != largestCell && cell.mass > 32 + 19) {
+
+				var distance = Util.computeDistance(cell.x, cell.y, largestCell.x, largestCell.y) - cell.size
+						- largestCell.size;
+
+				if (distance < 200) {
 					canShootCount++;
 				}
 			}
@@ -279,12 +283,12 @@ Player.prototype = {
 		if (canShootCount < 1) {
 			return false;
 		}
-		
+
 		// point to largest cell - mouse pos half radius distance on largest cell towards center
-		
+
 		var angle = largestCell.getAngle(this.x, this.y);
 		var point = Util.pointFromAngle(largestCell.x, largestCell.y, angle, largestCell.size / 2);
-		
+
 		for (i = 0; i < this.cells.length; i++) {
 			cell = this.cells[i];
 
@@ -292,7 +296,7 @@ Player.prototype = {
 				drawLine(cell.x, cell.y, point.x, point.y, Constants.orange);
 			}
 		}
-		
+
 		return true;
 	},
 	closestCell : function(x, y) {
@@ -2183,7 +2187,7 @@ function AposBot() {
 		}
 
 		player.mergeMassAction(destination, this.entities);
-		
+
 		if (!isHumanControlled()) {
 			this.determineTeams();
 			player.isSafeToSplit(this.entities);
