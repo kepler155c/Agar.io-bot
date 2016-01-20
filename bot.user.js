@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1670
+// @version     3.1671
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1670;
+var aposBotVersion = 3.1671;
 
 var Constants = {
 
@@ -1496,6 +1496,9 @@ function AposBot() {
 						preferredDistance : distance,
 						threatenedDistance : distance,
 					};
+
+					threat.intersects = threat.distance < cell.size + entity.size;
+
 					cell.threats.push(threat);
 					player.allThreats.push(threat);
 				}
@@ -1830,7 +1833,7 @@ function AposBot() {
 				shiftedAngle.shifted = true;
 				shiftedAngle.angle = Util.mod(range.left + 1);
 				console.log([ range.left, range.right, angle, diffLeft, diffRight ]);
-				if (diffLeft > diffRight) {
+				if (diffLeft < diffRight) {
 					shiftedAngle.angle = Util.mod(range.right - 1);
 					console.log('went right');
 				} else {
@@ -1914,15 +1917,15 @@ function AposBot() {
 			cell.threats = [];
 		}
 
-		Object.keys(this.entities).filter(this.entities.threatFilter, this.entities).forEach(function(key) {
+		Object.keys(this.entities).filter(this.entities.virusAndThreatFilter, this.entities).forEach(function(key) {
 
-			threat = this.entities[key];
+			entity = this.entities[key];
 
-			this.calculateThreatWeight(player, threat);
+			this.calculateThreatWeight(player, entity);
 
-			if (player.cells.length == 1) {
+			if (player.cells.length == 1 && entity.classification == Classification.threat) {
 				// this.predictPosition(threat, 200);
-				if (threat.distance < threat.size + player.largestCell.size * 0.75 && threat.velocity > 20) {
+				if (threat.distance < entity.size + player.largestCell.size * 0.75 && entity.velocity > 20) {
 					console.log('splitting due to near death');
 					player.split(null, 0, 0, destination);
 				}
