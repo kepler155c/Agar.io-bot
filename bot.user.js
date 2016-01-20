@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1679
+// @version     3.1680
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1679;
+var aposBotVersion = 3.1680;
 
 var Constants = {
 
@@ -248,6 +248,52 @@ Player.prototype = {
 			}
 		}
 		return false;
+	},
+	mergeMassAction : function(destination) {
+
+		if (this.cells.length < 2) {
+			return false;
+		}
+
+		var clone = this.cells.slice(0);
+
+		clone.sort(function(a, b) {
+			return b.size - a.size;
+		});
+
+		var largestCell = clone[0];
+
+		var canShootCount = 0;
+		var i, cell;
+
+		for (i = 0; i < this.cells.length; i++) {
+			cell = this.cells[i];
+
+			if (cell != largestCell) {
+				if (cell.size > 32 + 19 && Util.computeDistance(cell.x, cell.y, largestCell.x, largestCell.y) < 200) {
+					canShootCount++;
+				}
+			}
+		}
+
+		if (canShootCount < 1) {
+			return false;
+		}
+		
+		// point to largest cell - mouse pos half radius distance on largest cell towards center
+		
+		var angle = largestCell.getAngle(this.x, this.y);
+		var point = Util.pointFromAngle(largestCell.x, largestCell.y, angle, largestCell.size / 2);
+		
+		for (i = 0; i < this.cells.length; i++) {
+			cell = this.cells[i];
+
+			if (cell != largestCell) {
+				this.drawLine(cell.x, cell.y, point.x, point.y, Constants.orange);
+			}
+		}
+		
+		return true;
 	},
 	closestCell : function(x, y) {
 
@@ -615,6 +661,15 @@ Util.getAngle = function(x1, y1, x2, y2) {
 	}
 
 	return (Math.round(Math.atan2(-(y1 - y2), -(x1 - x2)) / Math.PI * 180 + 180));
+};
+
+Util.pointFromAngle = function(x, y, angle, distance) {
+	var radians = this.degreesToRadians(angle);
+
+	return {
+		x : x - Math.cos(radians) * distance,
+		y : y - Math.sin(radians) * distance
+	};
 };
 
 Util.circlesIntersect = function(circle1, circle2, percentage) {
@@ -1882,14 +1937,14 @@ function AposBot() {
 
 			if (threat.distance < threat.dangerZone) {
 
-				var x = 90 / shrinkage ;  // 180 degress initially, then 90, 45, 22.5
+				var x = 90 / shrinkage; // 180 degress initially, then 90, 45, 22.5
 				var range = new Range(Util.mod(threat.angle + x), Util.mod(threat.angle - x));
 				this.addRange(ranges, range);
 			}
 		}, this);
 
 		if (ranges.length == 1) {
-			if (Util.mod(ranges[0].left - ranges[0].right) <= 1) {  // wrong - this should use size
+			if (Util.mod(ranges[0].left - ranges[0].right) <= 1) { // wrong - this should use size
 				console.log('bad range');
 				console.log(ranges[0]);
 				return null;
@@ -2045,15 +2100,6 @@ function AposBot() {
 		}
 	};
 
-	this.pointFromAngle = function(x, y, angle, distance) {
-		var radians = this.degreesToRadians(angle);
-
-		return {
-			x : x - Math.cos(radians) * distance,
-			y : y - Math.sin(radians) * distance
-		};
-	};
-
 	/**
 	 * This is the main bot logic. This is called quite often.
 	 * @return A 2 dimensional array with coordinates for every cells.  [[x, y], [x, y]]
@@ -2136,6 +2182,8 @@ function AposBot() {
 			}
 		}
 
+		player.mergeMassAction(destination, this.entities);
+		
 		if (!isHumanControlled()) {
 			this.determineTeams();
 			player.isSafeToSplit(this.entities);
