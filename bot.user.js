@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1659
+// @version     3.1661
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1659;
+var aposBotVersion = 3.1661;
 
 var Constants = {
 
@@ -1316,6 +1316,8 @@ function AposBot() {
 		if (this.angleInRanges(shiftedAngle.angle, ranges)) {
 			console.log('not shifting');
 			console.log([ angle, shiftedAngle.angle ]);
+			console.log(ranges);
+			console.log(range);
 			return false;
 		}
 
@@ -2057,6 +2059,12 @@ function AposBot() {
 
 		var midPoint;
 		if (ranges) {
+			
+			if (ranges.length > 1) {
+				console.log("multiple ranges");
+				console.log(ranges);
+				console.log(player.allObstacles);
+			}
 
 			this.drawRanges(player, ranges);
 			if (!this.determineFoodDestination(player, destination, ranges)) {
