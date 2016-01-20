@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1680
+// @version     3.1681
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1680;
+var aposBotVersion = 3.1681;
 
 var Constants = {
 
@@ -251,7 +251,7 @@ Player.prototype = {
 	},
 	mergeMassAction : function(destination) {
 
-		if (this.cells.length < 2) {
+		if (this.cells.length < 3) {
 			return false;
 		}
 
@@ -661,6 +661,11 @@ Util.getAngle = function(x1, y1, x2, y2) {
 	}
 
 	return (Math.round(Math.atan2(-(y1 - y2), -(x1 - x2)) / Math.PI * 180 + 180));
+};
+
+Util.degreesToRadians = function(degrees) {
+	degrees -= 180;
+	return degrees / (180 / Math.PI);
 };
 
 Util.pointFromAngle = function(x, y, angle, distance) {
@@ -1759,11 +1764,6 @@ function AposBot() {
 		return angle * 180 / Math.PI + 180;
 	};
 
-	this.degreesToRadians = function(degrees) {
-		degrees -= 180;
-		return degrees / (180 / Math.PI);
-	};
-
 	this.getRange = function(source, target) {
 
 		var radius = target.size;
@@ -1921,7 +1921,7 @@ function AposBot() {
 
 	this.drawAngledLine = function(x, y, degrees, distance, color) {
 
-		var radians = this.degreesToRadians(degrees);
+		var radians = Util.degreesToRadians(degrees);
 		drawLine(x, y, x - Math.cos(radians) * distance, y - Math.sin(radians) * distance, color);
 	};
 
@@ -2245,7 +2245,7 @@ function AposBot() {
 
 					var tsize = Math.sqrt(threat.mass / 2 * 100);
 					var shadowDistance = Math.min(threat.entity.size + Constants.splitRangeMax, threat.distance);
-					var angle = this.degreesToRadians(threat.angle);
+					var angle = Util.degreesToRadians(threat.angle);
 
 					var shadowThreat = {
 						x : threat.entity.x - Math.cos(angle) * shadowDistance,
