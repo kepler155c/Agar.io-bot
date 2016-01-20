@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1671
+// @version     3.1672
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1671;
+var aposBotVersion = 3.1672;
 
 var Constants = {
 
@@ -1917,7 +1917,7 @@ function AposBot() {
 			cell.threats = [];
 		}
 
-		Object.keys(this.entities).filter(this.entities.virusAndThreatFilter, this.entities).forEach(function(key) {
+		Object.keys(this.entities).filter(this.entities.threatAndVirusFilter, this.entities).forEach(function(key) {
 
 			entity = this.entities[key];
 
