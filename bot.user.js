@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1681
+// @version     3.1682
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1681;
+var aposBotVersion = 3.1682;
 
 var Constants = {
 
@@ -289,7 +289,7 @@ Player.prototype = {
 			cell = this.cells[i];
 
 			if (cell != largestCell) {
-				this.drawLine(cell.x, cell.y, point.x, point.y, Constants.orange);
+				drawLine(cell.x, cell.y, point.x, point.y, Constants.orange);
 			}
 		}
 		
