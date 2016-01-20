@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1672
+// @version     3.1673
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1672;
+var aposBotVersion = 3.1673;
 
 var Constants = {
 
@@ -1901,17 +1901,9 @@ function AposBot() {
 
 	this.determineBestDestination = function(player, destination) {
 
-		var i, j;
-		var panicLevel = 0;
-		var threat;
-
-		// panic levels:
-		// 2 = partially inside a threat
-		// 1 = in the split distance of a threat
-
 		player.allThreats = [];
 
-		for (i = 0; i < player.cells.length; i++) {
+		for (var i = 0; i < player.cells.length; i++) {
 			var cell = player.cells[i];
 
 			cell.threats = [];
@@ -1925,7 +1917,7 @@ function AposBot() {
 
 			if (player.cells.length == 1 && entity.classification == Classification.threat) {
 				// this.predictPosition(threat, 200);
-				if (threat.distance < entity.size + player.largestCell.size * 0.75 && entity.velocity > 20) {
+				if (entity.distance < entity.size + player.largestCell.size * 0.75 && entity.velocity > 20) {
 					console.log('splitting due to near death');
 					player.split(null, 0, 0, destination);
 				}
