@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1704
+// @version     3.1705
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1704;
+var aposBotVersion = 3.1705;
 
 var Constants = {
 
@@ -133,15 +133,29 @@ var Player = function() {
 
 Player.prototype = {
 
-	setCells : function(cells) {
+	setCells : function(cells, entities) {
+
+		var i, cell;
+
+		this.cells = [];
+
+		for (i = 0; i < cells.length; i++) {
+			cell = cells[i];
+			if (entities[cell.id]) {
+				this.cells.push(cell);
+			} else {
+				console.log('not a cell');
+			}
+		}
+
 		this.cells = cells;
 		this.isAlive = this.cells.length > 0;
 		this.mass = 0;
 		this.smallestCell = cells[0];
 		this.largestCell = cells[0];
 
-		for (var i = 0; i < cells.length; i++) {
-			var cell = cells[i];
+		for (i = 0; i < cells.length; i++) {
+			cell = cells[i];
 
 			cell.mass = cell.size * cell.size / 100;
 			cell.isMe = true;
@@ -265,18 +279,22 @@ Player.prototype = {
 	},
 	mergeMass : function() {
 
-		if (this.action === null) {
+		if (this.action !== null || this.cells.length < 3 || this.size > this.largestCell.size * 2.5
+				|| this.canShootCount() < 3 || this.largestCell.size < 100) {
+			return;
+		}
 
-			if (this.cells.length < 3 || this.size > this.largestCell.size * 2.5 || this.canShootCount() < 3
-					|| this.largestCell.size < 100) {
-				return;
+		for (var i = 0; i < this.cells.length; i++) {
+			var cell = this.cells[i];
+
+			if (cell.threatened) {
+
+				this.action = this.mergeMassAction;
+				this.mergeMassInfo = {
+					timer : 0,
+					cell : cell
+				};
 			}
-
-			this.action = this.mergeMassAction;
-			this.mergeMassInfo = {
-				timer : 0,
-				cell : this.largestCell
-			};
 		}
 	},
 	mergeMassAction : function(destination) {
@@ -311,7 +329,7 @@ Player.prototype = {
 				nextLargestCell = cell;
 			}
 		}
-		
+
 		if (nextLargestCell.size < 50) {
 			this.action = null;
 			return false;
@@ -1963,6 +1981,12 @@ function AposBot() {
 
 		var ranges = [];
 
+		for (var i = 0; i < player.cells.length; i++) {
+			var cell = player.cells[i];
+
+			cell.threatened = false;
+		}
+
 		player.eachCellThreat(function(cell, threat) {
 
 			if (threat.distance < threat.dangerZone) {
@@ -1970,6 +1994,8 @@ function AposBot() {
 				var x = 90 / shrinkage; // 180 degress initially, then 90, 45, 22.5
 				var range = new Range(Util.mod(threat.angle + x), Util.mod(threat.angle - x));
 				this.addRange(ranges, range);
+
+				cell.threatened = threat.classification == Classification.threat;
 			}
 		}, this);
 
@@ -2145,8 +2171,8 @@ function AposBot() {
 
 		this.infoStrings = [];
 
-		var player = this.player;
-		this.player.setCells(cells);
+		this.entities = getMemoryCells();
+		this.player.setCells(cells, this.entities);
 
 		var destination = this.update(cells);
 
@@ -2177,7 +2203,6 @@ function AposBot() {
 		};
 
 		this.teams = [];
-		this.entities = getMemoryCells();
 
 		//The current destination that the cells were going towards.
 
