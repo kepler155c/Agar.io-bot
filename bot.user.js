@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1706
+// @version     3.1707
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1706;
+var aposBotVersion = 3.1707;
 
 var Constants = {
 
@@ -832,7 +832,7 @@ function initializeEntity() {
 		return Util.getAngle(this.x, this.y, target.x, target.y);
 	};
 
-	var entitiesPrototype = Object.getPrototypeOf(getMemoryCells());
+	var entitiesPrototype = Object.getPrototypeOf(getCells());
 
 	entitiesPrototype.foodFilter = function(key) {
 
@@ -2172,7 +2172,7 @@ function AposBot() {
 
 		this.infoStrings = [];
 
-		this.entities = getMemoryCells();
+		this.entities = getCells();
 		this.player.setCells(cells, this.entities);
 
 		var destination = this.update(cells);
