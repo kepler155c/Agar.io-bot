@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1713
+// @version     3.1715
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1713;
+var aposBotVersion = 3.1715;
 
 var Constants = {
 
@@ -1913,18 +1913,28 @@ function AposBot() {
 		}
 
 		player.allThreats.sort(function(a, b) {
-			return a.distance - b.distance;
+			return (a.distance - a.dangerZone) - (b.distance - b.dangerZone);
 		});
+		
+		var i, range, ranges = [];
 
-		for (var i = 0; i < player.allThreats.length; i++) {
+		for (i = 0; i < player.allThreats.length; i++) {
 
 			var threat = player.allThreats[i];
 
-			if (threat.distance > distance) {
+			if (threat.distance - threat.dangerZone > distance) {
 				break;
 			}
 
-			var range = this.getSafeRange(threat.cell, threat.entity, threat.preferredDistance);
+			range = this.getSafeRange(threat.cell, threat.entity, threat.dangerZone);
+
+			this.addRange(ranges, range);
+
+			drawCircle(threat.x, threat.y, threat.dangerZone, Constants.yellow);
+		}
+
+		for (i = 0; i < ranges.length; i++) {
+			range = ranges[i];
 
 			if (range.angleWithin(angle)) {
 
@@ -1937,7 +1947,6 @@ function AposBot() {
 				shiftedAngle.shifted = true;
 				shiftedAngle.angle = Util.mod(range.left + 1);
 
-				drawCircle(threat.x, threat.y, threat.preferredDistance, Constants.yellow);
 				if (diffLeft > diffRight) {
 					shiftedAngle.angle = Util.mod(range.right - 1);
 				}
