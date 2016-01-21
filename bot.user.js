@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1710
+// @version     3.1711
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1710;
+var aposBotVersion = 3.1711;
 
 var Constants = {
 
@@ -1204,11 +1204,6 @@ function AposBot() {
 
 			} else if (cluster.cell) {
 
-				if (player.splitInfo && player.splitInfo.target && player.splitInfo.target == cluster.cell
-						&& (Date.now() - player.splitInfo.timer) < 2000) {
-					weight = weight * 4;
-				}
-
 				if ((player.cells.length == 1) && cluster.cell.isType(Classification.splitTarget)) {
 					weight = weight * 1.5;
 				}
@@ -1429,8 +1424,8 @@ function AposBot() {
 		var shiftedAngle = this.avoidObstacles(player, angle, cluster.distance);
 
 		// console.log('angle is: ' + shiftedAngle.angle);
-		destination.point = this.followAngle(shiftedAngle.angle, cluster.closestCell.x, cluster.closestCell.y,
-				ranges.length > 0 ? verticalDistance() : cluster.distance);
+		destination.point = this.followAngle(shiftedAngle.angle, cluster.closestCell.x, cluster.closestCell.y, verticalDistance());
+				// ranges.length > 0 ? verticalDistance() : cluster.distance);
 
 		if (this.angleInRanges(shiftedAngle.angle, ranges)) {
 			console.log('not shifting');
