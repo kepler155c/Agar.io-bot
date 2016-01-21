@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1720
+// @version     3.1721
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1720;
+var aposBotVersion = 3.1721;
 
 var Constants = {
 
@@ -228,12 +228,6 @@ Player.prototype = {
 			};
 			this.action = this.mergeAction;
 		}
-	},
-	getSpeed : function() {
-		return Constants.playerSpeed * Math.pow(this.mass, -1.0 / 4.5) * 50 / 40;
-	},
-	getSplitDistance : function() {
-		return (4 * (this.getSpeed() * 5)) + (this.size * 1.75);
 	},
 	mergeAction : function(destination) {
 
@@ -784,6 +778,14 @@ function initializeEntity() {
 
 	da.prototype.isType = function(classification) {
 		return this.classification == classification;
+	};
+
+	da.prototype.getSpeed = function() {
+		return Constants.playerSpeed * Math.pow(this.mass, -1.0 / 4.5) * 50 / 40;
+	};
+
+	da.prototype.getSplitDistance = function() {
+		return (4 * (this.getSpeed() * 5)) + (this.size * 1.75);
 	};
 
 	da.prototype.getMovingTowards = function(target) {
@@ -1875,7 +1877,7 @@ function AposBot() {
 
 		if (isNaN(a)) {
 			console.log('it is NaN');
-			console.log([dd, radius]);
+			console.log([ dd, radius ]);
 			console.log(blob2);
 			angle = Util.getAngle(blob2.x, blob2.y, blob1.x, blob1.y);
 			this.drawAngledLine(blob1.x, blob1.y, angle, 500, Constants.cyan);
