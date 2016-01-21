@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1722
+// @version     3.1723
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1722;
+var aposBotVersion = 3.1723;
 
 var Constants = {
 
@@ -46,7 +46,6 @@ var Constants = {
 
 	splitRangeMin : 650,
 	splitRangeMax : 700, // 674.5,
-	enemySplitDistance : 710,
 	playerRatio : 1.285,
 	enemyRatio : 1.27,
 	splitDuration : 1000, // 800 was pretty good
@@ -64,7 +63,7 @@ var Constants = {
 	playerRecombineTime : 30, // Base amount of seconds before a cell is allowed to recombine
 	playerMassDecayRate : 0.002, // Amount of mass lost per second
 	playerMinMassDecay : 9, // Minimum mass for decay to occur
-	playerSpeed : 30, // Player base speed (seems like 72ish to me)
+	playerSpeed : 60, // was 30 - Player base speed (seems like 72ish to me)
 
 	// adjustables
 	lureDistance : 1000,
@@ -1271,7 +1270,7 @@ function AposBot() {
 			var threat = this.entities[keys[i]];
 
 			if (Util.computeDistance(threat.x, threat.y, cluster.x, cluster.y) < threat.size + player.largestCell.size
-					+ Constants.splitRangeMax) {
+					+ threat.splitDistance) {
 				return false;
 			}
 		}
@@ -1678,8 +1677,8 @@ function AposBot() {
 
 					//threat.mass = t.mass / 2;
 					//threat.size = Math.sqrt(threat.mass * 100);
-					threat.isSplitThreat = true;
-					entity.isSplitThreat = true;
+					threat.isSplitThreat = entity.isSplitThreat = true;
+					threat.splitDistance = entity.splitDistance = threat.getSplitDistance();
 				}
 
 				//threat.deathDistance = Math.min(threat.size - cell.size, threat.size); // how much overlap until we are eaten ??
@@ -1695,8 +1694,8 @@ function AposBot() {
 
 				} else if (threat.isSplitThreat) {
 
-					threat.preferredDistance = notTouchingDistance + Constants.splitRangeMax;
-					threat.threatenedDistance = notTouchingDistance + cell.size + Constants.splitRangeMax; // one radius distance
+					threat.preferredDistance = notTouchingDistance + threat.splitDistance;
+					threat.threatenedDistance = notTouchingDistance + cell.size + threat.splitDistance; // one radius distance
 
 				} else {
 
@@ -2237,7 +2236,7 @@ function AposBot() {
 		drawLine(getX() + (1920 / 2) / getZoomlessRatio(), getY() - (1080 / 2) / getZoomlessRatio(), getX()
 				+ (1920 / 2) / getZoomlessRatio(), getY() + (1080 / 2) / getZoomlessRatio(), Constants.gray);
 
-		drawCircle(player.x, player.y, player.size + Constants.enemySplitDistance, Constants.pink);
+		drawCircle(player.x, player.y, player.size + player.largestCell.getSplitDistance(), Constants.pink);
 
 		//loop through everything that is on the screen and
 		//separate everything in it's own category.
@@ -2322,7 +2321,7 @@ function AposBot() {
 				if (threat.isSplitThreat) {
 
 					var tsize = Math.sqrt(threat.mass / 2 * 100);
-					var shadowDistance = Math.min(threat.entity.size + Constants.splitRangeMax, threat.distance);
+					var shadowDistance = Math.min(threat.entity.size + threat.splitDistance, threat.distance);
 					var angle = Util.degreesToRadians(threat.angle);
 
 					var shadowThreat = {
@@ -2334,7 +2333,7 @@ function AposBot() {
 					drawCircle(shadowThreat.x, shadowThreat.y, tsize, Constants.gray);
 					drawCircle(threat.x, threat.y, threat.entity.getSplitDistance(), Constants.red);
 
-					var shadowLineDistance = Math.min(threat.entity.size - tsize + Constants.splitRangeMax,
+					var shadowLineDistance = Math.min(threat.entity.size - tsize + threat.splitDistance,
 							threat.distance);
 					var shadowThreatLine = {
 						x : threat.entity.x - Math.cos(angle) * shadowLineDistance,
