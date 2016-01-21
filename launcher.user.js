@@ -20,11 +20,11 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.316
+// @version     4.317
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposLauncherVersion = 4.316;
+var aposLauncherVersion = 4.317;
 
 var showAd = false;
 var moveLoc = null;
@@ -550,8 +550,17 @@ console.log("Running Bot Launcher!");
         var d = a.getUint16(b, !0);
         b += 2;
         for (var u = 0; u < d; ++u) {
-            var p = E[a.getUint32(b, !0)],
-                g = E[a.getUint32(b + 4, !0)];
+            var p = E[a.getUint32(b, !0)],            // eater
+                g = E[a.getUint32(b + 4, !0)];        // eaten
+            
+            if (interNodes[g]) {
+            	interNodes[g].eaten = true;
+            }
+            
+            if (interNodes[g] && interNodes[p]) {
+            	console.log(interNodes[p].name + " ate " + interNodes[g].name);
+            }
+            
             b += 8;
             p && g && (g.X(), g.s = g.x, g.t = g.y, g.r = g.size, g.J = p.x, g.K = p.y, g.q = g.size, g.Q =
                 C)
@@ -2109,6 +2118,7 @@ console.log("Running Bot Launcher!");
                     updateCode: 0,
                     danger: false,
                     dangerTimeOut: 0,
+                    eaten : false,
                     isMoving: function() {
 //                    	if (this.danger) {  // cells that have gone off screen do not get the position updated
 //                    		return true;
