@@ -562,21 +562,21 @@ console.log("Running Bot Launcher!");
                 C)
         }
         for (u = 0;;) {
-            d = a.getUint32(b, !0);
+            d = a.getUint32(b, !0);  //  ID
             b += 4;
             if (0 == d) break;
             ++u;
             var f, p;
-            p = a.getInt32(b, !0);
+            p = a.getInt32(b, !0);  // X
             b += 4;
-            g = a.getInt32(b, !0);
+            g = a.getInt32(b, !0);  // Y
             b += 4;
-            f = a.getInt16(b, !0);
+            f = a.getInt16(b, !0);  // Size
             b += 2;
             
-            var n = a.getUint8(b++),
-            h = a.getUint8(b++),
-            w = a.getUint8(b++),
+            var n = a.getUint8(b++), // Red
+            h = a.getUint8(b++),     // Green
+            w = a.getUint8(b++),     // Blue
             h = nccc(n << 16 | h << 8 | w),
             w = a.getUint8(b++),
             m = !!(w & 1),
