@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1711
+// @version     3.1712
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1711;
+var aposBotVersion = 3.1712;
 
 var Constants = {
 
@@ -402,7 +402,7 @@ Player.prototype = {
 
 				this.splitInfo.point = new Point(cluster.closestCell.x + (x - cluster.closestCell.x) * 4,
 						cluster.closestCell.y + (y - cluster.closestCell.y) * 4);
-				
+
 				destination.point = this.splitInfo.point;
 			}
 		}
@@ -1424,8 +1424,8 @@ function AposBot() {
 		var shiftedAngle = this.avoidObstacles(player, angle, cluster.distance);
 
 		// console.log('angle is: ' + shiftedAngle.angle);
-		destination.point = this.followAngle(shiftedAngle.angle, cluster.closestCell.x, cluster.closestCell.y, verticalDistance());
-				// ranges.length > 0 ? verticalDistance() : cluster.distance);
+		destination.point = this.followAngle(shiftedAngle.angle, cluster.closestCell.x, cluster.closestCell.y,
+				ranges.length > 0 ? verticalDistance() : cluster.distance);
 
 		if (this.angleInRanges(shiftedAngle.angle, ranges)) {
 			console.log('not shifting');
@@ -1495,7 +1495,7 @@ function AposBot() {
 				for (var j = 0; j < player.cells.length; j++) {
 					var cell = player.cells[j];
 
-					var range = this.getRange(cell, entity);
+					var range = this.getSafeRange(cell, entity);
 
 					if (range.angleWithin(angle)) {
 						this.drawAngledLine(player.x, player.y, range.left, 500, Constants.red);
