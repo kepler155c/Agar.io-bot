@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1724
+// @version     3.1725
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1724;
+var aposBotVersion = 3.1725;
 
 var Constants = {
 
@@ -759,7 +759,7 @@ function initializeEntity() {
 		this.teamSize = 1;
 		this.teamMass = this.mass;
 		this.isSplitThreat = false;
-		this.velocity = this.getVelocity();
+		this.velocity = this.getSpeed(); // this.getVelocity();
 
 		var closestInfo = player.closestCell(this.x, this.y);
 		this.closestCell = closestInfo.cell;
