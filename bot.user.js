@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1717
+// @version     3.1718
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1717;
+var aposBotVersion = 3.1718;
 
 var Constants = {
 
@@ -1876,6 +1876,7 @@ function AposBot() {
 		if (isNaN(a)) {
 			console.log('it is NaN');
 			console.log([dd, radius]);
+			console.log(blob2);
 			angle = Util.getAngle(blob2.x, blob2.y, blob1.x, blob1.y);
 			this.drawAngledLine(blob1.x, blob1.y, angle, 500, Constants.cyan);
 
