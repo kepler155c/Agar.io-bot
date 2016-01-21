@@ -587,7 +587,7 @@ console.log("Running Bot Launcher!");
             w & 4 && (rrr = uuu());    // what is u()
             
             var q = ddd(),  // what is d()
-            n = null;
+            n = null;  // circle arcs
 
             E.hasOwnProperty(d) ? (n = E[d], n.P(), n.s = n.x, n.t = n.y, n.r = n.size, n.color = h) :
                 (n = new da(d, p, g, f, h, q), v.push(n), E[d] = n, n.ua = p, n.va = g);

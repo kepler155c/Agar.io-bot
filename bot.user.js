@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1729
+// @version     3.1730
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1729;
+var aposBotVersion = 3.1730;
 
 var Constants = {
 
@@ -2303,17 +2303,6 @@ function AposBot() {
 			}
 		}, this);
 
-		for (var j = 0; j < player.cells.length; j++) {
-			var cell = player.cells[j];
-
-			var p = cell;
-			for (var i = 0; i < cell.a.length; i++) {
-
-				drawLine(p.x, p.y, cell.a[i].x, cell.a[i].y, Constants.red);
-				p = cell.a[i];
-			}
-		}
-
 		if (!isHumanControlled()) {
 
 			player.eachCellThreat(function(cell, threat) {
@@ -2364,6 +2353,17 @@ function AposBot() {
 		this.infoStrings.push("Speed     : " + parseInt(player.cells[0].getSpeed()));
 		this.infoStrings.push("Split     : " + parseInt(player.cells[0].splitDistance));
 		this.infoStrings.push("Aggression: " + Constants.aggressionLevel);
+		
+		if (player.cells.length > 1) {
+			var cell = player.cells[1];
+
+			var dx = cell.J - cell.s;
+			var dy = cell.K - cell.t;
+			var dd = Math.sqrt(dx * dx + dy * dy); // distance + 1 radius (not touching)
+			this.infoStrings.push("Velocity?: " + Math.floor(dd));
+		}
+
+		
 		/*
 		if (player.cells.length > 1) {
 			this.infoStrings.push("Player Min:  " + parseInt(player.smallestCell.size, 10));
