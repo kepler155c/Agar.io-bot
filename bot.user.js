@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1721
+// @version     3.1722
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1721;
+var aposBotVersion = 3.1722;
 
 var Constants = {
 
@@ -1939,7 +1939,7 @@ function AposBot() {
 
 			this.addRange(ranges, range);
 
-			drawCircle(threat.x, threat.y, threat.dangerZone, Constants.yellow);
+			// drawCircle(threat.x, threat.y, threat.dangerZone, Constants.yellow);
 		}
 
 		for (i = 0; i < ranges.length; i++) {
