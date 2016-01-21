@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1726
+// @version     3.1728
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1726;
+var aposBotVersion = 3.1728;
 
 var Constants = {
 
@@ -130,18 +130,6 @@ Player.prototype = {
 
 		var i, cell;
 
-		this.cells = [];
-
-		for (i = 0; i < cells.length; i++) {
-			cell = cells[i];
-			if (entities[cell.id] && !cell.eaten) {
-				this.cells.push(cell);
-			} else {
-				console.log('cell was eaten');
-				console.log(cell);
-			}
-		}
-
 		this.cells = cells;
 		this.isAlive = this.cells.length > 0;
 		this.mass = 0;
@@ -153,6 +141,7 @@ Player.prototype = {
 
 			cell.mass = cell.size * cell.size / 100;
 			cell.isMe = true;
+			cell.splitDistance = cell.getSplitDistance();
 
 			this.mass = this.mass + cell.mass;
 
@@ -2236,7 +2225,7 @@ function AposBot() {
 		drawLine(getX() + (1920 / 2) / getZoomlessRatio(), getY() - (1080 / 2) / getZoomlessRatio(), getX()
 				+ (1920 / 2) / getZoomlessRatio(), getY() + (1080 / 2) / getZoomlessRatio(), Constants.gray);
 
-		drawCircle(player.x, player.y, player.size + player.largestCell.getSplitDistance(), Constants.pink);
+		drawCircle(player.x, player.y, player.size + player.largestCell.splitDistance, Constants.pink);
 
 		//loop through everything that is on the screen and
 		//separate everything in it's own category.
@@ -2331,7 +2320,6 @@ function AposBot() {
 					// distance = Util.computeDistance(shadowThreat.x, shadowThreat.y, cell.x, cell.y);
 
 					drawCircle(shadowThreat.x, shadowThreat.y, tsize, Constants.gray);
-					drawCircle(threat.x, threat.y, threat.entity.getSplitDistance(), Constants.red);
 
 					var shadowLineDistance = Math.min(threat.splitDistance - tsize, threat.distance);
 					var shadowThreatLine = {
@@ -2363,7 +2351,7 @@ function AposBot() {
 		this.infoStrings.push("Velocity  : " + parseInt(player.smallestCell.velocity, 10));
 		this.infoStrings.push("Angle     : " + player.cells[0].getMovementAngle());
 		this.infoStrings.push("Speed     : " + parseInt(player.cells[0].getSpeed()));
-		this.infoStrings.push("Split     : " + parseInt(player.cells[0].getSplitDistance()));
+		this.infoStrings.push("Split     : " + parseInt(player.cells[0].splitDistance));
 		this.infoStrings.push("Aggression: " + Constants.aggressionLevel);
 		/*
 		if (player.cells.length > 1) {
@@ -2588,11 +2576,7 @@ function AposBot() {
 		if (!interceptPoint) {
 			return false;
 		}
-		var range = Constants.splitRangeMin;
-
-		if (cluster.cell.isMovingTowards) {
-			range = Constants.splitRangeMax;
-		}
+		var range = cluster.closestCell.splitDistance;
 
 		var distance = Util.computeDistance(cluster.cell.closestCell.x, cluster.cell.closestCell.y, interceptPoint.x,
 				interceptPoint.y);
