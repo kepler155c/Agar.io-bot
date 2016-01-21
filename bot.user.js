@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1715
+// @version     3.1716
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1715;
+var aposBotVersion = 3.1716;
 
 var Constants = {
 
@@ -1612,6 +1612,7 @@ function AposBot() {
 						minDistance : distance,
 						preferredDistance : distance,
 						threatenedDistance : distance,
+						dangerZone : distance,
 					};
 
 					threat.intersects = threat.distance < cell.size + entity.size;
