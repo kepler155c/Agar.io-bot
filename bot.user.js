@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1730
+// @version     3.1731
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1730;
+var aposBotVersion = 3.1731;
 
 var Constants = {
 
@@ -819,6 +819,14 @@ function initializeEntity() {
 			return 0;
 		}
 		return Math.max(40, (this.size - 50) / 4);
+	};
+	
+	da.prototype.getVelocity2 = function() {
+
+		var dx = this.J - this.s;
+		var dy = this.K - this.t;
+
+		return Math.sqrt(dx * dx + dy * dy); // distance + 1 radius (not touching)
 	};
 
 	da.prototype.getMovementAngle = function() {
@@ -2036,7 +2044,7 @@ function AposBot() {
 
 			if (player.cells.length == 1 && entity.classification == Classification.threat) {
 				// this.predictPosition(threat, 200);
-				if (entity.distance < entity.size + player.largestCell.size * 0.75 && entity.velocity > 20) {
+				if (entity.distance < entity.size + player.largestCell.size * 0.75 && entity.getVelocity2() > 50) {
 					console.log('splitting due to near death');
 					player.split(null, 0, 0, destination);
 				}
@@ -2353,16 +2361,6 @@ function AposBot() {
 		this.infoStrings.push("Speed     : " + parseInt(player.cells[0].getSpeed()));
 		this.infoStrings.push("Split     : " + parseInt(player.cells[0].splitDistance));
 		this.infoStrings.push("Aggression: " + Constants.aggressionLevel);
-		
-		if (player.cells.length > 1) {
-			var cell = player.cells[1];
-
-			var dx = cell.J - cell.s;
-			var dy = cell.K - cell.t;
-			var dd = Math.sqrt(dx * dx + dy * dy); // distance + 1 radius (not touching)
-			this.infoStrings.push("Velocity?: " + Math.floor(dd));
-		}
-
 		
 		/*
 		if (player.cells.length > 1) {
