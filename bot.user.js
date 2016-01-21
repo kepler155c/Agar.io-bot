@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1712
+// @version     3.1713
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1712;
+var aposBotVersion = 3.1713;
 
 var Constants = {
 
@@ -1873,11 +1873,7 @@ function AposBot() {
 			angle = Util.getAngle(blob2.x, blob2.y, blob1.x, blob1.y);
 			this.drawAngledLine(blob1.x, blob1.y, angle, 500, Constants.cyan);
 
-			return {
-				left : angle,
-				right : Util.mod(angle + 1),
-				inside : false
-			};
+			return new Range(angle, Util.mod(angle + 1));
 		}
 
 		var b = Math.atan2(dy, dx);
