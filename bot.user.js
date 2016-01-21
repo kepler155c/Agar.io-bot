@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1709
+// @version     3.1710
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1709;
+var aposBotVersion = 3.1710;
 
 var Constants = {
 
@@ -384,53 +384,59 @@ Player.prototype = {
 	},
 	split : function(cluster, x, y, destination) {
 
-		if (this.canSplit() && (cluster && (typeof cluster.cell.isMe == "undefined"))) {
+		if (this.canSplit()) {
 
 			this.splitInfo = {
 				target : null,
 				size : Math.floor(this.size),
-				timer : Date.now(),
-				initialSize : Math.floor(this.cells[0].size * 0.9),
-				location : null
+				timer : Date.now() + 1000,
+				point : null
 			};
 
 			this.action = this.splitAction;
 			destination.split = true;
 
 			if (cluster) {
-				this.splitInfo.target = cluster.cell;
-				// really should use an angle here
-				this.splitInfo.location = new Point(cluster.closestCell.x + (x - cluster.closestCell.x) * 4,
+
+				this.splitInfo.target = cluster.cell.id;
+
+				this.splitInfo.point = new Point(cluster.closestCell.x + (x - cluster.closestCell.x) * 4,
 						cluster.closestCell.y + (y - cluster.closestCell.y) * 4);
-				destination.point = this.splitInfo.location;
-				console.log("splitting for: " + cluster.cell.isRemoved + cluster.cell.interceptVelocity);
-				console.log([ cluster.cell.distance, cluster.cell.size, cluster.cell.closestCell.size ]);
-				console.log(cluster.cell);
-				console.log(this.splitInfo);
+				
+				destination.point = this.splitInfo.point;
 			}
 		}
 	},
-	splitAction : function(destination) {
-
-		if (Math.floor(this.size) <= this.splitInfo.size && (Date.now() - this.splitInfo.timer > 100)
-				&& this.cells[0].size < this.splitInfo.initialSize || (Date.now() - this.splitInfo.timer > 1000)) {
-
-			console.log('done splitting');
-			console.log(this.splitInfo);
-			console.log([ Date.now() - this.splitInfo.timer, this.size, this.cells[0].size ]);
-			// player size grows as long as we are splitting
-			this.action = null;
-		} else {
-			this.splitInfo.size = Math.floor(this.size);
-
-			drawCircle(this.splitInfo.location.x, this.splitInfo.location.y, 50, Constants.green);
-			drawCircle(this.x, this.y, this.size + 60, Constants.red);
-			if (this.splitInfo.target) {
-				destination.point.x = this.splitInfo.target.x;
-				destination.point.y = this.splitInfo.target.y;
+	hasSplit : function() {
+		for (var i = 0; i < this.cells.length; i++) {
+			if (this.cells[i].lastSize === null) {
+				return true;
 			}
-			return true;
 		}
+		return false;
+	},
+	splitAction : function(destination, entities) {
+
+		var info = this.splitInfo;
+
+		if (!info.hasSplit) {
+			info.hasSplit = this.hasSplit();
+		}
+
+		if (info.hasSplit && Math.floor(this.size) <= this.splitInfo.size || Date.now() > this.splitInfo.timer
+				|| info.target && !entities[info.target]) {
+			this.action = null;
+			return false;
+		}
+
+		info.size = Math.floor(this.size);
+
+		if (info.target) {
+
+			destination.point = info.point;
+		}
+
+		return true;
 	},
 	canShoot : function(numberOfShots) {
 
@@ -1008,7 +1014,9 @@ function AposBot() {
 
 					var entity = this.entities[key];
 
-					if (entity.isRemoved) { // hack until the isRemoved is fixed
+					if (typeof entity.isMe != "undefined") {
+						// ignore
+					} else if (entity.isRemoved) { // hack until the isRemoved is fixed
 
 						entity.classification = Classification.unknown;
 
