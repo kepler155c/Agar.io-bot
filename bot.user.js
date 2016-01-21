@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1705
+// @version     3.1706
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1705;
+var aposBotVersion = 3.1706;
 
 var Constants = {
 
@@ -141,10 +141,11 @@ Player.prototype = {
 
 		for (i = 0; i < cells.length; i++) {
 			cell = cells[i];
-			if (entities[cell.id]) {
+			if (entities[cell.id] && !cell.eaten) {
 				this.cells.push(cell);
 			} else {
-				console.log('not a cell');
+				console.log('cell was eaten');
+				console.log(cell);
 			}
 		}
 
