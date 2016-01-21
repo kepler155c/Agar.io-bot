@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1723
+// @version     3.1724
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1723;
+var aposBotVersion = 3.1724;
 
 var Constants = {
 
@@ -1678,7 +1678,7 @@ function AposBot() {
 					//threat.mass = t.mass / 2;
 					//threat.size = Math.sqrt(threat.mass * 100);
 					threat.isSplitThreat = entity.isSplitThreat = true;
-					threat.splitDistance = entity.splitDistance = threat.getSplitDistance();
+					threat.splitDistance = entity.splitDistance = entity.getSplitDistance();
 				}
 
 				//threat.deathDistance = Math.min(threat.size - cell.size, threat.size); // how much overlap until we are eaten ??
@@ -2363,6 +2363,8 @@ function AposBot() {
 		this.infoStrings.push("Size      : " + parseInt(player.size, 10));
 		this.infoStrings.push("Velocity  : " + parseInt(player.smallestCell.velocity, 10));
 		this.infoStrings.push("Angle     : " + player.cells[0].getMovementAngle());
+		this.infoStrings.push("Speed     : " + parseInt(player.cells[0].getSpeed()));
+		this.infoStrings.push("Split     : " + parseInt(player.cells[0].getSplitDistance()));
 		this.infoStrings.push("Aggression: " + Constants.aggressionLevel);
 		/*
 		if (player.cells.length > 1) {
