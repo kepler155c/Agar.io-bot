@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1718
+// @version     3.1719
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1718;
+var aposBotVersion = 3.1719;
 
 var Constants = {
 
@@ -230,10 +230,10 @@ Player.prototype = {
 		}
 	},
 	getSpeed : function() {
-		//return Constants.playerSpeed * Math.pow(this.mass, -1.0 / 4.5) * 50 / 40;
+		return Constants.playerSpeed * Math.pow(this.mass, -1.0 / 4.5) * 50 / 40;
 	},
 	getSplitDistance : function() {
-		//return splitDist = (4 * (cell.getSpeed() * 5)) + (cell.getSize() * 1.75);
+		return (4 * (this.getSpeed() * 5)) + (this.size * 1.75);
 	},
 	mergeAction : function(destination) {
 
@@ -1499,7 +1499,7 @@ function AposBot() {
 				for (var j = 0; j < player.cells.length; j++) {
 					var cell = player.cells[j];
 
-					var range = this.getSafeRange(cell, entity);
+					var range = this.getSafeRange(cell, entity, distance);
 
 					if (range.angleWithin(angle)) {
 						this.drawAngledLine(player.x, player.y, range.left, 500, Constants.red);
@@ -2330,6 +2330,7 @@ function AposBot() {
 					// distance = Util.computeDistance(shadowThreat.x, shadowThreat.y, cell.x, cell.y);
 
 					drawCircle(shadowThreat.x, shadowThreat.y, tsize, Constants.gray);
+					drawCircle(entity.x, entity.y, entity.getSplitDistance(), Constants.red);
 
 					var shadowLineDistance = Math.min(threat.entity.size - tsize + Constants.splitRangeMax,
 							threat.distance);
