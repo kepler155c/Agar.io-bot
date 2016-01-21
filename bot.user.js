@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1716
+// @version     3.1717
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1716;
+var aposBotVersion = 3.1717;
 
 var Constants = {
 
@@ -106,15 +106,7 @@ function Point(x, y) {
 
 //TODO: Team mode
 //      Detect when people are merging
-//      Angle based cluster code
-//      Better wall code
 //      In team mode, make allies be obstacles.
-
-/*
-Number.prototype.mod = function(n) {
-    return ((this % n) + n) % n;
-};
-*/
 
 var Player = function() {
 	this.cells = [];
@@ -127,6 +119,8 @@ var Player = function() {
 	this.fuseTimer = null;
 	this.action = null;
 	this.lastPoint = null;
+
+	this.splitFor = null;
 
 	this.lureTimer = Date.now();
 };
@@ -399,6 +393,15 @@ Player.prototype = {
 			if (cluster) {
 
 				this.splitInfo.target = cluster.cell.id;
+
+				this.splitFor = {
+					x : cluster.x,
+					y : cluster.y,
+					size : cluster.size
+				};
+
+				console.log('split for');
+				console.log(cluster.cell);
 
 				this.splitInfo.point = new Point(cluster.closestCell.x + (x - cluster.closestCell.x) * 4,
 						cluster.closestCell.y + (y - cluster.closestCell.y) * 4);
@@ -686,13 +689,14 @@ var Util = function() {
 };
 
 // Using mod function instead the prototype directly as it is very slow
-Util.mod = function(num) {
-	var mod = 360;
-
-	if (mod & (mod - 1) === 0 && mod !== 0) {
-		return num & (mod - 1);
+Util.mod = function(x) {
+	while (x < 0) {
+		x += 360;
 	}
-	return num < 0 ? ((num % mod) + mod) % mod : num % mod;
+	while (x > 360) {
+		x -= 360;
+	}
+	return x;
 };
 
 Util.computeDistance = function(x1, y1, x2, y2, s1, s2) {
@@ -1870,7 +1874,8 @@ function AposBot() {
 		var a = Math.asin(radius / dd);
 
 		if (isNaN(a)) {
-			//console.log('it is NaN');
+			console.log('it is NaN');
+			console.log([dd, radius]);
 			angle = Util.getAngle(blob2.x, blob2.y, blob1.x, blob1.y);
 			this.drawAngledLine(blob1.x, blob1.y, angle, 500, Constants.cyan);
 
@@ -1916,7 +1921,7 @@ function AposBot() {
 		player.allThreats.sort(function(a, b) {
 			return (a.distance - a.dangerZone) - (b.distance - b.dangerZone);
 		});
-		
+
 		var i, range, ranges = [];
 
 		for (i = 0; i < player.allThreats.length; i++) {
@@ -2198,6 +2203,10 @@ function AposBot() {
 			entity.lastSize = entity.size;
 
 		}, this);
+
+		if (this.splitFor) {
+			drawCircle(this.splitFor.x, this.splitFor.y, this.splitFor.size + 50, Constants.pink);
+		}
 
 		return destination;
 	};
