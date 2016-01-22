@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1736
+// @version     3.1737
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1736;
+var aposBotVersion = 3.1737;
 
 var Constants = {
 
@@ -1218,7 +1218,7 @@ function AposBot() {
 					weight = weight * 1.5;
 				}
 
-				if (player.safeToSplit && cluster.cell.isType(Classification.splitTarget) && this.inSplitRange(cluster)) {
+				if (cluster.cell.isType(Classification.splitTarget)) {
 					// weight = weight * 3;
 					cluster.canSplitKill = true;
 				}
@@ -1375,6 +1375,22 @@ function AposBot() {
 		return goodRanges[0];
 	};
 
+	this.shouldSplitKill = function(player, cluster) {
+
+		if (!this.inSplitRange(cluster)) {
+			return false;
+		}
+
+		if (Constants.aggressionLevel > 1) {
+			this.safeToSplit = false;
+
+			if ((player.largestCell.mass / 2) / cluster.mass > 1) {
+				return true;
+			}
+		}
+		return player.isSafeToSplit(this.entities);
+	};
+
 	this.determineFoodDestination = function(player, destination, ranges) {
 
 		this.clusterFood(player, player.largestCell.size);
@@ -1395,7 +1411,7 @@ function AposBot() {
 
 		var doSplit = false; // (player.largestCell.mass >= 36 && player.mass <= 50 && player.cells.length == 1 && player.safeToSplit);
 
-		player.isSafeToSplit(this.entities);
+		// player.isSafeToSplit(this.entities);
 
 		var cluster = this.getBestFood(player, range);
 
@@ -1404,8 +1420,8 @@ function AposBot() {
 		}
 
 		// drawPoint(bestFood.x, bestFood.y, 1, "");
-		if (cluster.canSplitKill && player.safeToSplit) {
-			doSplit = true;
+		if (cluster.canSplitKill) { //  && player.safeToSplit) {
+			doSplit = this.shouldSplitKill(player, cluster);
 		}
 
 		if (cluster.cell) {
