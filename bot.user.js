@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1738
+// @version     3.1739
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1738;
+var aposBotVersion = 3.1739;
 
 var Constants = {
 
@@ -1448,8 +1448,9 @@ function AposBot() {
 		var shiftedAngle = this.avoidObstacles(player, angle, cluster.distance);
 
 		// console.log('angle is: ' + shiftedAngle.angle);
-		destination.point = this.followAngle(shiftedAngle.angle, cluster.closestCell.x, cluster.closestCell.y, verticalDistance());
-				// ranges.length > 0 ? verticalDistance() : cluster.distance);
+		destination.point = this.followAngle(shiftedAngle.angle, cluster.closestCell.x, cluster.closestCell.y,
+				verticalDistance());
+		// ranges.length > 0 ? verticalDistance() : cluster.distance);
 
 		if (this.angleInRanges(shiftedAngle.angle, ranges)) {
 			console.log('not shifting');
@@ -2013,39 +2014,86 @@ function AposBot() {
 	 * The bot works by removing angles in which it is too
 	 * dangerous to travel towards to.
 	 */
-	this.avoidThreats = function(player, destination, shrinkage) {
+	this.avoidThreats = function(player, destination, shrinkage, retry) {
 
-		var ranges = [];
+		var allRanges = [];
+		var i;
 
-		for (var i = 0; i < player.cells.length; i++) {
+		// for merge mass
+		for (i = 0; i < player.cells.length; i++) {
 			var cell = player.cells[i];
 
 			cell.threatened = false;
 		}
 
-		player.eachCellThreat(function(cell, threat) {
+		this.addWall(player, allRanges);
+
+		this.allThreats.sort(function(a, b) {
+			if (a.cell.size < b.cell.size) {
+				return -1;
+			}
+
+			var diff = Math.min(a.distance - a.dangerZone, 0) - Math.min(b.distance - b.dangerZone, 0);
+			if (diff > 0) {
+				return 1;
+			} else if (diff < 0) {
+				return -1;
+			}
+			return 0;
+		});
+
+		console.log("dumping");
+		for (i = 0; i < player.allThreats.length; i++) {
+
+			var threat = player.allThreats[i];
+
+			console.log([ threat.cell.size, threat.distance - threat.dangerZone ]);
 
 			if (threat.distance < threat.dangerZone) {
 
 				var x = 90 / shrinkage; // 180 degress initially, then 90, 45, 22.5
-				var range = new Range(Util.mod(threat.angle + x), Util.mod(threat.angle - x));
-				this.addRange(ranges, range);
-
-				// cell.threatened = threat.classification == Classification.threat && threat.intersects;
-			}
-		}, this);
-
-		this.addWall(player, ranges);
-
-		if (ranges.length == 1) {
-			if (Util.mod(ranges[0].left - ranges[0].right) <= 1) { // wrong - this should use size
-				console.log('bad range');
-				console.log(ranges[0]);
-				return null;
+				allRanges.push(new Range(Util.mod(threat.angle + x), Util.mod(threat.angle - x)));
 			}
 		}
 
-		return ranges;
+		var result = this.combineRanges(allRanges, allRanges.length);
+
+		if (result.failed && retry) {
+			result = this.combineRanges(allRanges, result.max);
+		}
+
+		if (result.failed) {
+			console.log('failed ??');
+		}
+
+		return result.ranges;
+	};
+
+	this.combineRanges = function(ranges, length) {
+
+		var result = {
+			failed : false,
+			ranges : [],
+			max : 0
+		};
+
+		for (result.max = 0; result.max < length; result.max++) {
+			var range = ranges[result.max];
+
+			this.addRange(result.ranges, range);
+
+			if (result.ranges.length == 1) {
+				if (Util.mod(result.ranges[0].left - result.ranges[0].right) <= 1) { // wrong - this should use size
+					console.log('bad range' + result.ranges[0].size());
+					console.log(result.ranges[0]);
+					result.failed = true;
+					result.ranges = null;
+					return result;
+				}
+			}
+		}
+
+		return result;
 	};
 
 	this.determineBestDestination = function(player, destination) {
@@ -2131,7 +2179,7 @@ function AposBot() {
 			evasionStrategy.call(player);
 		}
 
-		var ranges = this.avoidThreats(player, destination, 1);
+		var ranges = this.avoidThreats(player, destination, 1, false);
 
 		if (ranges === null) {
 
@@ -2139,10 +2187,10 @@ function AposBot() {
 				threat.dangerZone = threat.minDistance;
 			});
 
-			console.log('trying again to determine destination');
-			for (i = 1; i < 10; i++) {
+			for (i = 2; i < 10; i++) {
 
-				ranges = this.avoidThreats(player, destination, i);
+				console.log('trying again to determine destination ' + i);
+				ranges = this.avoidThreats(player, destination, i, i > 2);
 				if (ranges === null) {
 					console.log('could not determine destination: ' + i);
 				} else {
