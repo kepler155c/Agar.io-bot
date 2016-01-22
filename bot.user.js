@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1733
+// @version     3.1734
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1733;
+var aposBotVersion = 3.1734;
 
 var Constants = {
 
@@ -920,6 +920,7 @@ function AposBot() {
 			Constants.aggressionLevel = Math.max(0, Constants.aggressionLevel - 1);
 		} else if (key.keyCode == 80) { // 'p: no processing'
 			this.noProcessing = !this.noProcessing;
+			setHumanControlled(this.noProcessing);
 		} else if (key.keyCode == 65) { // 'a: raise aggression'
 			Constants.aggressionLevel = Math.min(3, Constants.aggressionLevel + 1);
 		}
