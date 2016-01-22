@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1742
+// @version     3.1743
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1742;
+var aposBotVersion = 3.1743;
 
 var Constants = {
 
@@ -203,6 +203,8 @@ Player.prototype = {
 						}
 					}
 				}, this);
+		
+		return this.safeToSplit;
 	},
 	merge : function() {
 
@@ -535,12 +537,6 @@ Player.prototype = {
 			}
 		}
 	},
-	sortThreats : function() {
-
-		this.allThreats.sort(function(a, b) {
-			return Math.max(a.distance - a.dangerZone, 0) - Math.max(b.distance - b.dangerZone, 0);
-		});
-	},
 	singleThreatEvasionStrategy : function() {
 		// angle away from the closest threat and the next closest threat (if within range)
 
@@ -548,7 +544,9 @@ Player.prototype = {
 
 		if (this.allThreats.length > 1) {
 
-			this.sortThreats();
+			this.allThreats.sort(function(a, b) {
+				return Math.max(a.distance - a.dangerZone, 0) - Math.max(b.distance - b.dangerZone, 0);
+			});
 
 			for (var i = 1; i < this.allThreats.length; i++) {
 				var threat = this.allThreats[i];
@@ -2042,12 +2040,9 @@ function AposBot() {
 			return 0;
 		});
 
-		console.log("dumping");
 		for (i = 0; i < player.allThreats.length; i++) {
 
 			var threat = player.allThreats[i];
-
-			console.log([ threat.cell.size, threat.distance - threat.dangerZone ]);
 
 			if (threat.distance < threat.dangerZone) {
 
