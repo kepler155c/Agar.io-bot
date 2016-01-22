@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1747
+// @version     3.1748
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1747;
+var aposBotVersion = 3.1748;
 
 var Constants = {
 
@@ -903,12 +903,15 @@ function AposBot() {
 	this.initialized = false;
 	this.noProcessing = false;
 	this.toggleFollow = false;
+	this.verticalDistance = false;
 	this.infoStrings = [];
 	this.moreInfoStrings = [];
 	this.previousUpdated = Date.now();
 	this.keyAction = function(key) {
 		if (81 == key.keyCode) { // 'q'
 			this.toggleFollow = !this.toggleFollow;
+		} else if (key.keyCode == 86) { // 'v: vertical distance'
+			this.verticalDistance = !this.verticalDistance;
 		} else if (key.keyCode == 69) { // 'e: eject virus'
 			this.player.ejectVirus();
 		} else if (key.keyCode == 77) { // 'm: merge'
@@ -1444,10 +1447,11 @@ function AposBot() {
 		// angle away from obstacles
 		var shiftedAngle = this.avoidObstacles(player, angle, cluster.distance);
 
+		var distance = ranges.length > 0 ? verticalDistance() : cluster.distance;
+		
 		// console.log('angle is: ' + shiftedAngle.angle);
 		destination.point = this.followAngle(shiftedAngle.angle, cluster.closestCell.x, cluster.closestCell.y,
-				verticalDistance());
-		// ranges.length > 0 ? verticalDistance() : cluster.distance);
+				this.verticalDistance ? verticalDistance() : distance);
 
 		if (this.angleInRanges(shiftedAngle.angle, ranges)) {
 			console.log('not shifting');
@@ -2420,6 +2424,7 @@ function AposBot() {
 		this.infoStrings.push("Angle     : " + player.cells[0].getMovementAngle());
 		this.infoStrings.push("Speed     : " + parseInt(player.cells[0].getSpeed()));
 		this.infoStrings.push("Split     : " + parseInt(player.cells[0].splitDistance));
+		this.infoStrings.push("Vertical  : " + this.verticalDistance ? 'True' : 'False');
 		this.infoStrings.push("Aggression: " + Constants.aggressionLevel);
 
 		/*
