@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1748
+// @version     3.1749
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1748;
+var aposBotVersion = 3.1749;
 
 var Constants = {
 
@@ -2424,7 +2424,7 @@ function AposBot() {
 		this.infoStrings.push("Angle     : " + player.cells[0].getMovementAngle());
 		this.infoStrings.push("Speed     : " + parseInt(player.cells[0].getSpeed()));
 		this.infoStrings.push("Split     : " + parseInt(player.cells[0].splitDistance));
-		this.infoStrings.push("Vertical  : " + this.verticalDistance ? 'True' : 'False');
+		this.infoStrings.push("Vertical  : " + (this.verticalDistance ? "True" : "False"));
 		this.infoStrings.push("Aggression: " + Constants.aggressionLevel);
 
 		/*
