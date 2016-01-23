@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1760
+// @version     3.1761
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1760;
+var aposBotVersion = 3.1761;
 
 var Constants = {
 
@@ -2630,6 +2630,9 @@ function AposBot() {
 		drawLine(x, y, lineLeft.x, lineLeft.y, color);
 		drawLine(x, y, lineRight.x, lineRight.y, color);
 		drawArc(lineLeft.x, lineLeft.y, lineRight.x, lineRight.y, x, y, color);
+
+		drawPoint(lineLeft.x, lineLeft.y, Constants.gray, range.left);
+		drawPoint(lineRight.x, lineRight.y, Constants.gray, range.right);
 	};
 
 	this.drawAngle = function(cell, angle, distance, color) {
