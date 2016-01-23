@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1751
+// @version     3.1752
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1751;
+var aposBotVersion = 3.1752;
 
 var Constants = {
 
@@ -482,8 +482,10 @@ Player.prototype = {
 
 				if (virus.mass >= info.startingMass - 1 && info.mass - this.mass < 150) {
 
-					destination.point.x = virus.x;
-					destination.point.y = virus.y;
+//					destination.point.x = virus.x;
+//					destination.point.y = virus.y;
+					destination.point.x = Math.floor(cell.x - Math.cos(angle) * 5); // (distance / 2));
+					destination.point.y = Math.floor(cell.y - Math.sin(angle) * 5); // (distance / 2));
 					destination.shoot = true;
 
 				} else {
@@ -494,13 +496,13 @@ Player.prototype = {
 
 			} else if (virus.distance < virus.size + cell.size + 50) { // too close - back up
 
-				destination.point.x = Math.floor(cell.x + Math.cos(angle) * 5); // (distance / 2));
-				destination.point.y = Math.floor(cell.y + Math.sin(angle) * 5); // (distance / 2));
+				destination.point.x = Math.floor(cell.x + Math.cos(angle) * (distance / 2));
+				destination.point.y = Math.floor(cell.y + Math.sin(angle) * (distance / 2));
 
 			} else {
 
-				destination.point.x = Math.floor(cell.x - Math.cos(angle) * 5); // (distance / 2));
-				destination.point.y = Math.floor(cell.y - Math.sin(angle) * 5); // (distance / 2));
+				destination.point.x = Math.floor(cell.x - Math.cos(angle) * (distance / 2));
+				destination.point.y = Math.floor(cell.y - Math.sin(angle) * (distance / 2));
 			}
 			drawLine(cell.x, cell.y, destination.point.x, destination.point.y, Constants.red);
 
