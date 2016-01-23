@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1750
+// @version     3.1751
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1750;
+var aposBotVersion = 3.1751;
 
 var Constants = {
 
@@ -494,13 +494,13 @@ Player.prototype = {
 
 			} else if (virus.distance < virus.size + cell.size + 50) { // too close - back up
 
-				destination.point.x = Math.floor(cell.x + Math.cos(angle) * (distance / 2));
-				destination.point.y = Math.floor(cell.y + Math.sin(angle) * (distance / 2));
+				destination.point.x = Math.floor(cell.x + Math.cos(angle) * 5); // (distance / 2));
+				destination.point.y = Math.floor(cell.y + Math.sin(angle) * 5); // (distance / 2));
 
 			} else {
 
-				destination.point.x = Math.floor(cell.x - Math.cos(angle) * (distance / 2));
-				destination.point.y = Math.floor(cell.y - Math.sin(angle) * (distance / 2));
+				destination.point.x = Math.floor(cell.x - Math.cos(angle) * 5); // (distance / 2));
+				destination.point.y = Math.floor(cell.y - Math.sin(angle) * 5); // (distance / 2));
 			}
 			drawLine(cell.x, cell.y, destination.point.x, destination.point.y, Constants.red);
 
@@ -1453,7 +1453,7 @@ function AposBot() {
 		
 		// console.log('angle is: ' + shiftedAngle.angle);
 		destination.point = this.followAngle(shiftedAngle.angle, cluster.closestCell.x, cluster.closestCell.y,
-				this.verticalDistance ? verticalDistance() : distance);
+				this.verticalDistance ? 5 : distance);
 
 		if (this.angleInRanges(shiftedAngle.angle, ranges)) {
 			console.log('not shifting');
