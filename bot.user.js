@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1755
+// @version     3.1756
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1755;
+var aposBotVersion = 3.1756;
 
 var Constants = {
 
@@ -2430,7 +2430,7 @@ function AposBot() {
 		this.infoStrings.push("Angle     : " + player.cells[0].getMovementAngle());
 
 		var lastPos = player.cells[0].getLastPos();
-		var angle = Math.atan2(lastPos.y - player.cells[0].y, lastPos.x - player.cells[0].x);
+		var angle = Math.atan2(player.cells[0].y - lastPos.y, player.cells[0].x - lastPos.x);
 		this.infoStrings.push("Angle     : " + this.radiansToDegrees(angle));
 		
 
