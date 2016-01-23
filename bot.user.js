@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1769
+// @version     3.1770
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1769;
+var aposBotVersion = 3.1770;
 
 var Constants = {
 
@@ -693,19 +693,20 @@ Util.computeDistance = function(x1, y1, x2, y2, s1, s2) {
 	return distance;
 };
 
+// angle of point 1 in relation to point 2
 Util.getAngle = function(x1, y1, x2, y2) {
 
 	var result = Math.round(Math.atan2(-(y1 - y2), -(x1 - x2)) / Math.PI * 180 + 180);
 
 	if (x1 == x2) {
-		if (y1 < y2) {
+		if (y1 == y2) {
+			result = 180;
+		} else if (y1 < y2) {
 			result = 270;
 		} else {
 			result = 90;
 		}
-	}
-
-	if (y1 == y2) {
+	} else if (y1 == y2) {
 		if (x1 < x2) {
 			result = 180;
 		} else {
@@ -1505,8 +1506,8 @@ function AposBot() {
 		drawPoint(player.x - player.size, player.y + player.size, Constants.yellow, Util.getAngle(player.x
 				- player.size, player.y + player.size, player.x, player.y));
 
-		drawPoint(player.x - player.size, player.y, Constants.yellow, Util.getAngle(player.x, player.y, player.x
-				- player.size, player.y));
+		drawPoint(player.x - player.size, player.y, Constants.yellow, Util.getAngle(player.x - player.size, player.y,
+				player.x, player.y));
 
 		if (!doSplit && !shiftedAngle.shifted) {
 			player.lure(cluster, destination);
