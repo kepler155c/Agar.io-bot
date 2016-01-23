@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1762
+// @version     3.1764
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1762;
+var aposBotVersion = 3.1764;
 
 var Constants = {
 
@@ -731,8 +731,8 @@ Util.pointFromAngle = function(x, y, angle, distance) {
 	var radians = this.degreesToRadians(angle);
 
 	return {
-		x : x - Math.cos(radians) * distance,
-		y : y - Math.sin(radians) * distance
+		x : x + Math.cos(radians) * distance,
+		y : y + Math.sin(radians) * distance
 	};
 };
 
@@ -1467,12 +1467,8 @@ function AposBot() {
 
 		var distance = ranges.length > 0 ? verticalDistance() : cluster.distance;
 
-		// console.log('angle is: ' + shiftedAngle.angle);
-		destination.point = this.followAngle(shiftedAngle.angle, cluster.closestCell.x, cluster.closestCell.y,
-				this.verticalDistance ? 5 : distance);
-
-		destination.point = Util.pointFromAngle(cluster.closestCell.x, cluster.closestCell.y, shiftedAngle.angle,
-				this.verticalDistance ? 5 : distance);
+		destination.point = Util.pointFromAngle(cluster.closestCell.x, cluster.closestCell.y, Util
+				.mod(shiftedAngle.angle + 180), this.verticalDistance ? 5 : distance);
 
 		if (this.angleInRanges(shiftedAngle.angle, ranges)) {
 			console.log('not shifting');
@@ -2623,18 +2619,15 @@ function AposBot() {
 
 	this.drawRange = function(x, y, size, range, index, color) {
 
-		//		drawPoint(angleStuff[2][0], angleStuff[2][1], Constants.red, "");
-		//		drawPoint(angleStuff[3][0], angleStuff[3][1], Constants.red, "");
+		var leftPt = Util.pointFromAngle(x, y, range.left, size - index * 10);
+		var rightPt = Util.pointFromAngle(x, y, range.right, size - index * 10);
 
-		var lineLeft = this.followAngle(range.left, x, y, size - index * 10);
-		var lineRight = this.followAngle(range.right, x, y, size - index * 10);
+		drawLine(x, y, leftPt.x, leftPt.y, color);
+		drawLine(x, y, rightPt.x, rightPt.y, color);
+		drawArc(leftPt.x, leftPt.y, rightPt.x, rightPt.y, x, y, color);
 
-		drawLine(x, y, lineLeft.x, lineLeft.y, color);
-		drawLine(x, y, lineRight.x, lineRight.y, color);
-		drawArc(lineLeft.x, lineLeft.y, lineRight.x, lineRight.y, x, y, color);
-
-		drawPoint(lineLeft.x, lineLeft.y, Constants.gray, range.left);
-		drawPoint(lineRight.x, lineRight.y, Constants.gray, range.right);
+		drawPoint(leftPt.x, leftPt.y, Constants.gray, Math.floor(range.left));
+		drawPoint(rightPt.x, rightPt.y, Constants.gray, Math.floor(range.right));
 	};
 
 	this.drawAngle = function(cell, angle, distance, color) {
