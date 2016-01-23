@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1764
+// @version     3.1765
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1764;
+var aposBotVersion = 3.1765;
 
 var Constants = {
 
@@ -1499,11 +1499,11 @@ function AposBot() {
 		drawPoint(cluster.x, cluster.y + 20, Constants.yellow, angle + " " + cluster.closestCell.getMovementAngle());
 		// "m:" + cluster.mass.toFixed(1) + " w:" + cluster.clusterWeight.toFixed(1));
 
-		drawPoint(player.x + player.size, player.y + player.size, Constants.yellow, Util.getAngle(player.x, player.y,
-				player.x + player.size, player.y + player.size));
+		drawPoint(player.x + player.size, player.y + player.size, Constants.yellow, Util.getAngle(player.x
+				+ player.size, player.y + player.size, player.x, player.y));
 
-		drawPoint(player.x - player.size, player.y + player.size, Constants.yellow, Util.getAngle(player.x, player.y,
-				player.x - player.size, player.y + player.size));
+		drawPoint(player.x - player.size, player.y + player.size, Constants.yellow, Util.getAngle(player.x
+				+ player.size, player.y + player.size, player.x, player.y));
 
 		if (!doSplit && !shiftedAngle.shifted) {
 			player.lure(cluster, destination);
