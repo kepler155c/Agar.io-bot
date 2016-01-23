@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1757
+// @version     3.1758
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1757;
+var aposBotVersion = 3.1758;
 
 var Constants = {
 
@@ -699,9 +699,17 @@ Util.getAngle = function(x1, y1, x2, y2) {
 
 	if (x1 == x2) {
 		if (y1 < y2) {
-			result = 271;
+			result = 270;
 		} else {
-			result = 89;
+			result = 90;
+		}
+	}
+
+	if (y1 == y2) {
+		if (x1 < x2) {
+			result = 360;
+		} else {
+			result = 180;
 		}
 	}
 
@@ -709,6 +717,7 @@ Util.getAngle = function(x1, y1, x2, y2) {
 
 	if (result != result2) {
 		console.log([ result, result2 ]);
+		console.log([ x1, y1, x2, y2 ]);
 	}
 	return result;
 };
@@ -1486,8 +1495,10 @@ function AposBot() {
 		}
 
 		drawCircle(cluster.x, cluster.y, cluster.size + 40, color);
-		drawPoint(cluster.x, cluster.y + 20, Constants.yellow, "m:" + cluster.mass.toFixed(1) + " w:"
-				+ cluster.clusterWeight.toFixed(1));
+		//		drawPoint(cluster.x, cluster.y + 20, Constants.yellow, "m:" + cluster.mass.toFixed(1) + " w:"
+		//				+ cluster.clusterWeight.toFixed(1));
+		drawPoint(cluster.x, cluster.y + 20, Constants.yellow, angle + " " + cluster.closestCell.getMovementAngle());
+		// "m:" + cluster.mass.toFixed(1) + " w:" + cluster.clusterWeight.toFixed(1));
 
 		if (!doSplit && !shiftedAngle.shifted) {
 			player.lure(cluster, destination);
