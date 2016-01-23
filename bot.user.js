@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1770
+// @version     3.1771
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1770;
+var aposBotVersion = 3.1771;
 
 var Constants = {
 
@@ -316,7 +316,7 @@ Player.prototype = {
 		}
 
 		// point to largest cell - mouse pos half radius distance on largest cell towards next largest
-		var angle = Util.getAngle(nextLargestCell.x, nextLargestCell.y, info.cell.x, info.cell.y);
+		var angle = Util.getAngle(nextLargestCell, info.cell);
 		destination.point = Util.pointFromAngle(info.cell.x, info.cell.y, angle, info.cell.size / 2);
 
 		return true;
@@ -468,7 +468,7 @@ Player.prototype = {
 			var cell = virus.closestCell;
 			var distance = virus.distance;
 
-			var virusAngle = Util.getAngle(cell.x, cell.y, virus.x, virus.y);
+			var virusAngle = Util.getAngle(cell, virus);
 			var movementAngle = cell.getMovementAngle();
 
 			var angle = Math.atan2(cell.y - virus.y, cell.x - virus.x);
@@ -694,31 +694,31 @@ Util.computeDistance = function(x1, y1, x2, y2, s1, s2) {
 };
 
 // angle of point 1 in relation to point 2
-Util.getAngle = function(x1, y1, x2, y2) {
+Util.getAngle = function(target, source) {
 
-	var result = Math.round(Math.atan2(-(y1 - y2), -(x1 - x2)) / Math.PI * 180 + 180);
+	var result = Math.round(Math.atan2(-(target.y - source.y), -(target.x - source.x)) / Math.PI * 180 + 180);
 
-	if (x1 == x2) {
-		if (y1 == y2) {
+	if (target.x == source.x) {
+		if (target.y == source.y) {
 			result = 180;
-		} else if (y1 < y2) {
+		} else if (target.y < source.y) {
 			result = 270;
 		} else {
 			result = 90;
 		}
-	} else if (y1 == y2) {
-		if (x1 < x2) {
+	} else if (target.y == source.y) {
+		if (target.x < source.x) {
 			result = 180;
 		} else {
 			result = 360;
 		}
 	}
 
-	var result2 = Math.round(Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI + 180);
+	var result2 = Math.round(Math.atan2(source.y - target.y, source.x - target.x) * 180 / Math.PI + 180);
 
 	if (result != result2) {
 		console.log([ result, result2 ]);
-		console.log([ x1, y1, x2, y2 ]);
+		console.log([ target.x, target.y, source.x, source.y ]);
 	}
 	return result;
 };
@@ -800,8 +800,7 @@ function initializeEntity() {
 
 		var a = this.getLastPos();
 
-		var range = new Range(Util.getAngle(a.x, a.y, this.x, this.y), Util
-				.getAngle(this.x, this.y, target.x, target.y));
+		var range = new Range(Util.getAngle(a, this), Util.getAngle(this, target));
 
 		// hmm - 360 - 5 ??
 		return range.size() < 30 || range.size() > 330; // within 30 degrees
@@ -849,11 +848,11 @@ function initializeEntity() {
 
 		var lastPos = this.getLastPos();
 
-		return Util.getAngle(lastPos.x, lastPos.y, this.x, this.y);
+		return Util.getAngle(lastPos, this);
 	};
 
 	da.prototype.getAngle = function(target) {
-		return Util.getAngle(this.x, this.y, target.x, target.y);
+		return Util.getAngle(this, target);
 	};
 
 	var entitiesPrototype = Object.getPrototypeOf(getCells());
@@ -1271,8 +1270,7 @@ function AposBot() {
 	this.isFoodValid = function(player, cluster, range) {
 
 		if (range) {
-			// why is this reversed ?
-			var angle = Util.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
+			var angle = Util.getAngle(cluster, cluster.closestCell);
 			if (!range.angleWithin(angle)) {
 				return false;
 			}
@@ -1456,7 +1454,7 @@ function AposBot() {
 		}
 
 		// angle of food
-		var angle = Util.getAngle(cluster.x, cluster.y, cluster.closestCell.x, cluster.closestCell.y);
+		var angle = Util.getAngle(cluster, cluster.closestCell);
 
 		if (this.angleInThreatRanges(angle, ranges)) {
 			console.log('wtf');
@@ -1500,14 +1498,11 @@ function AposBot() {
 		drawPoint(cluster.x, cluster.y + 20, Constants.yellow, angle + " " + cluster.closestCell.getMovementAngle());
 		// "m:" + cluster.mass.toFixed(1) + " w:" + cluster.clusterWeight.toFixed(1));
 
-		drawPoint(player.x + player.size, player.y + player.size, Constants.yellow, Util.getAngle(player.x
-				+ player.size, player.y + player.size, player.x, player.y));
+		drawPoint(player.x + player.size, player.y + player.size, Constants.yellow, Util.getAngle(new Point(player.x
+				+ player.size, player.y + player.size), player));
 
-		drawPoint(player.x - player.size, player.y + player.size, Constants.yellow, Util.getAngle(player.x
-				- player.size, player.y + player.size, player.x, player.y));
-
-		drawPoint(player.x - player.size, player.y, Constants.yellow, Util.getAngle(player.x - player.size, player.y,
-				player.x, player.y));
+		drawPoint(player.x - player.size, player.y + player.size, Constants.yellow, Util.getAngle(new Point(player.x
+				- player.size, player.y + player.size), player));
 
 		if (!doSplit && !shiftedAngle.shifted) {
 			player.lure(cluster, destination);
@@ -1520,7 +1515,6 @@ function AposBot() {
 
 		drawLine(player.x, player.y, destination.point.x, destination.point.y, Constants.green);
 
-		this.drawAngledLine(player.x, player.y, 270, player.size * 2, Constants.red);
 		//drawLine(cluster.closestCell.x, cluster.closestCell.y, destination.point.x, destination.point.y,
 		//		Constants.green);
 
@@ -1537,7 +1531,7 @@ function AposBot() {
 		var keys = Object.keys(this.entities).filter(this.entities.threatAndVirusFilter, this.entities);
 
 		// cell -> target
-		var angle = Util.getAngle(target.x, target.y, target.closestCell.x, target.closestCell.y);
+		var angle = Util.getAngle(target, target.closestCell);
 
 		for (var i = 0; i < keys.length; i++) {
 			var entity = this.entities[keys[i]];
@@ -1899,8 +1893,8 @@ function AposBot() {
 			y : radius * Math.cos(t)
 		};
 
-		return new Range(Util.getAngle(target.x + ta.x, target.y + ta.y, source.x, source.y), Util.getAngle(target.x
-				+ tb.x, target.y + tb.y, source.x, source.y));
+		return new Range(Util.getAngle(new Point(target.x + ta.x, target.y + ta.y), source), Util.getAngle(new Point(
+				target.x + tb.x, target.y + tb.y), source));
 	};
 
 	//TODO: Don't let this function do the radius math.
@@ -1930,7 +1924,7 @@ function AposBot() {
 			console.log('it is NaN');
 			console.log([ dd, radius ]);
 			console.log(blob2);
-			angle = Util.getAngle(blob2.x, blob2.y, blob1.x, blob1.y);
+			angle = Util.getAngle(blob2, blob1);
 			this.drawAngledLine(blob1.x, blob1.y, angle, 500, Constants.cyan);
 
 			return new Range(angle, Util.mod(angle + 1));
@@ -1950,7 +1944,8 @@ function AposBot() {
 			y : radius * Math.cos(t)
 		};
 
-		var range = new Range(Util.getAngle(cx + ta.x, cy + ta.y, px, py), Util.getAngle(cx + tb.x, cy + tb.y, px, py));
+		var range = new Range(Util.getAngle(new Point(cx + ta.x, cy + ta.y), new Point(px, py)), Util.getAngle(
+				new Point(cx + tb.x, cy + tb.y), new Point(px, py)));
 		range.inverted = inverted;
 
 		return range;
