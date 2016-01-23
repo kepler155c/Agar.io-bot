@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1759
+// @version     3.1760
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1759;
+var aposBotVersion = 3.1760;
 
 var Constants = {
 
@@ -1469,6 +1469,9 @@ function AposBot() {
 
 		// console.log('angle is: ' + shiftedAngle.angle);
 		destination.point = this.followAngle(shiftedAngle.angle, cluster.closestCell.x, cluster.closestCell.y,
+				this.verticalDistance ? 5 : distance);
+
+		destination.point = Util.pointFromAngle(cluster.closestCell.x, cluster.closestCell.y, shiftedAngle.angle,
 				this.verticalDistance ? 5 : distance);
 
 		if (this.angleInRanges(shiftedAngle.angle, ranges)) {
