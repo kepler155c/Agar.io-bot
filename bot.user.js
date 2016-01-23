@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1768
+// @version     3.1769
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1768;
+var aposBotVersion = 3.1769;
 
 var Constants = {
 
@@ -158,7 +158,7 @@ Player.prototype = {
 			cell = cells[i];
 
 			if (!cell.fuseTimer) {
-				cell.fuseTimer = Date.now() + (30 + this.mass * 0.0233) * 1000;
+				cell.fuseTimer = Date.now() + (30 + this.mass * 0.02) * 1000;
 			}
 		}
 
@@ -707,9 +707,9 @@ Util.getAngle = function(x1, y1, x2, y2) {
 
 	if (y1 == y2) {
 		if (x1 < x2) {
-			result = 360;
-		} else {
 			result = 180;
+		} else {
+			result = 360;
 		}
 	}
 
@@ -731,8 +731,8 @@ Util.pointFromAngle = function(x, y, angle, distance) {
 	var radians = this.degreesToRadians(angle);
 
 	return {
-		x : x + Math.cos(radians) * distance,
-		y : y + Math.sin(radians) * distance
+		x : x - Math.cos(radians) * distance,
+		y : y - Math.sin(radians) * distance
 	};
 };
 
@@ -1467,8 +1467,8 @@ function AposBot() {
 
 		var distance = ranges.length > 0 ? verticalDistance() : cluster.distance;
 
-		destination.point = Util.pointFromAngle(cluster.closestCell.x, cluster.closestCell.y, Util
-				.mod(shiftedAngle.angle + 180), this.verticalDistance ? 5 : distance);
+		destination.point = Util.pointFromAngle(cluster.closestCell.x, cluster.closestCell.y, shiftedAngle.angle,
+				this.verticalDistance ? 5 : distance);
 
 		if (this.angleInRanges(shiftedAngle.angle, ranges)) {
 			console.log('not shifting');
