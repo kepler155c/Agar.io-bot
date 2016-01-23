@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1756
+// @version     3.1757
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1756;
+var aposBotVersion = 3.1757;
 
 var Constants = {
 
@@ -482,8 +482,8 @@ Player.prototype = {
 
 				if (virus.mass >= info.startingMass - 1 && info.mass - this.mass < 150) {
 
-//					destination.point.x = virus.x;
-//					destination.point.y = virus.y;
+					//					destination.point.x = virus.x;
+					//					destination.point.y = virus.y;
 					destination.point.x = Math.floor(cell.x - Math.cos(angle) * 5); // (distance / 2));
 					destination.point.y = Math.floor(cell.y - Math.sin(angle) * 5); // (distance / 2));
 					destination.shoot = true;
@@ -694,18 +694,23 @@ Util.computeDistance = function(x1, y1, x2, y2, s1, s2) {
 };
 
 Util.getAngle = function(x1, y1, x2, y2) {
-	//Handle vertical and horizontal lines.
+
+	var result = Math.round(Math.atan2(-(y1 - y2), -(x1 - x2)) / Math.PI * 180 + 180);
 
 	if (x1 == x2) {
 		if (y1 < y2) {
-			return 271;
-			//return 89;
+			result = 271;
 		} else {
-			return 89;
+			result = 89;
 		}
 	}
 
-	return (Math.round(Math.atan2(-(y1 - y2), -(x1 - x2)) / Math.PI * 180 + 180));
+	var result2 = Math.round(Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI + 180);
+
+	if (result != result2) {
+		console.log([ result, result2 ]);
+	}
+	return result;
 };
 
 Util.degreesToRadians = function(degrees) {
@@ -1452,7 +1457,7 @@ function AposBot() {
 		var shiftedAngle = this.avoidObstacles(player, angle, cluster.distance);
 
 		var distance = ranges.length > 0 ? verticalDistance() : cluster.distance;
-		
+
 		// console.log('angle is: ' + shiftedAngle.angle);
 		destination.point = this.followAngle(shiftedAngle.angle, cluster.closestCell.x, cluster.closestCell.y,
 				this.verticalDistance ? 5 : distance);
@@ -2425,16 +2430,13 @@ function AposBot() {
 		this.infoStrings.push("");
 		this.infoStrings.push("Size      : " + parseInt(player.size, 10));
 		this.infoStrings.push("Velocity  : " + parseInt(player.smallestCell.velocity, 10));
-		
-		
+
 		this.infoStrings.push("Angle     : " + player.cells[0].getMovementAngle());
 
 		var lastPos = player.cells[0].getLastPos();
 		var angle = Math.atan2(player.cells[0].y - lastPos.y, player.cells[0].x - lastPos.x);
 		this.infoStrings.push("Angle     : " + this.radiansToDegrees(angle));
-		
 
-		
 		this.infoStrings.push("Speed     : " + parseInt(player.cells[0].getSpeed()));
 		this.infoStrings.push("Split     : " + parseInt(player.cells[0].splitDistance));
 		this.infoStrings.push("Vertical  : " + (this.verticalDistance ? "True" : "False"));
