@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1804
+// @version     3.1805
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1804;
+var aposBotVersion = 3.1805;
 
 var Constants = {
 
@@ -1879,13 +1879,13 @@ function AposBot() {
 	this.getRange = function(source, target) {
 
 //		var radius = target.size;
-        var radius = target.size - source.size * 0.4;    // 200 - (100 * .4) = 160 --> min distance
+        var radius = target.size - (source.size * 0.4);    // 200 - (100 * .4) = 160 --> min distance
         // Eating range = radius of eating cell + 40% of the radius of the cell being eaten
 
 		//Alpha
 		var a = Math.asin(radius / target.distance);
 		if (isNaN(a)) {
-			console.log('it is NaN ' + radius / source.distance);
+			console.log('it is NaN ' + radius + ' ' + source.distance);
 			a = 1;
 		}
 		//Beta
@@ -1896,7 +1896,7 @@ function AposBot() {
 		var diff = Util.radiansToDegrees(b - t);
 		b = Util.radiansToDegrees(b);
 
-		return new Range(Util.mod(b - diff + 180), Util.mod(b + diff + 180));
+		return new Range(Util.mod(b - diff), Util.mod(b + diff));
 	};
 
 	//TODO: Don't let this function do the radius math.
