@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1789
+// @version     3.1790
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1789;
+var aposBotVersion = 3.1790;
 
 var Constants = {
 
@@ -1873,7 +1873,7 @@ function AposBot() {
 
 	this.getRange = function(source, target) {
 
-		var radius = target.size;
+		var radius = source.size;
 
 		//Alpha
 		var a = Math.asin(radius / source.distance);
