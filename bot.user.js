@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1785
+// @version     3.1786
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1785;
+var aposBotVersion = 3.1786;
 
 var Constants = {
 
@@ -1893,8 +1893,8 @@ function AposBot() {
 			y : radius * Math.cos(t)
 		};
 
-		return new Range(Util.getAngle(new Point(target.x + ta.x, target.y + ta.y), source), Util.getAngle(new Point(
-				target.x + tb.x, target.y + tb.y), source));
+		return new Range(Util.getAngle(new Point(target.x + tb.x, target.y + tb.y), source), Util.getAngle(new Point(
+				target.x + ta.x, target.y + ta.y), source));
 	};
 
 	//TODO: Don't let this function do the radius math.
