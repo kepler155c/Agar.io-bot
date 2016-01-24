@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1805
+// @version     3.1806
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1805;
+var aposBotVersion = 3.1806;
 
 var Constants = {
 
@@ -1296,8 +1296,7 @@ function AposBot() {
 
 			var threat = this.entities[keys[i]];
 
-			if (Util.computeDistance(threat.x, threat.y, cluster.x, cluster.y) < threat.size + player.largestCell.size
-					+ threat.splitDistance) {
+			if (Util.computeDistance(threat.x, threat.y, cluster.x, cluster.y) < threat.splitDistance) {
 				return false;
 			}
 		}
@@ -1437,7 +1436,8 @@ function AposBot() {
 
 		var doSplit = false; // (player.largestCell.mass >= 36 && player.mass <= 50 && player.cells.length == 1 && player.safeToSplit);
 
-		// player.isSafeToSplit(this.entities);
+		// refactor...
+		player.isSafeToSplit(this.entities);
 
 		var cluster = this.getBestFood(player, range);
 
@@ -1878,9 +1878,9 @@ function AposBot() {
 
 	this.getRange = function(source, target) {
 
-//		var radius = target.size;
-        var radius = target.size - (source.size * 0.4);    // 200 - (100 * .4) = 160 --> min distance
-        // Eating range = radius of eating cell + 40% of the radius of the cell being eaten
+		//		var radius = target.size;
+		var radius = target.size - (source.size * 0.4); // 200 - (100 * .4) = 160 --> min distance
+		// Eating range = radius of eating cell + 40% of the radius of the cell being eaten
 
 		//Alpha
 		var a = Math.asin(radius / target.distance);
@@ -2100,6 +2100,8 @@ function AposBot() {
 				allRanges.push(this.getRange(threat.cell, threat));
 			}
 		}
+
+		// if the range is 360, choose the range with the smallest distance and invert angle
 
 		return this.combineRanges(allRanges, length || allRanges.length);
 	};
