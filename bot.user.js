@@ -1749,8 +1749,8 @@ function AposBot() {
 
 				} else if (threat.isSplitThreat) {
 
-					threat.preferredDistance = notTouchingDistance + threat.splitDistance;
-					threat.threatenedDistance = notTouchingDistance + cell.size + threat.splitDistance; // one radius distance
+					threat.preferredDistance = threat.splitDistance;
+					threat.threatenedDistance = cell.size + threat.splitDistance; // one radius distance
 
 				} else {
 
