@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1798
+// @version     3.1799
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1798;
+var aposBotVersion = 3.1799;
 
 var Constants = {
 
@@ -2087,7 +2087,7 @@ function AposBot() {
 
 			if (threat.distance < threat.dangerZone) {
 				var overlap = threat.dangerZone - threat.distance;
-				var perc = overlap / threat.cell.size;
+				var perc = (threat.cell.size - overlap) / threat.cell.size;
 				var x = 90 + 90 * perc;
 				if (x < 2) {
 					x = 2;
