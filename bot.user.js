@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1795
+// @version     3.1796
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1795;
+var aposBotVersion = 3.1796;
 
 var Constants = {
 
@@ -659,6 +659,11 @@ function Range(left, right) {
 			return true;
 		}
 		return false;
+	};
+
+	this.getMidpoint = function() {
+
+		return Util.mod(this.left + this.size() / 2);
 	};
 
 	this.getInverseMidpoint = function() {
@@ -1423,9 +1428,12 @@ function AposBot() {
 		var range = this.getBestRange(ranges);
 
 		if (range) {
-//			var size = range.size() / 4;
-//			range.left = Util.mod(range.left + size);
-//			range.right = Util.mod(range.right - size);
+			var size = range.size();
+			if (size > 180) {
+				var midPoint = range.getMidpoint();
+				range.left = Util.mod(midPoint - 90);
+				range.right = Util.mod(midPoint + 90);
+			}
 
 			this.drawRange(player.x, player.y, player.size + 100, range, 0, Constants.green);
 		}
