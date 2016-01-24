@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1787
+// @version     3.1788
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1787;
+var aposBotVersion = 3.1788;
 
 var Constants = {
 
@@ -1881,22 +1881,12 @@ function AposBot() {
 		var b = Math.atan2(target.y - source.y, target.x - source.x);
 		//Tangent angle
 		var t = b - a;
-		
-		console.log(Util.radiansToDegrees(t));
 
-		var ta = {
-			x : radius * Math.sin(t),
-			y : radius * -Math.cos(t)
-		};
+		var diff = Util.radiansToDegrees(b - t);
+		b = Util.radiansToDegrees(b);
 
-		t = b + a;
-		var tb = {
-			x : radius * -Math.sin(t),
-			y : radius * Math.cos(t)
-		};
+		return new Range(Util.mod(b + diff), Util.mod(b - diff));
 
-		return new Range(Util.getAngle(new Point(target.x + tb.x, target.y + tb.y), source), Util.getAngle(new Point(
-				target.x + ta.x, target.y + ta.y), source));
 	};
 
 	//TODO: Don't let this function do the radius math.
