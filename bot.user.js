@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1788
+// @version     3.1789
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1788;
+var aposBotVersion = 3.1789;
 
 var Constants = {
 
@@ -1885,7 +1885,7 @@ function AposBot() {
 		var diff = Util.radiansToDegrees(b - t);
 		b = Util.radiansToDegrees(b);
 
-		return new Range(Util.mod(b + diff), Util.mod(b - diff));
+		return new Range(Util.mod(b - diff + 180), Util.mod(b + diff + 180));
 
 	};
 
