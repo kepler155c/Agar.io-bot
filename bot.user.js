@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1808
+// @version     3.1809
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1808;
+var aposBotVersion = 3.1809;
 
 var Constants = {
 
@@ -2341,8 +2341,7 @@ function AposBot() {
 
 		this.teams = [];
 
-		//The current destination that the cells were going towards.
-
+		/*
 		drawLine(getX() - (1920 / 2) / getZoomlessRatio(), getY() - (1080 / 2) / getZoomlessRatio(), getX()
 				+ (1920 / 2) / getZoomlessRatio(), getY() - (1080 / 2) / getZoomlessRatio(), Constants.gray);
 		drawLine(getX() - (1920 / 2) / getZoomlessRatio(), getY() + (1080 / 2) / getZoomlessRatio(), getX()
@@ -2351,8 +2350,9 @@ function AposBot() {
 				- (1920 / 2) / getZoomlessRatio(), getY() + (1080 / 2) / getZoomlessRatio(), Constants.gray);
 		drawLine(getX() + (1920 / 2) / getZoomlessRatio(), getY() - (1080 / 2) / getZoomlessRatio(), getX()
 				+ (1920 / 2) / getZoomlessRatio(), getY() + (1080 / 2) / getZoomlessRatio(), Constants.gray);
+		*/
 
-		drawCircle(player.x, player.y, player.size + player.largestCell.splitDistance, Constants.pink);
+		drawCircle(player.x, player.y, player.largestCell.splitDistance, Constants.pink);
 
 		//loop through everything that is on the screen and
 		//separate everything in it's own category.
