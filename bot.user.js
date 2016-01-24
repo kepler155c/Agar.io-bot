@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1792
+// @version     3.1793
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1792;
+var aposBotVersion = 3.1793;
 
 var Constants = {
 
@@ -1877,6 +1877,9 @@ function AposBot() {
 
 		//Alpha
 		var a = Math.asin(radius / source.distance);
+		if (isNaN(a)) {
+			console.log('it is NaN ' + radius / source.distance);
+		}
 		//Beta
 		var b = Math.atan2(target.y - source.y, target.x - source.x);
 		//Tangent angle
