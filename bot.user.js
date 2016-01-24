@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1786
+// @version     3.1787
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1786;
+var aposBotVersion = 3.1787;
 
 var Constants = {
 
@@ -726,6 +726,10 @@ Util.getAngle = function(target, source) {
 Util.degreesToRadians = function(degrees) {
 	degrees -= 180;
 	return degrees / (180 / Math.PI);
+};
+
+Util.radiansToDegrees = function(angle) {
+	return angle * 180 / Math.PI + 180;
 };
 
 Util.pointFromAngle = function(x, y, angle, distance) {
@@ -1867,20 +1871,18 @@ function AposBot() {
 		}
 	};
 
-	this.radiansToDegrees = function(angle) {
-		return angle * 180 / Math.PI + 180;
-	};
-
 	this.getRange = function(source, target) {
 
 		var radius = target.size;
 
 		//Alpha
-		var a = Math.asin(radius / target.distance);
+		var a = Math.asin(radius / source.distance);
 		//Beta
 		var b = Math.atan2(target.y - source.y, target.x - source.x);
 		//Tangent angle
 		var t = b - a;
+		
+		console.log(Util.radiansToDegrees(t));
 
 		var ta = {
 			x : radius * Math.sin(t),
@@ -2471,7 +2473,7 @@ function AposBot() {
 
 		var lastPos = player.cells[0].getLastPos();
 		var angle = Math.atan2(player.cells[0].y - lastPos.y, player.cells[0].x - lastPos.x);
-		this.infoStrings.push("Angle     : " + this.radiansToDegrees(angle));
+		this.infoStrings.push("Angle     : " + Util.radiansToDegrees(angle));
 
 		this.infoStrings.push("Speed     : " + parseInt(player.cells[0].getSpeed()));
 		this.infoStrings.push("Split     : " + parseInt(player.cells[0].splitDistance));
