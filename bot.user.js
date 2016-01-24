@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1800
+// @version     3.1801
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1800;
+var aposBotVersion = 3.1801;
 
 var Constants = {
 
@@ -1428,12 +1428,9 @@ function AposBot() {
 		var range = this.getBestRange(ranges);
 
 		if (range) {
-			var size = range.size();
-			if (size > 180) {
-				var midPoint = range.getMidpoint();
-				range.left = Util.mod(midPoint - 90);
-				range.right = Util.mod(midPoint + 90);
-			}
+			var size = range.size() / 4;
+			range.left = Util.mod(range.left + size);
+			range.right = Util.mod(range.right - size);
 
 			this.drawRange(player.x, player.y, player.size + 100, range, 0, Constants.green);
 		}
@@ -1898,7 +1895,6 @@ function AposBot() {
 		b = Util.radiansToDegrees(b);
 
 		return new Range(Util.mod(b - diff + 180), Util.mod(b + diff + 180));
-
 	};
 
 	//TODO: Don't let this function do the radius math.
