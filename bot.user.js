@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1819
+// @version     3.1820
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1819;
+var aposBotVersion = 3.1820;
 
 var Constants = {
 
@@ -1124,9 +1124,14 @@ function AposBot() {
 
 		var lastPos = target.getLastPos();
 
-		target.velocityX = (target.x - lastPos.x);
-		target.velocityY = (target.y - lastPos.y);
+		var angle = Util.getAngle(lastPos, target);
+		
+		var x = target.x - Math.cos(angle) * Constants.playerSpeed;
+		var y = target.y - Math.sin(angle) * Constants.playerSpeed;
 
+		target.velocityX = (target.x - x);
+		target.velocityY = (target.y - y);
+		
 		var a = sqr(target.velocityX) + sqr(target.velocityY) - sqr(Constants.splitVelocity); // sqr(source.velocity * 8);
 		target.interceptVelocity = a;
 
