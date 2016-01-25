@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1828
+// @version     3.1829
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1828;
+var aposBotVersion = 3.1829;
 
 var Constants = {
 
@@ -49,7 +49,7 @@ var Constants = {
 	playerRatio : 1.285,
 	enemyRatio : 1.27,
 	splitDuration : 1000, // 800 was pretty good
-	splitVelocity : 25,
+	splitVelocity : 300,
 
 	virusShotDistance : 800, // distance a virus travels when shot
 	virusFeedAmount : 7, // Amount of times you need to feed a virus to shoot it
@@ -822,9 +822,6 @@ function initializeEntity() {
 
 		this.px = timeDiff * a * (this.J - this.s) + this.x;
 		this.py = timeDiff * a * (this.K - this.t) + this.y;
-
-		this.px = this.x;
-		this.py = this.y;
 	};
 
 	// predicted position on next update
