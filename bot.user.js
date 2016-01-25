@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1821
+// @version     3.1822
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1821;
+var aposBotVersion = 3.1822;
 
 var Constants = {
 
@@ -1132,7 +1132,7 @@ function AposBot() {
 		var a = sqr(target.velocityX) + sqr(target.velocityY) - sqr(Constants.splitVelocity); // sqr(source.velocity * 8);
 		target.interceptVelocity = a;
 
-		console.log([ target.velocityX, target.velocityY, a ]);
+		a = Constants.splitVelocity;
 
 		var b = 2 * (target.velocityX * (target.x - source.x) + target.velocityY * (target.y - source.y));
 
