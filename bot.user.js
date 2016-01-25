@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1830
+// @version     3.1831
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1830;
+var aposBotVersion = 3.1831;
 
 var Constants = {
 
@@ -1668,37 +1668,34 @@ function AposBot() {
 
 			if (entity.classification == Classification.virus) {
 
-				if (entity.distance < 750) {
+				var distance = cell.size + entity.size + cell.velocity; // ??? cell.velocity;
 
-					var distance = cell.size + entity.size + cell.velocity; // ??? cell.velocity;
+				threat = {
+					classification : entity.classification,
+					x : entity.x,
+					y : entity.y,
+					size : entity.size,
+					mass : entity.mass,
+					distance : Util.computeDistance(entity.x, entity.y, cell.x, cell.y),
+					isMovingTowards : false,
+					cell : cell,
+					angle : cell.getAngle(entity),
+					threatLevel : 40,
+					massLoss : 0,
+					teamSize : 1,
+					isSplitThreat : false,
+					entity : entity,
+					deathDistance : cell.size,
+					minDistance : distance,
+					preferredDistance : distance,
+					threatenedDistance : distance,
+					dangerZone : distance,
+				};
 
-					threat = {
-						classification : entity.classification,
-						x : entity.x,
-						y : entity.y,
-						size : entity.size,
-						mass : entity.mass,
-						distance : Util.computeDistance(entity.x, entity.y, cell.x, cell.y),
-						isMovingTowards : false,
-						cell : cell,
-						angle : cell.getAngle(entity),
-						threatLevel : 40,
-						massLoss : 0,
-						teamSize : 1,
-						isSplitThreat : false,
-						entity : entity,
-						deathDistance : cell.size,
-						minDistance : distance,
-						preferredDistance : distance,
-						threatenedDistance : distance,
-						dangerZone : distance,
-					};
+				threat.intersects = threat.distance < cell.size + entity.size;
 
-					threat.intersects = threat.distance < cell.size + entity.size;
-
-					cell.threats.push(threat);
-					player.allThreats.push(threat);
-				}
+				cell.threats.push(threat);
+				player.allThreats.push(threat);
 
 			} else if (this.canEat(entity, cell, Constants.playerRatio)) {
 
