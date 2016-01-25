@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1811
+// @version     3.1813
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1811;
+var aposBotVersion = 3.1813;
 
 var Constants = {
 
@@ -1508,10 +1508,6 @@ function AposBot() {
 			}
 		}
 		
-		if (cluster.cell) {
-			this.obstaclesInPath3(player, cluster);
-		}
-
 		drawCircle(cluster.x, cluster.y, cluster.size + 40, color);
 		//		drawPoint(cluster.x, cluster.y + 20, Constants.yellow, "m:" + cluster.mass.toFixed(1) + " w:"
 		//				+ cluster.clusterWeight.toFixed(1));
@@ -1533,7 +1529,11 @@ function AposBot() {
 			player.split(cluster, cluster.x, cluster.y, destination);
 		}
 
-		drawLine(player.x, player.y, destination.point.x, destination.point.y, Constants.green);
+		if (cluster.cell) {
+			this.obstaclesInPath3(player, cluster);
+		} else {
+			drawLine(player.x, player.y, destination.point.x, destination.point.y, Constants.green);
+		}
 
 		//drawLine(cluster.closestCell.x, cluster.closestCell.y, destination.point.x, destination.point.y,
 		//		Constants.green);
@@ -1561,7 +1561,7 @@ function AposBot() {
 		var cell = target.closestCell;
 		var threatMass = (cell.mass / 2) * 1.25;  // threat if larger than this
 
-		var range = this.getRange3(cell, target, target.size);
+		var range = this.getRange3(cell, target, target.distance);
 
 		this.drawSimpleRange(target.closestCell, range, Constants.green);
 		
@@ -1575,7 +1575,7 @@ function AposBot() {
 				if (distance < target.distance - target.size) {
 					var threatRange = this.getRange3(target.closestCell, entity, target.size);
 
-					this.drawSimpleRange(target.closestCell, threatRange, Constants.red);
+					this.drawSimpleRange(target.closestCell, threatRange, distance, Constants.red);
 				}
 			}
 		}
