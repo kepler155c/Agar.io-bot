@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1814
+// @version     3.1815
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1814;
+var aposBotVersion = 3.1815;
 
 var Constants = {
 
@@ -1573,7 +1573,7 @@ function AposBot() {
 				var distance = Util.computeDistance(cell.x, cell.y, entity.x, entity.y);
 
 				if (distance < target.distance - target.size) {
-					var threatRange = this.getRange3(target.closestCell, entity, target.size);
+					var threatRange = this.getRange3(target.closestCell, entity, entity.size);
 
 					this.drawSimpleRange(target.closestCell, threatRange, distance, Constants.red);
 				}
