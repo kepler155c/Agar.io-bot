@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1816
+// @version     3.1817
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1816;
+var aposBotVersion = 3.1817;
 
 var Constants = {
 
@@ -1572,7 +1572,7 @@ function AposBot() {
 			if (entity.mass > threatMass || entity.isType(Classification.virus)) {
 				var distance = Util.computeDistance(cell.x, cell.y, entity.x, entity.y);
 
-				if (distance < target.distance - target.size) {
+				if (distance - target.size < 700) {
 					var threatRange = this.getRange3(cell, entity, entity.size);
 
 					if (range.overlaps(threatRange)) {
@@ -1584,7 +1584,7 @@ function AposBot() {
 				}
 			}
 		}
-		
+
 		return hasObstacles;
 	};
 
