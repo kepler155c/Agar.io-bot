@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1822
+// @version     3.1823
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1822;
+var aposBotVersion = 3.1823;
 
 var Constants = {
 
@@ -822,6 +822,9 @@ function initializeEntity() {
 
 		this.px = timeDiff * a * (this.J - this.s) + this.x;
 		this.py = timeDiff * a * (this.K - this.t) + this.y;
+		
+		this.px = this.x;
+		this.py = this.y;
 	};
 
 	// predicted position on next update
