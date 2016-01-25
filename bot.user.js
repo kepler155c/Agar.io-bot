@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1809
+// @version     3.1810
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1809;
+var aposBotVersion = 3.1810;
 
 var Constants = {
 
@@ -916,6 +916,15 @@ function initializeEntity() {
 
 		return entity.isType(Classification.threat) || entity.isType(Classification.virus);
 	};
+	entitiesPrototype.nonPlayerFilter = function(key) {
+
+		var entity = this[key];
+
+		if (entity.isType(Classification.player) || entity.isType(Classification.unknown)) {
+			return false;
+		}
+		return true;
+	};
 }
 
 console.log("Apos Bot!");
@@ -1498,6 +1507,10 @@ function AposBot() {
 				}
 			}
 		}
+		
+		if (cluster.cell) {
+			this.obstaclesInPath3(player, cluster);
+		}
 
 		drawCircle(cluster.x, cluster.y, cluster.size + 40, color);
 		//		drawPoint(cluster.x, cluster.y + 20, Constants.yellow, "m:" + cluster.mass.toFixed(1) + " w:"
@@ -1533,6 +1546,47 @@ function AposBot() {
 		return true;
 	};
 
+	this.drawSimpleRange = function(pt, range, distance, color) {
+		
+		this.drawAngledLine(pt.x, pt.y, range.left, distance, color);
+		this.drawAngledLine(pt.x, pt.y, range.right, distance, color);
+	};
+	
+	this.isSplitKillable = function(entity) {
+		
+	};
+	
+	this.obstaclesInPath3 = function(player, target) {
+		
+		var cell = target.closestCell;
+		var threatMass = (cell.mass / 2) * 1.25;  // threat if larger than this
+
+		var range = this.getRange3(target.closestCell, target, target.size);
+
+		this.drawSimpleRange(target.closestCell, range, Constants.green);
+		
+		var keys = Object.keys(this.entities).filter(this.entities.nonPlayerFilter, this.entities);
+		for (var i = 0; i < keys.length; i++) {
+			var entity = this.entities[keys[i]];
+			
+			if (entity.mass > threatMass || entity.isType(Classification.virus)) {
+				var distance = Util.computeDistance(cell.x, cell.y, entity.x, entity.y);
+
+				if (distance < target.distance - target.size) {
+					var threatRange = this.getRange3(target.closestCell, entity, target.size);
+
+					this.drawSimpleRange(target.closestCell, threatRange, Constants.red);
+				}
+			}
+		}
+		
+		var mergedEntity = {
+			x : target.x,
+			y : target.y,
+			mass : target.closestCell.mass + target.mass
+		};
+	};
+	
 	this.obstaclesInPath = function(player, target) {
 
 		var keys = Object.keys(this.entities).filter(this.entities.threatAndVirusFilter, this.entities);
@@ -1879,6 +1933,25 @@ function AposBot() {
 		//		var radius = target.size;
 		var radius = target.size - (source.size * 0.4); // 200 - (100 * .4) = 160 --> min distance
 		// Eating range = radius of eating cell + 40% of the radius of the cell being eaten
+
+		//Alpha
+		var a = Math.asin(radius / target.distance);
+		if (isNaN(a)) {
+			console.log('it is NaN ' + radius + ' ' + source.distance);
+			a = 1;
+		}
+		//Beta
+		var b = Math.atan2(target.y - source.y, target.x - source.x);
+		//Tangent angle
+		var t = b - a;
+
+		var diff = Util.radiansToDegrees(b - t);
+		b = Util.radiansToDegrees(b);
+
+		return new Range(Util.mod(b - diff), Util.mod(b + diff));
+	};
+
+	this.getRange3 = function(source, target, radius) {
 
 		//Alpha
 		var a = Math.asin(radius / target.distance);
