@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1815
+// @version     3.1816
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1815;
+var aposBotVersion = 3.1816;
 
 var Constants = {
 
@@ -1507,7 +1507,7 @@ function AposBot() {
 				}
 			}
 		}
-		
+
 		drawCircle(cluster.x, cluster.y, cluster.size + 40, color);
 		//		drawPoint(cluster.x, cluster.y + 20, Constants.yellow, "m:" + cluster.mass.toFixed(1) + " w:"
 		//				+ cluster.clusterWeight.toFixed(1));
@@ -1547,46 +1547,47 @@ function AposBot() {
 	};
 
 	this.drawSimpleRange = function(pt, range, distance, color) {
-		
+
 		this.drawAngledLine(pt.x, pt.y, range.left, distance, color);
 		this.drawAngledLine(pt.x, pt.y, range.right, distance, color);
 	};
-	
+
 	this.isSplitKillable = function(entity) {
-		
+
 	};
-	
-	this.obstaclesInPath3 = function(player, target) {
-		
-		var cell = target.closestCell;
-		var threatMass = (cell.mass / 2) * 1.25;  // threat if larger than this
+
+	this.obstaclesInPath3 = function(cell, target) {
+
+		var threatMass = (cell.mass / 2) * 1.25; // threat if larger than this
+		var hasObstacles = false;
 
 		var range = this.getRange3(cell, target, target.size);
 
-		this.drawSimpleRange(target.closestCell, range, target.distance, Constants.green);
-		
+		this.drawSimpleRange(cell, range, target.distance, Constants.green);
+
 		var keys = Object.keys(this.entities).filter(this.entities.nonPlayerFilter, this.entities);
 		for (var i = 0; i < keys.length; i++) {
 			var entity = this.entities[keys[i]];
-			
+
 			if (entity.mass > threatMass || entity.isType(Classification.virus)) {
 				var distance = Util.computeDistance(cell.x, cell.y, entity.x, entity.y);
 
 				if (distance < target.distance - target.size) {
-					var threatRange = this.getRange3(target.closestCell, entity, entity.size);
+					var threatRange = this.getRange3(cell, entity, entity.size);
 
-					this.drawSimpleRange(target.closestCell, threatRange, distance, Constants.red);
+					if (range.overlaps(threatRange)) {
+						this.drawSimpleRange(cell, threatRange, distance, Constants.red);
+						hasObstacles = true;
+					} else {
+						this.drawSimpleRange(cell, threatRange, distance, Constants.gray);
+					}
 				}
 			}
 		}
 		
-		var mergedEntity = {
-			x : target.x,
-			y : target.y,
-			mass : target.closestCell.mass + target.mass
-		};
+		return hasObstacles;
 	};
-	
+
 	this.obstaclesInPath = function(player, target) {
 
 		var keys = Object.keys(this.entities).filter(this.entities.threatAndVirusFilter, this.entities);
