@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1832
+// @version     3.1833
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1832;
+var aposBotVersion = 3.1833;
 
 var Constants = {
 
@@ -1668,7 +1668,7 @@ function AposBot() {
 
 			if (entity.classification == Classification.virus) {
 
-				if (cell.mass * 1.25 > virus.mass) {
+				if (cell.mass * 1.25 > entity.mass) {
 
 					var distance = cell.size + entity.size + cell.velocity; // ??? cell.velocity;
 
