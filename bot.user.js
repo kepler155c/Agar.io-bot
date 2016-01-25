@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1817
+// @version     3.1818
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1817;
+var aposBotVersion = 3.1818;
 
 var Constants = {
 
@@ -1501,7 +1501,7 @@ function AposBot() {
 		} else if (doSplit && !shiftedAngle.shifted) {
 
 			if (cluster.cell) {
-				if (this.obstaclesInPath(player, cluster)) {
+				if (this.obstaclesInPath(cluster.closestCell, cluster)) {
 					doSplit = false;
 					color = Constants.red;
 				}
@@ -1529,11 +1529,7 @@ function AposBot() {
 			player.split(cluster, cluster.x, cluster.y, destination);
 		}
 
-		if (cluster.cell) {
-			this.obstaclesInPath3(player, cluster);
-		} else {
-			drawLine(player.x, player.y, destination.point.x, destination.point.y, Constants.green);
-		}
+		drawLine(player.x, player.y, destination.point.x, destination.point.y, Constants.green);
 
 		//drawLine(cluster.closestCell.x, cluster.closestCell.y, destination.point.x, destination.point.y,
 		//		Constants.green);
@@ -1556,14 +1552,12 @@ function AposBot() {
 
 	};
 
-	this.obstaclesInPath3 = function(cell, target) {
+	this.obstaclesInPath = function(cell, target) {
 
-		var threatMass = (cell.mass / 2) * 1.25; // threat if larger than this
 		var hasObstacles = false;
+		var threatMass = (cell.mass / 2) * 1.25; // threat if larger than this
 
 		var range = this.getRange3(cell, target, target.size);
-
-		this.drawSimpleRange(cell, range, target.distance, Constants.green);
 
 		var keys = Object.keys(this.entities).filter(this.entities.nonPlayerFilter, this.entities);
 		for (var i = 0; i < keys.length; i++) {
@@ -1586,40 +1580,6 @@ function AposBot() {
 		}
 
 		return hasObstacles;
-	};
-
-	this.obstaclesInPath = function(player, target) {
-
-		var keys = Object.keys(this.entities).filter(this.entities.threatAndVirusFilter, this.entities);
-
-		// cell -> target
-		var angle = Util.getAngle(target, target.closestCell);
-
-		for (var i = 0; i < keys.length; i++) {
-			var entity = this.entities[keys[i]];
-			var distance = target.distance;
-
-			if (entity.classification == Classification.virus) {
-				distance = 750;
-			}
-
-			if (entity.distance < distance) {
-
-				for (var j = 0; j < player.cells.length; j++) {
-					var cell = player.cells[j];
-
-					var range = this.getSafeRange(cell, entity, distance);
-
-					if (range.angleWithin(angle)) {
-						this.drawAngledLine(player.x, player.y, range.left, 500, Constants.red);
-						this.drawAngledLine(player.x, player.y, range.right, 500, Constants.red);
-
-						return true;
-					}
-				}
-			}
-		}
-		return false;
 	};
 
 	this.setClosestVirus = function(player) {
