@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1810
+// @version     3.1811
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1810;
+var aposBotVersion = 3.1811;
 
 var Constants = {
 
@@ -1561,7 +1561,7 @@ function AposBot() {
 		var cell = target.closestCell;
 		var threatMass = (cell.mass / 2) * 1.25;  // threat if larger than this
 
-		var range = this.getRange3(target.closestCell, target, target.size);
+		var range = this.getRange3(cell, target, target.size);
 
 		this.drawSimpleRange(target.closestCell, range, Constants.green);
 		
@@ -2318,11 +2318,6 @@ function AposBot() {
 		destination.point.y = player.y;
 
 		if (ranges) {
-
-			if (ranges.length > 1) {
-				console.log("multiple ranges");
-				console.log(ranges);
-			}
 
 			this.drawRanges(player, ranges);
 			if (!this.determineFoodDestination(player, destination, ranges)) {
