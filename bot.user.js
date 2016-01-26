@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1838
+// @version     3.1839
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1838;
+var aposBotVersion = 3.1839;
 
 var Constants = {
 
@@ -158,7 +158,7 @@ Player.prototype = {
 			cell = cells[i];
 
 			if (!cell.fuseTimer) {
-				cell.fuseTimer = Date.now() + (30 + this.mass * 0.02) * 1000;
+				cell.fuseTimer = Date.now() + (30 + cell.mass * 0.02) * 1000;
 			}
 		}
 
@@ -2343,7 +2343,7 @@ function AposBot() {
 		}
 
 		if (this.player.splitFor) {
-			drawCircle(this.splitFor.x, this.splitFor.y, this.splitFor.size + 50, Constants.orange);
+			drawCircle(this.player.splitFor.x, this.player.splitFor.y, this.player.splitFor.size + 50, Constants.orange);
 		}
 
 		return destination;
@@ -2403,44 +2403,48 @@ function AposBot() {
 			this.determineBestDestination(player, destination);
 		}
 
-		Object.keys(this.entities).forEach(function(key) {
+		Object.keys(this.entities).forEach(
+				function(key) {
 
-			var entity = this.entities[key];
+					var entity = this.entities[key];
 
-			switch (entity.classification) {
-			case Classification.player:
-				// drawPoint(entity.x, entity.y + 20, 1, entity.mass.toFixed(2));
-				break;
-			case Classification.virus:
-				drawPoint(entity.x, entity.y, 1, entity.mass.toFixed(2));
-				break;
-			case Classification.splitTarget:
-				drawCircle(entity.x, entity.y, entity.size + 20, Constants.green);
-				break;
-			case Classification.mergeTarget:
-				drawCircle(entity.x, entity.y, entity.size + 20, Constants.cyan);
-				break;
-			case Classification.food:
-				// drawPoint(entity.x, entity.y+20, 1, entity.mass.toFixed(2));
-				if (entity.hasMoved) {
-					drawCircle(entity.x, entity.y, entity.size + 20, Constants.blue);
-				} else if (entity.size > 14) {
-					drawPoint(entity.x, entity.y + 20, Constants.white, entity.size);
-					drawCircle(entity.x, entity.y, entity.size + 20, Constants.cyan);
-				}
-				break;
-			case Classification.unknown:
-				drawCircle(entity.x, entity.y, entity.size + 20, Constants.purple);
-				break;
-			case Classification.threat:
-				//drawPoint(entity.x, entity.y + 20, 1, parseInt(entity.distance - entity.size));
-				var color = entity.isMovingTowards ? Constants.red : Constants.orange;
-				drawCircle(entity.x, entity.y, entity.size + 20, color);
+					switch (entity.classification) {
+					case Classification.player:
+						if (entity.fuseTimer) {
+							drawPoint(entity.x, entity.y + 20, 1, parseInt((entity.fuseTimer - Date.now()) / 1000),
+									parseInt((Date.now() - entity.fuseTimer) / 1000), 24);
+						}
+						break;
+					case Classification.virus:
+						drawPoint(entity.x, entity.y, 1, entity.mass.toFixed(2));
+						break;
+					case Classification.splitTarget:
+						drawCircle(entity.x, entity.y, entity.size + 20, Constants.green);
+						break;
+					case Classification.mergeTarget:
+						drawCircle(entity.x, entity.y, entity.size + 20, Constants.cyan);
+						break;
+					case Classification.food:
+						// drawPoint(entity.x, entity.y+20, 1, entity.mass.toFixed(2));
+						if (entity.hasMoved) {
+							drawCircle(entity.x, entity.y, entity.size + 20, Constants.blue);
+						} else if (entity.size > 14) {
+							drawPoint(entity.x, entity.y + 20, Constants.white, entity.size);
+							drawCircle(entity.x, entity.y, entity.size + 20, Constants.cyan);
+						}
+						break;
+					case Classification.unknown:
+						drawCircle(entity.x, entity.y, entity.size + 20, Constants.purple);
+						break;
+					case Classification.threat:
+						//drawPoint(entity.x, entity.y + 20, 1, parseInt(entity.distance - entity.size));
+						var color = entity.isMovingTowards ? Constants.red : Constants.orange;
+						drawCircle(entity.x, entity.y, entity.size + 20, color);
 
-				//drawCircle(entity.x, entity.y, entity.dangerZone, color);
-				break;
-			}
-		}, this);
+						//drawCircle(entity.x, entity.y, entity.dangerZone, color);
+						break;
+					}
+				}, this);
 
 		if (!isHumanControlled()) {
 
