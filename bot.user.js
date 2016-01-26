@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1852
+// @version     3.1853
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1852;
+var aposBotVersion = 3.1853;
 
 var Constants = {
 
@@ -2102,29 +2102,31 @@ function AposBot() {
 				totalDistance += distance;
 			}
 		}
-		
+
 		var totalAngleRange = 360 / angles.length;
 
 		for (i = 0; i < angles.length; i++) {
 			var angle = angles[i];
-			var angleRange = 1 - (angle.distance / totalDistance);
+			angle.range = 1 - (angle.distance / totalDistance);
 			if (angles.length == 1) {
-				angleRange = 0.5;
+				angle.range = 0.5;
 			}
-			angleRange *= totalAngleRange / 2;
-			var range = new Range(angle.angle + angleRange, angle.angle - angleRange);
-			
+			angle.range *= totalAngleRange / 2;
+			var range = new Range(angle.angle + angle.range, angle.angle - angle.range);
+
 			allRanges.push(range);
 		}
 
 		var ranges = this.combineRanges(allRanges);
-		
-		if (ranges.length == 1 && ranges[0].size() > 330) {
+
+		if (ranges === null || (ranges.length == 1 && ranges[0].size() > 330)) {
 			console.log('bad ranges');
 			console.log(angles);
-			console.log(ranges);
+			if (ranges) {
+				console.log(ranges);
+			}
 		}
-		
+
 		return {
 			failed : ranges === null,
 			ranges : ranges
