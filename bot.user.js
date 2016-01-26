@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1851
+// @version     3.1852
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1851;
+var aposBotVersion = 3.1852;
 
 var Constants = {
 
@@ -2118,6 +2118,12 @@ function AposBot() {
 		}
 
 		var ranges = this.combineRanges(allRanges);
+		
+		if (ranges.length == 1 && ranges[0].size() > 330) {
+			console.log('bad ranges');
+			console.log(angles);
+			console.log(ranges);
+		}
 		
 		return {
 			failed : ranges === null,
