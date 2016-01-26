@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1833
+// @version     3.1834
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1833;
+var aposBotVersion = 3.1834;
 
 var Constants = {
 
@@ -1668,7 +1668,7 @@ function AposBot() {
 
 			if (entity.classification == Classification.virus) {
 
-				if (cell.mass * 1.25 > entity.mass) {
+				if (cell.mass > entity.mass * 1.25) {
 
 					var distance = cell.size + entity.size + cell.velocity; // ??? cell.velocity;
 
@@ -1940,17 +1940,10 @@ function AposBot() {
 	//TODO: Don't let this function do the radius math.
 	this.getSafeRange = function(blob1, blob2, radius) {
 
-		var angle;
 		var inverted = false;
 
-		var px = blob1.x;
-		var py = blob1.y;
-
-		var cx = blob2.x;
-		var cy = blob2.y;
-
-		var dx = cx - px;
-		var dy = cy - py;
+		var dx = blob2.x - blob1.x;
+		var dy = blob2.y - blob1.y;
 		var dd = Math.sqrt(dx * dx + dy * dy); // distance + 1 radius (not touching)
 
 		if (dd < radius) {
@@ -1961,34 +1954,26 @@ function AposBot() {
 		var a = Math.asin(radius / dd);
 
 		if (isNaN(a)) {
-			console.log('it is NaN');
+			console.log('getSafeRange NaN');
 			console.log([ dd, radius ]);
 			console.log(blob2);
-			angle = Util.getAngle(blob2, blob1);
+			var angle = Util.getAngle(blob2, blob1);
 			this.drawAngledLine(blob1.x, blob1.y, angle, 500, Constants.cyan);
 
 			return new Range(angle, Util.mod(angle + 1));
 		}
 
 		var b = Math.atan2(dy, dx);
-
 		var t = b - a;
-		var ta = {
-			x : radius * Math.sin(t),
-			y : radius * -Math.cos(t)
-		};
+		var diff = Util.radiansToDegrees(b - t);
 
-		t = b + a;
-		var tb = {
-			x : radius * -Math.sin(t),
-			y : radius * Math.cos(t)
-		};
+		b = Util.radiansToDegrees(b);
 
-		var range = new Range(Util.getAngle(new Point(cx + ta.x, cy + ta.y), new Point(px, py)), Util.getAngle(
-				new Point(cx + tb.x, cy + tb.y), new Point(px, py)));
-		range.inverted = inverted;
+		if (inverted) {
+			diff = 270 + (270 - diff);
+		}
 
-		return range;
+		return new Range(Util.mod(b - diff), Util.mod(b + diff));
 	};
 
 	this.avoidObstacles = function(player, angle, distance) {
