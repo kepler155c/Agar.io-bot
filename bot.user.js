@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1846
+// @version     3.1847
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1846;
+var aposBotVersion = 3.1847;
 
 var Constants = {
 
@@ -2413,7 +2413,6 @@ function AposBot() {
 			case Classification.player:
 				if (entity.fuseTimer) {
 					var fuseTime = (30 + entity.mass * 0.02) * 1000;
-					console.log([ fuseTime, Date.now(), entity.fuseTimer ]);
 					fuseTime = fuseTime - (Date.now() - entity.fuseTimer);
 					drawPoint(entity.x, entity.y + 40, Constants.gray, parseInt(fuseTime / 1000), 24);
 				}
