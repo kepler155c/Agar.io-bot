@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1848
+// @version     3.1849
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1848;
+var aposBotVersion = 3.1849;
 
 var Constants = {
 
@@ -2414,7 +2414,8 @@ function AposBot() {
 				if (entity.fuseTimer) {
 					var fuseTime = (30 + entity.mass * 0.02) * 1000;
 					fuseTime = fuseTime - (Date.now() - entity.fuseTimer);
-					drawPoint(entity.x, entity.y + 40, Constants.gray, parseInt(fuseTime / 1000), 24);
+					var y = entity.y + 40 + entity.size / 15;
+					drawPoint(entity.x, y, Constants.gray, parseInt(fuseTime / 1000), 24);
 				}
 				break;
 			case Classification.virus:
