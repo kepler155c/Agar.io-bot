@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1836
+// @version     3.1837
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1836;
+var aposBotVersion = 3.1837;
 
 var Constants = {
 
@@ -49,7 +49,7 @@ var Constants = {
 	playerRatio : 1.285,
 	enemyRatio : 1.27,
 	splitDuration : 1000, // 800 was pretty good
-	splitVelocity : 360,
+	splitVelocity : 150,
 
 	virusShotDistance : 800, // distance a virus travels when shot
 	virusFeedAmount : 7, // Amount of times you need to feed a virus to shoot it
