@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1837
+// @version     3.1838
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1837;
+var aposBotVersion = 3.1838;
 
 var Constants = {
 
@@ -2342,7 +2342,7 @@ function AposBot() {
 
 		}
 
-		if (this.splitFor) {
+		if (this.player.splitFor) {
 			drawCircle(this.splitFor.x, this.splitFor.y, this.splitFor.size + 50, Constants.orange);
 		}
 
