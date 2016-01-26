@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1850
+// @version     3.1851
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1850;
+var aposBotVersion = 3.1851;
 
 var Constants = {
 
@@ -50,6 +50,7 @@ var Constants = {
 	enemyRatio : 1.27,
 	splitDuration : 1000, // 800 was pretty good
 	splitVelocity : 150,
+	mergeFactor : 0.025,
 
 	virusShotDistance : 800, // distance a virus travels when shot
 	virusFeedAmount : 7, // Amount of times you need to feed a virus to shoot it
@@ -589,10 +590,11 @@ Player.prototype = {
 	},
 };
 
-function Range(left, right) {
+function Range(left, right, distance) {
 
 	this.left = Util.mod(left);
 	this.right = Util.mod(right);
+	this.distance = distance;
 
 	this.angleWithin = function(angle) {
 
@@ -647,6 +649,7 @@ function Range(left, right) {
 
 			this.left = Math.min(this.left, range.left);
 			this.right = Math.max(this.right, range.right);
+			this.distance = Math.min(this.distance, range.distance);
 
 			if (this.right - this.left > 359) {
 				this.right = this.left - 1;
@@ -1395,7 +1398,9 @@ function AposBot() {
 			return new Range(ranges[0].right + 1, ranges[0].left - 1);
 		}
 
-		// umm - shouldnt this be sorted first ??		
+		ranges.sort(function(a, b) {
+			return a.left - b.left;
+		});
 
 		var left = ranges[0].right + 1;
 		var goodRanges = [];
@@ -1917,7 +1922,7 @@ function AposBot() {
 		var diff = Util.radiansToDegrees(b - t);
 		b = Util.radiansToDegrees(b);
 
-		return new Range(Util.mod(b - diff), Util.mod(b + diff));
+		return new Range(Util.mod(b - diff), Util.mod(b + diff), target.distance);
 	};
 
 	this.getRange3 = function(source, target, radius) {
@@ -1925,7 +1930,7 @@ function AposBot() {
 		//Alpha
 		var a = Math.asin(radius / target.distance);
 		if (isNaN(a)) {
-			console.log('it is NaN ' + radius + ' ' + source.distance);
+			console.log('it is NaN ' + radius + ' ' + target.distance);
 			a = 1;
 		}
 		//Beta
@@ -1936,7 +1941,7 @@ function AposBot() {
 		var diff = Util.radiansToDegrees(b - t);
 		b = Util.radiansToDegrees(b);
 
-		return new Range(Util.mod(b - diff), Util.mod(b + diff));
+		return new Range(Util.mod(b - diff), Util.mod(b + diff), target.distance);
 	};
 
 	//TODO: Don't let this function do the radius math.
@@ -1962,7 +1967,7 @@ function AposBot() {
 			var angle = Util.getAngle(blob2, blob1);
 			this.drawAngledLine(blob1.x, blob1.y, angle, 500, Constants.cyan);
 
-			return new Range(angle, Util.mod(angle + 1));
+			return new Range(angle, Util.mod(angle + 1), dd);
 		}
 
 		var b = Math.atan2(dy, dx);
@@ -1975,7 +1980,7 @@ function AposBot() {
 			diff = 270 + (270 - diff);
 		}
 
-		return new Range(Util.mod(b - diff), Util.mod(b + diff));
+		return new Range(Util.mod(b - diff), Util.mod(b + diff), dd);
 	};
 
 	this.avoidObstacles = function(player, angle, distance) {
@@ -2068,7 +2073,79 @@ function AposBot() {
 	 * The bot works by removing angles in which it is too
 	 * dangerous to travel towards to.
 	 */
-	this.avoidThreats = function(player, destination, shrinkage, length) {
+	this.avoidThreats = function(player) {
+
+		var allRanges = [];
+		var angles = [];
+		var i;
+
+		// for merge mass
+		for (i = 0; i < player.cells.length; i++) {
+			var cell = player.cells[i];
+
+			cell.threatened = false;
+		}
+
+		// this.addWall(player, allRanges);
+
+		var totalDistance = 0;
+		for (i = 0; i < player.allThreats.length; i++) {
+
+			var threat = player.allThreats[i];
+
+			if (threat.distance < threat.dangerZone) {
+				var distance = Math.max(threat.dangerZone - threat.distance, 0);
+				angles.push({
+					angle : threat.angle,
+					distance : distance
+				});
+				totalDistance += distance;
+			}
+		}
+		
+		var totalAngleRange = 360 / angles.length;
+
+		for (i = 0; i < angles.length; i++) {
+			var angle = angles[i];
+			var angleRange = 1 - (angle.distance / totalDistance);
+			if (angles.length == 1) {
+				angleRange = 0.5;
+			}
+			angleRange *= totalAngleRange / 2;
+			var range = new Range(angle.angle + angleRange, angle.angle - angleRange);
+			
+			allRanges.push(range);
+		}
+
+		var ranges = this.combineRanges(allRanges);
+		
+		return {
+			failed : ranges === null,
+			ranges : ranges
+		};
+	};
+
+	this.combineRanges = function(ranges) {
+
+		var result = [];
+
+		for (var i = 0; i < ranges.length; i++) {
+			var range = ranges[i];
+
+			this.addRange(result, range);
+
+			if (result.length == 1) {
+				if (result[0].size() >= 360) {
+					console.log('bad range');
+					return null;
+				}
+			}
+		}
+
+		return result;
+	};
+
+	this.avoidThreats2 = function(player, destination, shrinkage, length) {
 
 		var allRanges = [];
 		var i;
@@ -2131,7 +2208,7 @@ function AposBot() {
 		return this.combineRanges(allRanges, length || allRanges.length);
 	};
 
-	this.combineRanges = function(ranges, length) {
+	this.combineRanges2 = function(ranges, length) {
 
 		var result = {
 			failed : false,
@@ -2412,7 +2489,7 @@ function AposBot() {
 			switch (entity.classification) {
 			case Classification.player:
 				if (entity.fuseTimer) {
-					var fuseTime = (30 + entity.mass * 0.025) * 1000;
+					var fuseTime = (30 + entity.mass * Constants.mergeFactor) * 1000;
 					fuseTime = fuseTime - (Date.now() - entity.fuseTimer);
 					var y = entity.y + 40 + entity.size / 15;
 					drawPoint(entity.x, y, Constants.gray, parseInt(fuseTime / 1000), 24);
@@ -2517,7 +2594,7 @@ function AposBot() {
 				var cell = player.cells[i];
 				var cellInfo = "Cell " + i + " Mass: " + parseInt(cell.mass, 10);
 				if (cell.fuseTimer && i > 0) {
-					var fuseTime = (30 + cell.mass * 0.025) * 1000;
+					var fuseTime = (30 + cell.mass * Constants.mergeFactor) * 1000;
 					fuseTime = fuseTime - (Date.now() - cell.fuseTimer);
 
 					cellInfo += "   Fuse: " + parseInt(fuseTime / 1000);
@@ -2707,16 +2784,16 @@ function AposBot() {
 		var distanceFromWallX = player.size;
 
 		if (player.x < getMapStartX() + distanceFromWallX) { // LEFT
-			this.addRange(ranges, new Range(90, 270));
+			this.addRange(ranges, new Range(90, 270), player.x - getMapStartX());
 		}
 		if (player.y < getMapStartY() + distanceFromWallY) { // TOP
-			this.addRange(ranges, new Range(180, 359));
+			this.addRange(ranges, new Range(180, 359), player.y - getMapStartY());
 		}
 		if (player.x > getMapEndX() - distanceFromWallX) { // RIGHT
-			this.addRange(ranges, new Range(270, 90));
+			this.addRange(ranges, new Range(270, 90), getMapEndX() - player.x);
 		}
 		if (player.y > getMapEndY() - distanceFromWallY) { // BOTTOM
-			this.addRange(ranges, new Range(0, 180));
+			this.addRange(ranges, new Range(0, 180), getMapEndY() - player.y);
 		}
 	};
 
