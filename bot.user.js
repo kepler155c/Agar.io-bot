@@ -6,7 +6,7 @@
 /* global getPointX, getPointY, getMapEndX, getMapEndY, getMouseX, getMouseY */
 /* global getZoomlessRatio, verticalDistance, getPlayer, screenToGameX, screenToGameY */
 /* global getX, getY, getMemoryCells, getCells, getMode, getLastUpdate, isHumanControlled */
-/* global setHumanControlled, getEverything */
+/* global setHumanControlled, getEverything, getRatio */
 
 /*The MIT License (MIT)
 
@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1839
+// @version     3.1840
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1839;
+var aposBotVersion = 3.1840;
 
 var Constants = {
 
@@ -2411,7 +2411,8 @@ function AposBot() {
 					switch (entity.classification) {
 					case Classification.player:
 						if (entity.fuseTimer) {
-							drawPoint(entity.x, entity.y + 20, 1, parseInt((entity.fuseTimer - Date.now()) / 1000),
+							drawPoint(entity.x, entity.y + 40, Constants.gray,
+									parseInt((entity.fuseTimer - Date.now()) / 1000),
 									parseInt((Date.now() - entity.fuseTimer) / 1000), 24);
 						}
 						break;
@@ -2492,16 +2493,11 @@ function AposBot() {
 		this.infoStrings.push("");
 		this.infoStrings.push("Size      : " + parseInt(player.size, 10));
 		this.infoStrings.push("Velocity  : " + parseInt(player.smallestCell.velocity, 10));
-
-		this.infoStrings.push("Angle     : " + player.cells[0].getMovementAngle());
-
-		var lastPos = player.cells[0].getLastPos();
-		var angle = Math.atan2(player.cells[0].y - lastPos.y, player.cells[0].x - lastPos.x);
-		this.infoStrings.push("Angle     : " + Util.radiansToDegrees(angle));
-
 		this.infoStrings.push("Speed     : " + parseInt(player.cells[0].getSpeed()));
 		this.infoStrings.push("Split     : " + parseInt(player.cells[0].splitDistance));
 		this.infoStrings.push("Vertical  : " + (this.verticalDistance ? "True" : "False"));
+		this.infoStrings.push("Aggression: " + Constants.aggressionLevel);
+		this.infoStrings.push("Aggression: " + getRatio() + " " + getZoomlessRatio());
 		this.infoStrings.push("Aggression: " + Constants.aggressionLevel);
 
 		/*
