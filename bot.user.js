@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1859
+// @version     3.1860
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1859;
+var aposBotVersion = 3.1860;
 
 var Constants = {
 
@@ -1452,6 +1452,9 @@ function AposBot() {
 			range.right = Util.mod(range.right - size);
 
 			this.drawRange(player.x, player.y, player.size + 100, range, 0, Constants.green);
+
+			var midPoint = range.getMidpoint();
+			destination.point = this.followAngle(midPoint, player.x, player.y, verticalDistance());
 		}
 
 		var doSplit = false; // (player.largestCell.mass >= 36 && player.mass <= 50 && player.cells.length == 1 && player.safeToSplit);
@@ -1462,6 +1465,10 @@ function AposBot() {
 		var cluster = this.getBestFood(player, range);
 
 		if (cluster === null) {
+			if (range) {
+				drawLine(player.x, player.y, destination.point.x, destination.point.y, Constants.red);
+				return true;
+			}
 			return false;
 		}
 
@@ -1486,6 +1493,10 @@ function AposBot() {
 		var angle = Util.getAngle(cluster, cluster.closestCell);
 
 		if (this.angleInThreatRanges(angle, ranges)) {
+			if (range) {
+				drawLine(player.x, player.y, destination.point.x, destination.point.y, Constants.red);
+				return true;
+			}
 			console.log('wtf');
 			return false;
 		}
@@ -1499,6 +1510,10 @@ function AposBot() {
 				this.verticalDistance ? verticalDistance() : distance);
 
 		if (this.angleInRanges(shiftedAngle.angle, ranges)) {
+			if (range) {
+				drawLine(player.x, player.y, destination.point.x, destination.point.y, Constants.red);
+				return true;
+			}
 			console.log('not shifting');
 			console.log([ angle, shiftedAngle.angle ]);
 			console.log(ranges);
@@ -2113,7 +2128,7 @@ function AposBot() {
 		for (i = 0; i < angles.length; i++) {
 			var angle = angles[i];
 			angle.range = 1 - (angle.distance / totalDistance);
- 			if (angles.length == 1) {
+			if (angles.length == 1) {
 				angle.range = 0.5;
 			}
 			angle.range = Math.max(1, Math.round(angle.range * (totalAngleRange / 2)));
