@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1857
+// @version     3.1858
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1857;
+var aposBotVersion = 3.1858;
 
 var Constants = {
 
@@ -2096,7 +2096,7 @@ function AposBot() {
 			if (threat.distance < threat.dangerZone) {
 				var distance = Math.max(threat.dangerZone - threat.distance, 0);
 				angles.push({
-					angle : threat.angle,
+					angle : 180 - threat.angle,
 					distance : distance
 				});
 				totalDistance += distance;
