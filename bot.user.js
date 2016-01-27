@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1856
+// @version     3.1857
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1856;
+var aposBotVersion = 3.1857;
 
 var Constants = {
 
@@ -2108,16 +2108,17 @@ function AposBot() {
 			}
 		}
 
-		var totalAngleRange = 360 / angles.length;
+		var totalAngleRange = (360 - (angles.length * 2)) / angles.length;
 
 		for (i = 0; i < angles.length; i++) {
 			var angle = angles[i];
 			angle.range = 1 - (angle.distance / totalDistance);
-			if (angles.length == 1) {
+ 			if (angles.length == 1) {
 				angle.range = 0.5;
 			}
-			angle.range *= totalAngleRange / 2;
-			var range = new Range(angle.angle + angle.range, angle.angle - angle.range);
+			angle.range = Math.max(1, Math.round(angle.range * (totalAngleRange / 2)));
+
+			var range = new Range(angle.angle - angle.range, angle.angle + angle.range);
 
 			allRanges.push(range);
 			debugRanges.push(new Range(range.left, range.right));
