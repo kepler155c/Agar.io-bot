@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1860
+// @version     3.1861
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1860;
+var aposBotVersion = 3.1861;
 
 var Constants = {
 
@@ -774,6 +774,7 @@ function initializeEntity() {
 		this.teamSize = 1;
 		this.teamMass = this.mass;
 		this.isSplitThreat = false;
+		this.isLargeThreat = false;
 		this.velocity = this.getSpeed(); // this.getVelocity();
 
 		var closestInfo = player.closestCell(this.x, this.y);
@@ -1236,7 +1237,8 @@ function AposBot() {
 
 			cluster = player.foodClusters[i];
 			var multiplier = 3;
-			var weight = cluster.size; // shouldn't this be cluster.mass ?
+			var weight = cluster.mass; // shouldn't this be cluster.mass ?
+			var probability = 1;
 
 			var closestInfo = player.closestCell(cluster.x, cluster.y);
 			cluster.closestCell = closestInfo.cell;
@@ -1254,11 +1256,14 @@ function AposBot() {
 			} else if (cluster.cell) {
 
 				if ((player.cells.length == 1) && cluster.cell.isType(Classification.splitTarget)) {
-					weight = weight * 1.5;
+					probability = 2;
+					if (cluster.distance < 700) {
+						probability = 5;
+					}
 				}
 
 				if ((player.cells.length > 1) && cluster.cell.isType(Classification.mergeTarget)) {
-					weight = weight * 1.5;
+					probability = 1.2;
 				}
 
 				if (cluster.cell.isType(Classification.splitTarget)) {
@@ -1267,15 +1272,16 @@ function AposBot() {
 				}
 				if (cluster.cell.isMovingTowards) {
 					// prioritize enemies moving towards us
-					weight = weight * 1.1;
+					probability = probability * 1.1;
 				}
-
-				weight *= Math.log(closestInfo.distance / 1000 * 20);
+				// weight *= Math.log(closestInfo.distance / 1000 * 20);
+			} else {
+				probability = 4;
 			}
-			cluster.clusterWeight = closestInfo.distance / weight * multiplier;
 
-			//drawPoint(cluster.x, cluster.y + 60, 1, "" + parseInt(cluster.clusterWeight, 10) + " "
-			//		+ parseInt(cluster.size, 10));
+			cluster.clusterWeight = cluster.mass / (closestInfo.distance / 100) * multiplier * probability;
+
+			drawPoint(cluster.x, cluster.y + 60, 1, parseInt(cluster.clusterWeight, 10));
 		}
 
 		var bestCluster = null;
@@ -1283,7 +1289,7 @@ function AposBot() {
 		for (i = 1; i < player.foodClusters.length; i++) {
 			cluster = player.foodClusters[i];
 
-			if (!bestCluster || cluster.clusterWeight < bestCluster.clusterWeight) {
+			if (!bestCluster || cluster.clusterWeight > bestCluster.clusterWeight) {
 				if (this.isFoodValid(player, cluster, range)) {
 					bestCluster = cluster;
 				}
@@ -1424,7 +1430,7 @@ function AposBot() {
 			return false;
 		}
 
-		if (Constants.aggressionLevel > 1) {
+		if (Constants.aggressionLevel > 2) {
 			this.safeToSplit = false;
 
 			if (Constants.aggressionLevel > 2 || player.cells.length <= 2) {
@@ -1585,7 +1591,7 @@ function AposBot() {
 		var hasObstacles = false;
 		var threatMass = (cell.mass / 2) * 1.25; // threat if larger than this
 
-		var range = this.getRange3(cell, target, target.size);
+		var range = this.getRange(cell, target);
 
 		var keys = Object.keys(this.entities).filter(this.entities.nonPlayerFilter, this.entities);
 		for (var i = 0; i < keys.length; i++) {
@@ -1595,7 +1601,7 @@ function AposBot() {
 				var distance = Util.computeDistance(cell.x, cell.y, entity.x, entity.y);
 
 				if (distance - target.size < 700) {
-					var threatRange = this.getRange3(cell, entity, entity.size);
+					var threatRange = this.getRange(cell, entity);
 
 					if (range.overlaps(threatRange)) {
 						this.drawSimpleRange(cell, threatRange, distance, Constants.red);
@@ -1708,6 +1714,7 @@ function AposBot() {
 						massLoss : 0,
 						teamSize : 1,
 						isSplitThreat : false,
+						isLargeThreat : false,
 						entity : entity,
 						deathDistance : cell.size,
 						minDistance : distance,
@@ -1738,6 +1745,7 @@ function AposBot() {
 					massLoss : cell.mass,
 					teamSize : entity.teamSize,
 					isSplitThreat : false,
+					isLargeThreat : false,
 					entity : entity
 				};
 
@@ -1784,6 +1792,8 @@ function AposBot() {
 
 				// too big - not a threat
 				if (entity.teamMass / player.mass > Constants.largeThreatRatio) {
+
+					threat.isLargeThreat = entity.isLargeThreat = true;
 
 					threat.preferredDistance = notTouchingDistance;
 					threat.threatenedDistance = notTouchingDistance;
@@ -1917,7 +1927,7 @@ function AposBot() {
 		}
 	};
 
-	this.getRange = function(source, target) {
+	this.getMinimumRange = function(source, target) {
 
 		//		var radius = target.size;
 		var radius = target.size - (source.size * 0.4); // 200 - (100 * .4) = 160 --> min distance
@@ -1940,7 +1950,9 @@ function AposBot() {
 		return new Range(Util.mod(b - diff), Util.mod(b + diff), target.distance);
 	};
 
-	this.getRange3 = function(source, target, radius) {
+	this.getRange = function(source, target) {
+
+		var radius = target.size;
 
 		//Alpha
 		var a = Math.asin(radius / target.distance);
@@ -2232,7 +2244,7 @@ function AposBot() {
 				console.log([ overlap, threat.size, threat.cell.size, threat.distance, perc, x ]);
 				allRanges.push(new Range(Util.mod(threat.angle + x), Util.mod(threat.angle - x)));
 				*/
-				allRanges.push(this.getRange(threat.cell, threat));
+				allRanges.push(this.getMinimumRange(threat.cell, threat));
 			}
 		}
 
@@ -2267,6 +2279,20 @@ function AposBot() {
 		return result;
 	};
 
+	this.calculateRisk = function(entity) {
+		entity.riskFactor = 1;
+		if (!entity.isType(Classification.virus)) {
+
+			if (entity.isLargeThreat) {
+				entity.riskFactor = 2;
+			} else if (entity.isSplitThreat) {
+				entity.riskFactor = 4;
+			} else {
+				entity.riskFactor = 3;
+			}
+		}
+	};
+
 	this.determineBestDestination = function(player, destination) {
 
 		player.allThreats = [];
@@ -2282,6 +2308,9 @@ function AposBot() {
 			var entity = this.entities[key];
 
 			this.calculateThreatWeight(player, entity);
+
+			entity.range = this.getRange(entity.closestCell, entity);
+			this.calculateRisk(entity);
 
 			if (player.cells.length == 1 && entity.classification == Classification.threat) {
 				// this.predictPosition(threat, 200);
