@@ -469,7 +469,7 @@ Player.prototype = {
 			var cell = virus.closestCell;
 			var distance = virus.distance;
 
-			var virusAngle = Util.getAngle(cell, virus);
+			var virusAngle = Util.getAngle(virus, cell);
 			var movementAngle = cell.getMovementAngle();
 
 			var angle = Math.atan2(cell.y - virus.y, cell.x - virus.x);
@@ -688,6 +688,15 @@ Util.mod = function(x) {
 	return x;
 };
 
+Util.angleDiff = function(angle1, angle2) {
+
+	var diff = Util.mod(angle1 - angle2);
+	if (diff > 180) {
+		diff = 360 - diff;
+	}
+	return diff;
+};
+
 Util.computeDistance = function(x1, y1, x2, y2, s1, s2) {
 	// Make sure there are no null optional params.
 	s1 = s1 || 0;
@@ -791,6 +800,10 @@ function initializeEntity() {
 		*/
 	};
 
+	da.prototype.canEat = function(eatee, ratio) {
+		return this.mass > eatee.mass && this.mass / eatee.mass > ratio;
+	};
+	
 	da.prototype.isType = function(classification) {
 		return this.classification == classification;
 	};
@@ -859,7 +872,7 @@ function initializeEntity() {
 
 		var lastPos = this.getLastPos();
 
-		return Util.getAngle(lastPos, this);
+		return Util.getAngle(this, lastPos);
 	};
 
 	da.prototype.getAngle = function(target) {
@@ -1077,11 +1090,19 @@ function AposBot() {
 
 					} else if (entity.isVirus(entity)) {
 
-						entity.classification = Classification.virus;
-						entity.foodList = [];
-						entity.foodMass = 0;
+						if (player.cells.length == 16) {
+							if (entity.closestCell.canEat(entity, Constants.playerRatio)) {
+								entity.classification = Classification.food;
+							} else {
+								entity.classification = Classification.noThreat;  // this is not quite right - need to be able to shoot viruses
+							}
+						} else {
+							entity.classification = Classification.virus;
+							entity.foodList = [];
+							entity.foodMass = 0;
+						}
 
-					} else if (this.canEat(entity, player.smallestCell, Constants.enemyRatio)) {
+					} else if (entity.canEat(player.smallestCell, Constants.enemyRatio)) {
 						//} else if (this.canEat(entity, entity.closestCell, Constants.enemyRatio)) {
 
 						entity.classification = Classification.threat;
@@ -1101,7 +1122,7 @@ function AposBot() {
 							entity.classification = Classification.splitTarget;
 						}
 
-					} else if (this.canEat(entity.closestCell, entity, Constants.playerRatio)) {
+					} else if (entity.closestCell.canEat(entity, Constants.playerRatio)) {
 
 						entity.classification = Classification.food;
 
@@ -1233,6 +1254,7 @@ function AposBot() {
 
 		var i, cluster;
 		var keys = Object.keys(this.entities).filter(this.entities.threatFilter, this.entities);
+		var angle = player.cells[0].getMovementAngle();
 
 		for (i = 0; i < player.foodClusters.length; i++) {
 
@@ -1245,7 +1267,11 @@ function AposBot() {
 			cluster.closestCell = closestInfo.cell;
 			cluster.distance = closestInfo.distance;
 			cluster.angle = Util.getAngle(cluster, cluster.closestCell);
+			
+			var angleDiff = Util.angleDiff(angle, cluster.angle);
 
+			var distance = cluster.distance + (Constants.playerSpeed * 2) * (angleDiff / 180); // add in turn around distance
+			
 			// if (!cluster.cell) {  // lets try not to follow enemies towards wall
 			if ((cluster.x < getMapStartX() + 2000 && cluster.x < player.x)
 					|| (cluster.y < getMapStartY() + 2000 && cluster.y < player.y)
@@ -1281,18 +1307,18 @@ function AposBot() {
 				probability = 4;
 			}
 
-			cluster.clusterWeight = ((cluster.mass * probability) / (closestInfo.distance / 60)) / multiplier;
+			cluster.clusterWeight = distance / (cluster.mass * probability) * multiplier;
 			
 			for (var j = 0; j < keys.length; j++){
 
 				var entity = this.entities[keys[j]];
 
 				if (entity.range.angleWithin(cluster.angle)) {
-					cluster.clusterWeight /= entity.riskFactor;
+					cluster.clusterWeight *= entity.riskFactor;
 				}
 			}
 
-			drawPoint(cluster.x, cluster.y + 60, 1, parseInt(cluster.clusterWeight * 100, 10));
+			drawPoint(cluster.x, cluster.y + 60, 1, parseInt(cluster.clusterWeight, 10));
 		}
 
 		var bestCluster = null;
@@ -1300,7 +1326,7 @@ function AposBot() {
 		for (i = 1; i < player.foodClusters.length; i++) {
 			cluster = player.foodClusters[i];
 
-			if (!bestCluster || cluster.clusterWeight > bestCluster.clusterWeight) {
+			if (!bestCluster || cluster.clusterWeight < bestCluster.clusterWeight) {
 				if (this.isFoodValid(player, cluster, range)) {
 					bestCluster = cluster;
 				}
@@ -1740,7 +1766,7 @@ function AposBot() {
 					player.allThreats.push(threat);
 				}
 
-			} else if (this.canEat(entity, cell, Constants.playerRatio)) {
+			} else if (entity.canEat(cell, Constants.playerRatio)) {
 
 				threat = {
 					classification : entity.classification,
@@ -1961,6 +1987,10 @@ function AposBot() {
 		return new Range(Util.mod(b - diff), Util.mod(b + diff), target.distance);
 	};
 
+	this.get180Range = function(angle, distance) {
+		return new Range(Util.mod(angle - 90), Util.mod(angle + 90), distance);
+	};
+
 	this.getRange = function(source, target) {
 
 		var radius = target.size;
@@ -2028,15 +2058,6 @@ function AposBot() {
 			shifted : false
 		};
 
-		function angleDiff(angle1, angle2) {
-
-			var diff = Util.mod(angle - angle2);
-			if (diff > 180) {
-				diff = 360 - diff;
-			}
-			return diff;
-		}
-
 		player.allThreats.sort(function(a, b) {
 			return Math.max(a.distance - a.dangerZone, 0) - Math.max(b.distance - b.dangerZone, 0);
 		});
@@ -2063,8 +2084,8 @@ function AposBot() {
 
 			if (range.angleWithin(angle)) {
 
-				var diffLeft = angleDiff(angle, range.left);
-				var diffRight = angleDiff(angle, range.right);
+				var diffLeft = Util.angleDiff(angle, range.left);
+				var diffRight = Util.angleDiff(angle, range.right);
 				var diff = Math.min(diffLeft, diffRight);
 
 				// should add / subtract 1 from the angle
@@ -2301,6 +2322,9 @@ function AposBot() {
 			} else {
 				entity.riskFactor = 3;
 			}
+			if (entity.isMovingTowards) {
+				entity.riskFactor *= 2;
+			}
 		}
 	};
 
@@ -2320,7 +2344,12 @@ function AposBot() {
 
 			this.calculateThreatWeight(player, entity);
 
-			entity.range = this.getRange(entity.closestCell, entity);
+			entity.range = this.get180Range(Util.getAngle(entity, entity.closestCell), entity.distance);
+			
+			if (entity.isType(Classification.threat)) {
+				this.drawRange(player.x, player.y, 200, entity.range, 0, Constants.orange);
+			}
+			
 			this.calculateRisk(entity);
 
 			if (player.cells.length == 1 && entity.classification == Classification.threat) {
@@ -2755,15 +2784,8 @@ function AposBot() {
 
 	this.isFood = function(blob, cell) {
 
-		if (!cell.isMoving() && !cell.isVirus() && this.canEat(blob, cell, Constants.playerRatio)) {
+		if (!cell.isMoving() && !cell.isVirus() && blob.canEat(cell, Constants.playerRatio)) {
 			return true;
-		}
-		return false;
-	};
-
-	this.canEat = function(eater, eatee, ratio) {
-		if (eater.mass > eatee.mass) {
-			return eater.mass / eatee.mass > ratio;
 		}
 		return false;
 	};
@@ -2771,7 +2793,7 @@ function AposBot() {
 	// can i split and eat someone
 	this.canSplitKill = function(eater, eatee, ratio) {
 
-		if (eater.mass > eatee.mass) {
+		if (eater.mass >= 36 && eater.mass > eatee.mass) {
 			return (eater.mass / 2) / eatee.mass > ratio;
 		}
 		return false;
