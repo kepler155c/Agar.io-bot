@@ -1232,6 +1232,7 @@ function AposBot() {
 	this.getBestFood = function(player, range) {
 
 		var i, cluster;
+		var keys = Object.keys(this.entities).filter(this.entities.threatFilter, this.entities);
 
 		for (i = 0; i < player.foodClusters.length; i++) {
 
@@ -1243,6 +1244,7 @@ function AposBot() {
 			var closestInfo = player.closestCell(cluster.x, cluster.y);
 			cluster.closestCell = closestInfo.cell;
 			cluster.distance = closestInfo.distance;
+			cluster.angle = Util.getAngle(cluster, cluster.closestCell);
 
 			// if (!cluster.cell) {  // lets try not to follow enemies towards wall
 			if ((cluster.x < getMapStartX() + 2000 && cluster.x < player.x)
@@ -1280,6 +1282,15 @@ function AposBot() {
 			}
 
 			cluster.clusterWeight = ((cluster.mass * probability) / (closestInfo.distance / 60)) / multiplier;
+			
+			for (var j = 0; j < keys.length; j++){
+
+				var entity = this.entities[keys[j]];
+
+				if (entity.range.angleWithin(cluster.angle)) {
+					cluster.clusterWeight /= entity.riskFactor;
+				}
+			}
 
 			drawPoint(cluster.x, cluster.y + 60, 1, parseInt(cluster.clusterWeight * 100, 10));
 		}
