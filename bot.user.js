@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1862
+// @version     3.1863
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1862;
+var aposBotVersion = 3.1863;
 
 var Constants = {
 
@@ -1255,6 +1255,10 @@ function AposBot() {
 
 			} else if (cluster.cell) {
 
+				if (cluster.cell.isType(Classification.splitTarget)) {
+					cluster.canSplitKill = true;
+				}
+
 				if ((player.cells.length == 1) && cluster.cell.isType(Classification.splitTarget)) {
 					probability = 2;
 					if (cluster.distance < 700) {
@@ -1266,10 +1270,6 @@ function AposBot() {
 					probability = 1.2;
 				}
 
-				if (cluster.cell.isType(Classification.splitTarget)) {
-					// weight = weight * 3;
-					cluster.canSplitKill = true;
-				}
 				if (cluster.cell.isMovingTowards) {
 					// prioritize enemies moving towards us
 					probability = probability * 1.1;
@@ -1279,9 +1279,9 @@ function AposBot() {
 				probability = 4;
 			}
 
-			cluster.clusterWeight = (cluster.mass / (closestInfo.distance / 100) * probability) / multiplier;
+			cluster.clusterWeight = ((cluster.mass * probability) / (closestInfo.distance / 60)) / multiplier;
 
-			drawPoint(cluster.x, cluster.y + 60, 1, parseInt(cluster.clusterWeight, 10));
+			drawPoint(cluster.x, cluster.y + 60, 1, parseInt(cluster.clusterWeight * 100, 10));
 		}
 
 		var bestCluster = null;
