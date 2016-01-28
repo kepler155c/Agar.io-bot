@@ -34,11 +34,11 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.1861
+// @version     3.1862
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
-var aposBotVersion = 3.1861;
+var aposBotVersion = 3.1862;
 
 var Constants = {
 
@@ -1236,7 +1236,7 @@ function AposBot() {
 		for (i = 0; i < player.foodClusters.length; i++) {
 
 			cluster = player.foodClusters[i];
-			var multiplier = 3;
+			var multiplier = 1;
 			var weight = cluster.mass; // shouldn't this be cluster.mass ?
 			var probability = 1;
 
@@ -1279,7 +1279,7 @@ function AposBot() {
 				probability = 4;
 			}
 
-			cluster.clusterWeight = cluster.mass / (closestInfo.distance / 100) * multiplier * probability;
+			cluster.clusterWeight = (cluster.mass / (closestInfo.distance / 100) * probability) / multiplier;
 
 			drawPoint(cluster.x, cluster.y + 60, 1, parseInt(cluster.clusterWeight, 10));
 		}
