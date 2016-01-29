@@ -1,5 +1,6 @@
 'use strict';
 
+/* jshint -W097 */
 /* jshint browser: true, laxbreak: true */
 /* global console, $ */
 /* global drawPoint, drawLine, drawCircle, drawArc, getModek, getMapStartX, getMapStartY */
@@ -41,8 +42,6 @@ SOFTWARE.*/
 var aposBotVersion = 3.1863;
 
 var Constants = {
-
-	aggressionLevel : 1,
 
 	splitRangeMin : 650,
 	splitRangeMax : 700, // 674.5,
@@ -175,17 +174,17 @@ Player.prototype = {
 			this.y = enclosingCell.y;
 		}
 	},
-	isSafeToSplit : function(entities) {
+	isSafeToSplit : function(entities, aggressionLevel) {
 
 		this.safeToSplit = false;
 
-		if (Constants.aggressionLevel == 1) {
+		if (aggressionLevel == 1) {
 			this.safeToSplit = this.cells.length == 1;
 
-		} else if (Constants.aggressionLevel == 2) {
+		} else if (aggressionLevel == 2) {
 			this.safeToSplit = this.cells.length <= 2;
 
-		} else if (Constants.aggressionLevel > 2) {
+		} else if (aggressionLevel > 2) {
 			this.safeToSplit = true;
 		}
 
@@ -207,6 +206,14 @@ Player.prototype = {
 				}, this);
 
 		return this.safeToSplit;
+	},
+	canMerge : function() {
+		for (var i = 1; i < this.cells.length; i++) {
+			if (this.cells[i].getFuseTime() < 0) {
+				return true;
+			}
+		}
+		return false;
 	},
 	merge : function() {
 
@@ -803,7 +810,7 @@ function initializeEntity() {
 	da.prototype.canEat = function(eatee, ratio) {
 		return this.mass > eatee.mass && this.mass / eatee.mass > ratio;
 	};
-	
+
 	da.prototype.isType = function(classification) {
 		return this.classification == classification;
 	};
@@ -814,6 +821,11 @@ function initializeEntity() {
 
 	da.prototype.getSplitDistance = function() {
 		return (4 * (this.getSpeed() * 5)) + (this.size * 1.75);
+	};
+
+	da.prototype.getFuseTime = function() {
+		var fuseTime = (30 + this.mass * Constants.mergeFactor) * 1000;
+		return fuseTime - (Date.now() - this.fuseTimer);
 	};
 
 	da.prototype.getMovingTowards = function(target) {
@@ -955,6 +967,7 @@ function AposBot() {
 	this.noProcessing = false;
 	this.toggleFollow = false;
 	this.verticalDistance = false;
+	this.aggressionLevel = 1;
 	this.infoStrings = [];
 	this.moreInfoStrings = [];
 	this.previousUpdated = Date.now();
@@ -968,12 +981,12 @@ function AposBot() {
 		} else if (key.keyCode == 77) { // 'm: merge'
 			this.player.merge();
 		} else if (key.keyCode == 76) { // 'l: lower aggression'
-			Constants.aggressionLevel = Math.max(0, Constants.aggressionLevel - 1);
+			this.aggressionLevel = Math.max(0, this.aggressionLevel - 1);
 		} else if (key.keyCode == 80) { // 'p: no processing'
 			this.noProcessing = !this.noProcessing;
 			setHumanControlled(this.noProcessing);
 		} else if (key.keyCode == 65) { // 'a: raise aggression'
-			Constants.aggressionLevel = Math.min(3, Constants.aggressionLevel + 1);
+			this.aggressionLevel = Math.min(3, this.aggressionLevel + 1);
 		}
 	};
 
@@ -1094,7 +1107,7 @@ function AposBot() {
 							if (entity.closestCell.canEat(entity, Constants.playerRatio)) {
 								entity.classification = Classification.food;
 							} else {
-								entity.classification = Classification.noThreat;  // this is not quite right - need to be able to shoot viruses
+								entity.classification = Classification.noThreat; // this is not quite right - need to be able to shoot viruses
 							}
 						} else {
 							entity.classification = Classification.virus;
@@ -1113,7 +1126,7 @@ function AposBot() {
 						entity.classification = Classification.food;
 
 						var largeThreatRatio = Constants.largeThreatRatio;
-						if (Constants.aggressionLevel > 1) {
+						if (this.aggressionLevel > 1) {
 							largeThreatRatio *= 2;
 						}
 						//if (player.cells.length == 1 && player.mass / entity.mass < Constants.largeThreatRatio) {
@@ -1267,11 +1280,11 @@ function AposBot() {
 			cluster.closestCell = closestInfo.cell;
 			cluster.distance = closestInfo.distance;
 			cluster.angle = Util.getAngle(cluster, cluster.closestCell);
-			
+
 			var angleDiff = Util.angleDiff(angle, cluster.angle);
 
 			var distance = cluster.distance + (Constants.playerSpeed * 2) * (angleDiff / 180); // add in turn around distance
-			
+
 			// if (!cluster.cell) {  // lets try not to follow enemies towards wall
 			if ((cluster.x < getMapStartX() + 2000 && cluster.x < player.x)
 					|| (cluster.y < getMapStartY() + 2000 && cluster.y < player.y)
@@ -1308,8 +1321,8 @@ function AposBot() {
 			}
 
 			cluster.clusterWeight = distance / (cluster.mass * probability) * multiplier;
-			
-			for (var j = 0; j < keys.length; j++){
+
+			for (var j = 0; j < keys.length; j++) {
 
 				var entity = this.entities[keys[j]];
 
@@ -1467,16 +1480,16 @@ function AposBot() {
 			return false;
 		}
 
-		if (Constants.aggressionLevel > 2) {
+		if (this.aggressionLevel > 2) {
 			this.safeToSplit = false;
 
-			if (Constants.aggressionLevel > 2 || player.cells.length <= 2) {
+			if (this.aggressionLevel > 2 || player.cells.length <= 2) {
 				if ((player.largestCell.mass / 2) / cluster.mass > 1) {
 					return true;
 				}
 			}
 		}
-		return player.isSafeToSplit(this.entities);
+		return player.isSafeToSplit(this.entities, this.aggressionLevel);
 	};
 
 	this.determineFoodDestination = function(player, destination, ranges) {
@@ -2134,20 +2147,10 @@ function AposBot() {
 	 */
 	this.avoidThreats = function(player) {
 
-		var allRanges = [], debugRanges = [], debugThreats = [];
-		var angles = [];
+		var allRanges = [];
+		var angles = [], angle;
 		var i;
 
-		// for merge mass
-		for (i = 0; i < player.cells.length; i++) {
-			var cell = player.cells[i];
-
-			cell.threatened = false;
-		}
-
-		// this.addWall(player, allRanges);
-
-		var totalDistance = 0;
 		for (i = 0; i < player.allThreats.length; i++) {
 
 			var threat = player.allThreats[i];
@@ -2156,49 +2159,62 @@ function AposBot() {
 				var distance = Math.max(threat.dangerZone - threat.distance, 0);
 				angles.push({
 					angle : threat.angle - 180,
-					distance : distance
-				});
-				totalDistance += distance;
-				debugThreats.push({
-					distance : threat.distance,
-					dangerZone : threat.dangerZone,
-					angle : threat.angle,
+					distance : distance,
+					threat : threat
 				});
 			}
 		}
 
-		var totalAngleRange = (360 - (angles.length * 2)) / angles.length;
+		// this.addWall(player, angles);
 
+		var totalDistance = 0;
+		var minDistanceAngle = null;
 		for (i = 0; i < angles.length; i++) {
-			var angle = angles[i];
-			angle.range = 1 - (angle.distance / totalDistance);
-			if (angles.length == 1) {
-				angle.range = 0.5;
+
+			angle = angles[i];
+
+			totalDistance += angle.distance;
+
+			if (minDistanceAngle === null || angle.distance < minDistanceAngle.distance) {
+				minDistanceAngle = angle;
 			}
-			angle.range = Math.max(1, Math.round(angle.range * (totalAngleRange / 2)));
-
-			var range = new Range(angle.angle - angle.range, angle.angle + angle.range);
-
-			allRanges.push(range);
-			debugRanges.push(new Range(range.left, range.right));
 		}
 
-		var ranges = this.combineRanges(allRanges);
+		if (angles.length > 0) {
 
-		if (ranges === null || (ranges.length == 1 && ranges[0].size() > 330)) {
-			console.log('bad ranges');
-			console.log(angles);
-			console.log(allRanges);
-			console.log(debugRanges);
-			console.log(debugThreats);
-			if (ranges) {
-				console.log(ranges);
+			var totalAngleRange = (360 - (angles.length * 2)) / angles.length;
+			var destAngle = angles[0].angle;
+			var range;
+
+			for (i = 1; i < angles.length; i++) {
+				angle = angles[i];
+				angle.shift = 1 - (angle.distance / totalDistance);
+				if (angles.length == 1) {
+					angle.shift = 0.5;
+				}
+				angle.shift = Math.max(1, Math.round(angle.shift * (totalAngleRange / 2)));
+
+				range = new Range(destAngle, angle.angle);
+				if (range.size() > 180) {
+					destAngle -= angle.shift;
+				} else {
+					destAngle += angle.shift;
+				}
+				destAngle = Util.mod(destAngle);
 			}
+			// need the range to be calculated from the min distance threat
+			// need distance added
+
+			range = this.getSafeRange(minDistanceAngle.threat.cell, minDistanceAngle.threat.entity,
+					minDistanceAngle.threat.dangerZone);
+
+			allRanges.push(new Range(destAngle - range.size() / 2, destAngle + range.size() / 2,
+					minDistanceAngle.distance));
 		}
 
 		return {
-			failed : ranges === null,
-			ranges : ranges
+			failed : false,
+			ranges : allRanges
 		};
 	};
 
@@ -2328,6 +2344,76 @@ function AposBot() {
 		}
 	};
 
+	this.setVerticalToggle = function(player) {
+
+		var entity, i;
+		
+		if (!player.canMerge()) {
+			this.verticalDistance = true;
+			return;
+		}
+		
+		var threatExists;
+		
+		for (i = 0; i < player.allThreats.length; i++) {
+			entity = player.allThreats[i];
+			
+			if (entity.classification != Classification.virus) {
+				threatExists = true;
+				break;
+			}
+		}
+		
+		if (!threatExists) {
+			this.verticalDistance = true;
+			return;
+		}
+
+		for (i = 0; i < player.allThreats.length; i++) {
+
+			entity = player.allThreats[i];
+
+			if (entity.isSplitThreat) {
+				this.verticalDistance = true;
+				return;
+			}
+		}
+		this.verticalDistance = false;
+	};
+
+	this.setAggressionLevel = function() {
+
+		var keys = Object.keys(this.entities).filter(this.entities.threatFilter, this.entities);
+		var i, entity;
+
+		if (keys.length === 0) {
+			this.aggressionLevel = 3;
+			return;
+		}
+
+		for (i = 0; i < keys.length; i++) {
+
+			entity = this.entities[keys[i]];
+
+			if (entity.isMovingTowards) {
+				this.aggressionLevel = 1;
+				return;
+			}
+		}
+
+		for (i = 0; i < keys.length; i++) {
+
+			entity = this.entities[keys[i]];
+			
+			if (entity.distance < 1000) {
+				this.aggressionLevel = 1;
+				return;
+			}
+		}
+
+		this.agressionLevel = 2;
+	};
+
 	this.determineBestDestination = function(player, destination) {
 
 		player.allThreats = [];
@@ -2336,6 +2422,7 @@ function AposBot() {
 			var cell = player.cells[i];
 
 			cell.threats = [];
+			cell.threatened = false; // for merge mass
 		}
 
 		Object.keys(this.entities).filter(this.entities.threatAndVirusFilter, this.entities).forEach(function(key) {
@@ -2345,11 +2432,13 @@ function AposBot() {
 			this.calculateThreatWeight(player, entity);
 
 			entity.range = this.get180Range(Util.getAngle(entity, entity.closestCell), entity.distance);
-			
+
+			/*
 			if (entity.isType(Classification.threat)) {
 				this.drawRange(player.x, player.y, 200, entity.range, 0, Constants.orange);
 			}
-			
+			*/
+
 			this.calculateRisk(entity);
 
 			if (player.cells.length == 1 && entity.classification == Classification.threat) {
@@ -2360,6 +2449,9 @@ function AposBot() {
 				}
 			}
 		}, this);
+
+		this.setAggressionLevel();
+		this.setVerticalToggle(player);
 
 		var imminentThreatCount = 0;
 		var intersectCount = 0;
@@ -2591,8 +2683,7 @@ function AposBot() {
 			switch (entity.classification) {
 			case Classification.player:
 				if (entity.fuseTimer) {
-					var fuseTime = (30 + entity.mass * Constants.mergeFactor) * 1000;
-					fuseTime = fuseTime - (Date.now() - entity.fuseTimer);
+					var fuseTime = entity.getFuseTime();
 					var y = entity.y + 40 + entity.size / 15;
 					drawPoint(entity.x, y, Constants.gray, parseInt(fuseTime / 1000), 24);
 				}
@@ -2677,7 +2768,7 @@ function AposBot() {
 		this.infoStrings.push("Speed     : " + parseInt(player.cells[0].getSpeed()));
 		this.infoStrings.push("Split     : " + parseInt(player.cells[0].splitDistance));
 		this.infoStrings.push("Vertical  : " + (this.verticalDistance ? "True" : "False"));
-		this.infoStrings.push("Aggression: " + Constants.aggressionLevel);
+		this.infoStrings.push("Aggression: " + this.aggressionLevel);
 		this.infoStrings.push("Zoom      : " + getRatio() + " " + getZoomlessRatio());
 
 		/*
